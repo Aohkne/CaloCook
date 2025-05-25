@@ -5,8 +5,6 @@ import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '@/utils/validators'
 // Define Collection (name & schema)
 const _COLLECTION_NAME = 'user'
 const _COLLECTION_SCHEMA = Joi.object({
-  _id: Joi.string().required(),
-
   name: Joi.string().required().min(3).max(50).trim().strict(),
 
   email: Joi.string()
@@ -21,9 +19,10 @@ const _COLLECTION_SCHEMA = Joi.object({
 
   calorie_limit: Joi.number().integer().min(0).default(2000),
 
-  created_at: Joi.date().timestamp('javascript').default(Date.now),
+  is_active: Joi.boolean().default(true),
 
-  updated_at: Joi.date().timestamp('javascript').default(Date.now)
+  created_at: Joi.date().default(() => new Date()),
+  updated_at: Joi.date().default(() => new Date())
 })
 
 // Handle
@@ -34,9 +33,18 @@ const getAll = async () => {
     throw new Error(error)
   }
 }
+const findOne = async (filter) => {
+  return await GET_DB().collection(_COLLECTION_NAME).findOne(filter)
+}
+
+const create = async (data) => {
+  return await GET_DB().collection(_COLLECTION_NAME).insertOne(data)
+}
 
 export const userModel = {
   _COLLECTION_NAME,
   _COLLECTION_SCHEMA,
-  getAll
+  getAll,
+  findOne,
+  create
 }

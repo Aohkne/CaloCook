@@ -2,6 +2,7 @@
 
 import express from 'express'
 import exitHook from 'async-exit-hook'
+import 'module-alias/register'
 
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
@@ -18,7 +19,7 @@ const START_SERVER = () => {
   const swaggerSpec = swaggerJSDoc(swaggerOptions)
 
   // Enable req.body json data
-  app.use(express.json())
+  app.use(express.json({ limit: '10mb' })) // Giới hạn kích thước JSON là 10MB
 
   // API V1
   app.use('/api/v1', APIs_V1)
@@ -48,6 +49,7 @@ const START_SERVER = () => {
     await CONNECT_DB()
 
     console.log('Connected to MONGODB')
+
     START_SERVER()
   } catch (error) {
     console.error(error)

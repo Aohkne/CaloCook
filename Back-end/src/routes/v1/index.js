@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 
 // import { _Route } from '@/routes/v1/_Route'
 import { userRoute } from '@/routes/v1/userRoute'
+import { authRoute } from '@/routes/v1/authRoute'
 
 const Router = expesss.Router()
 
@@ -13,5 +14,6 @@ Router.get('/status', (req, res) => {
 
 /* API - Đường dẫn*/
 Router.use('/user', userRoute)
+Router.use('/auth', authRoute)
 
 export const APIs_V1 = Router
