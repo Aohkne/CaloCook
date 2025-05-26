@@ -5,7 +5,7 @@ import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '@/utils/validators'
 // Define Collection (name & schema)
 const _COLLECTION_NAME = 'user'
 const _COLLECTION_SCHEMA = Joi.object({
-  name: Joi.string().required().min(3).max(50).trim().strict(),
+  username: Joi.string().required().min(3).max(50).trim().strict(),
 
   email: Joi.string()
     .email({ tlds: { allow: false } })

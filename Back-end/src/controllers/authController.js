@@ -23,17 +23,22 @@ const storeRefreshToken = async (userId, refreshToken) => {
   await redis.set(key, refreshToken, 'EX', expiresInSeconds)
 }
 const signup = async (req, res) => {
-  const { name, email, password } = req.body
+  const { username, email, password } = req.body
 
   try {
     // console.log('Signup request:', { name, email, password })
-    if (!email || !password || !name) {
+    if (!email || !password || !username) {
       return res.status(400).json({ message: 'Missing required fields' })
     }
     // Kiểm tra tồn tại
-    const userExists = await User.findOne({ email })
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' })
+    const existingEmail = await User.findOne({ email })
+    if (existingEmail) {
+      return res.status(400).json({ message: 'Email was exists' })
+    }
+
+    const existingUsername = await User.findOne({ username })
+    if (existingUsername) {
+      return res.status(400).json({ message: 'Username was exists' })
     }
 
     // Hash password
@@ -41,7 +46,7 @@ const signup = async (req, res) => {
 
     // Tạo user mới
     const user = await User.create({
-      name,
+      username,
       email,
       password_hash: hashedPassword,
       role: 'user', // default role
@@ -60,7 +65,7 @@ const signup = async (req, res) => {
     // Trả về JSON response (không set cookie)
     res.status(201).json({
       _id: user._id,
-      name: user.name,
+      username: user.username,
       email: user.email,
       role: user.role
     })
@@ -72,17 +77,22 @@ const signup = async (req, res) => {
 // 3. Đăng nhập – trả JSON cho mobile
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { emailOrUsername, password } = req.body
     // console.log('Login request:', { email, password })
 
-    const user = await User.findOne({ email })
-    // console.log('User:', user)
+    const user = await User.findOne({
+      $or: [{ email: emailOrUsername }, { username: emailOrUsername }]
+    })
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid email/username or password' })
+    }
 
     const isMatch = await bcrypt.compare(password, user.password_hash)
     // console.log('Password match:', isMatch)
 
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' })
+      return res.status(400).json({ message: 'Invalid email/username or password' })
     }
     const { accessToken, refreshToken } = generateTokens(user._id)
     // console.log('Generated tokens:', { accessToken, refreshToken })
@@ -90,7 +100,7 @@ const login = async (req, res) => {
 
     res.json({
       _id: user._id,
-      name: user.name,
+      username: user.username,
       email: user.email,
       role: user.role,
       accessToken,
