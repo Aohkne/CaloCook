@@ -21,8 +21,9 @@ const _COLLECTION_SCHEMA = Joi.object({
 
   is_active: Joi.boolean().default(true),
 
-  created_at: Joi.date().default(() => new Date()),
-  updated_at: Joi.date().default(() => new Date())
+  created_at: Joi.date().timestamp('javascript').default(Date.now),
+
+  updated_at: Joi.date().timestamp('javascript').default(Date.now)
 })
 
 // Handle

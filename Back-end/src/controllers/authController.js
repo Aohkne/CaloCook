@@ -73,23 +73,29 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body
+    // console.log('Login request:', { email, password })
+
     const user = await User.findOne({ email })
+    // console.log('User:', user)
 
-    if (user && (await user.comparePassword(password))) {
-      const { accessToken, refreshToken } = generateTokens(user._id)
-      await storeRefreshToken(user._id, refreshToken)
+    const isMatch = await bcrypt.compare(password, user.password_hash)
+    // console.log('Password match:', isMatch)
 
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        accessToken,
-        refreshToken
-      })
-    } else {
-      res.status(400).json({ message: 'Invalid email or password' })
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid email or password' })
     }
+    const { accessToken, refreshToken } = generateTokens(user._id)
+    // console.log('Generated tokens:', { accessToken, refreshToken })
+    await storeRefreshToken(user._id, refreshToken)
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      accessToken,
+      refreshToken // Trả về refresh token cho mobile khi login thanh cong
+    })
   } catch (error) {
     console.error('Login error:', error.message)
     res.status(500).json({ message: 'Internal server error' })
@@ -100,6 +106,7 @@ const login = async (req, res) => {
 const refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body
+    // console.log('Refresh token request:', { refreshToken })
     if (!refreshToken) {
       return res.status(401).json({ message: 'No refresh token provided' })
     }
@@ -124,8 +131,14 @@ const refreshToken = async (req, res) => {
 
 // 5. Logout – xóa refresh token khỏi Redis
 const logout = async (req, res) => {
+  console.log('req.body:', req.body)
+  console.log('req.headers:', req.headers)
+
   try {
-    const { refreshToken } = req.body
+    // Cố gắng lấy token từ body hoặc header
+    const refreshToken = req.body.refreshToken
+
+    // console.log('Refresh token request:', { refreshToken })
     if (!refreshToken) return res.status(400).json({ message: 'No refresh token provided' })
 
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
