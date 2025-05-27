@@ -1,7 +1,10 @@
 import jwt from 'jsonwebtoken'
 import { redis } from '@/config/redis.js'
+import { ObjectId } from 'mongodb'
 import { userModel as User } from '@/models/userModel.js'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
+import sendEmail from '@/utils/sendEmail.js'
 
 // 1. Tạo access và refresh token
 const generateTokens = (userId) => {
@@ -161,9 +164,96 @@ const logout = async (req, res) => {
   }
 }
 
+// 6. Forgot password - not implemented yet
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body
+    // debug email
+    console.log(email)
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    // Tạo token và hash
+    const rawToken = crypto.randomBytes(32).toString('hex')
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex')
+    const expire = Date.now() + 30 * 60 * 1000 // 30 phút
+
+    // Lưu vào Redis: key = hashedToken, value = userId (hoặc email)
+    await redis.set(`reset_token:${hashedToken}`, user._id.toString(), 'EX', 30 * 60) // 30 phút
+
+    const resetURL = `http://localhost:5173/forgotPassword/${rawToken}`
+    const message = `
+			 <p>Click vào liên kết sau để đặt lại mật khẩu:</p>
+  				<a href="${resetURL}" target="_blank" style="color: blue;">${resetURL}
+ 				 </a>`
+
+    await sendEmail(user.email, 'Reset Password', message)
+
+    res.json({ message: 'Email đặt lại mật khẩu đã được gửi' })
+  } catch (err) {
+    console.error('forgotPassword error:', err)
+    res.status(500).json({ message: 'Server error', error: err.message })
+  }
+}
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params
+    const { password } = req.body
+    // debug token
+    // console.log('token', token)
+    // debug password
+    // console.log('password', password)
+    if (!token || !password) {
+      return res.status(400).json({ message: 'Token và mật khẩu là bắt buộc' })
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+    // debug hashedToken
+    // console.log('hashedToken', hashedToken)
+
+    const userId = await redis.get(`reset_token:${hashedToken}`)
+
+    if (!userId) {
+      return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' })
+    }
+    // ✅ Tìm user theo userId lấy từ Redis
+    const user = await User.findById(userId)
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+    await User.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { password_hash: hashedPassword, updated_at: new Date() } }
+    )
+
+    // 🧹 Xóa token khỏi Redis
+    await redis.del(`reset_token:${hashedToken}`)
+
+    const { accessToken, refreshToken } = generateTokens(user._id)
+    await storeRefreshToken(user._id, refreshToken)
+
+    res.status(200).json({
+      message: 'Đặt lại mật khẩu thành công',
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }
+    })
+  } catch (error) {
+    console.error('resetPassword error:', error.message)
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
 export const authController = {
   login,
   refreshToken,
   logout,
-  signup
+  signup,
+  forgotPassword,
+  resetPassword
 }
