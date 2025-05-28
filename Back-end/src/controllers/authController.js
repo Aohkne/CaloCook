@@ -18,7 +18,6 @@ const generateTokens = (userId) => {
 
   return { accessToken, refreshToken }
 }
-
 // 2. Lưu refresh token vào Redis với thời hạn 365 ngày
 const storeRefreshToken = async (userId, refreshToken) => {
   const key = `refresh_token:${userId}`
@@ -100,6 +99,7 @@ const login = async (req, res) => {
     const { accessToken, refreshToken } = generateTokens(user._id)
     // console.log('Generated tokens:', { accessToken, refreshToken })
     await storeRefreshToken(user._id, refreshToken)
+    // Lưu token vào AsyncStorage (nếu cần)
 
     res.json({
       _id: user._id,
@@ -144,12 +144,12 @@ const refreshToken = async (req, res) => {
 
 // 5. Logout – xóa refresh token khỏi Redis
 const logout = async (req, res) => {
-  console.log('req.body:', req.body)
-  console.log('req.headers:', req.headers)
+  // console.log('req.body:', req.body)
+  // console.log('req.headers:', req.headers)
 
   try {
     // Cố gắng lấy token từ body hoặc header
-    const refreshToken = req.body.refreshToken
+    const refreshToken = req.body
 
     // console.log('Refresh token request:', { refreshToken })
     if (!refreshToken) return res.status(400).json({ message: 'No refresh token provided' })
@@ -197,6 +197,7 @@ export const forgotPassword = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message })
   }
 }
+// 7. Reset password - not implemented yet
 export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params
@@ -249,11 +250,60 @@ export const resetPassword = async (req, res) => {
   }
 }
 
+// 8. Change password - not implemented yet
+export const changePassword = async (req, res) => {
+  try {
+    //lấy userId từ access token trong AsyncStorage
+    const authHeader = req.headers.authorization
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Authorization header missing or malformed' })
+    }
+    const token = authHeader.split(' ')[1]
+    let decoded
+    try {
+      decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+    } catch (err) {
+      return res.status(401).json({ message: 'Invalid or expired token' })
+    }
+    const userId = decoded.userId
+    const { oldPassword, newPassword } = req.body
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: 'Old password and new password are required' })
+    }
+    // mật khẩu mới phải khác mật khẩu cũ
+    if (oldPassword === newPassword) {
+      return res.status(400).json({ message: 'New password must be different from old password' })
+    }
+
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password_hash)
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Old password is incorrect' })
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10)
+    await User.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { password_hash: hashedNewPassword, updated_at: new Date() } }
+    )
+
+    res.json({ message: 'Password changed successfully' })
+  } catch (error) {
+    console.error('changePassword error:', error.message)
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
 export const authController = {
   login,
   refreshToken,
   logout,
   signup,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  changePassword
 }
