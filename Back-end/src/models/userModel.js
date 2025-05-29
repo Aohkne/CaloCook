@@ -6,6 +6,8 @@ import { ObjectId } from 'mongodb'
 // Define Collection (name & schema)
 const _COLLECTION_NAME = 'user'
 const _COLLECTION_SCHEMA = Joi.object({
+  _id: Joi.string().required(),
+
   username: Joi.string().required().min(3).max(50).trim().strict(),
 
   email: Joi.string()
@@ -18,13 +20,23 @@ const _COLLECTION_SCHEMA = Joi.object({
 
   role: Joi.string().valid('admin', 'user').required(),
 
-  calorie_limit: Joi.number().integer().min(0).default(2000),
+  calorieLimit: Joi.number().integer().min(0).default(2000),
 
-  is_active: Joi.boolean().default(true),
+  avatarUrl: Joi.string().uri().allow('').default(''),
 
-  created_at: Joi.date().timestamp('javascript').default(Date.now),
+  gender: Joi.string().valid('male', 'female').default('male'),
 
-  updated_at: Joi.date().timestamp('javascript').default(Date.now)
+  dob: Joi.date().iso().allow(null).default(null),
+
+  height: Joi.number().min(30).max(300).allow(null).default(null), // cm
+
+  weight: Joi.number().min(1).max(500).allow(null).default(null), // kg
+
+  isActive: Joi.boolean().default(true),
+
+  createdAt: Joi.date().timestamp('javascript').default(Date.now),
+
+  updatedAt: Joi.date().timestamp('javascript').default(Date.now)
 })
 
 // Handle

@@ -10,5 +10,6 @@ Router.post('/logout', authController.logout)
 Router.post('/forgot-password', authController.forgotPassword)
 Router.post('/forgot-password/:token', authController.resetPassword)
 Router.post('/change-password', authController.changePassword)
+Router.get('/profile', authController.getProfile)
 
 export const authRoute = Router

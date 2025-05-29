@@ -26,9 +26,10 @@ const storeRefreshToken = async (userId, refreshToken) => {
 }
 const signup = async (req, res) => {
   const { username, email, password } = req.body
+  console.log('Raw body:', req.body)
 
   try {
-    // console.log('Signup request:', { name, email, password })
+    console.log('Signup request:', { username, email, password })
     if (!email || !password || !username) {
       return res.status(400).json({ message: 'Missing required fields' })
     }
@@ -52,10 +53,15 @@ const signup = async (req, res) => {
       email,
       password_hash: hashedPassword,
       role: 'user', // default role
-      calorie_limit: 2000,
-      is_active: true,
-      created_at: new Date(),
-      updated_at: new Date()
+      calorieLimit: 2000,
+      avatarUrl: 'none', // default avatar
+      gender: 'male',
+      dob: null,
+      height: null, // cm
+      weight: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
     })
 
     // Tạo tokens
@@ -71,6 +77,7 @@ const signup = async (req, res) => {
       email: user.email,
       role: user.role
     })
+    res.json({ message: 'Registration successfully' })
   } catch (error) {
     console.error('Error in signup controller', error.message)
     res.status(500).json({ message: error.message })
@@ -149,7 +156,7 @@ const logout = async (req, res) => {
 
   try {
     // Cố gắng lấy token từ body hoặc header
-    const refreshToken = req.body
+    const refreshToken = req.body.refreshToken
 
     // console.log('Refresh token request:', { refreshToken })
     if (!refreshToken) return res.status(400).json({ message: 'No refresh token provided' })
@@ -298,6 +305,48 @@ export const changePassword = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
+
+// 0. Get Profile - not implemented yet
+export const getProfile = async (req, res) => {
+  try {
+    //lấy userId từ access token trong AsyncStorage
+    const authHeader = req.headers.authorization
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Authorization header missing or malformed' })
+    }
+    const token = authHeader.split(' ')[1]
+    let decoded
+    try {
+      decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) // Verify the token
+    } catch (err) {
+      return res.status(401).json({ message: 'Invalid or expired token' })
+    }
+    const userId = decoded.userId
+
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    res.json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      calorieLimit: user.calorieLimit,
+      avatarUrl: user.avatarUrl,
+      gender: user.gender,
+      dob: user.dob,
+      height: user.height,
+      weight: user.weight,
+      createdAt: user.created_at,
+      isActive: user.is_active
+    })
+  } catch (error) {
+    console.error('getProfile error:', error.message)
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
 export const authController = {
   login,
   refreshToken,
@@ -305,5 +354,6 @@ export const authController = {
   signup,
   forgotPassword,
   resetPassword,
-  changePassword
+  changePassword,
+  getProfile
 }
