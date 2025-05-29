@@ -158,7 +158,7 @@ const Router = express.Router()
  *           example: "68306f4d4928f3fe108df627"
  *         username:
  *           type: string
- *           example: "nguyenvana"
+ *           example: "Nguyễn Văn A"
  *         email:
  *           type: string
  *           example: "nguyenvana@example.com"
@@ -167,11 +167,31 @@ const Router = express.Router()
  *           example: "$2b$10$abcdefghij1234567890mnopqrstuv"
  *         role:
  *           type: string
- *           enum: [admin, user, moderator]
+ *           enum: [admin, user]
  *           example: "admin"
  *         calorieLimit:
  *           type: number
  *           example: 2200
+ *         avatarUrl:
+ *           type: string
+ *           example: ""
+ *         gender:
+ *           type: string
+ *           enum: [male, female, other]
+ *           example: "male"
+ *         dob:
+ *           type: string
+ *           format: date
+ *           example: "1990-05-01"
+ *         height:
+ *           type: number
+ *           example: 170
+ *         weight:
+ *           type: number
+ *           example: 65
+ *         isActive:
+ *           type: boolean
+ *           example: true
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -180,9 +200,6 @@ const Router = express.Router()
  *           type: string
  *           format: date-time
  *           example: "2025-05-23T07:00:00.000Z"
- *         isActive:
- *           type: boolean
- *           example: true
  */
 
 Router.route('/').get(userController.getAll)
