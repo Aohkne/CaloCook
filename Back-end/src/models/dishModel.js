@@ -6,17 +6,15 @@ import { ObjectId } from 'mongodb'
 // Define Collection (name & schema)
 const _COLLECTION_NAME = 'dish'
 const _COLLECTION_SCHEMA = Joi.object({
-  _id: Joi.string().required(),
-
   name: Joi.string().required().min(3).max(50).trim().strict(),
 
-  cookingTime: Joi.number().integer().min(0).default(2000),
+  cookingTime: Joi.number().integer().min(1).max(10080).default(30),
 
-  calorie: Joi.number().integer().min(0).default(2000),
+  calorie: Joi.number().integer().min(1).max(10000).default(100),
 
   difficulty: Joi.string().valid('easy', 'medium', 'hard').default('medium'),
 
-  description: Joi.string().required().min(10).trim().strict(),
+  description: Joi.string().required().min(10).max(1000).trim().strict(),
 
   imageUrl: Joi.string().uri().allow('').default(''),
 
@@ -115,6 +113,38 @@ const searchByIsActive = async (isActive, sortBy = 'createdAt', order = 'asc') =
   }
 }
 
+const getDetails = async (id) => {
+  try {
+    return await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .findOne({ _id: new ObjectId(id) })
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const createNew = async (data) => {
+  try {
+    const createdDish = await GET_DB().collection(_COLLECTION_NAME).insertOne(data)
+
+    return createdDish
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const updateDish = async (dishId, updateData) => {
+  try {
+    const result = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .findOneAndUpdate({ _id: new ObjectId(dishId) }, { $set: updateData }, { returnDocument: 'after' })
+
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 const updateIsActive = async (dishId, isActive) => {
   try {
     const result = await GET_DB()
@@ -136,5 +166,8 @@ export const dishModel = {
   searchByCalorie,
   searchByDifficulty,
   searchByIsActive,
+  getDetails,
+  createNew,
+  updateDish,
   updateIsActive
 }

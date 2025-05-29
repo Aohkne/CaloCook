@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 
 import { dishController } from '@/controllers/dishController'
 import { userValidation } from '@/validations/userValidation'
+import { dishValidation } from '@/validations/dishValidation'
 
 const Router = express.Router()
 
@@ -91,6 +92,162 @@ const Router = express.Router()
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Dish'
+ *   post:
+ *     summary: Create a new dish
+ *     tags: [dish]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - description
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 50
+ *                 example: "Grilled Chicken Breast"
+ *               cookingTime:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 10080
+ *                 default: 30
+ *                 example: 30
+ *               calorie:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 10000
+ *                 default: 100
+ *                 example: 400
+ *               difficulty:
+ *                 type: string
+ *                 enum: [easy, medium, hard]
+ *                 default: medium
+ *                 example: "easy"
+ *               description:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 1000
+ *                 example: "Lean grilled chicken breast with herbs and spices, perfect for a healthy meal."
+ *               imageUrl:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://example.com/image.jpg"
+ *               isActive:
+ *                 type: boolean
+ *                 default: true
+ *                 example: true
+ *     responses:
+ *       201:
+ *         description: Dish created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 201
+ *                 message:
+ *                   type: string
+ *                   example: "Create successful"
+ *                 data:
+ *                   $ref: '#/components/schemas/Dish'
+
+ * /api/v1/dish/{id}:
+ *   get:
+ *     summary: Get dish by ID
+ *     tags: [dish]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Dish Id
+ *     responses:
+ *       200:
+ *         description: Return detail of dish
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Get successful"
+ *                 data:
+ *                   $ref: '#/components/schemas/Dish' 
+ *   put:
+ *     summary: Update dish by ID
+ *     tags: [dish]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Dish ID to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 50
+ *                 example: "Updated Grilled Chicken Breast"
+ *               cookingTime:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 10080
+ *                 example: 35
+ *               calorie:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 10000
+ *                 example: 450
+ *               difficulty:
+ *                 type: string
+ *                 enum: [easy, medium, hard]
+ *                 example: "medium"
+ *               description:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 1000
+ *                 example: "Updated description for grilled chicken breast."
+ *               imageUrl:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://example.com/updated-image.jpg"
+ *               isActive:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: Dish updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Update successful"
+ *                 data:
+ *                   $ref: '#/components/schemas/Dish'
 
  * /api/v1/dish/{id}/activate:
  *   patch:
@@ -188,7 +345,8 @@ const Router = express.Router()
  *           example: "2025-05-29T08:00:00.000Z"
  */
 
-Router.route('/').get(dishController.getAll)
+Router.route('/').get(dishController.getAll).post(dishValidation.createNew, dishController.createNew)
+Router.route('/:id').get(dishController.getDetails).put(dishValidation.updateDish, dishController.updateDish)
 Router.route('/:id/activate').patch(dishController.activateDish)
 Router.route('/:id/deactivate').patch(dishController.deactivateDish)
 

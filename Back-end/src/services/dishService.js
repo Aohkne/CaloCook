@@ -100,6 +100,57 @@ const searchByIsActive = async (isActive, sortBy, order) => {
   }
 }
 
+const getDetails = async (dishId) => {
+  try {
+    const dish = await dishModel.getDetails(dishId)
+
+    if (!dish || dish.length === 0) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
+    }
+
+    return dish
+  } catch (error) {
+    throw error
+  }
+}
+
+const createNew = async (reqBody) => {
+  try {
+    const newDish = {
+      ...reqBody,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+
+    const createdDish = await dishModel.createNew(newDish)
+
+    const getNewDish = await dishModel.getDetails(createdDish.insertedId)
+
+    return getNewDish
+  } catch (error) {
+    throw error
+  }
+}
+
+const updateDish = async (dishId, updateData) => {
+  try {
+    const dataToUpdate = {
+      ...updateData,
+      updatedAt: new Date()
+    }
+
+    const updatedDish = await dishModel.updateDish(dishId, dataToUpdate)
+
+    if (!updatedDish) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
+    }
+
+    return updatedDish
+  } catch (error) {
+    throw error
+  }
+}
+
 const activateDish = async (dishId) => {
   try {
     const dish = await dishModel.updateIsActive(dishId, true)
@@ -131,6 +182,9 @@ export const dishService = {
   searchByCalorie,
   searchByDifficulty,
   searchByIsActive,
+  getDetails,
+  createNew,
+  updateDish,
   activateDish,
   deactivateDish
 }

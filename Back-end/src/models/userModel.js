@@ -6,8 +6,6 @@ import { ObjectId } from 'mongodb'
 // Define Collection (name & schema)
 const _COLLECTION_NAME = 'user'
 const _COLLECTION_SCHEMA = Joi.object({
-  _id: Joi.string().required(),
-
   username: Joi.string().required().min(3).max(50).trim().strict(),
 
   email: Joi.string()

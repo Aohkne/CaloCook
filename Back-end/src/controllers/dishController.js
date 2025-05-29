@@ -42,6 +42,53 @@ const getAll = async (req, res, next) => {
   }
 }
 
+const getDetails = async (req, res, next) => {
+  try {
+    const dishId = req.params.id
+
+    const dish = await dishService.getDetails(dishId)
+
+    res.status(StatusCodes.OK).json({
+      code: StatusCodes.OK,
+      message: 'Get successfull',
+      data: dish
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const createNew = async (req, res, next) => {
+  try {
+    const createdDish = await dishService.createNew(req.body)
+
+    res.status(StatusCodes.CREATED).json({
+      code: StatusCodes.CREATED,
+      message: 'Create successfull',
+      data: createdDish
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const updateDish = async (req, res, next) => {
+  try {
+    const dishId = req.params.id
+    const updateData = req.body
+
+    const updatedDish = await dishService.updateDish(dishId, updateData)
+
+    res.status(StatusCodes.OK).json({
+      code: StatusCodes.OK,
+      message: 'Update successful',
+      data: updatedDish
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const activateDish = async (req, res, next) => {
   try {
     const dishId = req.params.id
@@ -76,6 +123,9 @@ const deactivateDish = async (req, res, next) => {
 
 export const dishController = {
   getAll,
+  getDetails,
+  createNew,
+  updateDish,
   activateDish,
   deactivateDish
 }
