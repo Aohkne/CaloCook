@@ -1,8 +1,8 @@
 import expesss from 'express'
 import { StatusCodes } from 'http-status-codes'
 
-// import { _Route } from '@/routes/v1/_Route'
 import { userRoute } from '@/routes/v1/userRoute'
+import { dishRoute } from '@/routes/v1/dishRoute'
 
 const Router = expesss.Router()
 
@@ -13,5 +13,6 @@ Router.get('/status', (req, res) => {
 
 /* API - Đường dẫn*/
 Router.use('/user', userRoute)
+Router.use('/dish', dishRoute)
 
 export const APIs_V1 = Router
