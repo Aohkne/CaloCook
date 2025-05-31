@@ -45,11 +45,10 @@ const getDetails = async (req, res, next) => {
 
 const getDetailsByDishId = async (req, res, next) => {
   try {
+    const { sortBy, order } = req.query
     const dishId = req.params.dishId
 
-    console.log(dishId)
-
-    const ingredient = await ingredientService.getDetailsByDishId(dishId)
+    const ingredient = await ingredientService.getDetailsByDishId(dishId, sortBy, order)
 
     res.status(StatusCodes.OK).json({
       code: StatusCodes.OK,

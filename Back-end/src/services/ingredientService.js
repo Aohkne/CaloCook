@@ -1,6 +1,9 @@
-import { ingredientModel } from '@/models/ingredientModel'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
+
+import { dishModel } from '@/models/dishModel'
+import { ingredientModel } from '@/models/ingredientModel'
+import { ObjectId } from 'mongodb'
 
 const getAll = async (sortBy, order) => {
   try {
@@ -25,7 +28,7 @@ const searchByName = async (name, sortBy, order) => {
 const searchByIsActive = async (isActive, sortBy, order) => {
   try {
     if (!isActive) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Ingredient is required!')
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'isActive is required!')
     }
     const ingredient = await ingredientModel.searchByIsActive(isActive, sortBy, order)
     if (!ingredient || ingredient.length === 0) {
@@ -51,9 +54,9 @@ const getDetails = async (ingredientId) => {
   }
 }
 
-const getDetailsByDishId = async (dishId) => {
+const getDetailsByDishId = async (dishId, sortBy, order) => {
   try {
-    const ingredient = await ingredientModel.getDetailsByDishId(dishId)
+    const ingredient = await ingredientModel.getDetailsByDishId(dishId, sortBy, order)
 
     if (!ingredient || ingredient.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Ingredient not found!')
@@ -67,14 +70,15 @@ const getDetailsByDishId = async (dishId) => {
 
 const createNew = async (reqBody) => {
   try {
-    const dishId = await ingredientModel.getDetailsByDishId(reqBody.dishId)
+    const dishId = await dishModel.getDetails(reqBody.dishId)
 
     if (!dishId) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Dish ID not found!')
     }
 
     const newIngredient = {
       ...reqBody,
+      dishId: new ObjectId(reqBody.dishId),
       createdAt: new Date(),
       updatedAt: new Date()
     }
@@ -91,8 +95,12 @@ const createNew = async (reqBody) => {
 
 const updateIngredient = async (ingredientId, updateData) => {
   try {
+    console.log(ingredientId)
+    console.log(updateData)
+
     const dataToUpdate = {
       ...updateData,
+      dishId: new ObjectId(updateData.dishId),
       updatedAt: new Date()
     }
 

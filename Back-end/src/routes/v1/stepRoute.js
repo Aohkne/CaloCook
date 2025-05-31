@@ -1,37 +1,31 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
 
-import { ingredientController } from '@/controllers/ingredientController'
-import { ingredientValidation } from '@/validations/ingredientValidation'
+import { stepController } from '@/controllers/stepController'
+import { stepValidation } from '@/validations/stepValidation'
 
 const Router = express.Router()
 
 /**
  * @swagger
- * /api/v1/ingredient:
+ * /api/v1/step:
  *   get:
- *     summary: Get all ingredient (with optional filters and sorting)
- *     tags: [ingredient]
+ *     summary: Get all steps (with optional filters and sorting)
+ *     tags: [step]
  *     parameters:
- *       - in: query
- *         name: name
- *         schema:
- *           type: string
- *         required: false
- *         description: Filter ingredients by name
  *       - in: query
  *         name: isActive
  *         schema:
  *           type: boolean
  *         required: false
- *         description: Filter dishes by active status (true or false)
+ *         description: Filter steps by active status (true or false)
  *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
- *           enum: [name, createdAt]
+ *           enum: [stepNumber, createdAt]
  *         required: false
- *         description: Field to sort by (e.g. name, createdAt)
+ *         description: Field to sort by (e.g. stepNumber, createdAt)
  *       - in: query
  *         name: order
  *         schema:
@@ -41,7 +35,7 @@ const Router = express.Router()
  *         description: asc for ascending, desc for descending
  *     responses:
  *       200:
- *         description: Return list of ingredients
+ *         description: Return list of steps
  *         content:
  *           application/json:
  *             schema:
@@ -56,10 +50,10 @@ const Router = express.Router()
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Ingredient'
+ *                     $ref: '#/components/schemas/Step'
  *   post:
- *     summary: Create a new ingredient
- *     tags: [ingredient]
+ *     summary: Create a new step
+ *     tags: [step]
  *     requestBody:
  *       required: true
  *       content:
@@ -68,8 +62,8 @@ const Router = express.Router()
  *             type: object
  *             required:
  *               - dishId
- *               - name
- *               - quantity
+ *               - stepNumber
+ *               - description
  *             properties:
  *               dishId:
  *                 type: string
@@ -77,23 +71,23 @@ const Router = express.Router()
  *                 maxLength: 24
  *                 pattern: '^[a-fA-F0-9]{24}$'
  *                 example: "66574e301a6d1f001e8a1c01"
- *               name:
- *                 type: string
- *                 minLength: 1
- *                 maxLength: 100
- *                 example: "Garlic powder"
- *               quantity:
+ *               stepNumber:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 100
+ *                 example: 1
+ *               description:
  *                 type: string
  *                 minLength: 1
  *                 maxLength: 50
- *                 example: "1 tsp"
+ *                 example: "Chop the vegetables finely"
  *               isActive:
  *                 type: boolean
  *                 default: true
  *                 example: true
  *     responses:
  *       201:
- *         description: Ingredient created successfully
+ *         description: Step created successfully
  *         content:
  *           application/json:
  *             schema:
@@ -106,26 +100,29 @@ const Router = express.Router()
  *                   type: string
  *                   example: "Create successful"
  *                 data:
- *                   $ref: '#/components/schemas/Ingredient'
-
- * /api/v1/ingredient/by-dish/{dishId}:
+ *                   $ref: '#/components/schemas/Step'
+ *
+ * /api/v1/step/by-dish/{dishId}:
  *   get:
- *     summary: Get ingredient by dish ID
- *     tags: [ingredient]
+ *     summary: Get steps by dish ID
+ *     tags: [step]
  *     parameters:
  *       - in: path
  *         name: dishId
  *         schema:
  *           type: string
+ *           minLength: 24
+ *           maxLength: 24
+ *           pattern: '^[a-fA-F0-9]{24}$'
  *         required: true
  *         description: Dish Id
  *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
- *           enum: [createdAt]
+ *           enum: [stepNumber, createdAt]
  *         required: false
- *         description: Field to sort by (e.g. createdAt)
+ *         description: Field to sort by (e.g. stepNumber, createdAt)
  *       - in: query
  *         name: order
  *         schema:
@@ -135,7 +132,7 @@ const Router = express.Router()
  *         description: asc for ascending, desc for descending
  *     responses:
  *       200:
- *         description: Return detail of ingredient
+ *         description: Return list of steps for the dish
  *         content:
  *           application/json:
  *             schema:
@@ -148,22 +145,27 @@ const Router = express.Router()
  *                   type: string
  *                   example: "Get successful"
  *                 data:
- *                   $ref: '#/components/schemas/Ingredient' 
-
- * /api/v1/ingredient/{id}:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Step'
+ *
+ * /api/v1/step/{id}:
  *   get:
- *     summary: Get ingredient by ID
- *     tags: [ingredient]
+ *     summary: Get step by ID
+ *     tags: [step]
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: string
+ *           minLength: 24
+ *           maxLength: 24
+ *           pattern: '^[a-fA-F0-9]{24}$'
  *         required: true
- *         description: Ingredient Id
+ *         description: Step Id
  *     responses:
  *       200:
- *         description: Return detail of ingredient
+ *         description: Return detail of step
  *         content:
  *           application/json:
  *             schema:
@@ -176,74 +178,49 @@ const Router = express.Router()
  *                   type: string
  *                   example: "Get successful"
  *                 data:
- *                   $ref: '#/components/schemas/Ingredient' 
+ *                   $ref: '#/components/schemas/Step'
  *   put:
- *    summary: Update ingredient by ID
- *    tags: [ingredient]
- *    parameters:
- *      - in: path
- *        name: id
- *        schema:
- *          type: string
- *        required: true
- *        description: Ingredient ID to update
- *    requestBody:
- *      required: true
- *      content:
- *        application/json:
- *          schema:
- *            type: object
- *            properties:
- *              dishId:
- *                type: string
- *                minLength: 24
- *                maxLength: 24
- *                pattern: '^[a-fA-F0-9]{24}$'
- *                example: "66574e301a6d1f001e8a1c01"
- *              name:
- *                type: string
- *                minLength: 1
- *                maxLength: 100
- *                example: "Updated Garlic powder"
- *              quantity:
- *                type: string
- *                minLength: 1
- *                maxLength: 50
- *                example: "2 tsp"
- *              isActive:
- *                type: boolean
- *                example: true
- *    responses:
- *      200:
- *        description: Ingredient updated successfully
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                code:
- *                  type: number
- *                  example: 200
- *                message:
- *                  type: string
- *                  example: "Update successful"
- *                data:
- *                  $ref: '#/components/schemas/Ingredient'
-
- * /api/v1/ingredient/{id}/activate:
- *   patch:
- *     summary: Activate ingredient by ID (set isActive to true)
- *     tags: [ingredient]
+ *     summary: Update step by ID
+ *     tags: [step]
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: string
+ *           minLength: 24
+ *           maxLength: 24
+ *           pattern: '^[a-fA-F0-9]{24}$'
  *         required: true
- *         description:  Ingredient Id
+ *         description: Step ID to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               dishId:
+ *                 type: string
+ *                 minLength: 24
+ *                 maxLength: 24
+ *                 pattern: '^[a-fA-F0-9]{24}$'
+ *                 example: "66574e301a6d1f001e8a1c01"
+ *               stepNumber:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 100
+ *                 example: 2
+ *               description:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 50
+ *                 example: "Updated step description"
+ *               isActive:
+ *                 type: boolean
+ *                 example: true
  *     responses:
  *       200:
- *         description: Ingredient Activated successfully
+ *         description: Step updated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -254,24 +231,27 @@ const Router = express.Router()
  *                   example: 200
  *                 message:
  *                   type: string
- *                   example: "Ingredient Activated successfully"
+ *                   example: "Update successful"
  *                 data:
- *                   $ref: '#/components/schemas/Ingredient'
- 
- * /api/v1/ingredient/{id}/deactivate:
+ *                   $ref: '#/components/schemas/Step'
+ *
+ * /api/v1/step/{id}/activate:
  *   patch:
- *     summary: Deactivate ingredient by ID (set isActive to false)
- *     tags: [ingredient]
+ *     summary: Activate step by ID (set isActive to true)
+ *     tags: [step]
  *     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: string
+ *           minLength: 24
+ *           maxLength: 24
+ *           pattern: '^[a-fA-F0-9]{24}$'
  *         required: true
- *         description: Ingredient ID to deactivate
+ *         description: Step Id
  *     responses:
  *       200:
- *         description: Ingredient deactivated successfully
+ *         description: Step activated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -282,13 +262,44 @@ const Router = express.Router()
  *                   example: 200
  *                 message:
  *                   type: string
- *                   example: "Ingredient deactivated successfully"
+ *                   example: "Step activated successfully"
  *                 data:
- *                   $ref: '#/components/schemas/Ingredient' 
-
+ *                   $ref: '#/components/schemas/Step'
+ *
+ * /api/v1/step/{id}/deactivate:
+ *   patch:
+ *     summary: Deactivate step by ID (set isActive to false)
+ *     tags: [step]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *           minLength: 24
+ *           maxLength: 24
+ *           pattern: '^[a-fA-F0-9]{24}$'
+ *         required: true
+ *         description: Step ID to deactivate
+ *     responses:
+ *       200:
+ *         description: Step deactivated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Step deactivated successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Step'
+ *
  * components:
  *   schemas:
- *     Ingredient:
+ *     Step:
  *       type: object
  *       properties:
  *         _id:
@@ -297,12 +308,12 @@ const Router = express.Router()
  *         dishId:
  *           type: string
  *           example: "66574e301a6d1f001e8a1c01"
- *         name:
+ *         stepNumber:
+ *           type: integer
+ *           example: 1
+ *         description:
  *           type: string
- *           example: "Chicken breast"
- *         quantity:
- *           type: string
- *           example: "200g"
+ *           example: "Chop the vegetables finely"
  *         isActive:
  *           type: boolean
  *           example: true
@@ -314,15 +325,12 @@ const Router = express.Router()
  *           type: string
  *           format: date-time
  *           example: "2025-05-31T00:00:00Z"
- * 
  */
 
-Router.route('/').get(ingredientController.getAll).post(ingredientValidation.createNew, ingredientController.createNew)
-Router.route('/by-dish/:dishId').get(ingredientController.getDetailsByDishId)
-Router.route('/:id')
-  .get(ingredientController.getDetails)
-  .put(ingredientValidation.updateIngredient, ingredientController.updateIngredient)
-Router.route('/:id/activate').patch(ingredientController.activateIngredient)
-Router.route('/:id/deactivate').patch(ingredientController.deactivateIngredient)
+Router.route('/').get(stepController.getAll).post(stepValidation.createNew, stepController.createNew)
+Router.route('/by-dish/:dishId').get(stepController.getDetailsByDishId)
+Router.route('/:id').get(stepController.getDetails).put(stepValidation.updateStep, stepController.updateStep)
+Router.route('/:id/activate').patch(stepController.activateStep)
+Router.route('/:id/deactivate').patch(stepController.deactivateStep)
 
-export const ingredientRoute = Router
+export const stepRoute = Router

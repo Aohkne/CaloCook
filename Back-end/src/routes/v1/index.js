@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes'
 import { userRoute } from '@/routes/v1/userRoute'
 import { dishRoute } from '@/routes/v1/dishRoute'
 import { ingredientRoute } from '@/routes/v1/ingredientRoute'
+import { stepRoute } from '@/routes/v1/stepRoute'
 
 const Router = expesss.Router()
 
@@ -16,5 +17,6 @@ Router.get('/status', (req, res) => {
 Router.use('/user', userRoute)
 Router.use('/dish', dishRoute)
 Router.use('/ingredient', ingredientRoute)
+Router.use('/step', stepRoute)
 
 export const APIs_V1 = Router
