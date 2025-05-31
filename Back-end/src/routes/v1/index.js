@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 
 import { userRoute } from '@/routes/v1/userRoute'
 import { dishRoute } from '@/routes/v1/dishRoute'
+import { ingredientRoute } from '@/routes/v1/ingredientRoute'
 
 const Router = expesss.Router()
 
@@ -14,5 +15,6 @@ Router.get('/status', (req, res) => {
 /* API - Đường dẫn*/
 Router.use('/user', userRoute)
 Router.use('/dish', dishRoute)
+Router.use('/ingredient', ingredientRoute)
 
 export const APIs_V1 = Router
