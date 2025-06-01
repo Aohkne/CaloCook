@@ -88,7 +88,7 @@ const searchByDifficulty = async (difficulty, sortBy, order) => {
 const searchByIsActive = async (isActive, sortBy, order) => {
   try {
     if (!isActive) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Dish is required!')
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'isActive is required!')
     }
     const dish = await dishModel.searchByIsActive(isActive, sortBy, order)
     if (!dish || dish.length === 0) {

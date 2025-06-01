@@ -2,7 +2,6 @@ import express from 'express'
 import { StatusCodes } from 'http-status-codes'
 
 import { dishController } from '@/controllers/dishController'
-import { userValidation } from '@/validations/userValidation'
 import { dishValidation } from '@/validations/dishValidation'
 
 const Router = express.Router()
