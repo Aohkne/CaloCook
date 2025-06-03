@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import { env } from '@/config/environment'
 import { redis } from '@/config/redis.js'
 import { ObjectId } from 'mongodb'
 import { userModel as User } from '@/models/userModel.js'
@@ -131,14 +132,14 @@ const refreshToken = async (req, res) => {
       return res.status(401).json({ message: 'No refresh token provided' })
     }
 
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
+    const decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET)
     const storedToken = await redis.get(`refresh_token:${decoded.userId}`)
 
     if (!storedToken || storedToken !== refreshToken) {
       return res.status(403).json({ message: 'Invalid or expired refresh token' })
     }
 
-    const newAccessToken = jwt.sign({ userId: decoded.userId }, process.env.ACCESS_TOKEN_SECRET, {
+    const newAccessToken = jwt.sign({ userId: decoded.userId }, env.ACCESS_TOKEN_SECRET, {
       expiresIn: '30m'
     })
 
@@ -161,7 +162,7 @@ const logout = async (req, res) => {
     // console.log('Refresh token request:', { refreshToken })
     if (!refreshToken) return res.status(400).json({ message: 'No refresh token provided' })
 
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
+    const decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET)
     await redis.del(`refresh_token:${decoded.userId}`)
 
     res.json({ message: 'Logged out successfully' })
@@ -268,7 +269,7 @@ export const changePassword = async (req, res) => {
     const token = authHeader.split(' ')[1]
     let decoded
     try {
-      decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+      decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET)
     } catch (err) {
       return res.status(401).json({ message: 'Invalid or expired token' })
     }
@@ -317,7 +318,7 @@ export const getProfile = async (req, res) => {
     const token = authHeader.split(' ')[1]
     let decoded
     try {
-      decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) // Verify the token
+      decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) // Verify the token
     } catch (err) {
       return res.status(401).json({ message: 'Invalid or expired token' })
     }
