@@ -6,8 +6,6 @@ import { ObjectId } from 'mongodb'
 // Define Collection (name & schema)
 const _COLLECTION_NAME = 'user'
 const _COLLECTION_SCHEMA = Joi.object({
-  _id: Joi.string().required(),
-
   username: Joi.string().required().min(3).max(50).trim().strict(),
 
   email: Joi.string()
@@ -40,9 +38,81 @@ const _COLLECTION_SCHEMA = Joi.object({
 })
 
 // Handle
-const getAll = async () => {
+const getAll = async (sortBy = 'createdAt', order = 'asc') => {
   try {
-    return await GET_DB().collection(_COLLECTION_NAME).find().toArray()
+    const sortOrder = order === 'asc' ? 1 : -1
+    return await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .find()
+      .sort({ [sortBy]: sortOrder })
+      .toArray()
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const searchByUsername = async (username, sortBy = 'createdAt', order = 'asc') => {
+  try {
+    const sortOrder = order === 'asc' ? 1 : -1
+    return await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .find({ username: { $regex: `^${username}`, $options: 'i' } }) // ^: bắt đầu + i: ko phân biệt hoa thường
+      .sort({ [sortBy]: sortOrder })
+      .toArray()
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const searchByEmail = async (email, sortBy = 'createdAt', order = 'asc') => {
+  try {
+    const sortOrder = order === 'asc' ? 1 : -1
+    return await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .find({ email: { $regex: `^${email}`, $options: 'i' } })
+      .sort({ [sortBy]: sortOrder })
+      .toArray()
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const searchByIsActive = async (isActive, sortBy = 'createdAt', order = 'asc') => {
+  try {
+    const sortOrder = order === 'asc' ? 1 : -1
+
+    const filter = {}
+    if (isActive !== undefined) {
+      filter.isActive = isActive === 'true'
+    }
+
+    return await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .find(filter)
+      .sort({ [sortBy]: sortOrder })
+      .toArray()
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const getDetails = async (id) => {
+  try {
+    return await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .findOne({ _id: new ObjectId(id) })
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const updateIsActive = async (userId, isActive) => {
+  try {
+    const result = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .findOneAndUpdate({ _id: new ObjectId(userId) }, { $set: { isActive } }, { returnDocument: 'after' })
+
+    return result
   } catch (error) {
     throw new Error(error)
   }
@@ -67,8 +137,13 @@ export const userModel = {
   _COLLECTION_NAME,
   _COLLECTION_SCHEMA,
   getAll,
+  searchByUsername,
+  searchByEmail,
+  searchByIsActive,
+  getDetails,
+  updateIsActive,
   findOne,
-  create,
   findById,
+  create,
   updateOne
 }
