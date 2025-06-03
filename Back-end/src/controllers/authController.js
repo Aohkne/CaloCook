@@ -28,7 +28,6 @@ const storeRefreshToken = async (userId, refreshToken) => {
 const signup = async (req, res) => {
   const { username, email, password } = req.body
   console.log('Raw body:', req.body)
-
   try {
     console.log('Signup request:', { username, email, password })
     if (!email || !password || !username) {
@@ -78,7 +77,6 @@ const signup = async (req, res) => {
       email: user.email,
       role: user.role
     })
-    res.json({ message: 'Registration successfully' })
   } catch (error) {
     console.error('Error in signup controller', error.message)
     res.status(500).json({ message: error.message })
