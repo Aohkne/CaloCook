@@ -27,9 +27,9 @@ const storeRefreshToken = async (userId, refreshToken) => {
 }
 const signup = async (req, res) => {
   const { username, email, password } = req.body
-  console.log('Raw body:', req.body)
+  // console.log('Raw body:', req.body)
   try {
-    console.log('Signup request:', { username, email, password })
+    // console.log('Signup request:', { username, email, password })
     if (!email || !password || !username) {
       return res.status(400).json({ message: 'Missing required fields' })
     }
