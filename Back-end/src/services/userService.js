@@ -84,6 +84,38 @@ const deactivateUser = async (userId) => {
   }
 }
 
+//lay so luong có role bang user
+const getUserCount = async () => {
+  try {
+    const count = await userModel.countUsers('user')
+    return count
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching user count')
+  }
+}
+
+export const getUserProfile = async (userId) => {
+  const user = await userModel.findById(userId)
+  if (!user) {
+    throw new ApiError(404, 'User not found')
+  }
+
+  return {
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    calorieLimit: user.calorieLimit,
+    avatarUrl: user.avatarUrl,
+    gender: user.gender,
+    dob: user.dob,
+    height: user.height,
+    weight: user.weight,
+    createdAt: user.created_at,
+    isActive: user.is_active
+  }
+}
+
 export const userService = {
   getAll,
   searchByUsername,
@@ -91,5 +123,7 @@ export const userService = {
   searchByIsActive,
   getDetails,
   activateUser,
-  deactivateUser
+  deactivateUser,
+  getUserProfile,
+  getUserCount
 }

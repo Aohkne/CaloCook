@@ -133,6 +133,11 @@ const updateOne = async (filter, updateDoc) => {
   return await GET_DB().collection(_COLLECTION_NAME).updateOne(filter, updateDoc)
 }
 
+// dem so luong nguoi dung
+const countUsers = async (role) => {
+  return await GET_DB().collection(_COLLECTION_NAME).countDocuments({ role })
+}
+
 export const userModel = {
   _COLLECTION_NAME,
   _COLLECTION_SCHEMA,
@@ -145,5 +150,6 @@ export const userModel = {
   findOne,
   findById,
   create,
-  updateOne
+  updateOne,
+  countUsers
 }

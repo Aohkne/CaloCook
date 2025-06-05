@@ -6,6 +6,7 @@ import { authRoute } from '@/routes/v1/authRoute'
 import { dishRoute } from '@/routes/v1/dishRoute'
 import { ingredientRoute } from '@/routes/v1/ingredientRoute'
 import { stepRoute } from '@/routes/v1/stepRoute'
+import { dashboardRoute } from '@/routes/v1/dashboardRoute'
 
 const Router = expesss.Router()
 
@@ -20,5 +21,6 @@ Router.use('/auth', authRoute)
 Router.use('/dish', dishRoute)
 Router.use('/ingredient', ingredientRoute)
 Router.use('/step', stepRoute)
+Router.use('/dashboard', dashboardRoute)
 
 export const APIs_V1 = Router

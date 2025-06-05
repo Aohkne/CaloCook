@@ -121,11 +121,27 @@ const deactivateDish = async (req, res, next) => {
   }
 }
 
+// lay so luong dish
+const getDishCount = async (req, res, next) => {
+  try {
+    const dishCount = await dishService.getDishCount()
+
+    res.status(StatusCodes.OK).json({
+      code: StatusCodes.OK,
+      message: 'Dish count retrieved successfully',
+      data: dishCount
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const dishController = {
   getAll,
   getDetails,
   createNew,
   updateDish,
   activateDish,
-  deactivateDish
+  deactivateDish,
+  getDishCount
 }

@@ -175,6 +175,17 @@ const deactivateDish = async (dishId) => {
   }
 }
 
+// lay so luong dish
+
+const getDishCount = async () => {
+  try {
+    const count = await dishModel.countDish()
+    return count
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching user count')
+  }
+}
+
 export const dishService = {
   getAll,
   searchByName,
@@ -186,5 +197,6 @@ export const dishService = {
   createNew,
   updateDish,
   activateDish,
-  deactivateDish
+  deactivateDish,
+  getDishCount
 }

@@ -3,6 +3,7 @@ import { env } from '@/config/environment'
 import { redis } from '@/config/redis.js'
 import { ObjectId } from 'mongodb'
 import { userModel as User } from '@/models/userModel.js'
+import { getUserProfile } from '@/services/userService.js'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import sendEmail from '@/utils/sendEmail.js'
@@ -321,26 +322,11 @@ export const getProfile = async (req, res) => {
       return res.status(401).json({ message: 'Invalid or expired token' })
     }
     const userId = decoded.userId
-
-    const user = await User.findById(userId)
-    if (!user) {
+    const userProfile = await getUserProfile(userId)
+    if (!userProfile) {
       return res.status(404).json({ message: 'User not found' })
     }
-
-    res.json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      calorieLimit: user.calorieLimit,
-      avatarUrl: user.avatarUrl,
-      gender: user.gender,
-      dob: user.dob,
-      height: user.height,
-      weight: user.weight,
-      createdAt: user.created_at,
-      isActive: user.is_active
-    })
+    res.json(userProfile)
   } catch (error) {
     console.error('getProfile error:', error.message)
     res.status(500).json({ message: 'Server error', error: error.message })

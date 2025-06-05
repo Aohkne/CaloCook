@@ -157,6 +157,15 @@ const updateIsActive = async (dishId, isActive) => {
   }
 }
 
+// lay so luong dish
+const countDish = async () => {
+  try {
+    return await GET_DB().collection(_COLLECTION_NAME).countDocuments()
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const dishModel = {
   _COLLECTION_NAME,
   _COLLECTION_SCHEMA,
@@ -169,5 +178,6 @@ export const dishModel = {
   getDetails,
   createNew,
   updateDish,
-  updateIsActive
+  updateIsActive,
+  countDish
 }
