@@ -295,7 +295,7 @@ export const changePassword = async (req, res) => {
     const hashedNewPassword = await bcrypt.hash(newPassword, 10)
     await User.updateOne(
       { _id: new ObjectId(userId) },
-      { $set: { password_hash: hashedNewPassword, updated_at: new Date() } }
+      { $set: { password_hash: hashedNewPassword, updatedAt: new Date() } }
     )
 
     res.json({ message: 'Password changed successfully' })
@@ -305,7 +305,7 @@ export const changePassword = async (req, res) => {
   }
 }
 
-// 0. Get Profile - not implemented yet
+// 9. Get Profile - not implemented yet
 export const getProfile = async (req, res) => {
   try {
     //lấy userId từ access token trong AsyncStorage
@@ -346,6 +346,59 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
+
+// 10. Edit Profile - not implemented yet
+export const editProfile = async (req, res) => {
+  try {
+    //lấy userId từ access token trong AsyncStorage
+    const authHeader = req.headers.authorization
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Authorization header missing or malformed' })
+    }
+    const token = authHeader.split(' ')[1]
+    let decoded
+    try {
+      decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) // Verify the token
+    } catch (err) {
+      return res.status(401).json({ message: 'Invalid or expired token' })
+    }
+
+    // Lấy userId từ decoded token
+    const userId = decoded.userId
+    // console.log('User ID from token:', userId)
+
+    const { username, email, calorieLimit, avatarUrl, gender, dob, height, weight } = req.body
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    await User.updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          username: username,
+          email: email,
+          calorieLimit: calorieLimit,
+          avatarUrl: avatarUrl,
+          gender: gender,
+          dob: dob,
+          height: height,
+          weight: weight,
+          updatedAt: new Date()
+        }
+      }
+    )
+
+    res.json({ message: 'Profile updated successfully' })
+  } catch (error) {
+    console.error('editProfile error:', error.message)
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
 export const authController = {
   login,
   refreshToken,
@@ -354,5 +407,6 @@ export const authController = {
   forgotPassword,
   resetPassword,
   changePassword,
-  getProfile
+  getProfile,
+  editProfile
 }
