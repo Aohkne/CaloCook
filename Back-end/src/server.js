@@ -2,7 +2,6 @@
 
 import express from 'express'
 import exitHook from 'async-exit-hook'
-import 'module-alias/register'
 
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
