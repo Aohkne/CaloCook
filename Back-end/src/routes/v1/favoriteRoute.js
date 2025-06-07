@@ -7,7 +7,7 @@ const Router = express.Router()
 
 /**
  * @swagger
- * /api/v1/users/{userId}/favorites:
+ * /api/v1/favorite/{userId}:
  *   get:
  *     summary: Get favorite dishes of a user
  *     tags: [favorite]
@@ -89,7 +89,7 @@ const Router = express.Router()
  *                   example: "Favorite created successfully"
  *                 data:
  *                   $ref: '#/components/schemas/Favorite'
- * /api/v1/users/{userId}/favorites/{dishId}:
+ * /api/v1/favorite/{userId}/{dishId}:
  *   delete:
  *     summary: Remove a dish from user's favorites
  *     tags: [favorite]
@@ -126,32 +126,6 @@ const Router = express.Router()
  *                     message:
  *                       type: string
  *                       example: "Dish removed from favorites"
- *       404:
- *         description: Favorite not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 code:
- *                   type: number
- *                   example: 404
- *                 message:
- *                   type: string
- *                   example: "Favorite not found"
- *       400:
- *         description: Invalid userId or dishId
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 code:
- *                   type: number
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: "Invalid userId or dishId"
  * components:
  *   schemas:
  *     Favorite:
@@ -208,11 +182,11 @@ const Router = express.Router()
  *               example: "2025-05-29T08:00:00.000Z"
  */
 
-Router.route('/:userId/favorites')
+Router.route('/:userId')
   .get(favoriteValidation.viewFavorites, favoriteController.viewFavorites)
   .post(favoriteValidation.addToFavorites, favoriteController.addToFavorites)
 
-Router.route('/:userId/favorites/:dishId').delete(
+Router.route('/:userId/:dishId').delete(
   favoriteValidation.deleteFromFavorites,
   favoriteController.deleteFromFavorites
 )

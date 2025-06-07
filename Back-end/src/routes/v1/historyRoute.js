@@ -88,19 +88,6 @@ const Router = express.Router()
  *                             type: string
  *                             format: date-time
  *                             example: "2025-06-06T00:00:00.000Z"
- *       400:
- *         description: Invalid userId
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: number
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: "Invalid userId"
  *   post:
  *     summary: Add an eating record to user's history
  *     tags: [history]
@@ -159,32 +146,6 @@ const Router = express.Router()
  *                       type: string
  *                       format: date-time
  *                       example: "2025-06-06T22:15:00.000Z"
- *       400:
- *         description: Invalid userId or dishId
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: number
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: "Invalid userId or dishId"
- *       404:
- *         description: User or dish not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: number
- *                   example: 404
- *                 message:
- *                   type: string
- *                   example: "User not found"
  * /api/v1/history/user/{userId}:
  *   get:
  *     summary: Search eating history by user ID
@@ -233,19 +194,6 @@ const Router = express.Router()
  *                         type: string
  *                         format: date-time
  *                         example: "2025-06-06T22:15:00.000Z"
- *       400:
- *         description: Invalid userId
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: number
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: "Invalid userId"
  * /api/v1/history/dish/{dishId}:
  *   get:
  *     summary: Search eating history by dish ID
@@ -294,19 +242,6 @@ const Router = express.Router()
  *                         type: string
  *                         format: date-time
  *                         example: "2025-06-06T22:15:00.000Z"
- *       400:
- *         description: Invalid dishId
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: number
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: "Invalid dishId"
  * /api/v1/history/{historyId}:
  *   delete:
  *     summary: Delete an eating history record
@@ -338,32 +273,6 @@ const Router = express.Router()
  *                     message:
  *                       type: string
  *                       example: "History deleted successfully"
- *       400:
- *         description: Invalid historyId
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: number
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: "Invalid historyId"
- *       404:
- *         description: History not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: number
- *                   example: 404
- *                 message:
- *                   type: string
- *                   example: "History not found"
  *   put:
  *     summary: Edit an eating history record
  *     tags: [history]
@@ -423,32 +332,6 @@ const Router = express.Router()
  *                       type: string
  *                       format: date-time
  *                       example: "2025-06-06T23:00:00.000Z"
- *       400:
- *         description: Invalid historyId or consumedAt
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: number
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: "Invalid historyId"
- *       404:
- *         description: History not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: number
- *                   example: 404
- *                 message:
- *                   type: string
- *                   example: "History not found"
  */
 
 Router.route('/:userId/history')

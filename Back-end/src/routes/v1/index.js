@@ -20,7 +20,7 @@ Router.use('/user', userRoute)
 Router.use('/dish', dishRoute)
 Router.use('/ingredient', ingredientRoute)
 Router.use('/step', stepRoute)
-Router.use('/users', favoriteRoute)
+Router.use('/favorite', favoriteRoute)
 Router.use('/history', historyRoute)
 
 export const APIs_V1 = Router
