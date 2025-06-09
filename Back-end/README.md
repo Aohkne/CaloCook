@@ -10,7 +10,7 @@
 ## 📂 Project Structure
 
 ```
-📁 Back-end_ExpressJS-MongoDB
+📁 Back-end
 │
 ├── 📁 node_modules/ # Thư mục chứa các package đã cài
 │
