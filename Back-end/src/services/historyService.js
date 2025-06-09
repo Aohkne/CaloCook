@@ -13,7 +13,7 @@ const addToHistory = async (userId, dishId) => {
     }
 
 
-    const createdHistory = await historyModel.addToHistory(userId, dishId)
+  const createdHistory = await historyModel.addToHistory({ userId, dishId })
     return createdHistory
   } catch (error) {
 

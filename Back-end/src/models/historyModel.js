@@ -51,6 +51,7 @@ const viewHistory = async (userId) => {
 
 const addToHistory = async ({ userId, dishId }) => {
   try {
+    console.log('addToHistory called with:', { userId, dishId })
     const newHistory = {
       userId: new ObjectId(userId),
       dishId: new ObjectId(dishId),
@@ -61,8 +62,10 @@ const addToHistory = async ({ userId, dishId }) => {
     const result = await GET_DB()
       .collection(_COLLECTION_NAME)
       .insertOne(newHistory)
+    console.log('addToHistory result:', result)
     return result
   } catch (error) {
+    console.error('Error in addToHistory:', error)
     throw error
   }
 }
