@@ -228,11 +228,64 @@ const Router = express.Router()
  *           type: string
  *           format: date-time
  *           example: "2025-05-23T07:00:00.000Z"
+ * /api/v1/user/{userId}/total-calories:
+ *   get:
+ *     summary: View total calories consumed by a user on a specific date
+ *     tags: [user]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: date
+ *           example: "2025-06-10"
+ *         description: Date to calculate total calories (defaults to today)
+ *     responses: 
+ *       200:
+ *         description: Total calories retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties: 
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Total calories retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalCalories:
+ *                       type: number
+ *                       example: 1200
+ *                     dishes:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           dishId:
+ *                             type: string 
+ *                           name:
+ *                             type: string
+ *                           calorie:
+ *                             type: number
+ *                           eatenAt:
+ *                             type: string
+ *       400:
+ *         description: Invalid userId or date 
  */
 
 Router.route('/').get(paginationHelper.validatePaginationMiddleware, userController.getAll)
 Router.route('/:id').get(userController.getDetails)
 Router.route('/:id/activate').patch(userController.activateUser)
 Router.route('/:id/deactivate').patch(userController.deactivateUser)
-
+Router.route('/:id/total-calories').get( userController.getTotalCalories)
 export const userRoute = Router

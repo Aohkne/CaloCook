@@ -136,7 +136,65 @@ const updateIsActive = async (userId, isActive) => {
     throw new Error(error)
   }
 }
+const getTotalCaloriesByDate = async (userId, date) => {
+  try {
+    console.log('Model: getTotalCaloriesByDate', { userId, date })
+    const startOfDay = new Date(date)
+    startOfDay.setHours(0, 0, 0, 0)
+    const endOfDay = new Date(date)
+    endOfDay.setHours(23, 59, 59, 999)
 
+    const result = await GET_DB()
+      .collection('history')
+      .aggregate([
+        {
+          $match: {
+            userId: new ObjectId(userId),
+            eatenAt: {
+              $gte: startOfDay,
+              $lte: endOfDay
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: 'dish',
+            localField: 'dishId',
+            foreignField: '_id',
+            as: 'dish'
+          }
+        },
+        { $unwind: '$dish' },
+        {
+          $group: {
+            _id: null,
+            totalCalories: { $sum: '$dish.calorie' },
+            dishes: {
+              $push: {
+                dishId: { $toString: '$dishId' },
+                name: '$dish.name',
+                calorie: '$dish.calorie',
+                eatenAt: { $toString: '$eatenAt' }
+              }
+            }
+          }
+        },
+         {
+          $project: {
+            _id: 0,
+            totalCalories: 1,
+            dishes: 1
+          }
+        }
+      ])
+      .toArray()
+      console.log('getTotalCaloriesByDate result:', result)
+    return result.length > 0 ? result[0] : { totalCalories: 0, dishes: [] }
+  } catch (error) {
+    console.error('Error in getTotalCaloriesByDate:', error)
+    throw error
+  }
+}
 export const userModel = {
   _COLLECTION_NAME,
   _COLLECTION_SCHEMA,
@@ -145,5 +203,6 @@ export const userModel = {
   searchByEmail,
   searchByIsActive,
   getDetails,
-  updateIsActive
+  updateIsActive,
+  getTotalCaloriesByDate
 }

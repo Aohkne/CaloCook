@@ -32,7 +32,25 @@ const addToHistory = async (req, res, next) => {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
   }
 }
-
+const viewHistoryDetail = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    historyId: Joi.string()
+      .pattern(OBJECT_ID_RULE)
+      .message(OBJECT_ID_RULE_MESSAGE)
+      .required()
+  })
+  try {
+    await correctCondition.validateAsync(
+      {
+        historyId: req.params.historyId
+      },
+      { abortEarly: false }
+    )
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
+  }
+}
 const viewHistory = async (req, res, next) => {
   const correctCondition = Joi.object({
     userId: Joi.string()
@@ -157,5 +175,6 @@ export const historyValidation = {
   searchByUserId,
   searchByDishId,
   deleteFromHistory,
-  editHistory
+  editHistory,
+  viewHistoryDetail
 }

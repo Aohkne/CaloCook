@@ -23,7 +23,24 @@ const addToHistory = async (userId, dishId) => {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
 }
-
+const viewHistoryDetail = async (historyId) => {
+  try {
+    console.log('Service: viewHistoryDetail', { historyId })
+    if (!ObjectId.isValid(historyId)) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid historyId')
+    }
+    const history = await historyModel.viewHistoryDetail(historyId)
+    if (!history) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'History not found')
+    }
+    return history
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error
+    }
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
+}
 
 const viewHistory = async (userId) => {
   try {
@@ -116,5 +133,6 @@ export const historyService = {
   searchHistoryByUserId,
   searchHistoryByDishId,
   deleteHistory,
-  editHistory
+  editHistory,
+  viewHistoryDetail
 }

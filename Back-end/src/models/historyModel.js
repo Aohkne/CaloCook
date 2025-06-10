@@ -69,7 +69,51 @@ const addToHistory = async ({ userId, dishId }) => {
     throw error
   }
 }
-
+const viewHistoryDetail = async (historyId) => {
+  try {
+    console.log('Model: viewHistoryDetail', { historyId })
+    const history = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .aggregate([
+        { $match: { _id: new ObjectId(historyId) } },
+        {
+          $lookup: {
+            from: 'dish',
+            localField: 'dishId',
+            foreignField: '_id',
+            as: 'dish'
+          }
+           },
+        { $unwind: { path: '$dish', preserveNullAndEmptyArrays: true } },
+        {
+          $project: {
+            userId: { $toString: '$userId' },
+            dishId: { $toString: '$dishId' },
+            consumedAt: { $toString: '$consumedAt' },
+            createdAt: { $toString: '$createdAt' },
+            updatedAt: { $toString: '$updatedAt' },
+            dish: {
+               name: 1,
+              cookingTime: 1,
+              calorie: 1,
+              difficulty: 1,
+              description: 1,
+              imageUrl: 1,
+              isActive: 1,
+              createdAt: { $toString: '$dish.createdAt' },
+              updatedAt: { $toString: '$dish.updatedAt' }
+            }
+          }
+        }
+      ])
+      .toArray()
+       console.log('viewHistoryDetail result:', history)
+    return history.length > 0 ? history[0] : null
+  } catch (error) {
+    console.error('Error in viewHistoryDetail:', error)
+    throw error
+  }
+}
 const searchByUserId = async (userId) => {
   try {
     const histories = await GET_DB()
@@ -138,5 +182,6 @@ export const historyModel = {
   searchByUserId,
   searchByDishId,
   deleteFromHistory,
-  editHistory
+  editHistory,
+  viewHistoryDetail
 }

@@ -33,6 +33,20 @@ const viewHistory = async (req, res, next) => {
         next(error)
     }
 }
+const viewHistoryDetail = async (req, res, next) => {
+  try {
+    const { historyId } = req.params
+    console.log('Controller: viewHistoryDetail', { historyId })
+    const history = await historyService.viewHistoryDetail(historyId)
+    res.status(StatusCodes.OK).json({
+      code: StatusCodes.OK,
+      message: 'History details retrieved successfully',
+      data: history
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 
 const searchByUserId = async (req, res, next) => {
     try {
@@ -105,5 +119,6 @@ export const historyController = {
     searchByUserId,
     searchByDishId,
     deleteFromHistory,
-    editHistory
+    editHistory,
+    viewHistoryDetail
 }

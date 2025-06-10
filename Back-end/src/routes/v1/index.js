@@ -1,6 +1,5 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
-
 import { userRoute } from '@/routes/v1/userRoute'
 import { dishRoute } from '@/routes/v1/dishRoute'
 import { ingredientRoute } from '@/routes/v1/ingredientRoute'
@@ -22,5 +21,4 @@ Router.use('/ingredient', ingredientRoute)
 Router.use('/step', stepRoute)
 Router.use('/favorite', favoriteRoute)
 Router.use('/history', historyRoute)
-
 export const APIs_V1 = Router
