@@ -1,42 +1,45 @@
 import { StatusCodes } from 'http-status-codes'
 import { dishService } from '@/services/dishService'
+import { paginationHelper } from '@/utils/pagination'
 
 const getAll = async (req, res, next) => {
   try {
-    const { name, minCookingTime, maxCookingTime, minCalorie, maxCalorie, difficulty, isActive, sortBy, order } =
-      req.query
+    const { name, minCookingTime, maxCookingTime, minCalorie, maxCalorie, difficulty, isActive } = req.query
+
+    const paginationParams = req.pagination
 
     // NAVIGATION TO SERVICE
-
-    let dish
+    let result
     if (name) {
-      dish = await dishService.searchByName(name, sortBy, order)
+      result = await dishService.searchByName(name, paginationParams)
     } else if (minCookingTime || maxCookingTime) {
       const condition = {}
       if (minCookingTime) condition.$gte = parseInt(minCookingTime)
       if (maxCookingTime) condition.$lte = parseInt(maxCookingTime)
 
-      dish = await dishService.searchByCookingTime(condition, sortBy, order)
+      result = await dishService.searchByCookingTime(condition, paginationParams)
     } else if (minCalorie || maxCalorie) {
       const condition = {}
       if (minCalorie) condition.$gte = parseInt(minCalorie)
       if (maxCalorie) condition.$lte = parseInt(maxCalorie)
 
-      dish = await dishService.searchByCalorie(condition, sortBy, order)
+      result = await dishService.searchByCalorie(condition, paginationParams)
     } else if (difficulty) {
-      dish = await dishService.searchByDifficulty(difficulty, sortBy, order)
+      result = await dishService.searchByDifficulty(difficulty, paginationParams)
     } else if (isActive) {
-      dish = await dishService.searchByIsActive(isActive, sortBy, order)
+      result = await dishService.searchByIsActive(isActive, paginationParams)
     } else {
-      dish = await dishService.getAll(sortBy, order)
+      result = await dishService.getAll(paginationParams)
     }
 
-    // RETURN CLIENT
-    res.status(StatusCodes.OK).json({
-      code: StatusCodes.OK,
-      message: 'Get successfull',
-      data: dish
-    })
+    const response = paginationHelper.formatPaginatedResponse(
+      'Get successful',
+      result.totalCount,
+      paginationParams,
+      result.data
+    )
+
+    res.status(StatusCodes.OK).json(response)
   } catch (error) {
     next(error)
   }
