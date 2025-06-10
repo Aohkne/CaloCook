@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 
 import { userController } from '@/controllers/userController'
 import { userValidation } from '@/validations/userValidation'
+import { paginationHelper } from '@/utils/pagination'
 
 const Router = express.Router()
 
@@ -59,6 +60,33 @@ const Router = express.Router()
  *                 message:
  *                   type: string
  *                   example: "Get successful"
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: number
+ *                       example: 1
+ *                     totalPages:
+ *                       type: number
+ *                       example: 5
+ *                     totalItems:
+ *                       type: number
+ *                       example: 50
+ *                     itemsPerPage:
+ *                       type: number
+ *                       example: 10
+ *                     hasNextPage:
+ *                       type: boolean
+ *                       example: true
+ *                     hasPrevPage:
+ *                       type: boolean
+ *                       example: false
+ *                     nextPage:
+ *                       type: number
+ *                       example: 2
+ *                     prevPage:
+ *                       type: number
+ *                       example: null
  *                 data:
  *                   type: array
  *                   items:
@@ -202,7 +230,7 @@ const Router = express.Router()
  *           example: "2025-05-23T07:00:00.000Z"
  */
 
-Router.route('/').get(userController.getAll)
+Router.route('/').get(paginationHelper.validatePaginationMiddleware, userController.getAll)
 Router.route('/:id').get(userController.getDetails)
 Router.route('/:id/activate').patch(userController.activateUser)
 Router.route('/:id/deactivate').patch(userController.deactivateUser)
