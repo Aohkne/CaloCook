@@ -135,7 +135,7 @@ const Router = expesss.Router()
  *           schema:
  *             type: object
  *             properties:
- *               newPassword:
+ *               password:
  *                 type: string
  *     responses:
  *       200:
