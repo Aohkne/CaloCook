@@ -126,7 +126,22 @@ const editHistory = async (historyId, consumedAt) => {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
 }
-
+const getTotalCalories = async (userId, date) => {
+  try {
+    console.log('Service: getTotalCalories', { userId, date })
+    if (!ObjectId.isValid(userId)) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid userId')
+    }
+    const targetDate = date ? new Date(date) : new Date()
+    if (isNaN(targetDate.getTime())) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid date format')
+    }
+    const result = await historyModel.getTotalCaloriesByDate(userId, targetDate)
+    return result
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
+}
 export const historyService = {
   addToHistory,
   viewHistory,
@@ -134,5 +149,6 @@ export const historyService = {
   searchHistoryByDishId,
   deleteHistory,
   editHistory,
-  viewHistoryDetail
+  viewHistoryDetail,
+  getTotalCalories
 }

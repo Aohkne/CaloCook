@@ -111,8 +111,20 @@ const editHistory = async (req, res, next) => {
         next(error)
     }
 }
-
-
+const getTotalCalories = async (req, res, next) => {
+  try {
+    const { userId } = req.params
+    const { date } = req.query
+    const result = await historyService.getTotalCalories(userId, date)
+    res.status(StatusCodes.OK).json({
+ statusCode: StatusCodes.OK,
+      message: 'History retrieved successfully',
+      data: result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 export const historyController = {
     addToHistory,
     viewHistory,
@@ -120,5 +132,6 @@ export const historyController = {
     searchByDishId,
     deleteFromHistory,
     editHistory,
-    viewHistoryDetail
+    viewHistoryDetail,
+    getTotalCalories
 }

@@ -30,42 +30,8 @@ const createNew = async (req, res, next) => {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
   }
 }
-const getTotalCalories = async (req, res, next) => {
-  const correctCondition = Joi.object({
-    userId: Joi.string()
-      .required()
-      .pattern(OBJECT_ID_RULE)
-      .message(OBJECT_ID_RULE_MESSAGE)
-      .trim()
-      .strict()
-      .messages({
-        'any.required': 'User ID is required',
-        'string.empty': 'User ID is not allowed to be empty',
-        'string.trim': 'User ID must not have leading or trailing whitespace'
-      }),
-      date: Joi.date()
-      .iso()
-      .allow('')
-      .optional()
-      .messages({
-        'date.format': 'Date must be in ISO format (YYYY-MM-DD)',
-        'date.base': 'Date must be a valid date'
-      })
-  })
- try {
-    await correctCondition.validateAsync(
-      {
-        userId: req.params.userId,
-        date: req.query.date
-      },
-      { abortEarly: false }
-    )
-     next()
-  } catch (error) {
-    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
-  }
-}
+
 export const boardValidation = {
   createNew,
-  getTotalCalories
+  
 }

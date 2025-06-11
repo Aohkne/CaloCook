@@ -51,20 +51,7 @@ const getDetails = async (req, res, next) => {
     next(error)
   }
 }
-const getTotalCalories = async (req, res, next) => {
-  try {
-    const userId = req.params.id
-    const { date } = req.query
-    const result = await userService.getTotalCalories(userId, date)
-    res.status(StatusCodes.OK).json({
-      code: StatusCodes.OK,
-      message: 'Get successfull',
-data: result
-    })
-  } catch (error) {
-    next(error)
-  }
-}
+
 const activateUser = async (req, res, next) => {
   try {
     const userId = req.params.id
@@ -102,5 +89,4 @@ export const userController = {
   getDetails,
   activateUser,
   deactivateUser,
-  getTotalCalories
 }

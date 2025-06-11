@@ -1,7 +1,6 @@
 import { userModel } from '@/models/userModel'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
-import { ObjectId } from 'mongodb'
 const getAll = async (paginationParams) => {
   try {
     return await userModel.getAll(paginationParams)
@@ -83,31 +82,7 @@ const deactivateUser = async (userId) => {
     throw error
   }
 }
-const getTotalCalories = async (userId, date) => {
-  try {
-    console.log('Service: getTotalCalories', { userId, date })
-    if (!ObjectId.isValid(userId)) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid userId')
-    }
 
-    const user = await userModel.getDetails(userId)
-    if (!user) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found')
-    }
- const targetDate = date ? new Date(date) : new Date()
-    if (isNaN(targetDate.getTime())) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid date format')
-    }
-
-    const result = await userModel.getTotalCaloriesByDate(userId, targetDate)
-    return result
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error
-    }
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
-  }
-}
 export const userService = {
   getAll,
   searchByUsername,
@@ -116,5 +91,5 @@ export const userService = {
   getDetails,
   activateUser,
   deactivateUser,
-  getTotalCalories
+  
 }
