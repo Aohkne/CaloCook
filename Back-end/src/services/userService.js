@@ -96,7 +96,7 @@ const getUserCount = async () => {
 export const getUserProfile = async (userId) => {
   const user = await userModel.findById(userId)
   if (!user) {
-    throw new ApiError(404, 'User not found')
+    throw new ApiError(StatusCodes.NOT_FOUND, 'User not found')
   }
 
   return {

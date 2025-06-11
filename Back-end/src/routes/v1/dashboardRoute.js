@@ -28,13 +28,8 @@ const Router = expesss.Router()
  *                 data:
  *                   type: number
  *                   example: 10
- *         500:
- *           description: Internal server error
  *
- */
 
-/**
- * @swagger
  * /api/v1/dashboard/dish-count:
  *   get:
  *     summary: Get all dishes count
@@ -57,8 +52,6 @@ const Router = expesss.Router()
  *                 data:
  *                   type: number
  *                   example: 10
- *       500:
- *         description: Internal server error
  */
 Router.route('/user-count').get(userController.getUserCount)
 Router.route('/dish-count').get(dishController.getDishCount)

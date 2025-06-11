@@ -22,9 +22,8 @@ Router.use('/auth', authRoute)
 Router.use('/dish', dishRoute)
 Router.use('/ingredient', ingredientRoute)
 Router.use('/step', stepRoute)
-
 Router.use('/dashboard', dashboardRoute)
-
-export const APIs_V1 = Router
 Router.use('/favorite', favoriteRoute)
 Router.use('/history', historyRoute)
+
+export const APIs_V1 = Router

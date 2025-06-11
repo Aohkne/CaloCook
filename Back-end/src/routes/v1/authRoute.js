@@ -24,12 +24,8 @@ const Router = expesss.Router()
  *     responses:
  *       200:
  *         description: Login successful
- *       400:
- *         description: Invalid credentials
- */
 
-/**
- * @swagger
+
  * /api/v1/auth/signup:
  *   post:
  *     tags: [Auth]
@@ -50,12 +46,8 @@ const Router = expesss.Router()
  *     responses:
  *       201:
  *         description: Signup successful
- *       400:
- *         description: Invalid input
- */
 
-/**
- * @swagger
+
  * /api/v1/auth/refresh-token:
  *   post:
  *     tags: [Auth]
@@ -72,12 +64,8 @@ const Router = expesss.Router()
  *     responses:
  *       200:
  *         description: Token refreshed
- *       401:
- *         description: Invalid or expired refresh token
- */
 
-/**
- * @swagger
+
  * /api/v1/auth/logout:
  *   post:
  *     tags: [Auth]
@@ -94,10 +82,8 @@ const Router = expesss.Router()
  *     responses:
  *       200:
  *         description: Logout successful
- */
 
-/**
- * @swagger
+
  * /api/v1/auth/forgot-password:
  *   post:
  *     tags: [Auth]
@@ -114,10 +100,7 @@ const Router = expesss.Router()
  *     responses:
  *       200:
  *         description: Password reset email sent
- */
 
-/**
- * @swagger
  * /api/v1/auth/forgot-password/{token}:
  *   post:
  *     tags: [Auth]
@@ -140,12 +123,9 @@ const Router = expesss.Router()
  *     responses:
  *       200:
  *         description: Password reset successful
- *       400:
- *         description: Invalid or expired token
- */
 
-/**
- * @swagger
+
+
  * /api/v1/auth/change-password:
  *   post:
  *     tags: [Auth]
@@ -164,12 +144,8 @@ const Router = expesss.Router()
  *     responses:
  *       200:
  *         description: Password changed successfully
- *       400:
- *         description: Invalid input
- */
 
-/**
- * @swagger
+ 
  * /api/v1/auth/profile:
  *   get:
  *     tags: [Auth]
