@@ -147,12 +147,56 @@ const Router = expesss.Router()
 
  
  * /api/v1/auth/profile:
- *   get:
+  *   get:
  *     tags: [Auth]
  *     summary: Get user profile
  *     responses:
  *       200:
  *         description: User profile data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                   example: "6843b2dc410a1db97da1ad22"
+ *                 username:
+ *                   type: string
+ *                   example: sa
+ *                 email:
+ *                   type: string
+ *                   example: sa@gmail.com
+ *                 role:
+ *                   type: string
+ *                   example: user
+ *                 calorieLimit:
+ *                   type: number
+ *                   example: 2000
+ *                 avatarUrl:
+ *                   type: string
+ *                   example: none
+ *                 gender:
+ *                   type: string
+ *                   example: male
+ *                 dob:
+ *                   type: string
+ *                   example: null
+ *                 height:
+ *                   type: number
+ *                   example: null
+ *                 weight:
+ *                   type: number
+ *                   example: null
+ *                 isActive:
+ *                   type: boolean
+ *                   example: true
+ *                 createdAt:
+ *                   type: string
+ *                   example: "2024-06-11T08:00:00.000Z"
+ *  
+ *
+ *
  *   post:
  *     tags: [Auth]
  *     summary: Edit user profile
