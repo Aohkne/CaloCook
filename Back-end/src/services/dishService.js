@@ -2,27 +2,29 @@ import { dishModel } from '@/models/dishModel'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
 
-const getAll = async (sortBy, order) => {
+const getAll = async (paginationParams) => {
   try {
-    return await dishModel.getAll(sortBy, order)
+    const result = await dishModel.getAll(paginationParams)
+
+    return result
   } catch (error) {
     throw error
   }
 }
 
-const searchByName = async (name, sortBy, order) => {
+const searchByName = async (name, paginationParams) => {
   try {
-    const dish = await dishModel.searchByName(name, sortBy, order)
-    if (!dish || dish.length === 0) {
+    const result = await dishModel.searchByName(name, paginationParams)
+    if (!result.data || result.data.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
     }
-    return dish
+    return result
   } catch (error) {
     throw error
   }
 }
 
-const searchByCookingTime = async (condition, sortBy, order) => {
+const searchByCookingTime = async (condition, paginationParams) => {
   try {
     if (condition.$gte !== undefined && condition.$lte !== undefined) {
       if (condition.$gte > condition.$lte) {
@@ -30,18 +32,18 @@ const searchByCookingTime = async (condition, sortBy, order) => {
       }
     }
 
-    const dish = await dishModel.searchByCookingTime(condition, sortBy, order)
+    const result = await dishModel.searchByCookingTime(condition, paginationParams)
 
-    if (!dish || dish.length === 0) {
+    if (!result.data || result.data.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
     }
-    return dish
+    return result
   } catch (error) {
     throw error
   }
 }
 
-const searchByCalorie = async (condition, sortBy, order) => {
+const searchByCalorie = async (condition, paginationParams) => {
   try {
     if (condition.$gte !== undefined && condition.$lte !== undefined) {
       if (condition.$gte > condition.$lte) {
@@ -49,18 +51,18 @@ const searchByCalorie = async (condition, sortBy, order) => {
       }
     }
 
-    const dish = await dishModel.searchByCalorie(condition, sortBy, order)
+    const result = await dishModel.searchByCalorie(condition, paginationParams)
 
-    if (!dish || dish.length === 0) {
+    if (!result.data || result.data.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
     }
-    return dish
+    return result
   } catch (error) {
     throw error
   }
 }
 
-const searchByDifficulty = async (difficulty, sortBy, order) => {
+const searchByDifficulty = async (difficulty, paginationParams) => {
   try {
     let difficultyQuery
 
@@ -75,26 +77,26 @@ const searchByDifficulty = async (difficulty, sortBy, order) => {
       difficultyQuery = { $regex: `^${difficulty}`, $options: 'i' }
     }
 
-    const dish = await dishModel.searchByDifficulty(difficultyQuery, sortBy, order)
-    if (!dish || dish.length === 0) {
+    const result = await dishModel.searchByDifficulty(difficultyQuery, paginationParams)
+    if (!result.data || result.data.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
     }
-    return dish
+    return result
   } catch (error) {
     throw error
   }
 }
 
-const searchByIsActive = async (isActive, sortBy, order) => {
+const searchByIsActive = async (isActive, paginationParams) => {
   try {
     if (!isActive) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'isActive is required!')
     }
-    const dish = await dishModel.searchByIsActive(isActive, sortBy, order)
-    if (!dish || dish.length === 0) {
+    const result = await dishModel.searchByIsActive(isActive, paginationParams)
+    if (!result.data || result.data.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
     }
-    return dish
+    return result
   } catch (error) {
     throw error
   }

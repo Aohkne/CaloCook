@@ -1,3 +1,5 @@
+import { env } from '@/config/environment'
+
 export const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -18,7 +20,7 @@ export const swaggerOptions = {
     security: [{ bearerAuth: [] }],
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 8080}`,
+        url: `http://localhost:${env.PORT || 8080}`,
         description: 'Development server'
       }
     ]

@@ -1,29 +1,35 @@
 import { StatusCodes } from 'http-status-codes'
 import { userService } from '@/services/userService'
+import { paginationHelper } from '@/utils/pagination'
 
 const getAll = async (req, res, next) => {
   try {
-    const { username, email, isActive, sortBy, order } = req.query
+    const { username, email, isActive } = req.query
+
+    const paginationParams = req.pagination
 
     // NAVIGATION TO SERVICE
 
-    let users
+    let result
     if (username) {
-      users = await userService.searchByUsername(username, sortBy, order)
+      result = await userService.searchByUsername(username, paginationParams)
     } else if (email) {
-      users = await userService.searchByEmail(email, sortBy, order)
+      result = await userService.searchByEmail(email, paginationParams)
     } else if (isActive !== undefined) {
-      users = await userService.searchByIsActive(isActive, sortBy, order)
+      result = await userService.searchByIsActive(isActive, paginationParams)
     } else {
-      users = await userService.getAll(sortBy, order)
+      result = await userService.getAll(paginationParams)
     }
 
+    const response = paginationHelper.formatPaginatedResponse(
+      'Get successful',
+      result.totalCount,
+      paginationParams,
+      result.data
+    )
+
     // RETURN CLIENT
-    res.status(StatusCodes.OK).json({
-      code: StatusCodes.OK,
-      message: 'Get successfull',
-      data: users
-    })
+    res.status(StatusCodes.OK).json(response)
   } catch (error) {
     next(error)
   }
