@@ -2,10 +2,13 @@ import React, { useReducer } from 'react'
 import { Button, SafeAreaView, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '@contexts/ThemeProvider'
+import { useNavigation } from '@react-navigation/native'
 
 export default function LoginScreen() {
   const { colors, toggleTheme } = useTheme()
   const styles = createStyles(colors)
+
+  const navigation = useNavigation()
 
   return (
     <SafeAreaView style={styles.container}>
@@ -13,6 +16,7 @@ export default function LoginScreen() {
         <Text style={styles.title}>Calocook App</Text>
         <Button title='Toggle Theme' onPress={toggleTheme} color={colors.primary} />
       </View>
+      <Button title='Login' onPress={() => navigation.navigate('MainTabs')} color={colors.secondary} />
     </SafeAreaView>
   )
 }

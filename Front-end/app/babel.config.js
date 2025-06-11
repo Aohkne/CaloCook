@@ -1,26 +1,26 @@
 module.exports = function (api) {
-  api.cache(true);
+  api.cache(true)
   return {
-    presets: ["babel-preset-expo"],
+    presets: ['babel-preset-expo'],
     plugins: [
       [
-        "module-resolver",
+        'module-resolver',
         {
-          root: ["./src"],
+          root: ['./src'],
           alias: {
-            "@": "./src",
-            "@assets": "./src/assets",
-            "@components": "./src/components",
-            "@contexts": "./src/contexts",
-            "@redux": "./src/redux",
-            "@auth": "./src/screens/(auth)",
-            "@screens": "./src/screens/(screens)",
-            "@services": "./src/services",
-            "@styles": "./src/styles",
-            "@utils": "./src/utils",
-          },
-        },
-      ],
-    ],
-  };
-};
+            '@': './src',
+            '@assets': './src/assets',
+            '@components': './src/components',
+            '@contexts': './src/contexts',
+            '@navigations': './src/navigations',
+            '@redux': './src/redux',
+            '@screens': './src/screens',
+            '@services': './src/services',
+            '@styles': './src/styles',
+            '@utils': './src/utils'
+          }
+        }
+      ]
+    ]
+  }
+}
