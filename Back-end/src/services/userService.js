@@ -1,7 +1,6 @@
 import { userModel } from '@/models/userModel'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
-
 const getAll = async (paginationParams) => {
   try {
     return await userModel.getAll(paginationParams)
@@ -91,5 +90,6 @@ export const userService = {
   searchByIsActive,
   getDetails,
   activateUser,
-  deactivateUser
+  deactivateUser,
+  
 }

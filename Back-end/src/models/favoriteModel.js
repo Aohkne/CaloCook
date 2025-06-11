@@ -16,7 +16,10 @@ const _COLLECTION_SCHEMA = Joi.object({
     .required(),
   createdAt: Joi.date().timestamp('javascript').default(Date.now)
 })
-
+const createSortObject = (sortBy, order) => {
+  const sortOrder = order === 'asc' ? 1 : -1
+  return { [sortBy]: sortOrder }
+}
 
 const addToFavorites = async (userId, dishId) => {
   try {
@@ -27,12 +30,12 @@ const addToFavorites = async (userId, dishId) => {
       throw new Error('Dish not found')
     }
 
-   const user = await GET_DB().collection('user').findOne({ _id: new ObjectId(userId) })
+    const user = await GET_DB().collection('user').findOne({ _id: new ObjectId(userId) })
     if (!user) {
       throw new Error('User not found')
     }
 
- 
+
     const existingFavorite = await GET_DB()
       .collection(_COLLECTION_NAME)
       .findOne({ userId: new ObjectId(userId), dishId: new ObjectId(dishId) })
@@ -42,7 +45,7 @@ const addToFavorites = async (userId, dishId) => {
     const favoriteData = {
       userId: new ObjectId(userId),
       dishId: new ObjectId(dishId),
-      createdAt: new Date() 
+      createdAt: new Date()
     }
     await GET_DB().collection(_COLLECTION_NAME).insertOne(favoriteData)
 
@@ -57,42 +60,62 @@ const addToFavorites = async (userId, dishId) => {
 }
 
 
-const viewFavorites = async (userId, sortBy = 'createdAt', order = 'asc') => {
+const viewFavorites = async (userId, paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
+    console.log('Model: viewFavorites', { userId, paginationParams })
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
 
-
-    const favorites = await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .aggregate([
-        { $match: { userId: new ObjectId(userId) } },
-        {
-          $lookup: {
-            from: 'dish',
-            localField: 'dishId',
-            foreignField: '_id',
-            as: 'dish'
+    const [data, totalCount] = await Promise.all([
+      GET_DB()
+        .collection(_COLLECTION_NAME)
+        .aggregate([
+          { $match: { userId: new ObjectId(userId) } },
+          {
+            $lookup: {
+              from: 'dish',
+              localField: 'dishId',
+              foreignField: '_id',
+              as: 'dish'
+            }
+          },
+          { $unwind: { path: '$dish', preserveNullAndEmptyArrays: true } },
+          { $sort: sortObject },
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              userId: { $toString: '$userId' },
+              dishId: { $toString: '$dishId' },
+              createdAt: { $toString: '$createdAt' },
+              dish: {
+                name: 1,
+                cookingTime: 1,
+                calorie: 1,
+                difficulty: 1,
+                description: 1,
+                imageUrl: 1,
+                isActive: 1,
+                createdAt: { $toString: '$dish.createdAt' },
+                updatedAt: { $toString: '$dish.updatedAt' }
+              }
+            }
           }
-        },
-        { $unwind: '$dish' },
-        { $sort: { [`dish.${sortBy}`]: sortOrder } },
-        {
-          $project: {
-            _id: 1,
-            userId: 1,
-            dishId: 1,
-            createdAt: 1,
-            dish: 1
-          }
-        }
-      ])
-      .toArray()
+        ])
+        .toArray(),
+      GET_DB()
+        .collection(_COLLECTION_NAME)
+        .countDocuments({ userId: new ObjectId(userId) })
+    ])
 
-    return favorites
+    console.log('viewFavorites result:', { data, totalCount })
+    return { data, totalCount }
   } catch (error) {
-    throw new Error(error)
+    console.error('Error in viewFavorites:', error)
+    throw error
   }
 }
+
 
 
 const deleteFromFavorites = async (userId, dishId) => {

@@ -32,7 +32,25 @@ const addToHistory = async (req, res, next) => {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
   }
 }
-
+const viewHistoryDetail = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    historyId: Joi.string()
+      .pattern(OBJECT_ID_RULE)
+      .message(OBJECT_ID_RULE_MESSAGE)
+      .required()
+  })
+  try {
+    await correctCondition.validateAsync(
+      {
+        historyId: req.params.historyId
+      },
+      { abortEarly: false }
+    )
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
+  }
+}
 const viewHistory = async (req, res, next) => {
   const correctCondition = Joi.object({
     userId: Joi.string()
@@ -150,12 +168,39 @@ const editHistory = async (req, res, next) => {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
   }
 }
-
+const getTotalCalories = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    userId: Joi.string()
+      .required()
+      .pattern(OBJECT_ID_RULE)
+      .message(OBJECT_ID_RULE_MESSAGE)
+      .trim()
+      .strict(),
+    date: Joi.date()
+      .iso()
+      .allow('')
+      .optional()
+  })
+  try {
+    await correctCondition.validateAsync(
+      {
+        userId: req.params.userId,
+        date: req.query.date
+      },
+      { abortEarly: false }
+    )
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
+  }
+}
 export const historyValidation = {
   addToHistory,
   viewHistory,
   searchByUserId,
   searchByDishId,
   deleteFromHistory,
-  editHistory
+  editHistory,
+  viewHistoryDetail,
+  getTotalCalories
 }

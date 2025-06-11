@@ -88,5 +88,5 @@ export const userController = {
   getAll,
   getDetails,
   activateUser,
-  deactivateUser
+  deactivateUser,
 }

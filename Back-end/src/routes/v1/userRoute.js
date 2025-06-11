@@ -1,6 +1,5 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
-
 import { userController } from '@/controllers/userController'
 import { userValidation } from '@/validations/userValidation'
 import { paginationHelper } from '@/utils/pagination'
@@ -234,5 +233,4 @@ Router.route('/').get(paginationHelper.validatePaginationMiddleware, userControl
 Router.route('/:id').get(userController.getDetails)
 Router.route('/:id/activate').patch(userController.activateUser)
 Router.route('/:id/deactivate').patch(userController.deactivateUser)
-
 export const userRoute = Router

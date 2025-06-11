@@ -145,5 +145,6 @@ export const userModel = {
   searchByEmail,
   searchByIsActive,
   getDetails,
-  updateIsActive
+  updateIsActive,
+  
 }
