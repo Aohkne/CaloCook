@@ -84,9 +84,25 @@ const deactivateUser = async (req, res, next) => {
   }
 }
 
+// lay so luong dish
+const getUserCount = async (req, res, next) => {
+  try {
+    const userCount = await userService.getUserCount()
+
+    res.status(StatusCodes.OK).json({
+      code: StatusCodes.OK,
+      message: 'User count retrieved successfully',
+      data: userCount
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const userController = {
   getAll,
   getDetails,
   activateUser,
   deactivateUser,
+  getUserCount
 }

@@ -136,6 +136,26 @@ const updateIsActive = async (userId, isActive) => {
     throw new Error(error)
   }
 }
+const findOne = async (filter) => {
+  return await GET_DB().collection(_COLLECTION_NAME).findOne(filter)
+}
+const findById = async (id) => {
+  return await GET_DB()
+    .collection(_COLLECTION_NAME)
+    .findOne({ _id: new ObjectId(id) })
+}
+const create = async (data) => {
+  return await GET_DB().collection(_COLLECTION_NAME).insertOne(data)
+}
+
+const updateOne = async (filter, updateDoc) => {
+  return await GET_DB().collection(_COLLECTION_NAME).updateOne(filter, updateDoc)
+}
+
+// dem so luong nguoi dung
+const countUsers = async (role) => {
+  return await GET_DB().collection(_COLLECTION_NAME).countDocuments({ role })
+}
 
 export const userModel = {
   _COLLECTION_NAME,
@@ -146,5 +166,9 @@ export const userModel = {
   searchByIsActive,
   getDetails,
   updateIsActive,
-  
+  findOne,
+  findById,
+  create,
+  updateOne,
+  countUsers
 }

@@ -7,4 +7,11 @@ export const env = {
   HOST: process.env.HOST,
   PORT: process.env.PORT,
   AUTHOR: process.env.AUTHOR,
+  UPSTASH_REDIS_URL: process.env.UPSTASH_REDIS_URL,
+  ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
+  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
+  YOUR_GOOGLE_CLIENT_ID: process.env.YOUR_GOOGLE_CLIENT_ID,
+  YOUR_GOOGLE_CLIENT_SECRET: process.env.YOUR_GOOGLE_CLIENT_SECRET,
+  GMAIL_USER: process.env.GMAIL_USER,
+  GMAIL_PASS: process.env.GMAIL_PASS
 }

@@ -8,6 +8,16 @@ export const swaggerOptions = {
       version: '1.0.0',
       description: 'Management'
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      }
+    },
+    security: [{ bearerAuth: [] }],
     servers: [
       {
         url: `http://localhost:${env.PORT || 8080}`,
