@@ -1,33 +1,23 @@
+<p align="center">
+  <img src="Front-end/app/src/assets/logo_word.png" alt="CaloCook Logo" />
+</p>
+
 # 🍳 CaloCook
-Track your daily calories through every homemade dish 
+
+Track your daily calories through every homemade dish
 
 ## 🎯 Overview
+
 **CaloCook** is an application that helps users track their daily calorie intake through home-cooked meals. Users can add dishes to their personal list based on pre-stored recipes. Each recipe includes an estimated calorie count. When users choose to prepare that dish, the application will automatically add the calories to the total calories consumed for the day. At the end of the day, the system will automatically reset to start a new cycle, making it easy for users to control and build a healthy diet.
 
 ## 📚 Documentation
+
 - **API Documentation**: Truy cập Swagger UI tại `http://localhost:8080/api-docs` khi server đang chạy
 - **Project Backlog**: [Google Sheets](https://docs.google.com/spreadsheets/d/1qZQSl7nGFBgQ8uewTWSyrrD1jEJE7PI_dfjwzR5SLhw/edit?usp=sharing) - Chi tiết các tính năng và task
-- **UI/UX Design**: [Figma](https://www.figma.com/design/jEj7bKpg4Smo76bZdOhn67/Diet?t=Ti6E9dWskcX1FDG0-0) - Mockup và design system  
+- **UI/UX Design**: [Figma](https://www.figma.com/design/jEj7bKpg4Smo76bZdOhn67/Diet?t=Ti6E9dWskcX1FDG0-0) - Mockup và design system
 - **Database Schema**: [DB Diagram](https://dbdiagram.io/d/CaloCook-Diagram-6846e9d49d13e984f7c73e68) - Thiết kế cơ sở dữ liệu
 - **Final Documentation**: [Google Docs](https://docs.google.com/document/d/1a32SBriBL02bUEA6Ysl-95G0fvPRHgltR84ZnlGxYxg/edit?usp=sharing) - Tài liệu tổng hợp dự án
-
-## 🛠️ Technology Stack
-
-### Backend
-| Technology | Description |
-|------------|-------------|
-| ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white) | JavaScript runtime for backend |
-| ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white) | Minimalist web framework |
-| ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white) | NoSQL document database |
-| ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black) | API documentation and testing |
-
-### Frontend
-| Technology | Description |
-|------------|-------------|
-| ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) | Cross-platform mobile framework for app |
-| ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white) | Fast build tool for web development |
-| ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) | JavaScript library for web UI |
-| ![Expo Go](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white) | Development platform for React Native |
+- **Setup & Support Guide**: [SUPPORT.md](./SUPPORT.md) - Hướng dẫn cài đặt và hỗ trợ chi tiết
 
 ## 📂 Project Structure
 
@@ -111,148 +101,29 @@ Track your daily calories through every homemade dish
         └── 📄 vite.config.js       # Cấu hình Vite
 ```
 
-## ⚙️ Environment Variables
+## ✨ Features
 
-### Backend (.env)
-```bash
-AUTHOR=''
-MONGODB_URI=''
-DATABASE_NAME=''
-HOST=''
-PORT=''
-```
+- 📱 **Cross-platform**: Web app và mobile app (iOS/Android)
+- 🍽️ **Recipe Management**: Quản lý công thức nấu ăn với thông tin dinh dưỡng
+- 📊 **Calorie Tracking**: Theo dõi lượng calo tiêu thụ hàng ngày
+- 🔄 **Auto Reset**: Tự động reset dữ liệu hàng ngày
+- 📝 **Personal Dish List**: Danh sách món ăn cá nhân hóa
+- 📈 **Progress Monitoring**: Theo dõi tiến trình ăn uống lành mạnh
 
-### Frontend App (.env)
-```bash
-# API Configuration
-API_BASE_URL=''
-API_TIMEOUT=''
+## 🚀 Quick Start
 
-# Environment
-NODE_ENV=''
-
-# Expo Configuration (if needed)
-EXPO_PUBLIC_API_URL=''
-```
-
-### Frontend Web (.env)
-```bash
-# API Configuration
-VITE_API_BASE_URL=''
-VITE_API_TIMEOUT=''
-
-# Environment
-VITE_NODE_ENV=''
-
-# Application Settings
-VITE_APP_NAME=''
-VITE_APP_VERSION=''
-```
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js (v16 hoặc cao hơn)
-- MongoDB
-- Expo CLI (cho mobile app)
-- npm hoặc yarn
-
-### Backend Setup
-1. Clone repository và di chuyển vào thư mục backend:
-```bash
-git clone https://github.com/Aohkne/CaloCook.git
-cd CaloCook/Back-end
-```
-
-2. Cài đặt dependencies:
-```bash
-npm install
-```
-
-3. Tạo file `.env` từ `.env.example` và cấu hình các biến môi trường:
-```bash
-cp .env.example .env
-```
-
-4. Khởi chạy server:
-```bash
-npm run dev
-```
-
-Server sẽ chạy trên `http://localhost:8080` và Swagger documentation tại `http://localhost:8080/api-docs`
-
-### Frontend Setup
-
-#### Mobile App (React Native)
-1. Di chuyển vào thư mục app:
-```bash
-cd Front-end/app
-```
-
-2. Cài đặt dependencies:
-```bash
-npm install
-```
-
-3. Tạo file `.env` từ `.env.example`:
-```bash
-cp .env.example .env
-```
-
-4. Khởi chạy app với Expo:
-```bash
-npx expo start
-```
-hoặc
-```bash
-npm start
-```
-
-App sẽ chạy trên Metro bundler. Địa chỉ chính xác sẽ được hiển thị trong terminal khi chạy lệnh `npm start` (thường là `exp://[YOUR_LOCAL_IP]:8081`)
-
-#### Web App (React + Vite)
-1. Di chuyển vào thư mục web:
-```bash
-cd Front-end/web
-```
-
-2. Cài đặt dependencies:
-```bash
-npm install
-```
-
-3. Tạo file `.env` từ `.env.example`:
-```bash
-cp .env.example .env
-```
-
-4. Khởi chạy development server:
-```bash
-npm run dev
-```
-
-Web app sẽ chạy trên `http://localhost:3000`
-
-## 🔗 Application URLs
-- **Backend API**: http://localhost:8080
-- **Swagger Documentation**: http://localhost:8080/api-docs
-- **Web Application**: http://localhost:3000
-- **Mobile App**: Metro bundler sẽ hiển thị địa chỉ (thường là exp://[YOUR_LOCAL_IP]:8081)
-
-
-
-
-## 🤝 Contributing
-1. Fork repository
-2. Tạo feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Mở Pull Request
+1. **Setup Backend & Frontend**: Xem chi tiết trong [SUPPORT.md](./SUPPORT.md)
+2. **Access Applications**:
+   - API Documentation: http://localhost:8080/api-docs
+   - Web App: http://localhost:3000
+   - Mobile App: Scan QR code từ Expo CLI
 
 ## 📄 License
+
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 👥 Team
+
 - **Backend Developers**:
   - Lê Hữu Khoa - CE181099
   - Nguyễn Gia Chấn - CE181288
@@ -265,11 +136,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
   - Nguyễn Trọng Quý - CE180596
 
 ## 📞 Contact
+
 - **Email**: aohkne@gmail.com
 - **GitHub**: https://github.com/Aohkne/CaloCook
 - **Project Repository**: https://github.com/Aohkne/CaloCook
+- **Support**: Xem [SUPPORT.md](./SUPPORT.md) để được hỗ trợ kỹ thuật
 
 ### 🌟 Star Us on GitHub!
+
 If you find this project useful, please consider giving it a star ⭐ on GitHub to help others discover it.
 
 [![GitHub stars](https://img.shields.io/github/stars/Aohkne/CaloCook?style=social)](https://github.com/Aohkne/CaloCook)
