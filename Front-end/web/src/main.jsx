@@ -4,12 +4,16 @@ import "./index.css";
 import App from "./App.jsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import UserManagementPage from "./pages/UserManagementPage.jsx";
+import DishManagementPage from "./pages/DishManagementPage.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    children: [{ path: "/users", element: <UserManagementPage /> }],
+    children: [
+      { path: "/users", element: <UserManagementPage /> },
+      { path: "/dishes", element: <DishManagementPage /> },
+    ],
   },
 ]);
 
