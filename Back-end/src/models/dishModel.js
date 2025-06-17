@@ -1,6 +1,5 @@
 import Joi from 'joi'
 import { GET_DB } from '@/config/mongodb'
-import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '@/utils/validators'
 import { ObjectId } from 'mongodb'
 
 // Define Collection (name & schema)
@@ -25,89 +24,113 @@ const _COLLECTION_SCHEMA = Joi.object({
   updatedAt: Joi.date().timestamp('javascript').default(Date.now)
 })
 
+// Sort object
+const createSortObject = (sortBy, order) => {
+  const sortOrder = order === 'asc' ? 1 : -1
+  return { [sortBy]: sortOrder }
+}
+
 // Handle
-const getAll = async (sortBy = 'createdAt', order = 'asc') => {
+const getAll = async (paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
-    return await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .find()
-      .sort({ [sortBy]: sortOrder })
-      .toArray()
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find().sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments()
+    ])
+
+    return { data, totalCount }
   } catch (error) {
     throw new Error(error)
   }
 }
 
-const searchByName = async (name, sortBy = 'createdAt', order = 'asc') => {
+const searchByName = async (name, paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
-    return await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .find({ name: { $regex: `^${name}`, $options: 'i' } }) // ^: bắt đầu + i: ko phân biệt hoa thường
-      .sort({ [sortBy]: sortOrder })
-      .toArray()
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+    const filter = { name: { $regex: `^${name}`, $options: 'i' } } // ^: bắt đầu + i: ko phân biệt hoa thường
+
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find(filter).sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments(filter)
+    ])
+
+    return { data, totalCount }
   } catch (error) {
     throw new Error(error)
   }
 }
 
-const searchByCookingTime = async (condition = {}, sortBy = 'createdAt', order = 'asc') => {
+const searchByCookingTime = async (condition, paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+    const filter = { cookingTime: condition }
 
-    return await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .find({ cookingTime: condition })
-      .sort({ [sortBy]: sortOrder })
-      .toArray()
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find(filter).sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments(filter)
+    ])
+
+    return { data, totalCount }
   } catch (error) {
     throw new Error(error)
   }
 }
 
-const searchByCalorie = async (condition = {}, sortBy = 'createdAt', order = 'asc') => {
+const searchByCalorie = async (condition, paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+    const filter = { calorie: condition }
 
-    return await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .find({ calorie: condition })
-      .sort({ [sortBy]: sortOrder })
-      .toArray()
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find(filter).sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments(filter)
+    ])
+
+    return { data, totalCount }
   } catch (error) {
     throw new Error(error)
   }
 }
 
-const searchByDifficulty = async (difficultyQuery, sortBy = 'createdAt', order = 'asc') => {
+const searchByDifficulty = async (difficultyQuery, paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+    const filter = { difficulty: difficultyQuery }
 
-    return await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .find({ difficulty: difficultyQuery })
-      .sort({ [sortBy]: sortOrder })
-      .toArray()
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find(filter).sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments(filter)
+    ])
+
+    return { data, totalCount }
   } catch (error) {
     throw new Error(error)
   }
 }
 
-const searchByIsActive = async (isActive, sortBy = 'createdAt', order = 'asc') => {
+const searchByIsActive = async (isActive, paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
 
     const filter = {}
     if (isActive !== undefined) {
       filter.isActive = isActive === 'true'
     }
 
-    return await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .find(filter)
-      .sort({ [sortBy]: sortOrder })
-      .toArray()
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find(filter).sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments(filter)
+    ])
+
+    return { data, totalCount }
   } catch (error) {
     throw new Error(error)
   }
@@ -157,6 +180,15 @@ const updateIsActive = async (dishId, isActive) => {
   }
 }
 
+// lay so luong dish
+const countDish = async () => {
+  try {
+    return await GET_DB().collection(_COLLECTION_NAME).countDocuments()
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const dishModel = {
   _COLLECTION_NAME,
   _COLLECTION_SCHEMA,
@@ -169,5 +201,6 @@ export const dishModel = {
   getDetails,
   createNew,
   updateDish,
-  updateIsActive
+  updateIsActive,
+  countDish
 }

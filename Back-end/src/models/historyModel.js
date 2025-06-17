@@ -69,7 +69,51 @@ const addToHistory = async ({ userId, dishId }) => {
     throw error
   }
 }
-
+const viewHistoryDetail = async (historyId) => {
+  try {
+    console.log('Model: viewHistoryDetail', { historyId })
+    const history = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .aggregate([
+        { $match: { _id: new ObjectId(historyId) } },
+        {
+          $lookup: {
+            from: 'dish',
+            localField: 'dishId',
+            foreignField: '_id',
+            as: 'dish'
+          }
+           },
+        { $unwind: { path: '$dish', preserveNullAndEmptyArrays: true } },
+        {
+          $project: {
+            userId: { $toString: '$userId' },
+            dishId: { $toString: '$dishId' },
+            consumedAt: { $toString: '$consumedAt' },
+            createdAt: { $toString: '$createdAt' },
+            updatedAt: { $toString: '$updatedAt' },
+            dish: {
+               name: 1,
+              cookingTime: 1,
+              calorie: 1,
+              difficulty: 1,
+              description: 1,
+              imageUrl: 1,
+              isActive: 1,
+              createdAt: { $toString: '$dish.createdAt' },
+              updatedAt: { $toString: '$dish.updatedAt' }
+            }
+          }
+        }
+      ])
+      .toArray()
+       console.log('viewHistoryDetail result:', history)
+    return history.length > 0 ? history[0] : null
+  } catch (error) {
+    console.error('Error in viewHistoryDetail:', error)
+    throw error
+  }
+}
 const searchByUserId = async (userId) => {
   try {
     const histories = await GET_DB()
@@ -130,13 +174,72 @@ const editHistory = async ({ historyId, consumedAt }) => {
     throw error;
   }
 }
+const getTotalCaloriesByDate = async (userId, date) => {
+  try {
+    console.log('Model: getTotalCaloriesByDate', { userId, date })
+    const startOfDay = new Date(date)
+    startOfDay.setHours(0, 0, 0, 0)
+    const endOfDay = new Date(date)
+    endOfDay.setHours(23, 59, 59, 999)
+const result = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .aggregate([
+        {
+          $match: {
+            userId: new ObjectId(userId),
+            consumedAt: {
+              $gte: startOfDay,
+              $lte: endOfDay
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: 'dish',
+            localField: 'dishId',
+            foreignField: '_id',
+            as: 'dish'
+          }
+        },
+        { $unwind: '$dish' },
+        {
+           $group: {
+            _id: null,
+            totalCalories: { $sum: '$dish.calorie' },
+            dishes: {
+              $push: {
+                dishId: { $toString: '$dishId' },
+                name: '$dish.name',
+                calorie: '$dish.calorie',
+                eatenAt: { $toString: '$consumedAt' }
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            totalCalories: 1,
+            dishes: 1
+          }
+        }
+      ])
+      .toArray()
 
-
+    console.log('getTotalCaloriesByDate result:', result)
+    return result.length > 0 ? result[0] : { totalCalories: 0, dishes: [] }
+    } catch (error) {
+    console.error('Error in getTotalCaloriesByDate:', error)
+    throw error
+  }
+}
 export const historyModel = {
   viewHistory,
   addToHistory,
   searchByUserId,
   searchByDishId,
   deleteFromHistory,
-  editHistory
+  editHistory,
+  viewHistoryDetail,
+  getTotalCaloriesByDate
 }

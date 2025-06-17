@@ -332,6 +332,118 @@ const Router = express.Router()
  *                       type: string
  *                       format: date-time
  *                       example: "2025-06-06T23:00:00.000Z"
+ * /api/v1/history/{historyId}/detail:
+ *   get:
+ *     summary: View details of a specific history record
+ *     tags: [history]
+ *     parameters:
+ *       - in: path
+ *         name: historyId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: History ID
+ *     responses:
+ *       200:
+ *         description: History details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: History details retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+  *                       type: string
+ *                     dishId:
+ *                       type: string
+ *                     consumedAt:
+ *                       type: string
+ *                     createdAt:
+ *                       type: string
+ *                     updatedAt:
+ *                       type: string
+ *                     dish:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                         cookingTime:
+ *                           type: number
+ *                         calorie:
+ *                           type: number
+ *                         difficulty:
+ *                           type: string
+ *                         description:
+ *                           type: string
+ *                         imageUrl:
+ *                           type: string
+ *                         isActive:
+ *                           type: boolean
+ *                         createdAt:
+ *                           type: string
+ *                         updatedAt:
+ *                           type: string
+ *       400:
+ *         description: Invalid historyId  
+ * /api/v1/history/{userId}/total-calories:
+ *   get:
+ *     summary: View total calories consumed by a user on a specific date
+ *     tags: [history]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: User ID
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: date
+ *           example: "2025-06-10"
+ *         description: Date to calculate total calories (defaults to today)
+ *     responses:
+ *       200:
+ *         description: History retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: History retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalCalories:
+ *                       type: number
+ *                       example: 1200
+ *                     dishes:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           dishId:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           calorie:
+ *                             type: number
+ *                           eatenAt:
+ *                             type: string   
  */
 
 Router.route('/:userId/history')
@@ -347,5 +459,8 @@ Router.route('/dish/:dishId')
 Router.route('/:historyId')
   .delete(historyValidation.deleteFromHistory, historyController.deleteFromHistory)
   .put(historyValidation.editHistory, historyController.editHistory)
-
+Router.route('/:historyId/detail')
+  .get(historyValidation.viewHistoryDetail, historyController.viewHistoryDetail)
+  Router.route('/:userId/total-calories')
+  .get(historyValidation.getTotalCalories, historyController.getTotalCalories)
 export const historyRoute = Router

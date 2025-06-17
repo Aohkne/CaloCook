@@ -37,60 +37,79 @@ const _COLLECTION_SCHEMA = Joi.object({
   updatedAt: Joi.date().timestamp('javascript').default(Date.now)
 })
 
+// Sort object
+const createSortObject = (sortBy, order) => {
+  const sortOrder = order === 'asc' ? 1 : -1
+  return { [sortBy]: sortOrder }
+}
+
 // Handle
-const getAll = async (sortBy = 'createdAt', order = 'asc') => {
+const getAll = async (paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
-    return await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .find()
-      .sort({ [sortBy]: sortOrder })
-      .toArray()
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find().sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments()
+    ])
+
+    return { data, totalCount }
   } catch (error) {
     throw new Error(error)
   }
 }
 
-const searchByUsername = async (username, sortBy = 'createdAt', order = 'asc') => {
+const searchByUsername = async (username, paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
-    return await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .find({ username: { $regex: `^${username}`, $options: 'i' } }) // ^: bắt đầu + i: ko phân biệt hoa thường
-      .sort({ [sortBy]: sortOrder })
-      .toArray()
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+    const filter = { username: { $regex: `^${username}`, $options: 'i' } } // ^: bắt đầu + i: ko phân biệt hoa thường
+
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find(filter).sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments(filter)
+    ])
+
+    return { data, totalCount }
   } catch (error) {
     throw new Error(error)
   }
 }
 
-const searchByEmail = async (email, sortBy = 'createdAt', order = 'asc') => {
+const searchByEmail = async (email, paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
-    return await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .find({ email: { $regex: `^${email}`, $options: 'i' } })
-      .sort({ [sortBy]: sortOrder })
-      .toArray()
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+    const filter = { email: { $regex: `^${email}`, $options: 'i' } }
+
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find(filter).sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments(filter)
+    ])
+
+    return { data, totalCount }
   } catch (error) {
     throw new Error(error)
   }
 }
 
-const searchByIsActive = async (isActive, sortBy = 'createdAt', order = 'asc') => {
+const searchByIsActive = async (isActive, paginationParams) => {
   try {
-    const sortOrder = order === 'asc' ? 1 : -1
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
 
     const filter = {}
     if (isActive !== undefined) {
       filter.isActive = isActive === 'true'
     }
 
-    return await GET_DB()
-      .collection(_COLLECTION_NAME)
-      .find(filter)
-      .sort({ [sortBy]: sortOrder })
-      .toArray()
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find(filter).sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments(filter)
+    ])
+
+    return { data, totalCount }
   } catch (error) {
     throw new Error(error)
   }
@@ -117,6 +136,26 @@ const updateIsActive = async (userId, isActive) => {
     throw new Error(error)
   }
 }
+const findOne = async (filter) => {
+  return await GET_DB().collection(_COLLECTION_NAME).findOne(filter)
+}
+const findById = async (id) => {
+  return await GET_DB()
+    .collection(_COLLECTION_NAME)
+    .findOne({ _id: new ObjectId(id) })
+}
+const create = async (data) => {
+  return await GET_DB().collection(_COLLECTION_NAME).insertOne(data)
+}
+
+const updateOne = async (filter, updateDoc) => {
+  return await GET_DB().collection(_COLLECTION_NAME).updateOne(filter, updateDoc)
+}
+
+// dem so luong nguoi dung
+const countUsers = async (role) => {
+  return await GET_DB().collection(_COLLECTION_NAME).countDocuments({ role })
+}
 
 export const userModel = {
   _COLLECTION_NAME,
@@ -126,5 +165,10 @@ export const userModel = {
   searchByEmail,
   searchByIsActive,
   getDetails,
-  updateIsActive
+  updateIsActive,
+  findOne,
+  findById,
+  create,
+  updateOne,
+  countUsers
 }

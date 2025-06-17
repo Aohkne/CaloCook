@@ -1,14 +1,17 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet } from "react-native";
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet } from 'react-native';
 
-import { ThemeProvider } from "@contexts/ThemeProvider";
+import { ThemeProvider } from '@contexts/ThemeProvider';
 
-import LoginScreen from "@auth/LoginScreen";
+import { NavigationContainer } from '@react-navigation/native';
+import StackNavigator from '@navigations/StackNavigator';
 
 export default function App() {
   return (
     <ThemeProvider>
-      <LoginScreen />
+      <NavigationContainer>
+        <StackNavigator />
+      </NavigationContainer>
     </ThemeProvider>
   );
 }
@@ -16,8 +19,8 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
 });

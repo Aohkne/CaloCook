@@ -33,6 +33,20 @@ const viewHistory = async (req, res, next) => {
         next(error)
     }
 }
+const viewHistoryDetail = async (req, res, next) => {
+  try {
+    const { historyId } = req.params
+    console.log('Controller: viewHistoryDetail', { historyId })
+    const history = await historyService.viewHistoryDetail(historyId)
+    res.status(StatusCodes.OK).json({
+      code: StatusCodes.OK,
+      message: 'History details retrieved successfully',
+      data: history
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 
 const searchByUserId = async (req, res, next) => {
     try {
@@ -97,13 +111,27 @@ const editHistory = async (req, res, next) => {
         next(error)
     }
 }
-
-
+const getTotalCalories = async (req, res, next) => {
+  try {
+    const { userId } = req.params
+    const { date } = req.query
+    const result = await historyService.getTotalCalories(userId, date)
+    res.status(StatusCodes.OK).json({
+ statusCode: StatusCodes.OK,
+      message: 'History retrieved successfully',
+      data: result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 export const historyController = {
     addToHistory,
     viewHistory,
     searchByUserId,
     searchByDishId,
     deleteFromHistory,
-    editHistory
+    editHistory,
+    viewHistoryDetail,
+    getTotalCalories
 }

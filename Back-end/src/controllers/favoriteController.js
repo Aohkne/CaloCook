@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import { favoriteService } from '@/services/favoriteService'
-
+import { paginationHelper } from '@/utils/pagination'
 const addToFavorites = async (req, res, next) => {
   try {
     const userId = req.params.userId
@@ -20,21 +20,23 @@ const addToFavorites = async (req, res, next) => {
 
 const viewFavorites = async (req, res, next) => {
   try {
-    const userId = req.params.userId
-    const { sortBy, order } = req.query
+    const { userId } = req.params
+    const paginationParams = req.pagination
+    console.log('Controller: viewFavorites', { userId, paginationParams })
 
-    const favorites = await favoriteService.viewFavorites(userId, sortBy, order)
+    const result = await favoriteService.viewFavorites(userId, paginationParams)
+    const response = paginationHelper.formatPaginatedResponse(
+      'Get successful',
+      result.totalCount,
+      paginationParams,
+      result.data
+    )
 
-    res.status(StatusCodes.OK).json({
-      code: StatusCodes.OK,
-      message: 'Favorites retrieved successfully',
-      data: favorites
-    })
+    res.status(StatusCodes.OK).json(response)
   } catch (error) {
     next(error)
   }
 }
-
 const deleteFromFavorites = async (req, res, next) => {
   try {
     const userId = req.params.userId

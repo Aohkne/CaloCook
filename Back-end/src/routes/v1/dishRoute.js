@@ -1,8 +1,9 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
 
-import { dishController } from '@/controllers/dishController'
+import { paginationHelper } from '@/utils/pagination'
 import { dishValidation } from '@/validations/dishValidation'
+import { dishController } from '@/controllers/dishController'
 
 const Router = express.Router()
 
@@ -10,9 +11,42 @@ const Router = express.Router()
  * @swagger
  * /api/v1/dish:
  *   get:
- *     summary: Get all dishes (with optional filters and sorting)
+ *     summary: Get all dishes (with optional filters, sorting and pagination)
  *     tags: [dish]
  *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         required: false
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         required: false
+ *         description: Number of items per page (max 100)
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [name, cookingTime, calorie, createdAt]
+ *           default: createdAt
+ *         required: false
+ *         description: Field to sort by
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: asc
+ *         required: false
+ *         description: Sort order (asc for ascending, desc for descending)
  *       - in: query
  *         name: name
  *         schema:
@@ -59,23 +93,9 @@ const Router = express.Router()
  *           type: boolean
  *         required: false
  *         description: Filter dishes by active status (true or false)
- *       - in: query
- *         name: sortBy
- *         schema:
- *           type: string
- *           enum: [name, cookingTime, calorie, createdAt]
- *         required: false
- *         description: Field to sort by (e.g. name, calorie, createdAt)
- *       - in: query
- *         name: order
- *         schema:
- *           type: string
- *           enum: [asc, desc]
- *         required: false
- *         description: asc for ascending, desc for descending
  *     responses:
  *       200:
- *         description: Return list of dishes
+ *         description: Return paginated list of dishes
  *         content:
  *           application/json:
  *             schema:
@@ -87,10 +107,38 @@ const Router = express.Router()
  *                 message:
  *                   type: string
  *                   example: "Get successful"
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: number
+ *                       example: 1
+ *                     totalPages:
+ *                       type: number
+ *                       example: 5
+ *                     totalItems:
+ *                       type: number
+ *                       example: 50
+ *                     itemsPerPage:
+ *                       type: number
+ *                       example: 10
+ *                     hasNextPage:
+ *                       type: boolean
+ *                       example: true
+ *                     hasPrevPage:
+ *                       type: boolean
+ *                       example: false
+ *                     nextPage:
+ *                       type: number
+ *                       example: 2
+ *                     prevPage:
+ *                       type: number
+ *                       example: null
  *                 data:
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Dish'
+
  *   post:
  *     summary: Create a new dish
  *     tags: [dish]
@@ -344,7 +392,9 @@ const Router = express.Router()
  *           example: "2025-05-29T08:00:00.000Z"
  */
 
-Router.route('/').get(dishController.getAll).post(dishValidation.createNew, dishController.createNew)
+Router.route('/')
+  .get(paginationHelper.validatePaginationMiddleware, dishController.getAll)
+  .post(dishValidation.createNew, dishController.createNew)
 Router.route('/:id').get(dishController.getDetails).put(dishValidation.updateDish, dishController.updateDish)
 Router.route('/:id/activate').patch(dishController.activateDish)
 Router.route('/:id/deactivate').patch(dishController.deactivateDish)

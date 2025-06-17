@@ -4,51 +4,65 @@ import ApiError from '@/utils/ApiError'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '@/utils/validators'
 
 const addToFavorites = async (req, res, next) => {
-    const correctCondition = Joi.object({
-        userId: Joi.string()
-            .pattern(OBJECT_ID_RULE)
-            .message(OBJECT_ID_RULE_MESSAGE)
-            .required()
-            .messages({
-                'any.required': 'userId is required',
-                'string.empty': 'userId is not allowed to be empty'
-            }),
-        dishId: Joi.string()
-            .pattern(OBJECT_ID_RULE)
-            .message(OBJECT_ID_RULE_MESSAGE)
-            .required()
-            .messages({
-                'any.required': 'dishId is required',
-                'string.empty': 'dishId is not allowed to be empty'
-            })
-    })
-    try {
-        await correctCondition.validateAsync(
-            { userId: req.params.userId, dishId: req.body.dishId },
-            { abortEarly: false }
-        )
-        next()
-    } catch (error) {
-        next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
-    }
-    
+  const correctCondition = Joi.object({
+    userId: Joi.string()
+      .pattern(OBJECT_ID_RULE)
+      .message(OBJECT_ID_RULE_MESSAGE)
+      .required(),
+    dishId: Joi.string()
+      .pattern(OBJECT_ID_RULE)
+      .message(OBJECT_ID_RULE_MESSAGE)
+      .required()
+  })
+  try {
+    await correctCondition.validateAsync(
+      {
+        userId: req.params.userId,
+        dishId: req.body.dishId
+      },
+      { abortEarly: false }
+    )
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
+  }
 }
+
 const viewFavorites = async (req, res, next) => {
   const correctCondition = Joi.object({
     userId: Joi.string()
       .pattern(OBJECT_ID_RULE)
       .message(OBJECT_ID_RULE_MESSAGE)
-      .required()
-      .messages({
-        'any.required': 'userId is required',
-        'string.empty': 'userId is not allowed to be empty'
-      }),
-    sortBy: Joi.string().valid('createdAt', 'name', 'cookingTime', 'calorie', 'difficulty').default('createdAt'),
-    order: Joi.string().valid('asc', 'desc').default('asc')
+      .required(),
+    page: Joi.number()
+      .integer()
+      .min(1)
+      .default(1)
+      .optional(),
+    limit: Joi.number()
+      .integer()
+      .min(1)
+      .max(100)
+      .default(10)
+      .optional(),
+    sortBy: Joi.string()
+      .valid('createdAt', 'name', 'cookingTime', 'calorie', 'difficulty')
+      .default('createdAt')
+      .optional(),
+    order: Joi.string()
+      .valid('asc', 'desc')
+      .default('asc')
+      .optional()
   })
-   try {
+  try {
     await correctCondition.validateAsync(
-      { userId: req.params.userId, ...req.query },
+      {
+        userId: req.params.userId,
+        page: req.query.page,
+        limit: req.query.limit,
+        sortBy: req.query.sortBy,
+        order: req.query.order
+      },
       { abortEarly: false }
     )
     next()
@@ -56,28 +70,24 @@ const viewFavorites = async (req, res, next) => {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
   }
 }
+
 const deleteFromFavorites = async (req, res, next) => {
   const correctCondition = Joi.object({
     userId: Joi.string()
       .pattern(OBJECT_ID_RULE)
       .message(OBJECT_ID_RULE_MESSAGE)
-      .required()
-      .messages({
-        'any.required': 'userId is required',
-        'string.empty': 'userId is not allowed to be empty'
-      }),
-       dishId: Joi.string()
+      .required(),
+    dishId: Joi.string()
       .pattern(OBJECT_ID_RULE)
       .message(OBJECT_ID_RULE_MESSAGE)
       .required()
-      .messages({
-        'any.required': 'dishId is required',
-        'string.empty': 'dishId is not allowed to be empty'
-      })
   })
   try {
     await correctCondition.validateAsync(
-      { userId: req.params.userId, dishId: req.params.dishId },
+      {
+        userId: req.params.userId,
+        dishId: req.params.dishId
+      },
       { abortEarly: false }
     )
     next()
@@ -85,6 +95,7 @@ const deleteFromFavorites = async (req, res, next) => {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))
   }
 }
+
 export const favoriteValidation = {
   addToFavorites,
   viewFavorites,

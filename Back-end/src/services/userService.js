@@ -1,18 +1,17 @@
 import { userModel } from '@/models/userModel'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
-
-const getAll = async (sortBy, order) => {
+const getAll = async (paginationParams) => {
   try {
-    return await userModel.getAll(sortBy, order)
+    return await userModel.getAll(paginationParams)
   } catch (error) {
     throw error
   }
 }
 
-const searchByUsername = async (username, sortBy, order) => {
+const searchByUsername = async (username, paginationParams) => {
   try {
-    const user = await userModel.searchByUsername(username, sortBy, order)
+    const user = await userModel.searchByUsername(username, paginationParams)
     if (!user || user.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
     }
@@ -22,9 +21,9 @@ const searchByUsername = async (username, sortBy, order) => {
   }
 }
 
-const searchByEmail = async (email, sortBy, order) => {
+const searchByEmail = async (email, paginationParams) => {
   try {
-    const user = await userModel.searchByEmail(email, sortBy, order)
+    const user = await userModel.searchByEmail(email, paginationParams)
     if (!user || user.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
     }
@@ -34,9 +33,9 @@ const searchByEmail = async (email, sortBy, order) => {
   }
 }
 
-const searchByIsActive = async (isActive, sortBy, order) => {
+const searchByIsActive = async (isActive, paginationParams) => {
   try {
-    const user = await userModel.searchByIsActive(isActive, sortBy, order)
+    const user = await userModel.searchByIsActive(isActive, paginationParams)
     if (!user || user.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
     }
@@ -84,6 +83,38 @@ const deactivateUser = async (userId) => {
   }
 }
 
+//lay so luong có role bang user
+const getUserCount = async () => {
+  try {
+    const count = await userModel.countUsers('user')
+    return count
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching user count')
+  }
+}
+
+export const getUserProfile = async (userId) => {
+  const user = await userModel.findById(userId)
+  if (!user) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'User not found')
+  }
+
+  return {
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    calorieLimit: user.calorieLimit,
+    avatarUrl: user.avatarUrl,
+    gender: user.gender,
+    dob: user.dob,
+    height: user.height,
+    weight: user.weight,
+    createdAt: user.created_at,
+    isActive: user.is_active
+  }
+}
+
 export const userService = {
   getAll,
   searchByUsername,
@@ -91,5 +122,7 @@ export const userService = {
   searchByIsActive,
   getDetails,
   activateUser,
-  deactivateUser
+  deactivateUser,
+  getUserProfile,
+  getUserCount
 }
