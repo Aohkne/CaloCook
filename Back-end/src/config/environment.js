@@ -13,5 +13,6 @@ export const env = {
   YOUR_GOOGLE_CLIENT_ID: process.env.YOUR_GOOGLE_CLIENT_ID,
   YOUR_GOOGLE_CLIENT_SECRET: process.env.YOUR_GOOGLE_CLIENT_SECRET,
   GMAIL_USER: process.env.GMAIL_USER,
-  GMAIL_PASS: process.env.GMAIL_PASS
+  GMAIL_PASS: process.env.GMAIL_PASS,
+  DISPLAY_HOST: process.env.DISPLAY_HOST
 }

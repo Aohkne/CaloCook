@@ -1,8 +1,139 @@
 import { Space, Table } from "antd";
 import { Ban, Check, Edit2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getAllUsers } from "../api/User";
-
+const users = [
+  {
+    _id: {
+      $oid: "68306f4d4928f3fe108df627",
+    },
+    email: "nguyenvana@example.com",
+    password_hash: "$2b$10$abcdefghij1234567890mnopqrstuv",
+    role: "admin",
+    username: "nguyenvana",
+    calorieLimit: 2200,
+    avatar_url: "",
+    gender: "male",
+    dob: "1990-05-01",
+    height: 170,
+    weight: 65,
+    isActive: true,
+    createdAt: {
+      $date: "2025-05-23T07:00:00.000Z",
+    },
+    updatedAt: {
+      $date: "2025-05-23T07:00:00.000Z",
+    },
+  },
+  {
+    _id: {
+      $oid: "68306f4d4928f3fe108df628",
+    },
+    email: "tranthib@example.com",
+    password_hash: "$2b$10$klmnopqrstuv1234567890abcdefghij",
+    role: "user",
+    username: "tranthib",
+    calorieLimit: 1800,
+    avatar_url: "",
+    gender: "female",
+    dob: "1995-07-20",
+    height: 160,
+    weight: 50,
+    isActive: true,
+    createdAt: {
+      $date: "2025-05-24T07:00:00.000Z",
+    },
+    updatedAt: {
+      $date: "2025-05-24T07:00:00.000Z",
+    },
+  },
+  {
+    _id: {
+      $oid: "68306f4d4928f3fe108df629",
+    },
+    email: "lecuong@example.com",
+    password_hash: "$2b$10$1234567890abcdefghijklmnpqrstuv",
+    role: "user",
+    username: "lecuong",
+    calorieLimit: 2000,
+    avatar_url: "",
+    gender: "male",
+    dob: "1992-09-15",
+    height: 175,
+    weight: 70,
+    isActive: false,
+    createdAt: {
+      $date: "2025-05-25T07:00:00.000Z",
+    },
+    updatedAt: {
+      $date: "2025-05-25T07:00:00.000Z",
+    },
+  },
+  {
+    _id: {
+      $oid: "68306f4d4928f3fe108df62a",
+    },
+    email: "phamthi@example.com",
+    password_hash: "$2b$10$mnopqrstuvabcdefghij1234567890",
+    role: "user",
+    username: "phamthi",
+    calorieLimit: 2100,
+    avatar_url: "",
+    gender: "female",
+    dob: "1988-12-10",
+    height: 158,
+    weight: 55,
+    isActive: true,
+    createdAt: {
+      $date: "2025-05-26T07:00:00.000Z",
+    },
+    updatedAt: {
+      $date: "2025-05-26T07:00:00.000Z",
+    },
+  },
+  {
+    _id: {
+      $oid: "68306f4d4928f3fe108df62b",
+    },
+    email: "doanh@example.com",
+    password_hash: "$2b$10$abcdefghijklmnopqrstuv1234567890",
+    role: "user",
+    username: "doanhuuanh",
+    calorieLimit: 1900,
+    avatar_url: "",
+    gender: "male",
+    dob: "1993-03-30",
+    height: 172,
+    weight: 68,
+    isActive: false,
+    createdAt: {
+      $date: "2025-05-27T07:00:00.000Z",
+    },
+    updatedAt: {
+      $date: "2025-05-27T07:00:00.000Z",
+    },
+  },
+  {
+    _id: {
+      $oid: "68306f4d4928f3fe108d",
+    },
+    email: "doanh@example.com",
+    password_hash: "$2b$10$abcdefghijklmnopqrstuv1234567890",
+    role: "user",
+    username: "doanhuuanh",
+    calorieLimit: 1900,
+    avatar_url: "",
+    gender: "male",
+    dob: "1993-03-30",
+    height: 172,
+    weight: 68,
+    isActive: false,
+    createdAt: {
+      $date: "2025-05-27T07:00:00.000Z",
+    },
+    updatedAt: {
+      $date: "2025-05-27T07:00:00.000Z",
+    },
+  },
+];
 const columns = [
   {
     title: "Username",
@@ -96,20 +227,11 @@ const columns = [
   },
 ];
 
-export default function UserTable({
+export default function DishTable({
   tabs,
   searchText = "",
   roleFilter = "all",
 }) {
-  const [users, setUsers] = useState([]);
-  useEffect(() => {
-    const fetchData = async () => {
-      const user = await getAllUsers();
-      if (user) setUsers(user.data);
-    };
-
-    fetchData();
-  }, []);
   // Filter users by isActive
   let filteredUsers = users;
   if (tabs === "Active") {
@@ -136,7 +258,7 @@ export default function UserTable({
   // Adding a key variable to each user its value is taken from _id
   const dataSource = filteredUsers.map((user) => ({
     ...user,
-    key: user._id,
+    key: user._id.$oid,
   }));
   return (
     <Table

@@ -1,16 +1,33 @@
 import { useNavigation } from '@react-navigation/native';
-import { Eye, EyeClosed } from 'lucide-react-native';
+import { ChevronLeft, Eye, EyeClosed } from 'lucide-react-native';
 import { useState } from 'react';
 import { Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-export default function LoginScreen() {
+export default function SignUpScreen() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigation = useNavigation();
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
   };
+  const handleShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FCFAF3', alignItems: 'center' }}>
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          top: 50,
+          left: 20,
+          flexDirection: 'row',
+          alignItems: 'center'
+        }}
+        onPress={() => navigation.navigate('Login')}
+      >
+        <ChevronLeft color={'#006955'} />
+        <Text style={{ fontSize: 14, color: '#006955', fontWeight: 600 }}>Back to Login</Text>
+      </TouchableOpacity>
       <View style={styles.container}>
         <Image style={styles.logo} source={require('@assets/login/logo-removebg-preview 2.png')} />
         <Text style={[styles.bigText, { marginBottom: 10 }]}>Create a meal plan on the go</Text>
@@ -19,12 +36,17 @@ export default function LoginScreen() {
         </Text>
         <TextInput
           style={[styles.input, { marginBottom: 10 }]}
-          placeholder='Email or Username'
+          placeholder='Email'
+          placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+        />
+        <TextInput
+          style={[styles.input, { marginBottom: 10 }]}
+          placeholder='Username'
           placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
         />
         <View style={{ position: 'relative' }}>
           <TextInput
-            style={[styles.input, { paddingRight: 50 }]}
+            style={[styles.input, { paddingRight: 50, marginBottom: 10 }]}
             placeholder='Password'
             placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
             secureTextEntry={!showPassword}
@@ -34,7 +56,7 @@ export default function LoginScreen() {
               style={{
                 position: 'absolute',
                 right: 15,
-                top: '50%',
+                top: '40%',
                 transform: [{ translateY: '-50%' }]
               }}
               color='black'
@@ -46,7 +68,7 @@ export default function LoginScreen() {
               style={{
                 position: 'absolute',
                 right: 15,
-                top: '50%',
+                top: '40%',
                 transform: [{ translateY: '-50%' }]
               }}
               color='black'
@@ -55,20 +77,47 @@ export default function LoginScreen() {
             />
           )}
         </View>
+        <View style={{ position: 'relative' }}>
+          <TextInput
+            style={[styles.input, { paddingRight: 50, marginBottom: 10 }]}
+            placeholder='Confirm Password'
+            placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+            secureTextEntry={!showConfirmPassword}
+          />
+          {showConfirmPassword ? (
+            <Eye
+              style={{
+                position: 'absolute',
+                right: 15,
+                top: '40%',
+                transform: [{ translateY: '-50%' }]
+              }}
+              color='black'
+              size={24}
+              onPress={handleShowConfirmPassword}
+            />
+          ) : (
+            <EyeClosed
+              style={{
+                position: 'absolute',
+                right: 15,
+                top: '40%',
+                transform: [{ translateY: '-50%' }]
+              }}
+              color='black'
+              size={24}
+              onPress={handleShowConfirmPassword}
+            />
+          )}
+        </View>
         <View
           style={{
             alignItems: 'flex-end',
             width: '100%'
           }}
-        >
-          <Text onPress={() => navigation.navigate('ForgotPassword')} style={styles.forgotPassword}>
-            Forgot Password
-          </Text>
-        </View>
-        <TouchableOpacity style={styles.button}>
-          <Text onPress={() => navigation.navigate('MainTabs')} style={styles.buttonText}>
-            Login
-          </Text>
+        ></View>
+        <TouchableOpacity style={[styles.button, { marginTop: 10 }]}>
+          <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
         <View style={styles.lineContainer}>
           <View style={styles.line}></View>
@@ -78,18 +127,6 @@ export default function LoginScreen() {
         <TouchableOpacity style={styles.googleButton}>
           <Text style={styles.googleButtonText}>Google</Text>
         </TouchableOpacity>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <Text style={styles.smallText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-            <Text style={styles.link}>Sign Up</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </SafeAreaView>
   );
@@ -114,6 +151,7 @@ const styles = StyleSheet.create({
   smallText: {
     fontSize: 16,
     color: 'rgba(8, 14, 45, 0.6)',
+    width: 343,
     textAlign: 'center'
   },
   input: {
@@ -125,7 +163,6 @@ const styles = StyleSheet.create({
     height: 51,
     paddingHorizontal: 10
   },
-  forgotPassword: { fontSize: 13, color: '#006955', marginVertical: 10 },
   button: {
     backgroundColor: '#006955',
     width: 343,
