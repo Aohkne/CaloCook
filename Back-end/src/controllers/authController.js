@@ -3,18 +3,19 @@ import { env } from '@/config/environment'
 import { redis } from '@/config/redis.js'
 import { ObjectId } from 'mongodb'
 import { userModel as User } from '@/models/userModel.js'
-import { getUserProfile } from '@/services/userService.js'
+import { authService as Auth } from '@/services/authService.js'
+import { userService } from '@/services/userService.js'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import sendEmail from '@/utils/sendEmail.js'
 
 // 1. Tạo access và refresh token
 const generateTokens = (userId) => {
-  const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
+  const accessToken = jwt.sign({ userId }, env.ACCESS_TOKEN_SECRET, {
     expiresIn: '30m'
   })
 
-  const refreshToken = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, {
+  const refreshToken = jwt.sign({ userId }, env.REFRESH_TOKEN_SECRET, {
     expiresIn: '365d'
   })
 
@@ -55,7 +56,7 @@ const signup = async (req, res) => {
       password_hash: hashedPassword,
       role: 'user', // default role
       calorieLimit: 2000,
-      avatarUrl: 'none', // default avatar
+      avatarUrl: 'https://res.cloudinary.com/di6lwnmsm/image/upload/v1749722514/products/qp3q2dkrfm9cbzfc0kut.jpg', // default avatar
       gender: 'male',
       dob: null,
       height: null, // cm
@@ -258,21 +259,8 @@ export const resetPassword = async (req, res) => {
 }
 
 // 8. Change password - not implemented yet
-export const changePassword = async (req, res) => {
+const changePassword = async (req, res) => {
   try {
-    //lấy userId từ access token trong AsyncStorage
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Authorization header missing or malformed' })
-    }
-    const token = authHeader.split(' ')[1]
-    let decoded
-    try {
-      decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET)
-    } catch (err) {
-      return res.status(401).json({ message: 'Invalid or expired token' })
-    }
-    const userId = decoded.userId
     const { oldPassword, newPassword } = req.body
 
     if (!oldPassword || !newPassword) {
@@ -282,22 +270,7 @@ export const changePassword = async (req, res) => {
     if (oldPassword === newPassword) {
       return res.status(400).json({ message: 'New password must be different from old password' })
     }
-
-    const user = await User.findById(userId)
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' })
-    }
-
-    const isMatch = await bcrypt.compare(oldPassword, user.password_hash)
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Old password is incorrect' })
-    }
-
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10)
-    await User.updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { password_hash: hashedNewPassword, updatedAt: new Date() } }
-    )
+    await Auth.changePasswordService(req.user._id, oldPassword, newPassword)
 
     res.json({ message: 'Password changed successfully' })
   } catch (error) {
@@ -307,26 +280,9 @@ export const changePassword = async (req, res) => {
 }
 
 // 9. Get Profile - not implemented yet
-export const getProfile = async (req, res) => {
+const getProfile = async (req, res) => {
   try {
-    //lấy userId từ access token trong AsyncStorage
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Authorization header missing or malformed' })
-    }
-    const token = authHeader.split(' ')[1]
-    let decoded
-    try {
-      decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) // Verify the token
-    } catch (err) {
-      return res.status(401).json({ message: 'Invalid or expired token' })
-    }
-    const userId = decoded.userId
-    const userProfile = await getUserProfile(userId)
-    if (!userProfile) {
-      return res.status(404).json({ message: 'User not found' })
-    }
-    res.json(userProfile)
+    res.json(req.user)
   } catch (error) {
     console.error('getProfile error:', error.message)
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -336,47 +292,12 @@ export const getProfile = async (req, res) => {
 // 10. Edit Profile - not implemented yet
 export const editProfile = async (req, res) => {
   try {
-    //lấy userId từ access token trong AsyncStorage
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Authorization header missing or malformed' })
-    }
-    const token = authHeader.split(' ')[1]
-    let decoded
-    try {
-      decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) // Verify the token
-    } catch (err) {
-      return res.status(401).json({ message: 'Invalid or expired token' })
-    }
-
-    // Lấy userId từ decoded token
-    const userId = decoded.userId
-    // console.log('User ID from token:', userId)
-
-    const { username, email, calorieLimit, avatarUrl, gender, dob, height, weight } = req.body
-
-    const user = await User.findById(userId)
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' })
-    }
-
-    await User.updateOne(
-      { _id: new ObjectId(userId) },
-      {
-        $set: {
-          username: username,
-          email: email,
-          calorieLimit: calorieLimit,
-          avatarUrl: avatarUrl,
-          gender: gender,
-          dob: dob,
-          height: height,
-          weight: weight,
-          updatedAt: new Date()
-        }
-      }
-    )
+    // const { username, email, calorieLimit, avatarUrl, gender, dob, height, weight } = req.body
+    const profileData = req.body
+    // console.log('Profile data:', profileData)
+    const userId = req.user._id // req.user là user đã được xác thực từ middleware
+    // console.log('User ID:', userId)
+    await userService.editProfileService(userId, profileData)
 
     res.json({ message: 'Profile updated successfully' })
   } catch (error) {
