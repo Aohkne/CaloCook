@@ -319,6 +319,9 @@ export default function TabNavigator() {
   );
 }
 
+
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

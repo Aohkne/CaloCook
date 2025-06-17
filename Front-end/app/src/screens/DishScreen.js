@@ -31,7 +31,7 @@ export default function DishScreen({ navigation }) {
     },
     {
       id: 3,
-      name: 'VEGGIE SCRAMBLE',
+      name: 'VEGGIE CULE',
       time: '15 min',
       calories: '180 kcal',
       difficulty: 'Hard',
