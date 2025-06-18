@@ -39,6 +39,18 @@
 │ ├── 📄 package.json # Các gói phụ thuộc và script
 │ └── 📄 package-lock.json # Phiên bản phụ thuộc được khóa
 │
-├── 📁 web/
-
+├── 📁 web/ # Trang web quản lí người dùng cho Admin sử dụng React Vite
+│ ├── 📁 node_modules/ # Các gói đã cài đặt cho web
+│ ├── 📁 public/ # Thư mục chứa các tệp tĩnh cho web
+│ ├── 📁 src/ # Mã nguồn của ứng dụng web
+│ │ ├── 📁 assets/ # Hình ảnh, phông chữ và các tệp tĩnh khác
+│ │ ├── 📁 components/ # Các thành phần UI có thể tái sử dụng
+│ │ └── 📁 pages/ # Dùng để lưu trữ các trang
+| |
+│ ├── 📄 .gitignore # Quy tắc bỏ qua của Git
+│ ├── 📄 eslint.config.js # Cấu hình ESLint cho dự án web
+│ ├── 📄 index.html # Điểm bắt đầu của React Vite
+│ ├── 📄 package.json # Các gói phụ thuộc và script
+│ ├── 📄 package-lock.json # Phiên bản phụ thuộc được khóa
+│ └── 📄 vite.config.js # Cấu hình Vite cho dự án web
 ```
