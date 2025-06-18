@@ -1,11 +1,14 @@
 import jwt from 'jsonwebtoken'
+import { StatusCodes } from 'http-status-codes'
 import { userModel as User } from '@/models/userModel'
 import { env } from '@/config/environment'
 
-export const authenticateUser = async (req, res, next) => {
+const authenticateUser = async (req, res, next) => {
   const authHeader = req.headers.authorization
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Authorization header missing or malformed' })
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ message: 'Unauthorized: Authorization header missing or malformed' })
   }
   const token = authHeader.split(' ')[1]
   try {
@@ -13,7 +16,7 @@ export const authenticateUser = async (req, res, next) => {
     const userId = decoded.userId
     // console.log('userId:', userId, typeof userId)
     if (!userId) {
-      return res.status(401).json({ message: 'Invalid token payload' })
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Unauthorized: Invalid token or user not found' })
     }
     const user = await User.findById(userId)
     // console.log('user:', user)
@@ -25,15 +28,19 @@ export const authenticateUser = async (req, res, next) => {
     next()
   } catch (err) {
     console.error('JWT verify error:', err)
-    return res.status(401).json({ message: 'Invalid or expired token' })
+    return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Unauthorized: Invalid token' })
   }
 }
 
-export const authorizeRole = (roles) => {
+const authorizeRole = (roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Forbidden: Insufficient permissions' })
+      return res.status(StatusCodes.FORBIDDEN).json({ message: 'Forbidden: Insufficient permissions' })
     }
     next()
   }
+}
+export const authMiddleware = {
+  authenticateUser,
+  authorizeRole
 }

@@ -7,6 +7,7 @@ import { authService as Auth } from '@/services/authService.js'
 import { userService } from '@/services/userService.js'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
+import { StatusCodes } from 'http-status-codes'
 import sendEmail from '@/utils/sendEmail.js'
 
 // 1. Tạo access và refresh token
@@ -33,17 +34,17 @@ const signup = async (req, res) => {
   try {
     // console.log('Signup request:', { username, email, password })
     if (!email || !password || !username) {
-      return res.status(400).json({ message: 'Missing required fields' })
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Email, password and username are required' })
     }
     // Kiểm tra tồn tại
     const existingEmail = await User.findOne({ email })
     if (existingEmail) {
-      return res.status(400).json({ message: 'Email was exists' })
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Email already exists' })
     }
 
     const existingUsername = await User.findOne({ username })
     if (existingUsername) {
-      return res.status(400).json({ message: 'Username was exists' })
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Username already exists' })
     }
 
     // Hash password
@@ -95,14 +96,14 @@ const login = async (req, res) => {
     })
 
     if (!user) {
-      return res.status(400).json({ message: 'Invalid email/username or password' })
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid email/username or password' })
     }
 
     const isMatch = await bcrypt.compare(password, user.password_hash)
     // console.log('Password match:', isMatch)
 
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email/username or password' })
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid email/username or password' })
     }
     const { accessToken, refreshToken } = generateTokens(user._id)
     // console.log('Generated tokens:', { accessToken, refreshToken })
@@ -119,7 +120,7 @@ const login = async (req, res) => {
     })
   } catch (error) {
     console.error('Login error:', error.message)
-    res.status(500).json({ message: 'Internal server error' })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' })
   }
 }
 
@@ -129,14 +130,14 @@ const refreshToken = async (req, res) => {
     const { refreshToken } = req.body
     // console.log('Refresh token request:', { refreshToken })
     if (!refreshToken) {
-      return res.status(401).json({ message: 'No refresh token provided' })
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'No refresh token provided' })
     }
 
     const decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET)
     const storedToken = await redis.get(`refresh_token:${decoded.userId}`)
 
     if (!storedToken || storedToken !== refreshToken) {
-      return res.status(403).json({ message: 'Invalid or expired refresh token' })
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Invalid or expired refresh token' })
     }
 
     const newAccessToken = jwt.sign({ userId: decoded.userId }, env.ACCESS_TOKEN_SECRET, {
@@ -146,7 +147,7 @@ const refreshToken = async (req, res) => {
     res.json({ accessToken: newAccessToken })
   } catch (error) {
     console.error('Refresh token error:', error.message)
-    res.status(403).json({ message: 'Invalid or expired refresh token' })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' })
   }
 }
 
@@ -160,7 +161,7 @@ const logout = async (req, res) => {
     const refreshToken = req.body.refreshToken
 
     // console.log('Refresh token request:', { refreshToken })
-    if (!refreshToken) return res.status(400).json({ message: 'No refresh token provided' })
+    if (!refreshToken) return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'No refresh token provided' })
 
     const decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET)
     await redis.del(`refresh_token:${decoded.userId}`)
@@ -168,7 +169,7 @@ const logout = async (req, res) => {
     res.json({ message: 'Logged out successfully' })
   } catch (error) {
     console.error('Logout error:', error.message)
-    res.status(500).json({ message: 'Logout failed', error: error.message })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' })
   }
 }
 
@@ -180,7 +181,7 @@ export const forgotPassword = async (req, res) => {
     // console.log(email)
     const user = await User.findOne({ email })
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
     }
 
     // Tạo token và hash
@@ -202,7 +203,7 @@ export const forgotPassword = async (req, res) => {
     res.json({ message: 'Email đặt lại mật khẩu đã được gửi' })
   } catch (err) {
     console.error('forgotPassword error:', err)
-    res.status(500).json({ message: 'Server error', error: err.message })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: err.message })
   }
 }
 // 7. Reset password - not implemented yet
@@ -264,18 +265,18 @@ const changePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body
 
     if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: 'Old password and new password are required' })
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Old password and new password are required' })
     }
     // mật khẩu mới phải khác mật khẩu cũ
     if (oldPassword === newPassword) {
-      return res.status(400).json({ message: 'New password must be different from old password' })
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'New password must be different from old password' })
     }
     await Auth.changePasswordService(req.user._id, oldPassword, newPassword)
 
     res.json({ message: 'Password changed successfully' })
   } catch (error) {
     console.error('changePassword error:', error.message)
-    res.status(500).json({ message: 'Server error', error: error.message })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: error.message })
   }
 }
 
@@ -285,7 +286,7 @@ const getProfile = async (req, res) => {
     res.json(req.user)
   } catch (error) {
     console.error('getProfile error:', error.message)
-    res.status(500).json({ message: 'Server error', error: error.message })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: error.message })
   }
 }
 
@@ -302,7 +303,7 @@ export const editProfile = async (req, res) => {
     res.json({ message: 'Profile updated successfully' })
   } catch (error) {
     console.error('editProfile error:', error.message)
-    res.status(500).json({ message: 'Server error', error: error.message })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: error.message })
   }
 }
 

@@ -134,7 +134,7 @@ const editProfileService = async (userId, profileData) => {
     }
   )
 
-  if (result.modifiedCount === 0) throw new Error('Update failed')
+  if (result.modifiedCount === 0) throw new ApiError(StatusCodes.NOT_FOUND, 'User not found or no changes made')
   return true
 }
 export const userService = {
