@@ -1,10 +1,10 @@
-import { StatusBar } from 'expo-status-bar'
-import { StyleSheet } from 'react-native'
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet } from 'react-native';
 
-import { ThemeProvider } from '@contexts/ThemeProvider'
+import { ThemeProvider } from '@contexts/ThemeProvider';
 
-import { NavigationContainer } from '@react-navigation/native'
-import StackNavigator from '@navigations/StackNavigator'
+import { NavigationContainer } from '@react-navigation/native';
+import StackNavigator from '@navigations/StackNavigator';
 
 export default function App() {
   return (
@@ -13,7 +13,7 @@ export default function App() {
         <StackNavigator />
       </NavigationContainer>
     </ThemeProvider>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -23,4 +23,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   }
-})
+});

@@ -30,8 +30,8 @@ const START_SERVER = () => {
   app.use(errorHandlingMiddleware)
 
   app.listen(env.PORT, env.HOST, () => {
-    console.log(`Hello ${env.AUTHOR}, Server is running at http://${env.HOST}:${env.PORT}/`)
-    console.log(`Swagger is running at http://${env.HOST}:${env.PORT}/api-docs`)
+    console.log(`Hello ${env.AUTHOR}, Server is running at http://${env.DISPLAY_HOST}:${env.PORT}/`)
+    console.log(`Swagger is running at http://${env.DISPLAY_HOST}:${env.PORT}/api-docs`)
   })
 
   // CLEAN UP
