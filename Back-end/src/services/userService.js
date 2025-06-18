@@ -1,6 +1,7 @@
 import { userModel } from '@/models/userModel'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
+import { ObjectId } from 'mongodb'
 const getAll = async (paginationParams) => {
   try {
     return await userModel.getAll(paginationParams)
@@ -93,7 +94,7 @@ const getUserCount = async () => {
   }
 }
 
-export const getUserProfile = async (userId) => {
+const getUserProfile = async (userId) => {
   const user = await userModel.findById(userId)
   if (!user) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'User not found')
@@ -114,7 +115,28 @@ export const getUserProfile = async (userId) => {
     isActive: user.is_active
   }
 }
+const editProfileService = async (userId, profileData) => {
+  
+  const result = await userModel.updateOne(
+    { _id: new ObjectId(userId) },
+    {
+      $set: {
+        username: profileData.username,
+        email: profileData.email,
+        calorieLimit: profileData.calorieLimit,
+        avatarUrl: profileData.avatarUrl,
+        gender: profileData.gender,
+        dob: profileData.dob,
+        height: profileData.height,
+        weight: profileData.weight,
+        updatedAt: new Date()
+      }
+    }
+  )
 
+  if (result.modifiedCount === 0) throw new ApiError(StatusCodes.NOT_FOUND, 'User not found or no changes made')
+  return true
+}
 export const userService = {
   getAll,
   searchByUsername,
@@ -124,5 +146,6 @@ export const userService = {
   activateUser,
   deactivateUser,
   getUserProfile,
-  getUserCount
+  getUserCount,
+  editProfileService
 }
