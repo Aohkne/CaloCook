@@ -1,6 +1,7 @@
 /* eslint-disable no-console*/
 
 import express from 'express'
+import cors from 'cors'
 import exitHook from 'async-exit-hook'
 
 import swaggerJSDoc from 'swagger-jsdoc'
@@ -17,8 +18,11 @@ const START_SERVER = () => {
   const app = express()
   const swaggerSpec = swaggerJSDoc(swaggerOptions)
 
+  // CORS
+  app.use(cors())
+
   // Enable req.body json data
-  app.use(express.json({ limit: '10mb' })) // Giới hạn kích thước JSON là 10MB
+  app.use(express.json({ limit: '10mb' }))
 
   // API V1
   app.use('/api/v1', APIs_V1)
