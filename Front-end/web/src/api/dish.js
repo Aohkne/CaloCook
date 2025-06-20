@@ -1,12 +1,8 @@
 import api from "./api";
 
-export async function getAllDish(page = 1, limit = 10) {
-  console.log(123);
-
+export async function getAllDish() {
   try {
-    const response = await api.get("/dish", {
-      params: { page, limit },
-    });
+    const response = await api.get("/dish");
 
     return response.data;
   } catch (error) {

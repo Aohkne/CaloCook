@@ -1,100 +1,7 @@
-import { Space, Table } from "antd";
+import { Popconfirm, Space, Table } from "antd";
 import { Ban, Check, Edit2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getAllUsers } from "../api/User";
-
-const columns = [
-  {
-    title: "Username",
-    dataIndex: "username",
-    filterSearch: true,
-    key: "username",
-    render: (text) => (
-      <Space>
-        <a>{text}</a>
-      </Space>
-    ),
-  },
-  {
-    title: "Email",
-    dataIndex: "email",
-    key: "email",
-    render: (text) => (
-      <Space>
-        <p>{text}</p>
-      </Space>
-    ),
-  },
-  {
-    title: "Role",
-    dataIndex: "role",
-    key: "email",
-    render: (text) => {
-      return text === "admin" ? (
-        <Space>
-          <p className=" bg-amber-50 text-amber-600 border border-amber-400 px-1 rounded-md">
-            {text}
-          </p>
-        </Space>
-      ) : (
-        <Space>
-          <p className="bg-gray-50 text-gray-600 border border-gray-400 px-1 rounded-md">
-            {text}
-          </p>
-        </Space>
-      );
-    },
-  },
-  {
-    title: "Status",
-    dataIndex: "isActive",
-    key: "status",
-    render: (text) => {
-      return text === true ? (
-        <Space>
-          <p className="bg-green-50 text-green-600 border border-green-500 px-1 rounded-md">
-            Active
-          </p>
-        </Space>
-      ) : (
-        <Space>
-          <p className=" bg-red-50 text-red-600 border border-red-400 px-1 rounded-md">
-            Banned
-          </p>
-        </Space>
-      );
-    },
-  },
-  {
-    title: "Action",
-    dataIndex: "isActive",
-    key: "ban",
-    render: (text) => {
-      return (
-        <Space>
-          {text === true ? (
-            <Space>
-              <button className="hover:cursor-pointer">
-                <Ban size={16} color="red" />
-              </button>
-            </Space>
-          ) : (
-            <Space>
-              <button className="hover:cursor-pointer">
-                <Check size={16} color="green" />
-              </button>
-            </Space>
-          )}
-          <Space>
-            <button className="hover:cursor-pointer">
-              <Edit2 size={16} color="gray" />
-            </button>
-          </Space>
-        </Space>
-      );
-    },
-  },
-];
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { activateUser, deactivateUser, getUser } from "../api/user";
 
 export default function UserTable({
   tabs,
@@ -102,48 +9,166 @@ export default function UserTable({
   roleFilter = "all",
 }) {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Move fetchData outside useEffect so it can be called elsewhere
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    let params = {};
+    if (tabs === "Active") params.isActive = true;
+    else if (tabs === "Banned") params.isActive = false;
+    if (searchText) {
+      params.username = searchText;
+      params.email = searchText;
+    }
+    const response = await getUser(params);
+    if (response) setUsers(response.data);
+    else setUsers([]);
+    setLoading(false);
+  }, [tabs, searchText]);
+
   useEffect(() => {
-    const fetchData = async () => {
-      const user = await getAllUsers();
-      if (user) setUsers(user.data);
-    };
-
     fetchData();
-  }, []);
-  // Filter users by isActive
-  let filteredUsers = users;
-  if (tabs === "Active") {
-    filteredUsers = users.filter((user) => user.isActive);
-  } else if (tabs === "Banned") {
-    filteredUsers = users.filter((user) => !user.isActive);
-  }
+  }, [fetchData]);
 
-  // Filter by role
-  if (roleFilter !== "all") {
-    filteredUsers = filteredUsers.filter((user) => user.role === roleFilter);
-  }
+  const handleActivate = useCallback(
+    async ({ id }) => {
+      await activateUser({ id });
+      fetchData();
+    },
+    [fetchData]
+  );
 
-  // Filter by search text (username or email)
-  if (searchText.trim() !== "") {
-    const lower = searchText.toLowerCase();
-    filteredUsers = filteredUsers.filter(
-      (user) =>
-        user.username.toLowerCase().includes(lower) ||
-        user.email.toLowerCase().includes(lower)
-    );
-  }
-
-  // Adding a key variable to each user its value is taken from _id
-  const dataSource = filteredUsers.map((user) => ({
+  const handleDeactivate = useCallback(
+    async ({ id }) => {
+      await deactivateUser({ id });
+      fetchData();
+    },
+    [fetchData]
+  );
+  const columns = useMemo(
+    () => [
+      {
+        title: "Username",
+        dataIndex: "username",
+        filterSearch: true,
+        key: "username",
+        sorter: (a, b) => a.username.localeCompare(b.username),
+        render: (text) => (
+          <Space>
+            <a>{text}</a>
+          </Space>
+        ),
+      },
+      {
+        title: "Email",
+        dataIndex: "email",
+        key: "email",
+        sorter: (a, b) => a.email.localeCompare(b.email),
+        render: (text) => (
+          <Space>
+            <p>{text}</p>
+          </Space>
+        ),
+      },
+      {
+        title: "Role",
+        dataIndex: "role",
+        key: "email",
+        render: (text) => {
+          return text === "admin" ? (
+            <Space>
+              <p className=" bg-amber-50 text-amber-600 border border-amber-400 px-1 rounded-md">
+                {text}
+              </p>
+            </Space>
+          ) : (
+            <Space>
+              <p className="bg-gray-50 text-gray-600 border border-gray-400 px-1 rounded-md">
+                {text}
+              </p>
+            </Space>
+          );
+        },
+      },
+      {
+        title: "Status",
+        dataIndex: "isActive",
+        key: "status",
+        render: (text) => {
+          return text === true ? (
+            <Space>
+              <p className="bg-green-50 text-green-600 border border-green-500 px-1 rounded-md">
+                Active
+              </p>
+            </Space>
+          ) : (
+            <Space>
+              <p className=" bg-red-50 text-red-600 border border-red-400 px-1 rounded-md">
+                Banned
+              </p>
+            </Space>
+          );
+        },
+      },
+      {
+        title: "Action",
+        dataIndex: "isActive",
+        key: "ban",
+        render: (text, record) => {
+          return (
+            <Space>
+              {text === true ? (
+                <Popconfirm
+                  title="Are you sure you want to deactivate this user?"
+                  onConfirm={async () =>
+                    await handleDeactivate({ id: record._id })
+                  }
+                  okText="Yes"
+                  cancelText="Cancel"
+                >
+                  <button className="hover:cursor-pointer">
+                    <Ban size={16} color="red" />
+                  </button>
+                </Popconfirm>
+              ) : (
+                <Popconfirm
+                  title="Are you sure you want to activate this user?"
+                  onConfirm={async () =>
+                    await handleActivate({ id: record._id })
+                  }
+                  okText="Yes"
+                  cancelText="Cancel"
+                >
+                  <button className="hover:cursor-pointer">
+                    <Check size={16} color="green" />
+                  </button>
+                </Popconfirm>
+              )}
+              <Space>
+                <button className="hover:cursor-pointer">
+                  <Edit2 size={16} color="gray" />
+                </button>
+              </Space>
+            </Space>
+          );
+        },
+      },
+    ],
+    [handleActivate, handleDeactivate]
+  );
+  const dataSource = users.map((user) => ({
     ...user,
     key: user._id,
   }));
+
   return (
     <Table
       className="border border-gray-300 rounded-md overflow-x-auto select-none"
       columns={columns}
       dataSource={dataSource}
       pagination={{ pageSize: 5 }}
+      loading={loading}
     />
   );
 }
