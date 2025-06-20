@@ -18,6 +18,8 @@
     "@babel/runtime": "^7.27.1",
     "async-exit-hook": "^2.0.1",
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.4.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "google-auth-library": "^9.15.1",
@@ -27,7 +29,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.16.0",
     "nodemailer": "^7.0.2",
-    "cloudinary": "^2.4.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },
