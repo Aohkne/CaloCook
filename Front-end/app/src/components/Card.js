@@ -22,8 +22,8 @@ export default function Card({ dish, onHeartPress, onCardPress }) {
                 >
                     <Heart
                         size={28}
-                        color={dish.isLiked ? '#FF69B4' : '#FF69B4'}
-                        fill={dish.isLiked ? '#FF69B4' : 'none'}
+                        color={colors.red}
+                        fill={dish.isLiked ? colors.red : 'none'}
                     />
                 </Pressable>
             </View>
@@ -34,19 +34,19 @@ export default function Card({ dish, onHeartPress, onCardPress }) {
                 <View style={styles.dishMeta}>
                     <View style={styles.metaItem}>
 
-                        <Clock size={14} color={colors.textSecondary} />
-                        <Text style={styles.metaText}>{dish.time}</Text>
+                        <Clock size={14} color={colors.description} />
+                        <Text style={styles.title}>{dish.time}</Text>
                     </View>
 
                     <View style={styles.metaItem}>
-                        <Flame size={14} color={colors.textSecondary} />
-                        <Text style={styles.metaText}>{dish.calories}</Text>
+                        <Flame size={14} color={colors.description} />
+                        <Text style={styles.title}>{dish.calories}</Text>
                     </View>
 
                     {dish.difficulty && (
                         <View style={styles.metaItem}>
-                            <ChefHat size={14} color={colors.textSecondary} />
-                            <Text style={styles.metaText}>{dish.difficulty}</Text>
+                            <ChefHat size={14} color={colors.description} />
+                            <Text style={styles.title}>{dish.difficulty}</Text>
                         </View>
                     )}
                 </View>
@@ -130,7 +130,7 @@ const createStyles = (colors) =>
         },
         ingredients: {
             fontSize: 12,
-            color: colors.textSecondary || '#666',
+            color: colors.description || '#666',
             lineHeight: 18,
             textAlign: 'center',
             paddingHorizontal: 4,

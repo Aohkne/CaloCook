@@ -106,8 +106,8 @@ export default function Detail({ route, navigation }) {
                 >
                     <Heart
                         size={28}
-                        color={isLiked ? '#FF69B4' : '#FF69B4'}
-                        fill={isLiked ? '#FF69B4' : 'none'}
+                        color={colors.red}
+                        fill={isLiked ? colors.red : 'none'}
                     />
                 </TouchableOpacity>
             </View>
@@ -128,17 +128,17 @@ export default function Detail({ route, navigation }) {
                     {/* Meta Information */}
                     <View style={styles.metaContainer}>
                         <View style={styles.metaItem}>
-                            <Clock size={16} color={colors.textSecondary} />
+                            <Clock size={16} color={colors.description} />
                             <Text style={styles.metaText}>{dishDetails.time}</Text>
                         </View>
 
                         <View style={styles.metaItem}>
-                            <Flame size={16} color={colors.textSecondary} />
+                            <Flame size={16} color={colors.description} />
                             <Text style={styles.metaText}>{dishDetails.calories}</Text>
                         </View>
 
                         <View style={styles.metaItem}>
-                            <ChefHat size={16} color={colors.textSecondary} />
+                            <ChefHat size={16} color={colors.description} />
                             <Text style={styles.metaText}>{dishDetails.difficulty}</Text>
                         </View>
                     </View>
@@ -260,7 +260,7 @@ const createStyles = (colors) =>
         sectionTitle: {
             fontSize: 18,
             fontWeight: '600',
-            color: colors.text,
+            color: colors.title,
             marginBottom: 12,
         },
         description: {

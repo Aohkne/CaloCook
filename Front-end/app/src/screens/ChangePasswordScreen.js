@@ -85,15 +85,15 @@ export default function ChangePasswordScreen({ navigation }) {
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
-                {/* Security Icon */}
-                <View style={styles.iconContainer}>
-                    <View style={styles.securityIcon}>
-                        <ShieldCheck size={48} color="#006955" />
-                    </View>
-                </View>
-
                 {/* Form Container */}
                 <View style={styles.formContainer}>
+                    {/* Security Icon */}
+                    <View style={styles.iconContainer}>
+                        <View style={styles.securityIcon}>
+                            <ShieldCheck size={48} color={colors.secondary} />
+                        </View>
+                    </View>
+
                     <Text style={styles.subtitle}>
                         To secure your account, please enter your current password and new password
                     </Text>
@@ -270,9 +270,23 @@ const createStyles = (colors) =>
             flex: 1,
             paddingHorizontal: 20,
         },
+        formContainer: {
+            backgroundColor: '#FFFFFF',
+            borderRadius: 20,
+            padding: 24,
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 3,
+            marginBottom: 20,
+        },
         iconContainer: {
             alignItems: 'center',
-            marginBottom: 30,
+            marginBottom: 20,
         },
         securityIcon: {
             width: 80,
@@ -289,20 +303,6 @@ const createStyles = (colors) =>
             shadowOpacity: 0.1,
             shadowRadius: 8,
             elevation: 4,
-        },
-        formContainer: {
-            backgroundColor: '#FFFFFF',
-            borderRadius: 20,
-            padding: 24,
-            shadowColor: '#000',
-            shadowOffset: {
-                width: 0,
-                height: 2,
-            },
-            shadowOpacity: 0.1,
-            shadowRadius: 8,
-            elevation: 3,
-            marginBottom: 20,
         },
         subtitle: {
             fontSize: 14,
@@ -362,7 +362,7 @@ const createStyles = (colors) =>
         },
         changeButton: {
             flexDirection: 'row',
-            backgroundColor: '#006955',
+            backgroundColor: colors.secondary,
             borderRadius: 12,
             paddingVertical: 16,
             paddingHorizontal: 24,
@@ -408,8 +408,3 @@ const createStyles = (colors) =>
             lineHeight: 16,
         },
     })
-
-
-
-
-

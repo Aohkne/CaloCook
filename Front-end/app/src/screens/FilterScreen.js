@@ -255,9 +255,6 @@ export default function FilterScreen({ navigation }) {
             ]}>
                 {ingredient}
             </Text>
-            {isSelected && (
-                <X size={16} color="#fff" style={styles.closeIcon} />
-            )}
         </TouchableOpacity>
     )
 
@@ -445,8 +442,8 @@ const createStyles = (colors) =>
             borderColor: colors.border || '#E5E5E5',
         },
         ingredientTagSelected: {
-            backgroundColor: colors.secondary || '#00B894',
-            borderColor: colors.secondary || '#00B894',
+            backgroundColor: colors.secondary,
+            borderColor: colors.secondary,
         },
         ingredientText: {
             fontSize: 14,
@@ -474,8 +471,8 @@ const createStyles = (colors) =>
             alignItems: 'center',
         },
         difficultyButtonSelected: {
-            backgroundColor: colors.secondary || '#00B894',
-            borderColor: colors.secondary || '#00B894',
+            backgroundColor: colors.secondary,
+            borderColor: colors.secondary,
         },
         difficultyText: {
             fontSize: 14,
@@ -513,7 +510,7 @@ const createStyles = (colors) =>
         sliderRange: {
             position: 'absolute',
             height: 4,
-            backgroundColor: colors.secondary || '#00B894',
+            backgroundColor: colors.secondary,
             borderRadius: 2,
             top: 0,
         },
@@ -521,7 +518,7 @@ const createStyles = (colors) =>
             position: 'absolute',
             width: 20,
             height: 20,
-            backgroundColor: colors.secondary || '#00B894',
+            backgroundColor: colors.secondary,
             borderRadius: 10,
             top: -8,
             shadowColor: '#000',
@@ -546,7 +543,7 @@ const createStyles = (colors) =>
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: colors.secondary || '#00B894',
+            backgroundColor: colors.secondary,
             paddingVertical: 16,
             borderRadius: 12,
             gap: 8,
