@@ -1,0 +1,48 @@
+@startuml SortIngredient
+
+actor "Admin" as Admin
+boundary "IngredientListPage" as View #lightblue
+participant ":ingredientRoute" as Route #lightblue
+control "ingredientController" as Controller #lightblue
+participant ":ingredientService" as Service #lightblue
+entity "ingredientModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Sort Ingredients by Dish ID
+Admin -> View: 1. Select sort for specific dish ingredients
+activate View
+View -> Route: 2. GET /api/v1/ingredient/by-dish/:dishId?sortBy=createdAt&order=asc
+activate Route
+
+Route -> Controller: 3. getDetailsByDishId(req, res)
+activate Controller
+
+Controller -> Service: 4. getDetailsByDishId(dishId, sortBy, order)
+activate Service
+
+Service -> Model: 5. getDetailsByDishId(dishId, sortBy, order)
+activate Model
+
+Model -> MongoDB: 6. Query ingredients by dishId with sort
+activate MongoDB
+
+MongoDB --> Model: 7. Return sorted ingredients for dish
+deactivate MongoDB
+
+Model --> Service: 8. Return sorted dish ingredients
+deactivate Model
+
+Service --> Controller: 9. Return sorted dish ingredients
+deactivate Service
+
+Controller --> Route: 10. Send JSON response (200, sorted dish ingredients)
+deactivate Controller
+
+Route --> View: 11. Render sorted dish ingredients
+deactivate Route
+
+View --> Admin: 12. Display sorted ingredients for dish
+deactivate View
+end
+
+@enduml

@@ -1,0 +1,120 @@
+@startuml CreateIngredient
+
+actor "Admin" as Admin
+boundary "DishDetailPage" as View #lightblue
+participant ":ingredientRoute" as Route #lightblue
+control "ingredientValidation" as Validation #yellow
+control "ingredientController" as Controller #lightblue
+participant ":ingredientService" as Service #lightblue
+entity "dishModel" as DishModel #lightgreen
+entity "ingredientModel" as IngredientModel #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Create New Ingredient
+
+Admin -> View: 1. Click "Add Ingredient" button
+activate View
+
+View -> Admin: 2. Show ingredient form (dishId, name, quantity, isActive)
+
+Admin -> View: 3. Fill form and submit
+View -> Route: 4. POST /api/v1/ingredient
+activate Route
+
+note right of Route: Body: {\n  dishId: "66574e301a6d1f001e8a1c01",\n  name: "Garlic powder",\n  quantity: "1 tsp",\n  isActive: true\n}
+
+Route -> Validation: 5. ingredientValidation.createNew(req, res, next)
+activate Validation
+
+note right of Validation: Validate using Joi:\n- dishId: required, 24 chars hex\n- name: required, 1-100 chars\n- quantity: required, 1-50 chars\n- isActive: boolean, default true
+
+alt Validation Success
+    Validation -> Controller: 6. next() - validation passed
+    deactivate Validation
+    
+    activate Controller
+    Controller -> Service: 7. ingredientService.createNew(req.body)
+    activate Service
+    
+    Service -> DishModel: 8. dishModel.getDetails(dishId)
+    activate DishModel
+    
+    DishModel -> MongoDB: 9. Find dish by dishId
+    activate MongoDB
+    
+    alt Dish Found
+        MongoDB --> DishModel: 10. Return dish data
+        deactivate MongoDB
+        DishModel --> Service: 11. Return dish
+        deactivate DishModel
+        
+        note right of Service: Create newIngredient object:\n{\n  ...reqBody,\n  dishId: ObjectId(dishId),\n  createdAt: new Date(),\n  updatedAt: new Date()\n}
+        
+        Service -> IngredientModel: 12. ingredientModel.createNew(newIngredient)
+        activate IngredientModel
+        
+        IngredientModel -> MongoDB: 13. insertOne(newIngredient)
+        activate MongoDB
+        
+        MongoDB --> IngredientModel: 14. Return insertedId
+        deactivate MongoDB
+        
+        IngredientModel --> Service: 15. Return creation result
+        deactivate IngredientModel
+        
+        Service -> IngredientModel: 16. ingredientModel.getDetails(insertedId)
+        activate IngredientModel
+        
+        IngredientModel -> MongoDB: 17. findOne by insertedId
+        activate MongoDB
+        
+        MongoDB --> IngredientModel: 18. Return created ingredient
+        deactivate MongoDB
+        
+        IngredientModel --> Service: 19. Return ingredient details
+        deactivate IngredientModel
+        
+        Service --> Controller: 20. Return created ingredient
+        deactivate Service
+        
+        Controller --> Route: 21. Send 201 JSON response
+        note right of Controller: {\n  code: 201,\n  message: "Create successful",\n  data: createdIngredient\n}
+        deactivate Controller
+        
+        Route --> View: 22. Return success response
+        deactivate Route
+        
+        View --> Admin: 23. Show success message & update ingredient list
+        
+    else Dish Not Found
+        MongoDB --> DishModel: 10. Return null
+        deactivate MongoDB
+        DishModel --> Service: 11. Return null
+        deactivate DishModel
+        
+        Service --> Controller: 12. Throw ApiError(404, "Dish ID not found!")
+        deactivate Service
+        
+        Controller --> Route: 13. next(error)
+        deactivate Controller
+        
+        Route --> View: 14. Return 404 error
+        deactivate Route
+        
+        View --> Admin: 15. Show error message
+    end
+    
+else Validation Failed
+    Validation --> Route: 6. next(ApiError(422, validation errors))
+    deactivate Validation
+    
+    Route --> View: 7. Return 422 validation errors
+    deactivate Route
+    
+    View --> Admin: 8. Show validation error messages
+end
+
+deactivate View
+end
+
+@enduml

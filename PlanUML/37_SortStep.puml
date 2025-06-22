@@ -1,0 +1,48 @@
+@startuml SortStep
+
+actor "Admin" as Admin
+boundary "StepListPage" as View #lightblue
+participant ":stepRoute" as Route #lightblue
+control "stepController" as Controller #lightblue
+participant ":stepService" as Service #lightblue
+entity "stepModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Sort Steps by Dish ID
+Admin -> View: 1. Select sort for specific dish steps
+activate View
+View -> Route: 2. GET /api/v1/step/by-dish/:dishId?sortBy=stepNumber&order=asc
+activate Route
+
+Route -> Controller: 3. getDetailsByDishId(req, res)
+activate Controller
+
+Controller -> Service: 4. getDetailsByDishId(dishId, sortBy, order)
+activate Service
+
+Service -> Model: 5. getDetailsByDishId(dishId, sortBy, order)
+activate Model
+
+Model -> MongoDB: 6. Query steps by dishId with sort
+activate MongoDB
+
+MongoDB --> Model: 7. Return sorted steps for dish
+deactivate MongoDB
+
+Model --> Service: 8. Return sorted dish steps
+deactivate Model
+
+Service --> Controller: 9. Return sorted dish steps
+deactivate Service
+
+Controller --> Route: 10. Send JSON response (200, sorted dish steps)
+deactivate Controller
+
+Route --> View: 11. Render sorted dish steps
+deactivate Route
+
+View --> Admin: 12. Display sorted steps for dish
+deactivate View
+end
+
+@enduml

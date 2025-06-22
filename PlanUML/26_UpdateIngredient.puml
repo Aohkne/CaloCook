@@ -1,0 +1,97 @@
+@startuml UpdateIngredient
+
+actor "Admin" as Admin
+boundary "DishDetailPage" as View #lightblue
+participant ":ingredientRoute" as Route #lightblue
+control "ingredientValidation" as Validation #yellow
+control "ingredientController" as Controller #lightblue
+participant ":ingredientService" as Service #lightblue
+entity "ingredientModel" as IngredientModel #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Update Ingredient
+
+Admin -> View: 1. Click "Edit Ingredient" button
+activate View
+
+View -> Admin: 2. Show edit form with current data\n(dishId, name, quantity, isActive)
+
+Admin -> View: 3. Modify fields and submit
+View -> Route: 4. PUT /api/v1/ingredient/:id
+activate Route
+
+note right of Route: Body: {\n  dishId: "66574e301a6d1f001e8a1c01",\n  name: "Updated Garlic powder",\n  quantity: "2 tsp",\n  isActive: true\n}
+
+Route -> Validation: 5. ingredientValidation.updateIngredient(req, res, next)
+activate Validation
+
+note right of Validation: Validate using Joi:\n- dishId: required, 24 chars hex\n- name: required, 1-100 chars\n- quantity: required, 1-50 chars\n- isActive: boolean, default true
+
+alt Validation Success
+    Validation -> Controller: 6. next() - validation passed
+    deactivate Validation
+    
+    activate Controller
+    Controller -> Service: 7. ingredientService.updateIngredient(ingredientId, updateData)
+    activate Service
+    
+    note right of Service: Prepare dataToUpdate:\n{\n  ...updateData,\n  dishId: ObjectId(dishId),\n  updatedAt: new Date()\n}
+    
+    Service -> IngredientModel: 8. ingredientModel.updateIngredient(ingredientId, dataToUpdate)
+    activate IngredientModel
+    
+    IngredientModel -> MongoDB: 9. findOneAndUpdate({\n  _id: ObjectId(ingredientId)\n}, {\n  $set: dataToUpdate\n}, {\n  returnDocument: 'after'\n})
+    activate MongoDB
+    
+    alt Ingredient Found & Updated
+        MongoDB --> IngredientModel: 10. Return updated ingredient
+        deactivate MongoDB
+        
+        IngredientModel --> Service: 11. Return updated ingredient
+        deactivate IngredientModel
+        
+        Service --> Controller: 12. Return updated ingredient
+        deactivate Service
+        
+        Controller --> Route: 13. Send 200 JSON response
+        note right of Controller: {\n  code: 200,\n  message: "Update successful",\n  data: updatedIngredient\n}
+        deactivate Controller
+        
+        Route --> View: 14. Return success response
+        deactivate Route
+        
+        View --> Admin: 15. Show success message & update ingredient display
+        
+    else Ingredient Not Found
+        MongoDB --> IngredientModel: 10. Return null
+        deactivate MongoDB
+        
+        IngredientModel --> Service: 11. Return null
+        deactivate IngredientModel
+        
+        Service --> Controller: 12. Throw ApiError(404, "Ingredient not found!")
+        deactivate Service
+        
+        Controller --> Route: 13. next(error)
+        deactivate Controller
+        
+        Route --> View: 14. Return 404 error
+        deactivate Route
+        
+        View --> Admin: 15. Show error message
+    end
+    
+else Validation Failed
+    Validation --> Route: 6. next(ApiError(422, validation errors))
+    deactivate Validation
+    
+    Route --> View: 7. Return 422 validation errors
+    deactivate Route
+    
+    View --> Admin: 8. Show validation error messages
+end
+
+deactivate View
+end
+
+@enduml
