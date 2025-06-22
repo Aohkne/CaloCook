@@ -1,14 +1,16 @@
 
 import React, { useEffect, useRef, useState } from 'react'
-import { StyleSheet, Text, View, Image, TouchableOpacity, Animated, ScrollView, Modal, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native'
+import { StyleSheet, Text, View, Image, TouchableOpacity, Animated, ScrollView, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, Button } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTheme } from '@contexts/ThemeProvider'
-import { Lock, User, Edit3, Calendar, Ruler, Weight, Target, Crown, X, Save, Users, Activity, Flame, ThumbsUp, ThumbsDown, Mars, Venus } from 'lucide-react-native'
+import { Lock, User, Edit3, Calendar, Ruler, Weight, Target, Crown, X, Save, Users, Activity, Flame, ThumbsUp, ThumbsDown, Mars, Venus, Sun, Moon } from 'lucide-react-native'
 import Svg, { Circle } from 'react-native-svg'
 
+
 export default function ProfileScreen({ navigation }) {
-  const { colors } = useTheme()
+  const { colors, toggleTheme, isDark } = useTheme()
   const styles = createStyles(colors)
+
 
   // Animation values cho ngọn lửa
   const flameScale = useRef(new Animated.Value(1)).current
@@ -90,7 +92,7 @@ export default function ProfileScreen({ navigation }) {
 
   // Hình tròn
   // Progress data (có thể lấy từ API riêng)
-  const currentCalories = 2213
+  const currentCalories = 4000
   const targetCalories = userData.calorieLimit
   const progressPercentage = (currentCalories / targetCalories) * 100
 
@@ -99,8 +101,12 @@ export default function ProfileScreen({ navigation }) {
   const strokeWidth = 18
   const circumference = 2 * Math.PI * radius
   const strokeDasharray = circumference
-  const strokeDashoffset = circumference - (progressPercentage / 100) * circumference
-  // Tính toán màu sắc và icon dựa trên progress
+
+  // FIX: Giới hạn progress không vượt quá 100% cho hiển thị vòng tròn
+  const displayPercentage = Math.min(progressPercentage, 100)
+  const strokeDashoffset = circumference - (displayPercentage / 100) * circumference
+
+  // Tính toán màu sắc và icon dựa trên progress (vẫn dùng progressPercentage gốc để xác định trạng thái)
   const getProgressColor = () => {
     if (progressPercentage <= 15) {
       return '#FF4444' // Màu đỏ khi ít
@@ -297,6 +303,13 @@ export default function ProfileScreen({ navigation }) {
           <TouchableOpacity style={styles.iconButton} onPress={handleLockPress}>
             <Lock size={24} color={colors.text} />
           </TouchableOpacity>
+          <TouchableOpacity style={styles.themeToggleButton} onPress={toggleTheme}>
+            {isDark ? (
+              <Moon size={24} color="#4A90E2" />
+            ) : (
+              <Sun size={24} color="#FFA500" />
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -422,7 +435,7 @@ export default function ProfileScreen({ navigation }) {
                     strokeWidth={strokeWidth}
                     fill="none"
                   />
-                  {/* Progress circle */}
+                  {/* Progress circle - sử dụng displayPercentage thay vì progressPercentage */}
                   <Circle
                     cx={radius + strokeWidth}
                     cy={radius + strokeWidth}
@@ -435,11 +448,11 @@ export default function ProfileScreen({ navigation }) {
                     strokeLinecap="round"
                     transform={`rotate(-90 ${radius + strokeWidth} ${radius + strokeWidth})`}
                   />
-                  {/* Progress dot at the end of the progress */}
-                  {progressPercentage > 0 && (
+                  {/* Progress dot at the end of the progress - sử dụng displayPercentage */}
+                  {displayPercentage > 0 && (
                     <Circle
-                      cx={radius + strokeWidth + radius * Math.cos((progressPercentage / 100) * 2 * Math.PI - Math.PI / 2)}
-                      cy={radius + strokeWidth + radius * Math.sin((progressPercentage / 100) * 2 * Math.PI - Math.PI / 2)}
+                      cx={radius + strokeWidth + radius * Math.cos((displayPercentage / 100) * 2 * Math.PI - Math.PI / 2)}
+                      cy={radius + strokeWidth + radius * Math.sin((displayPercentage / 100) * 2 * Math.PI - Math.PI / 2)}
                       r={6}
                       fill="#FFFFFF"
                       stroke={getProgressColor()}
@@ -1134,5 +1147,8 @@ const createStyles = (colors) =>
     },
     bottomPadding: {
       height: 50, // Thêm không gian trống ở cuối
+    },
+    themeToggleButton: {
+      padding: 8,
     },
   })
