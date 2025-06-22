@@ -46,10 +46,11 @@ export default function ProfilePage() {
       <p className="text-gray-600">Manage profile details.</p>
       <div className="grid grid-cols-2 gap-5 mt-5">
         {/* Username & Email */}
-        <div className="col-span-2 relative border border-gray-300 rounded-md flex items-center p-5 gap-4">
+        <div className="col-span-2 relative border border-gray-300 rounded-md flex flex-col lg:flex-row items-center p-5 gap-4">
           <Avatar size={80} icon={<User />} src={user.avatar_url} />
+
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col lg:flex-row items-center gap-2">
               <h2 className="font-bold text-2xl">{user.username}</h2>
               <p className="flex items-center gap-0.5 bg-black rounded-full py-1 px-2 text-white font-medium text-xs">
                 <Shield size={12} />
@@ -65,17 +66,17 @@ export default function ProfilePage() {
                 </p>
               )}
             </div>
-            <p className="flex items-center gap-1 text-black/60">
+            <p className="flex items-center gap-1 text-black/60 whitespace-nowrap">
               <Mail size={14} />
               {user.email}
             </p>
-            <p className="flex items-center gap-1 text-black/60">
+            <p className="flex items-center gap-1 text-black/60 whitespace-nowrap">
               <User size={14} />
               ID: {user._id.$oid}
             </p>
           </div>
           {activateEdit ? (
-            <div className="absolute right-[20px] top-[20px] flex gap-2">
+            <div className="static lg:absolute right-[20px] top-[20px] flex gap-2">
               <button
                 className="flex items-center gap-2 border border-gray-300 py-2 px-3 rounded-md font-medium text-sm hover:bg-gray-100 transition-all hover:cursor-pointer"
                 onClick={handleCancelEdit}
@@ -91,7 +92,7 @@ export default function ProfilePage() {
             </div>
           ) : (
             <button
-              className="flex items-center gap-2 border border-gray-300 absolute right-[20px] top-[20px] py-2 px-3 rounded-md font-medium text-sm hover:bg-gray-100 transition-all hover:cursor-pointer"
+              className="flex items-center gap-2 border border-gray-300 static lg:absolute right-[20px] top-[20px] py-2 px-3 rounded-md font-medium text-sm hover:bg-gray-100 transition-all hover:cursor-pointer"
               onClick={handleActivateEdit}
             >
               <Edit size={16} />
@@ -100,10 +101,12 @@ export default function ProfilePage() {
           )}
         </div>
         {/* Basic Information */}
-        <div className="col-span-1 p-5 relative border border-gray-300 rounded-md">
+        <div className="col-span-2 p-5 relative border border-gray-300 rounded-md">
           <h2 className="flex items-center gap-1 ">
             <User />
-            <span className="font-bold text-xl">Personal Information</span>
+            <span className="font-bold text-xl whitespace-nowrap">
+              Personal Information
+            </span>
           </h2>
           <p className="text-sm text-black/60 mb-4">Basic personal details</p>
           <ul>
@@ -173,7 +176,7 @@ export default function ProfilePage() {
           </ul>
         </div>
         {/* Health & Activity */}
-        <div className="col-span-1 p-5 relative border border-gray-300 rounded-md">
+        <div className="col-span-2 p-5 relative border border-gray-300 rounded-md">
           <h2 className="flex items-center gap-1 ">
             <Target />
             <span className="font-bold text-xl">Health & Activity</span>
@@ -208,7 +211,7 @@ export default function ProfilePage() {
           <p className="text-sm text-black/60 mb-4">
             Account creation and update information
           </p>
-          <ul className="flex gap-90">
+          <ul className="flex flex-col lg:flex-row gap-10 lg:gap-50 xl:gap-90">
             <li className="flex flex-col gap-2">
               <label
                 htmlFor="createdAt"
