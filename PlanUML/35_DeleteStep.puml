@@ -1,0 +1,93 @@
+@startuml DeleteStep
+
+actor "Admin" as Admin
+boundary "StepManagementPage" as View #lightblue
+participant ":stepRoute" as Route #lightblue
+control "stepController" as Controller #lightblue
+participant ":stepService" as Service #lightblue
+entity "stepModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Delete Step (Deactivate)
+Admin -> View: 1. Click Delete/Deactivate Step
+activate View
+View -> Route: 2. PATCH /api/v1/step/:id/deactivate
+activate Route
+
+Route -> Controller: 3. deactivateStep(req, res)
+activate Controller
+
+Controller -> Service: 4. deactivateStep(stepId)
+activate Service
+
+Service -> Model: 5. updateIsActive(stepId, false)
+activate Model
+
+Model -> MongoDB: 6. findOneAndUpdate step (set isActive: false)
+activate MongoDB
+
+MongoDB --> Model: 7. Return updated step or null
+deactivate MongoDB
+
+Model --> Service: 8. Return updated step
+deactivate Model
+
+alt Step Found and Deactivated
+    Service --> Controller: 9. Return deactivated step
+    deactivate Service
+
+    Controller --> Route: 10. Send JSON response (200, deactivated step)
+    deactivate Controller
+
+    Route --> View: 11. Show success message
+    deactivate Route
+
+    View --> Admin: 12. Display step as inactive/deleted
+    deactivate View
+
+else Step Not Found
+    Service --> Controller: 13. Throw ApiError (404, Step not found)
+    Controller --> Route: 14. Send error response
+    Route --> View: 15. Show error message
+    View --> Admin: 16. Display error message
+end
+end
+
+group Alternative: Activate Step
+Admin -> View: 17. Click Activate Step
+activate View
+View -> Route: 18. PATCH /api/v1/step/:id/activate
+activate Route
+
+Route -> Controller: 19. activateStep(req, res)
+activate Controller
+
+Controller -> Service: 20. activateStep(stepId)
+activate Service
+
+Service -> Model: 21. updateIsActive(stepId, true)
+activate Model
+
+Model -> MongoDB: 22. findOneAndUpdate step (set isActive: true)
+activate MongoDB
+
+MongoDB --> Model: 23. Return updated step
+deactivate MongoDB
+
+Model --> Service: 24. Return activated step
+deactivate Model
+
+Service --> Controller: 25. Return activated step
+deactivate Service
+
+Controller --> Route: 26. Send JSON response (200, activated step)
+deactivate Controller
+
+Route --> View: 27. Show success message
+deactivate Route
+
+View --> Admin: 28. Display step as active
+deactivate View
+end
+
+@enduml

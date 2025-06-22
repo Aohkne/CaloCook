@@ -1,0 +1,70 @@
+@startuml UpdateStep
+
+actor "Admin" as Admin
+boundary "StepEditPage" as View #lightblue
+participant ":stepRoute" as Route #lightblue
+participant ":stepValidation" as Validation #orange
+control "stepController" as Controller #lightblue
+participant ":stepService" as Service #lightblue
+entity "stepModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Update Step
+Admin -> View: 1. Edit step form and submit
+activate View
+View -> Route: 2. PUT /api/v1/step/:id
+activate Route
+
+Route -> Validation: 3. updateStep validation
+activate Validation
+
+Validation -> Validation: 4. Validate dishId, stepNumber, description, isActive
+alt Validation Success
+    Validation -> Controller: 5. updateStep(req, res)
+    deactivate Validation
+    activate Controller
+
+    Controller -> Service: 6. updateStep(stepId, updateData)
+    activate Service
+
+    Service -> Model: 7. updateStep(stepId, dataToUpdate)
+    activate Model
+
+    Model -> MongoDB: 8. findOneAndUpdate step by ID
+    activate MongoDB
+
+    MongoDB --> Model: 9. Return updated step or null
+    deactivate MongoDB
+
+    Model --> Service: 10. Return updated step
+    deactivate Model
+
+    alt Step Found and Updated
+        Service --> Controller: 11. Return updated step
+        deactivate Service
+
+        Controller --> Route: 12. Send JSON response (200, updated step)
+        deactivate Controller
+
+        Route --> View: 13. Show success message
+        deactivate Route
+
+        View --> Admin: 14. Display updated step
+        deactivate View
+
+    else Step Not Found
+        Service --> Controller: 15. Throw ApiError (404, Step not found)
+        Controller --> Route: 16. Send error response
+        Route --> View: 17. Show error message
+        View --> Admin: 18. Display error
+    end
+
+else Validation Failed
+    Validation --> Route: 19. Throw validation error
+    deactivate Validation
+    Route --> View: 20. Send validation error
+    View --> Admin: 21. Display validation errors
+end
+end
+
+@enduml

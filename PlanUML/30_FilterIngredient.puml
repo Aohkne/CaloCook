@@ -1,0 +1,91 @@
+@startuml FilterIngredient
+
+actor "User" as User
+boundary "IngredientPage" as View #lightblue
+participant ":ingredientRoute" as Route #lightblue
+control "ingredientController" as Controller #lightblue
+participant ":ingredientService" as Service #lightblue
+entity "ingredientModel" as IngredientModel #lightblue
+entity "dishModel" as DishModel #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Filter Ingredients
+
+User -> View: 1. Open filter panel to find dishes by ingredients
+activate View
+
+User -> View: 2. Enter ingredient name
+User -> View: 3. Click "Find Dishes"
+
+View -> Route: 4. GET /api/v1/ingredient/?name={searchName}
+activate Route
+
+Route -> Controller: 5. ingredientController.searchIngredientForDish(req, res, next)
+activate Controller
+
+Controller -> Service: 6. ingredientService.searchByName(name, sortBy, order)
+activate Service
+
+Service -> IngredientModel: 7. ingredientModel.searchByName(name, sortBy, order)
+activate IngredientModel
+
+note right of IngredientModel: Create regex filter:\n{ name: { $regex: "^name", $options: "i" } }
+
+IngredientModel -> MongoDB: 8. find(nameFilter).sort().toArray()
+activate MongoDB
+
+MongoDB --> IngredientModel: 9. Return filtered ingredients
+deactivate MongoDB
+
+alt Results Found
+    IngredientModel --> Service: 10. Return filtered ingredients with dishIds
+    deactivate IngredientModel
+    
+    note right of Service: Extract unique dishIds from ingredients:\ndishIds = [...new Set(ingredients.map(i => i.dishId))]
+    
+    loop For each unique dishId
+        Service -> DishModel: 11. dishModel.getDetails(dishId)
+        activate DishModel
+        
+        DishModel -> MongoDB: 12. findOne({ _id: ObjectId(dishId) })
+        activate MongoDB
+        
+        MongoDB --> DishModel: 13. Return dish details
+        deactivate MongoDB
+        
+        DishModel --> Service: 14. Return dish info
+        deactivate DishModel
+    end
+    
+    Service --> Controller: 15. Return dishes found by ingredient filter
+    deactivate Service
+    
+    Controller --> Route: 16. Send 200 JSON response
+    note right of Controller: {\n  code: 200,\n  message: "Dishes found by ingredient filter",\n  data: filteredDishes\n}
+    deactivate Controller
+    
+    Route --> View: 17. Return filtered dish results
+    deactivate Route
+    
+    View --> User: 18. Display dishes containing filtered ingredients
+    
+else No Results Found
+    IngredientModel --> Service: 10. Return empty array
+    deactivate IngredientModel
+    
+    Service --> Controller: 11. Throw ApiError(404, "No dishes found with these ingredient criteria!")
+    deactivate Service
+    
+    Controller --> Route: 12. next(error)
+    deactivate Controller
+    
+    Route --> View: 13. Return 404 error
+    deactivate Route
+    
+    View --> User: 14. Show "No dishes match the ingredient filter criteria"
+end
+
+deactivate View
+end
+
+@enduml
