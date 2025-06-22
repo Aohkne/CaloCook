@@ -1,8 +1,9 @@
-import { ChevronLeft, ChevronRight, Soup, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Soup, User, Users } from "lucide-react";
 import SidebarButton from "./SidebarButton";
 import { useEffect, useState } from "react";
 import logoFull from "../assets/logo-full.png";
 import { useLocation } from "react-router-dom";
+import SettingMenu from "./SettingMenu";
 export default function Sidebar() {
   const [expanded, setExpanded] = useState(true);
   const location = useLocation();
@@ -44,7 +45,7 @@ export default function Sidebar() {
       {expanded && <img src={logoFull} className="w-40" />}
 
       {/* Sidebar item list */}
-      <ul className="flex flex-col items-center gap-1 transition-all">
+      <ul className="flex flex-col items-center gap-1 transition-al h-full">
         {expanded ? (
           <>
             <SidebarButton
@@ -59,6 +60,9 @@ export default function Sidebar() {
               link="/dishes"
               ariaSelected={location.pathname === "/dishes"}
             />
+            <div className="mt-auto w-full flex">
+              <SettingMenu />
+            </div>
           </>
         ) : (
           <>
@@ -71,6 +75,12 @@ export default function Sidebar() {
               icon={<Soup />}
               link="/dishes"
               ariaSelected={location.pathname === "/dishes"}
+            />
+            <SidebarButton
+              icon={<User />}
+              link="/profile"
+              ariaSelected={location.pathname === "/profile"}
+              classname="mt-auto "
             />
           </>
         )}

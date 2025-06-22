@@ -3,11 +3,7 @@ import { Ban, Check, Edit2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { activateUser, deactivateUser, getUser } from "../api/user";
 
-export default function UserTable({
-  tabs,
-  searchText = "",
-  roleFilter = "all",
-}) {
+export default function UserTable({ tabs, searchText = "" }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 

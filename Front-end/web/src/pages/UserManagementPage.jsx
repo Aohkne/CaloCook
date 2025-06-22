@@ -30,11 +30,7 @@ export default function UserManagementPage() {
         setRoleFilter={setRoleFilter}
       />
       {/* User Table */}
-      <UserTable
-        tabs={selectedTab}
-        searchText={searchText}
-        roleFilter={roleFilter}
-      />
+      <UserTable tabs={selectedTab} searchText={searchText} />
     </div>
   );
 }

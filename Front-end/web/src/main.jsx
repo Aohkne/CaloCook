@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import UserManagementPage from "./pages/UserManagementPage.jsx";
 import DishManagementPage from "./pages/DishManagementPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +15,7 @@ const router = createBrowserRouter([
     children: [
       { path: "/users", element: <UserManagementPage /> },
       { path: "/dishes", element: <DishManagementPage /> },
+      { path: "/profile", element: <ProfilePage /> },
     ],
   },
   {
