@@ -13,7 +13,7 @@ group Delete Ingredient - Deactivate
 Admin -> View: 1. Click "Delete Ingredient" button
 activate View
 
-View -> Admin: 2. Show confirmation dialog\n"Are you sure you want to delete this ingredient?"
+View -> Admin: 2. Show confirmation dialog
 
 Admin -> View: 3. Confirm deletion
 View -> Route: 4. PATCH /api/v1/ingredient/:id/deactivate
@@ -21,16 +21,16 @@ activate Route
 
 note right of Route: Soft delete by setting\nisActive = false
 
-Route -> Controller: 5. ingredientController.deactivateIngredient(req, res, next)
+Route -> Controller: 5. deactivateIngredient(req, res, next)
 activate Controller
 
-Controller -> Service: 6. ingredientService.deactivateIngredient(ingredientId)
+Controller -> Service: 6. deactivateIngredient(ingredientId)
 activate Service
 
-Service -> IngredientModel: 7. ingredientModel.updateIsActive(ingredientId, false)
+Service -> IngredientModel: 7. updateIsActive(ingredientId, false)
 activate IngredientModel
 
-IngredientModel -> MongoDB: 8. findOneAndUpdate({\n  _id: ObjectId(ingredientId)\n}, {\n  $set: { isActive: false }\n}, {\n  returnDocument: 'after'\n})
+IngredientModel -> MongoDB: 8. ExecuteQuery()
 activate MongoDB
 
 alt Ingredient Found & Deactivated
@@ -44,7 +44,6 @@ alt Ingredient Found & Deactivated
     deactivate Service
     
     Controller --> Route: 12. Send 200 JSON response
-    note right of Controller: {\n  code: 200,\n  message: "Ingredient deactivated successfully",\n  data: updatedIngredient\n}
     deactivate Controller
     
     Route --> View: 13. Return success response
@@ -84,16 +83,16 @@ Admin -> View: 2. Click "Restore Ingredient" button
 View -> Route: 3. PATCH /api/v1/ingredient/:id/activate
 activate Route
 
-Route -> Controller: 4. ingredientController.activateIngredient(req, res, next)
+Route -> Controller: 4. activateIngredient(req, res, next)
 activate Controller
 
-Controller -> Service: 5. ingredientService.activateIngredient(ingredientId)
+Controller -> Service: 5. activateIngredient(ingredientId)
 activate Service
 
-Service -> IngredientModel: 6. ingredientModel.updateIsActive(ingredientId, true)
+Service -> IngredientModel: 6. updateIsActive(ingredientId, true)
 activate IngredientModel
 
-IngredientModel -> MongoDB: 7. findOneAndUpdate({\n  _id: ObjectId(ingredientId)\n}, {\n  $set: { isActive: true }\n}, {\n  returnDocument: 'after'\n})
+IngredientModel -> MongoDB: 7. ExecuteQuery()
 activate MongoDB
 
 MongoDB --> IngredientModel: 8. Return activated ingredient
@@ -106,7 +105,6 @@ Service --> Controller: 10. Return activated ingredient
 deactivate Service
 
 Controller --> Route: 11. Send 200 JSON response
-note right of Controller: {\n  code: 200,\n  message: "Ingredient activated successfully",\n  data: updatedIngredient\n}
 deactivate Controller
 
 Route --> View: 12. Return success response

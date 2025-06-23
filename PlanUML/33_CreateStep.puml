@@ -31,7 +31,7 @@ alt Validation Success
     Service -> DishModel: 7. getDetails(dishId) - verify dish exists
     activate DishModel
     
-    DishModel -> MongoDB: 8. Query dish by ID
+    DishModel -> MongoDB: 8. ExecuteQuery()
     activate MongoDB
     
     MongoDB --> DishModel: 9. Return dish data
@@ -44,13 +44,13 @@ alt Validation Success
         Service -> Model: 11. createNew(newStepData)
         activate Model
 
-        Model -> MongoDB: 12. Insert new step document
+        Model -> MongoDB: 12. ExecuteQuery()
         activate MongoDB
 
         MongoDB --> Model: 13. Return insertedId
         deactivate MongoDB
 
-        Model -> MongoDB: 14. Query created step by ID
+        Model -> MongoDB: 14. ExecuteQuery()
         activate MongoDB
 
         MongoDB --> Model: 15. Return created step

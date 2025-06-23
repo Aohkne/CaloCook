@@ -20,18 +20,17 @@ User -> View: 3. Click "Find Dishes"
 View -> Route: 4. GET /api/v1/ingredient/?name={searchName}
 activate Route
 
-Route -> Controller: 5. ingredientController.searchIngredientForDish(req, res, next)
+Route -> Controller: 5. searchIngredientForDish(req, res, next)
 activate Controller
 
-Controller -> Service: 6. ingredientService.searchByName(name, sortBy, order)
+Controller -> Service: 6. searchByName(name, sortBy, order)
 activate Service
 
-Service -> IngredientModel: 7. ingredientModel.searchByName(name, sortBy, order)
+Service -> IngredientModel: 7. searchByName(name, sortBy, order)
 activate IngredientModel
 
-note right of IngredientModel: Create regex filter:\n{ name: { $regex: "^name", $options: "i" } }
 
-IngredientModel -> MongoDB: 8. find(nameFilter).sort().toArray()
+IngredientModel -> MongoDB: 8. ExecuteQuery()
 activate MongoDB
 
 MongoDB --> IngredientModel: 9. Return filtered ingredients
@@ -41,13 +40,12 @@ alt Results Found
     IngredientModel --> Service: 10. Return filtered ingredients with dishIds
     deactivate IngredientModel
     
-    note right of Service: Extract unique dishIds from ingredients:\ndishIds = [...new Set(ingredients.map(i => i.dishId))]
     
     loop For each unique dishId
-        Service -> DishModel: 11. dishModel.getDetails(dishId)
+        Service -> DishModel: 11. getDetails(dishId)
         activate DishModel
         
-        DishModel -> MongoDB: 12. findOne({ _id: ObjectId(dishId) })
+        DishModel -> MongoDB: 12. ExecuteQuery()
         activate MongoDB
         
         MongoDB --> DishModel: 13. Return dish details
@@ -61,7 +59,6 @@ alt Results Found
     deactivate Service
     
     Controller --> Route: 16. Send 200 JSON response
-    note right of Controller: {\n  code: 200,\n  message: "Dishes found by ingredient filter",\n  data: filteredDishes\n}
     deactivate Controller
     
     Route --> View: 17. Return filtered dish results
