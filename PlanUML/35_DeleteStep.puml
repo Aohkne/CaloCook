@@ -23,7 +23,7 @@ activate Service
 Service -> Model: 5. updateIsActive(stepId, false)
 activate Model
 
-Model -> MongoDB: 6. findOneAndUpdate step (set isActive: false)
+Model -> MongoDB: 6. ExecuteQuery()
 activate MongoDB
 
 MongoDB --> Model: 7. Return updated step or null
@@ -68,7 +68,7 @@ activate Service
 Service -> Model: 21. updateIsActive(stepId, true)
 activate Model
 
-Model -> MongoDB: 22. findOneAndUpdate step (set isActive: true)
+Model -> MongoDB: 22. ExecuteQuery()
 activate MongoDB
 
 MongoDB --> Model: 23. Return updated step

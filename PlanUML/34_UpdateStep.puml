@@ -30,7 +30,7 @@ alt Validation Success
     Service -> Model: 7. updateStep(stepId, dataToUpdate)
     activate Model
 
-    Model -> MongoDB: 8. findOneAndUpdate step by ID
+    Model -> MongoDB: 8. ExecuteQuery()
     activate MongoDB
 
     MongoDB --> Model: 9. Return updated step or null

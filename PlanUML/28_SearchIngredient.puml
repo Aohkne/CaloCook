@@ -18,20 +18,18 @@ User -> View: 2. Click "Search Dishes by Ingredient"
 View -> Route: 3. GET /api/v1/ingredient/search-dishes?name={searchName}
 activate Route
 
-note right of Route: Query params:\n?name=garlic&sortBy=name&order=asc
 
-Route -> Controller: 4. ingredientController.searchIngredientForDish(req, res, next)
+Route -> Controller: 4. searchIngredientForDish(req, res, next)
 activate Controller
 
-note right of Controller: Extract query params:\n- name: "garlic"\n- sortBy: "name" (optional)\n- order: "asc" (optional)
 
-Controller -> Service: 5. ingredientService.searchByName(name, sortBy, order)
+Controller -> Service: 5. searchByName(name, sortBy, order)
 activate Service
 
-Service -> IngredientModel: 6. ingredientModel.searchByName(name, sortBy, order)
+Service -> IngredientModel: 6. searchByName(name, sortBy, order)
 activate IngredientModel
 
-IngredientModel -> MongoDB: 7. find({\n  name: { $regex: "^garlic", $options: "i" }\n}).sort({ name: 1 }).toArray()
+IngredientModel -> MongoDB: 7. ExecuteQuery()
 activate MongoDB
 
 alt Ingredients Found
@@ -41,13 +39,12 @@ alt Ingredients Found
     IngredientModel --> Service: 9. Return ingredients list with dishIds
     deactivate IngredientModel
     
-    note right of Service: Extract unique dishIds from ingredients:\ndishIds = [...new Set(ingredients.map(i => i.dishId))]
     
     loop For each unique dishId
-        Service -> DishModel: 10. dishModel.getDetails(dishId)
+        Service -> DishModel: 10. getDetails(dishId)
         activate DishModel
         
-        DishModel -> MongoDB: 11. findOne({ _id: ObjectId(dishId) })
+        DishModel -> MongoDB: 11. ExecuteQuery()
         activate MongoDB
         
         MongoDB --> DishModel: 12. Return dish details
@@ -61,7 +58,6 @@ alt Ingredients Found
     deactivate Service
     
     Controller --> Route: 15. Send 200 JSON response
-    note right of Controller: {\n  code: 200,\n  message: "Dishes found by ingredient search",\n  data: dishesArray\n}
     deactivate Controller
     
     Route --> View: 16. Return dish results

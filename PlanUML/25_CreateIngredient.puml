@@ -23,7 +23,7 @@ activate Route
 
 note right of Route: Body: {\n  dishId: "66574e301a6d1f001e8a1c01",\n  name: "Garlic powder",\n  quantity: "1 tsp",\n  isActive: true\n}
 
-Route -> Validation: 5. ingredientValidation.createNew(req, res, next)
+Route -> Validation: 5. createNew(req, res, next)
 activate Validation
 
 note right of Validation: Validate using Joi:\n- dishId: required, 24 chars hex\n- name: required, 1-100 chars\n- quantity: required, 1-50 chars\n- isActive: boolean, default true
@@ -33,13 +33,13 @@ alt Validation Success
     deactivate Validation
     
     activate Controller
-    Controller -> Service: 7. ingredientService.createNew(req.body)
+    Controller -> Service: 7. createNew(req.body)
     activate Service
     
-    Service -> DishModel: 8. dishModel.getDetails(dishId)
+    Service -> DishModel: 8. getDetails(dishId)
     activate DishModel
     
-    DishModel -> MongoDB: 9. Find dish by dishId
+    DishModel -> MongoDB: 9. ExecuteQuery()
     activate MongoDB
     
     alt Dish Found
@@ -50,10 +50,10 @@ alt Validation Success
         
         note right of Service: Create newIngredient object:\n{\n  ...reqBody,\n  dishId: ObjectId(dishId),\n  createdAt: new Date(),\n  updatedAt: new Date()\n}
         
-        Service -> IngredientModel: 12. ingredientModel.createNew(newIngredient)
+        Service -> IngredientModel: 12. createNew(newIngredient)
         activate IngredientModel
         
-        IngredientModel -> MongoDB: 13. insertOne(newIngredient)
+        IngredientModel -> MongoDB: 13. ExecuteQuery()
         activate MongoDB
         
         MongoDB --> IngredientModel: 14. Return insertedId
@@ -62,10 +62,10 @@ alt Validation Success
         IngredientModel --> Service: 15. Return creation result
         deactivate IngredientModel
         
-        Service -> IngredientModel: 16. ingredientModel.getDetails(insertedId)
+        Service -> IngredientModel: 16. getDetails(insertedId)
         activate IngredientModel
         
-        IngredientModel -> MongoDB: 17. findOne by insertedId
+        IngredientModel -> MongoDB: 17. ExecuteQuery()
         activate MongoDB
         
         MongoDB --> IngredientModel: 18. Return created ingredient

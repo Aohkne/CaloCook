@@ -24,7 +24,7 @@ activate Service
 Service -> Model: 5. getDetailsByDishId(dishId, sortBy, order)
 activate Model
 
-Model -> MongoDB: 6. Query ingredients with dishId
+Model -> MongoDB: 6. ExecuteQuery()
 activate MongoDB
 
 MongoDB --> Model: 7. Return ingredient list
