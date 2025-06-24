@@ -1,17 +1,59 @@
-import { useNavigation } from '@react-navigation/native';
-import { ChevronLeft, Eye, EyeClosed } from 'lucide-react-native';
 import { useState } from 'react';
-import { Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ChevronLeft, Eye, EyeClosed } from 'lucide-react-native';
+import { Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+
+import { register } from '@/redux/slices/authSlice';
 
 export default function SignUpScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
   };
   const handleShowConfirmPassword = () => {
     setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  const handleRegister = async () => {
+    if (!username.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+      Alert.alert('Error', 'Please enter both email/username and password');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    try {
+      const userData = {
+        username: username.trim(),
+        email: email.trim(),
+        password: password
+      };
+
+      console.log(userData);
+
+      await dispatch(register(userData)).unwrap();
+
+      Alert.alert('Success', 'Account created successfully!', [
+        { text: 'OK', onPress: () => navigation.navigate('Login') }
+      ]);
+    } catch (error) {
+      Alert.alert('Sign up failed', error.message || 'Unable to log in');
+    }
   };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FCFAF3', alignItems: 'center' }}>
@@ -34,15 +76,24 @@ export default function SignUpScreen() {
         <Text style={[styles.smallText, { marginBottom: 40 }]}>
           Choose dishes, view recipes, add to favorites, and create a meal plan
         </Text>
+
         <TextInput
           style={[styles.input, { marginBottom: 10 }]}
           placeholder='Email'
           placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType='email-address'
+          autoCapitalize='none'
+          autoComplete='email'
         />
         <TextInput
           style={[styles.input, { marginBottom: 10 }]}
           placeholder='Username'
           placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize='none'
         />
         <View style={{ position: 'relative' }}>
           <TextInput
@@ -50,6 +101,9 @@ export default function SignUpScreen() {
             placeholder='Password'
             placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
             secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+            textContentType='password'
           />
           {showPassword ? (
             <Eye
@@ -83,6 +137,9 @@ export default function SignUpScreen() {
             placeholder='Confirm Password'
             placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
             secureTextEntry={!showConfirmPassword}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            textContentType='password'
           />
           {showConfirmPassword ? (
             <Eye
@@ -116,14 +173,16 @@ export default function SignUpScreen() {
             width: '100%'
           }}
         ></View>
-        <TouchableOpacity style={[styles.button, { marginTop: 10 }]}>
+        <TouchableOpacity style={[styles.button, { marginTop: 10 }]} onPress={handleRegister}>
           <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
+
         <View style={styles.lineContainer}>
           <View style={styles.line}></View>
           <Text style={{ opacity: 0.6, fontSize: 16 }}>OR</Text>
           <View style={styles.line}></View>
         </View>
+
         <TouchableOpacity style={styles.googleButton}>
           <Text style={styles.googleButtonText}>Google</Text>
         </TouchableOpacity>

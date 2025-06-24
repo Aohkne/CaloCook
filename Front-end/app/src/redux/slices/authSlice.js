@@ -6,7 +6,8 @@ import {
   getProfileService,
   logoutService,
   refreshTokenService,
-  resetPasswordService
+  resetPasswordService,
+  registerService
 } from '@/services/auth';
 
 // Initial state
@@ -39,7 +40,7 @@ export const login = createAsyncThunk('auth/login', async (credentials, { reject
   }
 });
 
-export const register = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
+export const register = createAsyncThunk('auth/signup', async (userData, { rejectWithValue }) => {
   try {
     const response = await registerService(userData);
     return response;
@@ -169,15 +170,9 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = {
-          _id: action.payload._id,
-          username: action.payload.username,
-          email: action.payload.email,
-          role: action.payload.role
-        };
-        state.token = action.payload.accessToken;
-        state.refreshToken = action.payload.refreshToken;
-        state.isAuthenticated = true;
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
         state.error = null;
         state.message = action.payload.message || 'Registration successful';
       })

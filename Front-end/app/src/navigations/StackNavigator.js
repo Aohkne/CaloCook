@@ -18,7 +18,7 @@ import Detail from '@screens/Detail';
 const Stack = createNativeStackNavigator();
 
 export default function StackNavigator() {
-  const { isAuthenticated, isInitialized } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <Stack.Navigator

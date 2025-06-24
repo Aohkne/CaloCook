@@ -134,6 +134,8 @@ export const AuthProvider = ({ children }) => {
     dispatch(logoutLocal());
   };
 
+  // logout();
+
   // GET ACCESS TOKEN
   const getAccessToken = () => {
     return token;

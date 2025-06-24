@@ -6,7 +6,6 @@ export const loginService = async (credentials) => {
     const response = await api.post('/auth/login', credentials);
 
     if (response.data?.user?.role === 'admin') {
-      // Throw error với message cụ thể để Redux có thể catch
       const error = new Error('Your account does not have permission to log in to this platform.');
       error.code = 'ADMIN_LOGIN_FORBIDDEN';
       throw error;
@@ -23,7 +22,7 @@ export const loginService = async (credentials) => {
 // REGISTER
 export const registerService = async (userData) => {
   try {
-    const response = await api.post('/auth/register', userData);
+    const response = await api.post('/auth/signup', userData);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Registration failed' };
