@@ -1,14 +1,48 @@
+import { Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Eye, EyeClosed } from 'lucide-react-native';
+
 import { useState } from 'react';
-import { Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+import { useDispatch } from 'react-redux';
+import { login } from '@/redux/slices/authSlice';
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
   };
+
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please enter both email/username and password');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const credentials = {
+        emailOrUsername: email.trim(),
+        password: password
+      };
+
+      await dispatch(login(credentials)).unwrap();
+    } catch (error) {
+      Alert.alert('Login failed', error.message || 'Unable to log in');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FCFAF3', alignItems: 'center' }}>
       <View style={styles.container}>
@@ -17,10 +51,16 @@ export default function LoginScreen() {
         <Text style={[styles.smallText, { marginBottom: 40 }]}>
           Choose dishes, view recipes, add to favorites, and create a meal plan
         </Text>
+
         <TextInput
           style={[styles.input, { marginBottom: 10 }]}
           placeholder='Email or Username'
           placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType='email-address'
+          autoCapitalize='none'
+          autoComplete='email'
         />
         <View style={{ position: 'relative' }}>
           <TextInput
@@ -28,6 +68,9 @@ export default function LoginScreen() {
             placeholder='Password'
             placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
             secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+            autoCompleteType='password'
           />
           {showPassword ? (
             <Eye
@@ -65,16 +108,21 @@ export default function LoginScreen() {
             Forgot Password
           </Text>
         </View>
-        <TouchableOpacity style={styles.button}>
-          <Text onPress={() => navigation.navigate('MainTabs')} style={styles.buttonText}>
-            Login
-          </Text>
+
+        <TouchableOpacity
+          style={[styles.button, { opacity: isLoading ? 0.7 : 1 }]}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          <Text style={styles.buttonText}>{isLoading ? 'Login...' : 'Login'}</Text>
         </TouchableOpacity>
+
         <View style={styles.lineContainer}>
           <View style={styles.line}></View>
           <Text style={{ opacity: 0.6, fontSize: 16 }}>OR</Text>
           <View style={styles.line}></View>
         </View>
+
         <TouchableOpacity style={styles.googleButton}>
           <Text style={styles.googleButtonText}>Google</Text>
         </TouchableOpacity>
