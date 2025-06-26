@@ -305,6 +305,45 @@ const Router = express.Router()
  *                 data:
  *                   $ref: '#/components/schemas/Dish'
 
+ * /api/v1/dish/random/userId/{id}:
+ *   get:
+ *     summary: Get random unfavorite dishes
+ *     tags: [dish]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of random dishes to return 
+ *     responses:
+ *      200:
+ *        description: Return paginated list of dishes
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                code:
+ *                  type: number
+ *                  example: 200
+ *                message:
+ *                  type: string
+ *                  example: "Get successful"
+ *                data:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/Dish'
+
  * /api/v1/dish/{id}/activate:
  *   patch:
  *     summary: Activate dish by ID (set isActive to true)
@@ -426,6 +465,12 @@ Router.route('/:id')
     dishValidation.updateDish,
     dishController.updateDish
   )
+
+Router.route('/random/userId/:id').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
+  dishController.getRandomUnfavoritedDishes
+)
 
 Router.route('/:id/activate').patch(
   authMiddleware.authenticateUser,
