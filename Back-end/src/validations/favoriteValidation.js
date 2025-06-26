@@ -17,7 +17,7 @@ const addToFavorites = async (req, res, next) => {
   try {
     await correctCondition.validateAsync(
       {
-        userId: req.params.userId,
+        userId: req.body.userId,
         dishId: req.body.dishId
       },
       { abortEarly: false }
@@ -85,8 +85,8 @@ const deleteFromFavorites = async (req, res, next) => {
   try {
     await correctCondition.validateAsync(
       {
-        userId: req.params.userId,
-        dishId: req.params.dishId
+        userId: req.body.userId,
+        dishId: req.body.dishId
       },
       { abortEarly: false }
     )

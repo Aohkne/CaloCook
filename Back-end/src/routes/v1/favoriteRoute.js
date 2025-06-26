@@ -15,13 +15,7 @@ const Router = express.Router()
  *     tags: [favorite]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: userId
- *         schema:
- *           type: string
- *         required: true
- *         description: User ID
+ 
  *     requestBody:
  *       required: true
  *       content:
@@ -29,8 +23,13 @@ const Router = express.Router()
  *           schema:
  *             type: object
  *             required:
+ *               - userId
  *               - dishId
  *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: "68306f4d4928f3fe108df627"
+ *                 description: ID of the user
  *               dishId:
  *                 type: string
  *                 example: "6841bd26594d6203e5e54c13"
@@ -155,19 +154,24 @@ const Router = express.Router()
  *     tags: [favorite]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: userId
- *         schema:
- *           type: string
- *         required: true
- *         description: User ID
- *       - in: path
- *         name: dishId
- *         schema:
- *           type: string
- *         required: true
- *         description: Dish ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - dishId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: "68306f4d4928f3fe108df627"
+ *                 description: ID of the user
+ *               dishId:
+ *                 type: string
+ *                 example: "6841bd26594d6203e5e54c13"
+ *                 description: ID of the dish
  *     responses:
  *       200:
  *         description: Favorite removed successfully
@@ -194,5 +198,4 @@ Router.route('/:userId/:dishId').delete(
   favoriteValidation.deleteFromFavorites,
   favoriteController.deleteFromFavorites
 )
-
 export const favoriteRoute = Router
