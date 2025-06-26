@@ -89,7 +89,6 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { emailOrUsername, password } = req.body
-    // console.log('Login request:', { email, password })
 
     const user = await User.findOne({
       $or: [{ email: emailOrUsername }, { username: emailOrUsername }]
@@ -100,13 +99,12 @@ const login = async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(password, user.password_hash)
-    // console.log('Password match:', isMatch)
 
     if (!isMatch) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid email/username or password' })
     }
     const { accessToken, refreshToken } = generateTokens(user._id)
-    // console.log('Generated tokens:', { accessToken, refreshToken })
+
     await storeRefreshToken(user._id, refreshToken)
     // Lưu token vào AsyncStorage (nếu cần)
 
@@ -116,7 +114,7 @@ const login = async (req, res) => {
       email: user.email,
       role: user.role,
       accessToken,
-      refreshToken // Trả về refresh token cho mobile khi login thanh cong
+      refreshToken
     })
   } catch (error) {
     console.error('Login error:', error.message)

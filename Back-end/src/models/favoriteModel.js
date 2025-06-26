@@ -6,35 +6,44 @@ import { ObjectId } from 'mongodb'
 // Define Collection (name & schema)
 const _COLLECTION_NAME = 'favorites'
 const _COLLECTION_SCHEMA = Joi.object({
-  userId: Joi.string()
-    .pattern(OBJECT_ID_RULE)
-    .message(OBJECT_ID_RULE_MESSAGE)
-    .required(),
-  dishId: Joi.string()
-    .pattern(OBJECT_ID_RULE)
-    .message(OBJECT_ID_RULE_MESSAGE)
-    .required(),
+  userId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
+  dishId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
   createdAt: Joi.date().timestamp('javascript').default(Date.now)
 })
+
 const createSortObject = (sortBy, order) => {
   const sortOrder = order === 'asc' ? 1 : -1
   return { [sortBy]: sortOrder }
+}
+
+const getfavoriteByUserId = async (userId) => {
+  try {
+    return await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .find({ userId: new ObjectId(userId) })
+      .toArray()
+  } catch (error) {
+    throw new Error(error)
+  }
 }
 
 const addToFavorites = async (userId, dishId) => {
   try {
     console.log('Model: addToFavorites', { userId, dishId })
 
-    const dish = await GET_DB().collection('dish').findOne({ _id: new ObjectId(dishId) })
+    const dish = await GET_DB()
+      .collection('dish')
+      .findOne({ _id: new ObjectId(dishId) })
     if (!dish) {
       throw new Error('Dish not found')
     }
 
-    const user = await GET_DB().collection('user').findOne({ _id: new ObjectId(userId) })
+    const user = await GET_DB()
+      .collection('user')
+      .findOne({ _id: new ObjectId(userId) })
     if (!user) {
       throw new Error('User not found')
     }
-
 
     const existingFavorite = await GET_DB()
       .collection(_COLLECTION_NAME)
@@ -58,7 +67,6 @@ const addToFavorites = async (userId, dishId) => {
     throw error
   }
 }
-
 
 const viewFavorites = async (userId, paginationParams) => {
   try {
@@ -116,18 +124,14 @@ const viewFavorites = async (userId, paginationParams) => {
   }
 }
 
-
-
 const deleteFromFavorites = async (userId, dishId) => {
   try {
-
     const favorite = await GET_DB()
       .collection(_COLLECTION_NAME)
       .findOne({ userId: new ObjectId(userId), dishId: new ObjectId(dishId) })
     if (!favorite) {
       throw new Error('Favorite not found')
     }
-
 
     await GET_DB()
       .collection(_COLLECTION_NAME)
@@ -142,6 +146,7 @@ const deleteFromFavorites = async (userId, dishId) => {
 export const favoriteModel = {
   _COLLECTION_NAME,
   _COLLECTION_SCHEMA,
+  getfavoriteByUserId,
   addToFavorites,
   viewFavorites,
   deleteFromFavorites

@@ -1,6 +1,8 @@
-import { dishModel } from '@/models/dishModel'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
+
+import { dishModel } from '@/models/dishModel'
+import { favoriteModel } from '@/models/favoriteModel'
 
 const getAll = async (paginationParams) => {
   try {
@@ -9,6 +11,51 @@ const getAll = async (paginationParams) => {
     return result
   } catch (error) {
     throw error
+  }
+}
+
+const getDetails = async (dishId) => {
+  try {
+    const dish = await dishModel.getDetails(dishId)
+
+    if (!dish || dish.length === 0) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
+    }
+
+    return dish
+  } catch (error) {
+    throw error
+  }
+}
+
+const getRandomUnfavoritedDishes = async (userId, limit = 10) => {
+  try {
+    const favorites = await favoriteModel.getfavoriteByUserId(userId)
+
+    const allDishes = await dishModel.getAllExistDish()
+
+    if (!allDishes || allDishes.length === 0) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
+    }
+
+    if (!favorites || favorites.length === 0) {
+      const shuffled = allDishes.sort(() => 0.5 - Math.random())
+      return shuffled.slice(0, limit)
+    }
+
+    const favoritedDishIds = favorites.map((fav) => fav.dishId.toString())
+
+    console.log('---')
+
+    const unfavoritedDishes = allDishes.filter((dish) => !favoritedDishIds.includes(dish._id.toString()))
+
+    //RANDOM
+    const shuffled = unfavoritedDishes.sort(() => 0.5 - Math.random())
+    const result = shuffled.slice(0, limit)
+
+    return result
+  } catch (error) {
+    throw new Error('Failed to get random unfavorited dishes: ' + error.message)
   }
 }
 
@@ -102,20 +149,6 @@ const searchByIsActive = async (isActive, paginationParams) => {
   }
 }
 
-const getDetails = async (dishId) => {
-  try {
-    const dish = await dishModel.getDetails(dishId)
-
-    if (!dish || dish.length === 0) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
-    }
-
-    return dish
-  } catch (error) {
-    throw error
-  }
-}
-
 const createNew = async (reqBody) => {
   try {
     const newDish = {
@@ -190,12 +223,13 @@ const getDishCount = async () => {
 
 export const dishService = {
   getAll,
+  getDetails,
+  getRandomUnfavoritedDishes,
   searchByName,
   searchByCookingTime,
   searchByCalorie,
   searchByDifficulty,
   searchByIsActive,
-  getDetails,
   createNew,
   updateDish,
   activateDish,

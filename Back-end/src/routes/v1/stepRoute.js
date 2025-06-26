@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 
 import { stepController } from '@/controllers/stepController'
 import { stepValidation } from '@/validations/stepValidation'
+import { authMiddleware } from '@/middlewares/authMiddleware'
 
 const Router = express.Router()
 
@@ -12,6 +13,8 @@ const Router = express.Router()
  *   get:
  *     summary: Get all steps (with optional filters and sorting)
  *     tags: [step]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: isActive
@@ -54,6 +57,8 @@ const Router = express.Router()
  *   post:
  *     summary: Create a new step
  *     tags: [step]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -106,6 +111,8 @@ const Router = express.Router()
  *   get:
  *     summary: Get steps by dish ID
  *     tags: [step]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: dishId
@@ -153,6 +160,8 @@ const Router = express.Router()
  *   get:
  *     summary: Get step by ID
  *     tags: [step]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -182,6 +191,8 @@ const Router = express.Router()
  *   put:
  *     summary: Update step by ID
  *     tags: [step]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -239,6 +250,8 @@ const Router = express.Router()
  *   patch:
  *     summary: Activate step by ID (set isActive to true)
  *     tags: [step]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -270,6 +283,8 @@ const Router = express.Router()
  *   patch:
  *     summary: Deactivate step by ID (set isActive to false)
  *     tags: [step]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -327,10 +342,36 @@ const Router = express.Router()
  *           example: "2025-05-31T00:00:00Z"
  */
 
-Router.route('/').get(stepController.getAll).post(stepValidation.createNew, stepController.createNew)
-Router.route('/by-dish/:dishId').get(stepController.getDetailsByDishId)
-Router.route('/:id').get(stepController.getDetails).put(stepValidation.updateStep, stepController.updateStep)
-Router.route('/:id/activate').patch(stepController.activateStep)
-Router.route('/:id/deactivate').patch(stepController.deactivateStep)
+Router.route('/')
+  .get(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['admin']), stepController.getAll)
+  .post(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['admin']),
+    stepValidation.createNew,
+    stepController.createNew
+  )
+Router.route('/by-dish/:dishId').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin', 'user']),
+  stepController.getDetailsByDishId
+)
+Router.route('/:id')
+  .get(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['admin']), stepController.getDetails)
+  .put(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['admin']),
+    stepValidation.updateStep,
+    stepController.updateStep
+  )
+Router.route('/:id/activate').patch(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  stepController.activateStep
+)
+Router.route('/:id/deactivate').patch(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  stepController.deactivateStep
+)
 
 export const stepRoute = Router

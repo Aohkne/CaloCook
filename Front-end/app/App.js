@@ -1,18 +1,25 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
-
-import { ThemeProvider } from '@contexts/ThemeProvider';
+import { store } from '@redux/store';
 
 import { NavigationContainer } from '@react-navigation/native';
 import StackNavigator from '@navigations/StackNavigator';
 
+import { ThemeProvider } from '@contexts/ThemeProvider';
+import { AuthProvider } from '@contexts/AuthContext';
+import { Provider } from 'react-redux';
+
 export default function App() {
   return (
-    <ThemeProvider>
-      <NavigationContainer>
-        <StackNavigator />
-      </NavigationContainer>
-    </ThemeProvider>
+    <Provider store={store}>
+      <AuthProvider>
+        <ThemeProvider>
+          <NavigationContainer>
+            <StackNavigator />
+          </NavigationContainer>
+        </ThemeProvider>
+      </AuthProvider>
+    </Provider>
   );
 }
 

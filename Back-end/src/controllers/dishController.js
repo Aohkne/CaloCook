@@ -61,6 +61,23 @@ const getDetails = async (req, res, next) => {
   }
 }
 
+const getRandomUnfavoritedDishes = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const { limit } = req.query
+
+    const dish = await dishService.getRandomUnfavoritedDishes(id, limit)
+
+    res.status(StatusCodes.OK).json({
+      code: StatusCodes.OK,
+      message: 'Get successfull',
+      data: dish
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const createNew = async (req, res, next) => {
   try {
     const createdDish = await dishService.createNew(req.body)
@@ -142,6 +159,7 @@ const getDishCount = async (req, res, next) => {
 export const dishController = {
   getAll,
   getDetails,
+  getRandomUnfavoritedDishes,
   createNew,
   updateDish,
   activateDish,

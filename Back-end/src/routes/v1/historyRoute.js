@@ -2,6 +2,7 @@ import express from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { historyController } from '@/controllers/historyController'
 import { historyValidation } from '@/validations/historyValidation'
+import { authMiddleware } from '@/middlewares/authMiddleware'
 
 const Router = express.Router()
 
@@ -11,6 +12,8 @@ const Router = express.Router()
  *   get:
  *     summary: View all eating history of a user
  *     tags: [history]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -91,6 +94,8 @@ const Router = express.Router()
  *   post:
  *     summary: Add an eating record to user's history
  *     tags: [history]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -150,6 +155,8 @@ const Router = express.Router()
  *   get:
  *     summary: Search eating history by user ID
  *     tags: [history]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -198,6 +205,8 @@ const Router = express.Router()
  *   get:
  *     summary: Search eating history by dish ID
  *     tags: [history]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: dishId
@@ -246,6 +255,8 @@ const Router = express.Router()
  *   delete:
  *     summary: Delete an eating history record
  *     tags: [history]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: historyId
@@ -276,6 +287,8 @@ const Router = express.Router()
  *   put:
  *     summary: Edit an eating history record
  *     tags: [history]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: historyId
@@ -336,6 +349,8 @@ const Router = express.Router()
  *   get:
  *     summary: View details of a specific history record
  *     tags: [history]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: historyId
@@ -361,7 +376,7 @@ const Router = express.Router()
  *                   type: object
  *                   properties:
  *                     userId:
-  *                       type: string
+ *                       type: string
  *                     dishId:
  *                       type: string
  *                     consumedAt:
@@ -391,12 +406,13 @@ const Router = express.Router()
  *                           type: string
  *                         updatedAt:
  *                           type: string
- *       400:
- *         description: Invalid historyId  
+ *
  * /api/v1/history/{userId}/total-calories:
  *   get:
  *     summary: View total calories consumed by a user on a specific date
  *     tags: [history]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -443,24 +459,62 @@ const Router = express.Router()
  *                           calorie:
  *                             type: number
  *                           eatenAt:
- *                             type: string   
+ *                             type: string
  */
 
 Router.route('/:userId/history')
-  .get(historyValidation.viewHistory, historyController.viewHistory)
-  .post(historyValidation.addToHistory, historyController.addToHistory)
+  .get(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
+    historyValidation.viewHistory,
+    historyController.viewHistory
+  )
+  .post(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
+    historyValidation.addToHistory,
+    historyController.addToHistory
+  )
 
-Router.route('/user/:userId')
-  .get(historyValidation.searchByUserId, historyController.searchByUserId)
+Router.route('/user/:userId').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
+  historyValidation.searchByUserId,
+  historyController.searchByUserId
+)
 
-Router.route('/dish/:dishId')
-  .get(historyValidation.searchByDishId, historyController.searchByDishId)
+Router.route('/dish/:dishId').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
+  historyValidation.searchByDishId,
+  historyController.searchByDishId
+)
 
 Router.route('/:historyId')
-  .delete(historyValidation.deleteFromHistory, historyController.deleteFromHistory)
-  .put(historyValidation.editHistory, historyController.editHistory)
-Router.route('/:historyId/detail')
-  .get(historyValidation.viewHistoryDetail, historyController.viewHistoryDetail)
-  Router.route('/:userId/total-calories')
-  .get(historyValidation.getTotalCalories, historyController.getTotalCalories)
+  .delete(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
+    historyValidation.deleteFromHistory,
+    historyController.deleteFromHistory
+  )
+  .put(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
+    historyValidation.editHistory,
+    historyController.editHistory
+  )
+
+Router.route('/:historyId/detail').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
+  historyValidation.viewHistoryDetail,
+  historyController.viewHistoryDetail
+)
+
+Router.route('/:userId/total-calories').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
+  historyValidation.getTotalCalories,
+  historyController.getTotalCalories
+)
 export const historyRoute = Router

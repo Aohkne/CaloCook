@@ -1,7 +1,9 @@
 import express from 'express'
+
 import { favoriteController } from '@/controllers/favoriteController'
 import { favoriteValidation } from '@/validations/favoriteValidation'
 import { paginationHelper } from '@/utils/pagination'
+import { authMiddleware } from '@/middlewares/authMiddleware'
 
 const Router = express.Router()
 
@@ -11,6 +13,8 @@ const Router = express.Router()
  *   post:
  *     summary: Add a dish to user's favorites
  *     tags: [favorite]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -37,6 +41,8 @@ const Router = express.Router()
  *   get:
  *     summary: View all favorite dishes of a user
  *     tags: [favorite]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -147,6 +153,8 @@ const Router = express.Router()
  *   delete:
  *     summary: Remove a dish from user's favorites
  *     tags: [favorite]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -166,10 +174,25 @@ const Router = express.Router()
  */
 
 Router.route('/:userId')
-  .post(favoriteValidation.addToFavorites, favoriteController.addToFavorites)
-  .get(paginationHelper.validatePaginationMiddleware, favoriteValidation.viewFavorites, favoriteController.viewFavorites)
+  .post(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
+    favoriteValidation.addToFavorites,
+    favoriteController.addToFavorites
+  )
+  .get(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
+    paginationHelper.validatePaginationMiddleware,
+    favoriteValidation.viewFavorites,
+    favoriteController.viewFavorites
+  )
 
-Router.route('/:userId/:dishId')
-  .delete(favoriteValidation.deleteFromFavorites, favoriteController.deleteFromFavorites)
+Router.route('/:userId/:dishId').delete(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
+  favoriteValidation.deleteFromFavorites,
+  favoriteController.deleteFromFavorites
+)
 
 export const favoriteRoute = Router

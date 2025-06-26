@@ -17,7 +17,6 @@ export const swaggerOptions = {
         }
       }
     },
-    security: [{ bearerAuth: [] }],
     servers: [
       {
         url: `http://localhost:${env.PORT || 8080}`,
