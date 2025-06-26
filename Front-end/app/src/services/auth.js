@@ -5,17 +5,24 @@ export const loginService = async (credentials) => {
   try {
     const response = await api.post('/auth/login', credentials);
 
-    if (response.data?.user?.role === 'admin') {
-      const error = new Error('Your account does not have permission to log in to this platform.');
-      error.code = 'ADMIN_LOGIN_FORBIDDEN';
-      throw error;
+    if (response.data?.role === 'admin') {
+      throw {
+        code: 'ADMIN_LOGIN_FORBIDDEN',
+        message: 'Your account does not have permission to log in to this platform.'
+      };
     }
 
     return response.data;
   } catch (error) {
-    console.log('service: ', error);
+    // Axios
+    if (error.response?.data) {
+      throw error.response.data;
+    }
 
-    throw error.response?.data || { message: 'Login failed' };
+    throw {
+      message: error.message || 'Login failed',
+      code: error.code || 'LOGIN_FAILED'
+    };
   }
 };
 

@@ -33,8 +33,6 @@ export const AuthProvider = ({ children }) => {
   // LOAD AUTH
   const loadAuthData = async () => {
     try {
-      console.log('Loading auth data from AsyncStorage...');
-
       const values = await AsyncStorage.multiGet([STORAGE_KEYS.USER, STORAGE_KEYS.TOKEN, STORAGE_KEYS.REFRESH_TOKEN]);
 
       const storedUser = values[0][1] ? JSON.parse(values[0][1]) : null;
@@ -78,15 +76,12 @@ export const AuthProvider = ({ children }) => {
   const saveAuthData = async () => {
     if (isAuthenticated && user && token && refreshToken) {
       if (user.role === 'admin') {
-        console.log('Attempted to save admin data - aborting');
         await clearAuthData();
         dispatch(logoutLocal());
         return;
       }
 
       try {
-        console.log('Saving auth data to AsyncStorage...');
-
         await AsyncStorage.multiSet([
           [STORAGE_KEYS.USER, JSON.stringify(user)],
           [STORAGE_KEYS.TOKEN, token],
@@ -129,7 +124,7 @@ export const AuthProvider = ({ children }) => {
 
   // LOGOUT
   const logout = async () => {
-    console.log('Logging out...');
+    // console.log('Logging out...');
     await clearAuthData();
     dispatch(logoutLocal());
   };

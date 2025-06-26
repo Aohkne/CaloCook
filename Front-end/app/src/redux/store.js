@@ -1,9 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { setStore } from '@services/api';
 import authSlice from './slices/authSlice';
+import dishSlice from './slices/dishSlice';
 
 export const store = configureStore({
   reducer: {
-    auth: authSlice
+    auth: authSlice,
+    dish: dishSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -12,3 +15,5 @@ export const store = configureStore({
       }
     })
 });
+
+setStore(store);

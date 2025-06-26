@@ -176,7 +176,7 @@ function RandomCard({ dishes, currentIndex, onCardChange }, ref) {
 
         return (
           <Animated.View
-            key={`${item.id}`}
+            key={`${item._id}`}
             style={[getCardStyle(stackIndex), isTopCard && animatedCardStyle]}
             {...dragHandlers}
           >
@@ -192,20 +192,22 @@ function RandomCard({ dishes, currentIndex, onCardChange }, ref) {
               </>
             )}
 
-            <Image source={item.image} style={styles.image} />
-
+            <Image
+              source={item.imageUrl ? require('@assets/img/default-img.png') : { uri: imageUrl }}
+              style={styles.image}
+            />
             <View style={styles.content}>
-              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.title}>{item.name}</Text>
 
               <View style={styles.info}>
                 <View style={styles.infoItem}>
                   <Clock size={15} color={colors.description + '80'} style={styles.infoIcon} />
-                  <Text style={styles.infoText}>{item.time}</Text>
+                  <Text style={styles.infoText}>{item.cookingTime}</Text>
                 </View>
 
                 <View style={styles.infoItem}>
                   <Flame size={15} color={colors.description + '80'} style={styles.infoIcon} />
-                  <Text style={styles.infoText}>{item.calories}</Text>
+                  <Text style={styles.infoText}>{item.calorie}</Text>
                 </View>
 
                 <View style={styles.infoItem}>
@@ -214,7 +216,7 @@ function RandomCard({ dishes, currentIndex, onCardChange }, ref) {
                 </View>
               </View>
 
-              <Text style={styles.description}>{item.ingredients}</Text>
+              <Text style={styles.description}>{item.description}</Text>
             </View>
           </Animated.View>
         );

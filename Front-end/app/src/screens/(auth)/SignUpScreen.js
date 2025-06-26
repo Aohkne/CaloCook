@@ -44,8 +44,6 @@ export default function SignUpScreen() {
         password: password
       };
 
-      console.log(userData);
-
       await dispatch(register(userData)).unwrap();
 
       Alert.alert('Success', 'Account created successfully!', [

@@ -8,6 +8,7 @@ export const setStore = (storeInstance) => {
   store = storeInstance;
 };
 
+console.log('Fe get API at:' + API_URL);
 const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,

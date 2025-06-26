@@ -9,9 +9,6 @@ import { ThemeProvider } from '@contexts/ThemeProvider';
 import { AuthProvider } from '@contexts/AuthContext';
 import { Provider } from 'react-redux';
 
-import { setStore } from '@services/api';
-setStore(store);
-
 export default function App() {
   return (
     <Provider store={store}>
