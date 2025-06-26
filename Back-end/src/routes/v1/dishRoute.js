@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes'
 import { paginationHelper } from '@/utils/pagination'
 import { dishValidation } from '@/validations/dishValidation'
 import { dishController } from '@/controllers/dishController'
+import { authMiddleware } from '@/middlewares/authMiddleware'
 
 const Router = express.Router()
 
@@ -13,6 +14,8 @@ const Router = express.Router()
  *   get:
  *     summary: Get all dishes (with optional filters, sorting and pagination)
  *     tags: [dish]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -142,6 +145,8 @@ const Router = express.Router()
  *   post:
  *     summary: Create a new dish
  *     tags: [dish]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -208,6 +213,8 @@ const Router = express.Router()
  *   get:
  *     summary: Get dish by ID
  *     tags: [dish]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -234,6 +241,8 @@ const Router = express.Router()
  *   put:
  *     summary: Update dish by ID
  *     tags: [dish]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -300,6 +309,8 @@ const Router = express.Router()
  *   patch:
  *     summary: Activate dish by ID (set isActive to true)
  *     tags: [dish]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -328,6 +339,8 @@ const Router = express.Router()
  *   patch:
  *     summary: Deactivate dish by ID (set isActive to false)
  *     tags: [dish]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -393,10 +406,36 @@ const Router = express.Router()
  */
 
 Router.route('/')
-  .get(paginationHelper.validatePaginationMiddleware, dishController.getAll)
-  .post(dishValidation.createNew, dishController.createNew)
-Router.route('/:id').get(dishController.getDetails).put(dishValidation.updateDish, dishController.updateDish)
-Router.route('/:id/activate').patch(dishController.activateDish)
-Router.route('/:id/deactivate').patch(dishController.deactivateDish)
+  .get(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['admin', 'user']),
+    paginationHelper.validatePaginationMiddleware,
+    dishController.getAll
+  )
+  .post(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['admin']),
+    dishValidation.createNew,
+    dishController.createNew
+  )
+Router.route('/:id')
+  .get(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['admin', 'user']), dishController.getDetails)
+  .put(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['admin']),
+    dishValidation.updateDish,
+    dishController.updateDish
+  )
+
+Router.route('/:id/activate').patch(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  dishController.activateDish
+)
+Router.route('/:id/deactivate').patch(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  dishController.deactivateDish
+)
 
 export const dishRoute = Router

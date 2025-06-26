@@ -1,7 +1,6 @@
 import express from 'express'
-import { StatusCodes } from 'http-status-codes'
+import { authMiddleware } from '@/middlewares/authMiddleware'
 import { userController } from '@/controllers/userController'
-import { userValidation } from '@/validations/userValidation'
 import { paginationHelper } from '@/utils/pagination'
 
 const Router = express.Router()
@@ -12,6 +11,8 @@ const Router = express.Router()
  *   get:
  *     summary: Get all users (with optional filters and sorting)
  *     tags: [user]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *        - in: query
  *          name: username
@@ -95,6 +96,8 @@ const Router = express.Router()
  *   get:
  *     summary: Get user by ID
  *     tags: [user]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -123,6 +126,8 @@ const Router = express.Router()
  *   patch:
  *     summary: Activate user by ID (set isActive to true)
  *     tags: [user]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -151,6 +156,8 @@ const Router = express.Router()
  *   patch:
  *     summary: Deactivate user by ID (set isActive to false)
  *     tags: [user]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -229,8 +236,25 @@ const Router = express.Router()
  *           example: "2025-05-23T07:00:00.000Z"
  */
 
-Router.route('/').get(paginationHelper.validatePaginationMiddleware, userController.getAll)
-Router.route('/:id').get(userController.getDetails)
-Router.route('/:id/activate').patch(userController.activateUser)
-Router.route('/:id/deactivate').patch(userController.deactivateUser)
+Router.route('/').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  paginationHelper.validatePaginationMiddleware,
+  userController.getAll
+)
+Router.route('/:id').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  userController.getDetails
+)
+Router.route('/:id/activate').patch(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  userController.activateUser
+)
+Router.route('/:id/deactivate').patch(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  userController.deactivateUser
+)
 export const userRoute = Router
