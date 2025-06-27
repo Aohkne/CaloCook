@@ -3,7 +3,7 @@ import { favoriteService } from '@/services/favoriteService'
 import { paginationHelper } from '@/utils/pagination'
 const addToFavorites = async (req, res, next) => {
   try {
-    const userId = req.params.userId
+    const userId = req.body.userId
     const dishId = req.body.dishId
 
     const favorite = await favoriteService.addToFavorites(userId, dishId)
@@ -39,8 +39,8 @@ const viewFavorites = async (req, res, next) => {
 }
 const deleteFromFavorites = async (req, res, next) => {
   try {
-    const userId = req.params.userId
-    const dishId = req.params.dishId
+    const userId = req.body.userId
+    const dishId = req.body.dishId
 
     const result = await favoriteService.deleteFromFavorites(userId, dishId)
 
