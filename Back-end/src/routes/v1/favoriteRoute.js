@@ -9,13 +9,13 @@ const Router = express.Router()
 
 /**
  * @swagger
- * /api/v1/favorite/{userId}:
- *   post:
+ * /api/v1/favorite:
+ *    post:
  *     summary: Add a dish to user's favorites
  *     tags: [favorite]
  *     security:
  *       - bearerAuth: []
- 
+ *
  *     requestBody:
  *       required: true
  *       content:
@@ -37,6 +37,34 @@ const Router = express.Router()
  *     responses:
  *       201:
  *         description: Favorite added successfully
+ *    delete:
+ *     summary: Remove a dish from user's favorites
+ *     tags: [favorite]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - dishId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: "68306f4d4928f3fe108df627"
+ *                 description: ID of the user
+ *               dishId:
+ *                 type: string
+ *                 example: "6841bd26594d6203e5e54c13"
+ *                 description: ID of the dish
+ *     responses:
+ *       200:
+ *         description: Favorite removed successfully
+ *
+ * /api/v1/favorite/{userId}:
  *   get:
  *     summary: View all favorite dishes of a user
  *     tags: [favorite]
@@ -148,54 +176,28 @@ const Router = express.Router()
  *                             type: string
  *                           updatedAt:
  *                             type: string
- * /api/v1/favorite/{userId}/{dishId}:
- *   delete:
- *     summary: Remove a dish from user's favorites
- *     tags: [favorite]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - userId
- *               - dishId
- *             properties:
- *               userId:
- *                 type: string
- *                 example: "68306f4d4928f3fe108df627"
- *                 description: ID of the user
- *               dishId:
- *                 type: string
- *                 example: "6841bd26594d6203e5e54c13"
- *                 description: ID of the dish
- *     responses:
- *       200:
- *         description: Favorite removed successfully
  */
 
-Router.route('/:userId')
+Router.route('/')
   .post(
     authMiddleware.authenticateUser,
     authMiddleware.authorizeRole(['user']),
     favoriteValidation.addToFavorites,
     favoriteController.addToFavorites
   )
-  .get(
+  .delete(
     authMiddleware.authenticateUser,
     authMiddleware.authorizeRole(['user']),
-    paginationHelper.validatePaginationMiddleware,
-    favoriteValidation.viewFavorites,
-    favoriteController.viewFavorites
+    favoriteValidation.deleteFromFavorites,
+    favoriteController.deleteFromFavorites
   )
 
-Router.route('/:userId/:dishId').delete(
+Router.route('/:userId').get(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['user']),
-  favoriteValidation.deleteFromFavorites,
-  favoriteController.deleteFromFavorites
+  paginationHelper.validatePaginationMiddleware,
+  favoriteValidation.viewFavorites,
+  favoriteController.viewFavorites
 )
+
 export const favoriteRoute = Router
