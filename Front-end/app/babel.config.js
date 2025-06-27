@@ -11,6 +11,7 @@ module.exports = function (api) {
             '@': './src',
             '@assets': './src/assets',
             '@components': './src/components',
+            '@constants': './src/constants',
             '@contexts': './src/contexts',
             '@navigations': './src/navigations',
             '@redux': './src/redux',

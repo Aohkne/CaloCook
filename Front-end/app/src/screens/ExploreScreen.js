@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 import { Animated, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import RandomCard from '@components/RandomCard';
 import { randomDishes, resetDishes } from '@/redux/slices/dishSlice';
+import { likeDish, toggleFavoriteLocal } from '@/redux/slices/favoriteSlice';
 
 export default function ExploreScreen() {
   const { colors } = useTheme();
@@ -29,12 +30,12 @@ export default function ExploreScreen() {
     x: new Animated.Value(1)
   }).current;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (user?._id) {
       // API
       dispatch(randomDishes({ userId: user._id, limit: 10 }));
     }
-  }, [dispatch, user?.id]);
+  }, [dispatch, user?._id]);
 
   const animateScale = useCallback((scale, newValue) => {
     Animated.spring(scale, {
@@ -44,16 +45,65 @@ export default function ExploreScreen() {
     }).start();
   }, []);
 
-  // Action
+  // LIKE API
+  const onLike = useCallback(async () => {
+    if (!user?._id || currentIndex >= dishes.length) return;
+
+    const currentDish = dishes[currentIndex];
+    if (!currentDish) return;
+
+    try {
+      //Optimistic update
+      dispatch(
+        toggleFavoriteLocal({
+          dishId: currentDish._id,
+          isLiked: true,
+          dishData: currentDish
+        })
+      );
+
+      //API
+      const resultAction = await dispatch(
+        likeDish({
+          userId: user._id,
+          dishId: currentDish._id
+        })
+      );
+
+      //Handle API response
+      if (likeDish.fulfilled.match(resultAction)) {
+        console.log('Dish liked successfully');
+      } else {
+        dispatch(
+          toggleFavoriteLocal({
+            dishId: currentDish._id,
+            isLiked: false
+          })
+        );
+        console.error('Failed to like dish:', resultAction.payload);
+      }
+    } catch (error) {
+      // Revert optimistic
+      dispatch(
+        toggleFavoriteLocal({
+          dishId: currentDish._id,
+          isLiked: false
+        })
+      );
+    }
+  }, [dispatch, user?._id, currentIndex, dishes]);
+
+  // ACTION
+
   const handleLike = useCallback(() => {
     if (cardRef.current) {
-      cardRef.current.animateSwipe('right');
+      cardRef.current.animateSwipe('left');
     }
   }, []);
 
   const handleNope = useCallback(() => {
     if (cardRef.current) {
-      cardRef.current.animateSwipe('left');
+      cardRef.current.animateSwipe('right');
     }
   }, []);
 
@@ -64,7 +114,7 @@ export default function ExploreScreen() {
       // API
       dispatch(randomDishes({ userId: user._id, limit: 10 }));
     }
-  }, []);
+  }, [dispatch, user?._id]);
 
   const handleCardChange = useCallback((newIndex) => {
     setCurrentIndex(newIndex);
@@ -77,7 +127,13 @@ export default function ExploreScreen() {
       </View>
 
       <View style={styles.dishList}>
-        <RandomCard ref={cardRef} dishes={dishes} currentIndex={currentIndex} onCardChange={handleCardChange} />
+        <RandomCard
+          ref={cardRef}
+          dishes={dishes}
+          currentIndex={currentIndex}
+          onCardChange={handleCardChange}
+          onLike={onLike}
+        />
       </View>
 
       <View style={styles.action}>
@@ -125,7 +181,7 @@ const createStyles = (colors) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical: 25,
+      paddingVertical: 10,
       paddingHorizontal: 20,
       backgroundColor: colors.background
     },
@@ -134,7 +190,7 @@ const createStyles = (colors) =>
     },
     title: {
       color: colors.title,
-      fontSize: 35,
+      fontSize: 32,
       letterSpacing: 3,
       fontWeight: 700
     },

@@ -45,8 +45,6 @@ const getRandomUnfavoritedDishes = async (userId, limit = 10) => {
 
     const favoritedDishIds = favorites.map((fav) => fav.dishId.toString())
 
-    console.log('---')
-
     const unfavoritedDishes = allDishes.filter((dish) => !favoritedDishIds.includes(dish._id.toString()))
 
     //RANDOM
