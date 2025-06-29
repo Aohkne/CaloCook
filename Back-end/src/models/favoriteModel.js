@@ -29,8 +29,6 @@ const getfavoriteByUserId = async (userId) => {
 
 const addToFavorites = async (userId, dishId) => {
   try {
-    console.log('Model: addToFavorites', { userId, dishId })
-
     const dish = await GET_DB()
       .collection('dish')
       .findOne({ _id: new ObjectId(dishId) })

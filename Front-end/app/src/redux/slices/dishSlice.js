@@ -11,10 +11,12 @@ const initialState = {
 
 // Async thunk
 export const randomDishes = createAsyncThunk(
-  'dish/random/userId/',
+  'dish/random/userId',
   async ({ userId, limit = 10 }, { rejectWithValue }) => {
     try {
       const response = await getRandomDishService(userId, limit);
+
+      // console.log(JSON.stringify(response, null, 2));
 
       return response;
     } catch (error) {
