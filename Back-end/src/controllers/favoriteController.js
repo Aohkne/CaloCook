@@ -53,9 +53,23 @@ const deleteFromFavorites = async (req, res, next) => {
     next(error)
   }
 }
+const getTopFavorites = async (req, res, next) => {
+  try {
+    const { limit } = req.query
+    const topFavorites = await favoriteService.getTopFavorites(parseInt(limit) || 10)
+    return res.status(StatusCodes.OK).json({
+      statusCode: StatusCodes.OK,
+      message: 'Top favorite dishes retrieved successfully',
+      data: topFavorites
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 
 export const favoriteController = {
   addToFavorites,
   viewFavorites,
-  deleteFromFavorites
+  deleteFromFavorites,
+  getTopFavorites
 }
