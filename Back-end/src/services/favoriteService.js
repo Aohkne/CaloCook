@@ -64,7 +64,6 @@ const deleteFromFavorites = async (userId, dishId) => {
 }
 const getTopFavorites = async (limit = 10) => {
   try {
-    console.log('Service: getTopFavorites', { limit })
     const result = await favoriteModel.getTopFavorites(limit)
     return result
   } catch (error) {

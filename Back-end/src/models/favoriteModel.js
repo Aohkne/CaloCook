@@ -142,7 +142,6 @@ const deleteFromFavorites = async (userId, dishId) => {
 }
 const getTopFavorites = async (limit = 10) => {
   try {
-    console.log('Model: getTopFavorites', { limit })
     const topFavorites = await GET_DB()
       .collection(_COLLECTION_NAME)
       .aggregate([

@@ -129,7 +129,8 @@ Router.route('/dish-count').get(
   dishController.getDishCount
 )
 Router.route('/top-favorites').get(
- 
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
   favoriteController.getTopFavorites
 )
 export const dashboardRoute = Router
