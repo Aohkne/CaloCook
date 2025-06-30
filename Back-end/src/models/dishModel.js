@@ -59,7 +59,7 @@ const searchByName = async (name, paginationParams) => {
   try {
     const { skip, limit, sortBy, order } = paginationParams
     const sortObject = createSortObject(sortBy, order)
-    const filter = { name: { $regex: `^${name}`, $options: 'i' } } // ^: bắt đầu + i: ko phân biệt hoa thường
+    const filter = { name: { $regex: name, $options: 'i' } } // ^: bắt đầu + i: ko phân biệt hoa thường
 
     const [data, totalCount] = await Promise.all([
       GET_DB().collection(_COLLECTION_NAME).find(filter).sort(sortObject).skip(skip).limit(limit).toArray(),
