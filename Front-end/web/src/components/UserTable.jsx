@@ -2,8 +2,9 @@ import { Popconfirm, Space, Table } from "antd";
 import { Ban, Check, Edit2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { activateUser, deactivateUser, getUser } from "../api/user";
-
+import { useAuth } from "./AuthContext";
 export default function UserTable({ tabs, searchText = "" }) {
+  const { accessToken } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -17,11 +18,11 @@ export default function UserTable({ tabs, searchText = "" }) {
       params.username = searchText;
       params.email = searchText;
     }
-    const response = await getUser(params);
+    const response = await getUser({ accessToken, ...params });
     if (response) setUsers(response.data);
     else setUsers([]);
     setLoading(false);
-  }, [tabs, searchText]);
+  }, [tabs, searchText, accessToken]);
 
   useEffect(() => {
     fetchData();

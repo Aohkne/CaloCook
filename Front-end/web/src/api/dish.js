@@ -1,6 +1,7 @@
 import api from "./api";
 
 export async function getDish({
+  accessToken,
   page,
   limit,
   sortBy,
@@ -28,11 +29,17 @@ export async function getDish({
   if (difficulty) params.difficulty = difficulty;
   if (isActive !== undefined) params.isActive = isActive;
 
-  const response = await api.get("/dish", { params });
+  const response = await api.get("/dish", {
+    params,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 }
 
 export async function addDish({
+  accessToken,
   name,
   cookingTime,
   calorie,
@@ -50,15 +57,27 @@ export async function addDish({
   if (imageUrl) params.imageUrl = imageUrl;
   if (isActive != null) params.isActive = isActive;
 
-  const response = await api.post("/dish", params);
+  const response = await api.post("/dish", params, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 }
 
-export async function activateDish({ id }) {
-  const response = await api.patch(`/dish/${id}/activate`);
+export async function activateDish({ accessToken, id }) {
+  const response = await api.patch(`/dish/${id}/activate`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 }
-export async function deactivateDish({ id }) {
-  const response = await api.patch(`/dish/${id}/deactivate`);
+export async function deactivateDish({ accessToken, id }) {
+  const response = await api.patch(`/dish/${id}/deactivate`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 }

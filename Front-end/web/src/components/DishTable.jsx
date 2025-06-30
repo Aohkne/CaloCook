@@ -3,7 +3,7 @@ import { Image, Popconfirm, Space, Table } from "antd";
 import { Ban, Check, Edit2 } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { activateDish, deactivateDish, getDish } from "../api/dish";
-
+import { useAuth } from "./AuthContext";
 const DishTable = React.memo(function DishTable({
   tabs,
   handleOk,
@@ -11,6 +11,7 @@ const DishTable = React.memo(function DishTable({
   sortBy,
   order,
 }) {
+  const { accessToken } = useAuth();
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +26,7 @@ const DishTable = React.memo(function DishTable({
       }
       params.sortBy = sortBy;
       params.order = order;
-      const response = await getDish(params);
+      const response = await getDish({ accessToken, ...params });
       if (response) setDishes(response.data);
       else setDishes([]);
     } catch (error) {
@@ -34,7 +35,7 @@ const DishTable = React.memo(function DishTable({
       console.error("Failed to fetch dishes:", error);
     }
     setLoading(false);
-  }, [tabs, searchText, sortBy, order]);
+  }, [tabs, searchText, sortBy, order, accessToken]);
 
   useEffect(() => {
     fetchData();

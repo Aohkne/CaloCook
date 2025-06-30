@@ -1,16 +1,13 @@
 import api from "./api";
 
-/**
- * Fetches user data from the API.
- * @param {Object} params - The parameters for fetching users.
- * @param {string} [params.username] - The username to filter by.
- * @param {string} [params.email] - The email to filter by.
- * @param {boolean} [params.isActive] - Filter by active status.
- * @param {string} [params.sortBy] - The field to sort by.
- * @param {string} [params.order] - The sort order ('asc' or 'desc').
- * @returns {Promise<Object>} The user data returned from the API.
- */
-export async function getUser({ username, email, isActive, sortBy, order }) {
+export async function getUser({
+  accessToken,
+  username,
+  email,
+  isActive,
+  sortBy,
+  order,
+}) {
   console.log(`[getUser] Fetching user`);
   const params = {};
   if (username) params.username = username;
@@ -19,18 +16,40 @@ export async function getUser({ username, email, isActive, sortBy, order }) {
   if (sortBy) params.sortBy = sortBy;
   if (order) params.order = order;
 
-  const response = await api.get("/user", { params });
+  const response = await api.get("/user", {
+    params,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 }
 
-export async function activateUser({ id }) {
+export async function getUserById({ accessToken, id }) {
+  const response = await api.get(`/user/${id}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+
+export async function activateUser({ accessToken, id }) {
   console.log(`[activateUser] user with id: ${id} activated`);
-  const response = await api.patch(`/user/${id}/activate`);
+  const response = await api.patch(`/user/${id}/activate`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 }
 
-export async function deactivateUser({ id }) {
+export async function deactivateUser({ accessToken, id }) {
   console.log(`[deactivateUser] user with id: ${id} deactivated`);
-  const response = await api.patch(`/user/${id}/deactivate`);
+  const response = await api.patch(`/user/${id}/deactivate`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 }
