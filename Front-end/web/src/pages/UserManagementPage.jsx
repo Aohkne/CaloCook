@@ -4,9 +4,10 @@ import Tabs from "../components/Tabs";
 import SearchBar from "../components/SearchBar";
 
 export default function UserManagementPage() {
+  // Tabs states
   const [selectedTab, setSelectedTab] = useState("All Users");
+  // Search states
   const [searchText, setSearchText] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
   const tabs = ["All Users", "Active", "Banned"];
   return (
     <div>
@@ -24,10 +25,10 @@ export default function UserManagementPage() {
       />
       {/* Searchbar */}
       <SearchBar
+        placeholder={"Search user..."}
+        classname={"mb-5 mt-5"}
         searchText={searchText}
         setSearchText={setSearchText}
-        roleFilter={roleFilter}
-        setRoleFilter={setRoleFilter}
       />
       {/* User Table */}
       <UserTable tabs={selectedTab} searchText={searchText} />

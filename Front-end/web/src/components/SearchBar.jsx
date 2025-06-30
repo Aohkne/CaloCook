@@ -1,27 +1,18 @@
 import { Input, Select } from "antd";
 
 export default function SearchBar({
+  placeholder,
   searchText,
   setSearchText,
-  setRoleFilter,
+  classname,
 }) {
   return (
     // Search bar with a search icon and a filter button
-    <div className="flex mt-5 gap-2 mb-3">
+    <div className={`${classname}`}>
       <Input
-        placeholder="Search user..."
+        placeholder={placeholder}
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
-      />
-      <Select
-        defaultValue={"All"}
-        style={{ width: 120 }}
-        options={[
-          { value: "all", label: "All" },
-          { value: "admin", label: "Admin" },
-          { value: "user", label: "User" },
-        ]}
-        onChange={(value) => setRoleFilter(value)}
       />
     </div>
   );

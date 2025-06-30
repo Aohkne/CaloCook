@@ -11,9 +11,7 @@ import api from "./api";
  * @returns {Promise<Object>} The user data returned from the API.
  */
 export async function getUser({ username, email, isActive, sortBy, order }) {
-  console.log(
-    `[getUser] Fetching user username: ${username}, email: ${email}, isActive: ${isActive}, sortBy: ${sortBy}, order: ${order}`
-  );
+  console.log(`[getUser] Fetching user`);
   const params = {};
   if (username) params.username = username;
   if (email) params.email = email;

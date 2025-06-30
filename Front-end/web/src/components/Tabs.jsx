@@ -1,4 +1,7 @@
-export default function Tabs({ tabs, selectedTab, setSelectedTab }) {
+import React from "react";
+
+const Tabs = React.memo(function Tabs({ tabs, selectedTab, setSelectedTab }) {
+  console.log(`[Tabs] selected: ${selectedTab}`);
   return (
     <div className="h-10 bg-gray-100 inline-flex font-semibold px-1 items-center justify-center rounded-md text-gray-400 mt-4 select-none">
       {tabs.map((tab) => (
@@ -14,4 +17,6 @@ export default function Tabs({ tabs, selectedTab, setSelectedTab }) {
       ))}
     </div>
   );
-}
+});
+
+export default Tabs;

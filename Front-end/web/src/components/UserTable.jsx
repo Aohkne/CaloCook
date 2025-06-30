@@ -117,9 +117,7 @@ export default function UserTable({ tabs, searchText = "" }) {
               {text === true ? (
                 <Popconfirm
                   title="Are you sure you want to deactivate this user?"
-                  onConfirm={async () =>
-                    await handleDeactivate({ id: record._id })
-                  }
+                  onConfirm={() => handleDeactivate({ id: record._id })}
                   okText="Yes"
                   cancelText="Cancel"
                 >
@@ -130,9 +128,7 @@ export default function UserTable({ tabs, searchText = "" }) {
               ) : (
                 <Popconfirm
                   title="Are you sure you want to activate this user?"
-                  onConfirm={async () =>
-                    await handleActivate({ id: record._id })
-                  }
+                  onConfirm={() => handleActivate({ id: record._id })}
                   okText="Yes"
                   cancelText="Cancel"
                 >
@@ -141,11 +137,6 @@ export default function UserTable({ tabs, searchText = "" }) {
                   </button>
                 </Popconfirm>
               )}
-              <Space>
-                <button className="hover:cursor-pointer">
-                  <Edit2 size={16} color="gray" />
-                </button>
-              </Space>
             </Space>
           );
         },
