@@ -19,8 +19,10 @@ const Router = expesss.Router()
  *             properties:
  *               emailOrUsername:
  *                 type: string
+ *                 example: userTest1
  *               password:
  *                 type: string
+ *                 example: Login123@
  *     responses:
  *       200:
  *         description: Login successful
