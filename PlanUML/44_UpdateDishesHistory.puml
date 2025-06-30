@@ -1,0 +1,65 @@
+@startuml UpdateHistory
+
+actor User
+boundary "HistoryPage" as View #lightblue
+participant ":historyRoute" as Route #lightblue
+control "historyValidation" as Validation #orange
+control "historyController" as Controller #lightblue
+participant ":historyService" as Service #lightblue
+entity "historyModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Update History
+User -> View: 1. Click "Edit" on history item
+activate View
+User -> View: 2. Update fields
+User -> View: 3. Click "Save"
+
+View -> Route: 4. PUT /api/v1/history/:id
+activate Route
+
+Route -> Validation: 5. validateUpdateHistory(req)
+activate Validation
+
+alt Validation Failed
+    Validation --> Route: 6. Return 400
+    Route --> View: 6.1. Show error
+    View --> User: 6.1.1. Display error message
+    deactivate Validation
+    deactivate Route
+    deactivate View
+else
+    Validation --> Route: 7. Proceed
+    deactivate Validation
+
+    Route -> Controller: 8. updateHistory(req, res)
+    activate Controller
+
+    Controller -> Service: 9. updateHistory(id)
+    activate Service
+
+    Service -> Model: 10. updateHistoryById(id)
+    activate Model
+
+    Model -> MongoDB: 11. Execute update
+    activate MongoDB
+    MongoDB --> Model: 12. Return update result
+    deactivate MongoDB
+
+    Model --> Service: 13. Return status
+    deactivate Model
+
+    Service --> Controller: 14. Return success
+    deactivate Service
+
+    Controller --> Route: 15. Send response
+    deactivate Controller
+
+    Route --> View: 16. Notify UI
+    deactivate Route
+
+    View --> User: 17. Show "Update success"
+end
+
+deactivate View
+@enduml
