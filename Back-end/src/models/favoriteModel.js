@@ -140,12 +140,59 @@ const deleteFromFavorites = async (userId, dishId) => {
     throw new Error(error)
   }
 }
-
+const getTopFavorites = async (limit = 10) => {
+  try {
+    const topFavorites = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .aggregate([
+        {
+          $group: {
+            _id: '$dishId',
+            favoriteCount: { $sum: 1 }
+          }
+        },
+        {
+          $lookup: {
+            from: 'dish',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'dish'
+          }
+        },
+        { $unwind: '$dish' },
+        {
+          $project: {
+            dishId: { $toString: '$_id' },
+            favoriteCount: 1,
+            dish: {
+              name: 1,
+              cookingTime: 1,
+              calorie: 1,
+              difficulty: 1,
+              description: 1,
+              imageUrl: 1,
+              isActive: 1,
+              createdAt: { $toString: '$dish.createdAt' },
+              updatedAt: { $toString: '$dish.updatedAt' }
+            }
+          }
+        },
+        { $sort: { favoriteCount: -1 } },
+        { $limit: limit }
+      ])
+      .toArray()
+    return topFavorites
+  } catch (error) {
+    console.error('Error in getTopFavorites:', error)
+    throw error
+  }
+}
 export const favoriteModel = {
   _COLLECTION_NAME,
   _COLLECTION_SCHEMA,
   getfavoriteByUserId,
   addToFavorites,
   viewFavorites,
-  deleteFromFavorites
+  deleteFromFavorites,
+  getTopFavorites
 }

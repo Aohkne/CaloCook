@@ -1,0 +1,64 @@
+@startuml FilterDish
+
+actor User
+boundary "DishFilterPage" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "dishValidation" as Validation #orange
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Filter Dishes
+User -> View: 1. Select filter criteria (e.g., difficulty, calories)
+activate View
+User -> View: 2. Click "Filter"
+
+View -> Route: 3. GET /api/v1/dishes?difficulty=easy&calories=<500
+activate Route
+
+Route -> Validation: 4. validateFilterDish(req)
+activate Validation
+
+alt Validation Failed
+    Validation --> Route: 5. Return 400 Bad Request
+    Route --> View: 5.1. Show validation error
+    View --> User: 5.1.1. Display error message
+    deactivate Validation
+    deactivate Route
+    deactivate View
+else Validation Passed
+    Validation --> Route: 6. Proceed
+    deactivate Validation
+
+    Route -> Controller: 7. filterDishes(req, res)
+    activate Controller
+
+    Controller -> Service: 8. filterDishes(queryParams)
+    activate Service
+
+    Service -> Model: 9. queryFilteredDishes(queryParams)
+    activate Model
+
+    Model -> MongoDB: 10. Execute filtered query
+    activate MongoDB
+    MongoDB --> Model: 11. Return matched dishes
+    deactivate MongoDB
+
+    Model --> Service: 12. Return results
+    deactivate Model
+
+    Service --> Controller: 13. Return data
+    deactivate Service
+
+    Controller --> Route: 14. Send response
+    deactivate Controller
+
+    Route --> View: 15. Display filtered list
+    deactivate Route
+
+    View --> User: 16. Show matching dishes
+end
+
+deactivate View
+@enduml

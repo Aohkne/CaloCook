@@ -1,0 +1,64 @@
+@startuml RemoveFromFavorites
+
+actor User
+boundary "FavoriteListPage" as View #lightblue
+participant ":favoriteRoute" as Route #lightblue
+control "favoriteValidation" as Validation #orange
+control "favoriteController" as Controller #lightblue
+participant ":favoriteService" as Service #lightblue
+entity "favoriteModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Remove From Favorite List
+User -> View: 1. Click "Remove" on a favorite item
+activate View
+User -> View: 2. Confirm removal
+
+View -> Route: 3. DELETE /api/v1/favorite/:dishId
+activate Route
+
+Route -> Validation: 4. validateRemoveFavorite(req)
+activate Validation
+
+alt Validation Failed
+    Validation --> Route: 5. Return 400 Bad Request
+    Route --> View: 5.1. Show validation error
+    View --> User: 5.1.1. Display error message
+    deactivate Validation
+    deactivate Route
+    deactivate View
+else Validation Passed
+    Validation --> Route: 6. Proceed
+    deactivate Validation
+
+    Route -> Controller: 7. removeFavorite(req, res)
+    activate Controller
+
+    Controller -> Service: 8. removeFavorite(userId, dishId)
+    activate Service
+
+    Service -> Model: 9. deleteFavorite(userId, dishId)
+    activate Model
+
+    Model -> MongoDB: 10. Execute delete query
+    activate MongoDB
+    MongoDB --> Model: 11. Return delete result
+    deactivate MongoDB
+
+    Model --> Service: 12. Return success/failure
+    deactivate Model
+
+    Service --> Controller: 13. Return result
+    deactivate Service
+
+    Controller --> Route: 14. Send response
+    deactivate Controller
+
+    Route --> View: 15. Update favorite list
+    deactivate Route
+
+    View --> User: 16. Display "Favorite removed"
+end
+
+deactivate View
+@enduml

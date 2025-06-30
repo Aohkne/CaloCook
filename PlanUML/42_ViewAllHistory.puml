@@ -1,0 +1,64 @@
+@startuml ViewAllHistory
+
+actor User
+boundary "HistoryPage" as View #lightblue
+participant ":historyRoute" as Route #lightblue
+control "historyValidation" as Validation #orange
+control "historyController" as Controller #lightblue
+participant ":historyService" as Service #lightblue
+entity "historyModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View History List
+User -> View: 1. Click "View History"
+activate View
+User -> View: 2. Page loads and sends request
+
+View -> Route: 3. GET /api/v1/history
+activate Route
+
+Route -> Validation: 4. validateGetHistory(req)
+activate Validation
+
+alt Validation Failed
+    Validation --> Route: 5. Return 400
+    Route --> View: 5.1. Show error
+    View --> User: 5.1.1. Display error message
+    deactivate Validation
+    deactivate Route
+    deactivate View
+else
+    Validation --> Route: 6. Proceed
+    deactivate Validation
+
+    Route -> Controller: 7. getHistory(req, res)
+    activate Controller
+
+    Controller -> Service: 8. getHistory(userId)
+    activate Service
+
+    Service -> Model: 9. viewHistory(userId)
+    activate Model
+
+    Model -> MongoDB: 10. Query user history
+    activate MongoDB
+    MongoDB --> Model: 11. Return result
+    deactivate MongoDB
+
+    Model --> Service: 12. Return history
+    deactivate Model
+
+    Service --> Controller: 13. Return data
+    deactivate Service
+
+    Controller --> Route: 14. Send response
+    deactivate Controller
+
+    Route --> View: 15. Update UI
+    deactivate Route
+
+    View --> User: 16. Show all history
+end
+
+deactivate View
+@enduml

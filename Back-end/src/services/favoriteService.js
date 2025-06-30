@@ -62,9 +62,18 @@ const deleteFromFavorites = async (userId, dishId) => {
     throw error
   }
 }
+const getTopFavorites = async (limit = 10) => {
+  try {
+    const result = await favoriteModel.getTopFavorites(limit)
+    return result
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
+}
 
 export const favoriteService = {
   addToFavorites,
   viewFavorites,
-  deleteFromFavorites
+  deleteFromFavorites,
+  getTopFavorites
 }
