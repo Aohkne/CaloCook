@@ -1,0 +1,118 @@
+@startuml DeleteIngredient
+
+actor "Admin" as Admin
+boundary "DishDetailPage" as View #lightblue
+participant ":ingredientRoute" as Route #lightblue
+control "ingredientController" as Controller #lightblue
+participant ":ingredientService" as Service #lightblue
+entity "ingredientModel" as IngredientModel #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Delete Ingredient - Deactivate
+
+Admin -> View: 1. Click "Delete Ingredient" button
+activate View
+
+View -> Admin: 2. Show confirmation dialog
+
+Admin -> View: 3. Confirm deletion
+View -> Route: 4. PATCH /api/v1/ingredient/:id/deactivate
+activate Route
+
+note right of Route: Soft delete by setting\nisActive = false
+
+Route -> Controller: 5. deactivateIngredient(req, res, next)
+activate Controller
+
+Controller -> Service: 6. deactivateIngredient(ingredientId)
+activate Service
+
+Service -> IngredientModel: 7. updateIsActive(ingredientId, false)
+activate IngredientModel
+
+IngredientModel -> MongoDB: 8. ExecuteQuery()
+activate MongoDB
+
+alt Ingredient Found & Deactivated
+    MongoDB --> IngredientModel: 9. Return deactivated ingredient
+    deactivate MongoDB
+    
+    IngredientModel --> Service: 10. Return ingredient
+    deactivate IngredientModel
+    
+    Service --> Controller: 11. Return deactivated ingredient
+    deactivate Service
+    
+    Controller --> Route: 12. Send 200 JSON response
+    deactivate Controller
+    
+    Route --> View: 13. Return success response
+    deactivate Route
+    
+    View --> Admin: 14. Show success message\n& hide ingredient from active list
+    
+else Ingredient Not Found
+    MongoDB --> IngredientModel: 9. Return null
+    deactivate MongoDB
+    
+    IngredientModel --> Service: 10. Return null
+    deactivate IngredientModel
+    
+    Service --> Controller: 11. Throw ApiError(404, "Ingredient not found!")
+    deactivate Service
+    
+    Controller --> Route: 12. next(error)
+    deactivate Controller
+    
+    Route --> View: 13. Return 404 error
+    deactivate Route
+    
+    View --> Admin: 14. Show error message
+end
+
+deactivate View
+end
+
+group Alternative: Activate Ingredient (Restore)
+
+Admin -> View: 1. View deactivated ingredients
+activate View
+
+Admin -> View: 2. Click "Restore Ingredient" button
+
+View -> Route: 3. PATCH /api/v1/ingredient/:id/activate
+activate Route
+
+Route -> Controller: 4. activateIngredient(req, res, next)
+activate Controller
+
+Controller -> Service: 5. activateIngredient(ingredientId)
+activate Service
+
+Service -> IngredientModel: 6. updateIsActive(ingredientId, true)
+activate IngredientModel
+
+IngredientModel -> MongoDB: 7. ExecuteQuery()
+activate MongoDB
+
+MongoDB --> IngredientModel: 8. Return activated ingredient
+deactivate MongoDB
+
+IngredientModel --> Service: 9. Return ingredient
+deactivate IngredientModel
+
+Service --> Controller: 10. Return activated ingredient
+deactivate Service
+
+Controller --> Route: 11. Send 200 JSON response
+deactivate Controller
+
+Route --> View: 12. Return success response
+deactivate Route
+
+View --> Admin: 13. Show success message\n& add ingredient back to active list
+
+deactivate View
+end
+
+@enduml

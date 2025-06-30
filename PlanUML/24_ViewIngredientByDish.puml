@@ -1,0 +1,51 @@
+@startuml ViewIngredientByDish
+
+actor "User" as User
+actor "Admin" as Admin
+boundary "DishDetailPage" as View #lightblue
+participant ":ingredientRoute" as Route #lightblue
+control "ingredientController" as Controller #lightblue
+participant ":ingredientService" as Service #lightblue
+entity "ingredientModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View Dish Details
+User -> View: 1. Click Dish
+activate View
+View -> Route: 2. GET /api/v1/ingredient/by-dish/:dishId
+activate Route
+
+Route -> Controller: 3. getDetailsByDishId(req, res)
+activate Controller
+
+Controller -> Service: 4. getDetailsByDishId(dishId, sortBy, order)
+activate Service
+
+Service -> Model: 5. getDetailsByDishId(dishId, sortBy, order)
+activate Model
+
+Model -> MongoDB: 6. ExecuteQuery()
+activate MongoDB
+
+MongoDB --> Model: 7. Return ingredient list
+deactivate MongoDB
+
+Model --> Service: 8. Return ingredients
+deactivate Model
+
+Service --> Controller: 9. Return ingredients
+deactivate Service
+
+Controller --> Route: 10. Send JSON response
+deactivate Controller
+
+Route --> View: 11. Render ingredients
+deactivate Route
+
+View --> User: 12. Show ingredient details
+
+deactivate View
+end
+
+
+@enduml

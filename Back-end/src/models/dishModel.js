@@ -47,6 +47,14 @@ const getAll = async (paginationParams) => {
   }
 }
 
+const getAllExistDish = async () => {
+  try {
+    return await GET_DB().collection(_COLLECTION_NAME).find({ isActive: true }).toArray()
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 const searchByName = async (name, paginationParams) => {
   try {
     const { skip, limit, sortBy, order } = paginationParams
@@ -193,6 +201,7 @@ export const dishModel = {
   _COLLECTION_NAME,
   _COLLECTION_SCHEMA,
   getAll,
+  getAllExistDish,
   searchByName,
   searchByCookingTime,
   searchByCalorie,

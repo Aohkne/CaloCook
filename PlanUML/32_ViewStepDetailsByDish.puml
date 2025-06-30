@@ -1,0 +1,49 @@
+@startuml ViewStepByDish
+
+actor "User" as User
+actor "Admin" as Admin
+boundary "DishDetailPage" as View #lightblue
+participant ":stepRoute" as Route #lightblue
+control "stepController" as Controller #lightblue
+participant ":stepService" as Service #lightblue
+entity "stepModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View Step Details By Dish
+User -> View: 1. Click View Steps for Dish
+activate View
+View -> Route: 2. GET /api/v1/step/by-dish/:dishId?sortBy=stepNumber&order=asc
+activate Route
+
+Route -> Controller: 3. getDetailsByDishId(req, res)
+activate Controller
+
+Controller -> Service: 4. getDetailsByDishId(dishId, sortBy, order)
+activate Service
+
+Service -> Model: 5. getDetailsByDishId(dishId, sortBy, order)
+activate Model
+
+Model -> MongoDB: 6. ExecuteQuery()
+activate MongoDB
+
+MongoDB --> Model: 7. Return step list for dish
+deactivate MongoDB
+
+Model --> Service: 8. Return steps array
+deactivate Model
+
+Service --> Controller: 9. Return steps data
+deactivate Service
+
+Controller --> Route: 10. Send JSON response (200, steps data)
+deactivate Controller
+
+Route --> View: 11. Render step list
+deactivate Route
+
+View --> User: 12. Show step details for dish
+deactivate View
+end
+
+@enduml

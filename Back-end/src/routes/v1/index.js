@@ -1,5 +1,6 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
+
 import { userRoute } from '@/routes/v1/userRoute'
 import { authRoute } from '@/routes/v1/authRoute'
 import { dishRoute } from '@/routes/v1/dishRoute'

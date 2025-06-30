@@ -1,0 +1,21 @@
+import { configureStore } from '@reduxjs/toolkit';
+import { setStore } from '@services/api';
+import authSlice from './slices/authSlice';
+import dishSlice from './slices/dishSlice';
+import favoriteSlice from './slices/favoriteSlice';
+
+export const store = configureStore({
+  reducer: {
+    auth: authSlice,
+    dish: dishSlice,
+    favorite: favoriteSlice
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE']
+      }
+    })
+});
+
+setStore(store);

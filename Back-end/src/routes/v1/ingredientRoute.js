@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 
 import { ingredientController } from '@/controllers/ingredientController'
 import { ingredientValidation } from '@/validations/ingredientValidation'
+import { authMiddleware } from '@/middlewares/authMiddleware'
 
 const Router = express.Router()
 
@@ -12,6 +13,8 @@ const Router = express.Router()
  *   get:
  *     summary: Get all ingredient (with optional filters and sorting)
  *     tags: [ingredient]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: name
@@ -60,6 +63,8 @@ const Router = express.Router()
  *   post:
  *     summary: Create a new ingredient
  *     tags: [ingredient]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -112,6 +117,8 @@ const Router = express.Router()
  *   get:
  *     summary: Get ingredient by dish ID
  *     tags: [ingredient]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: dishId
@@ -154,6 +161,8 @@ const Router = express.Router()
  *   get:
  *     summary: Get ingredient by ID
  *     tags: [ingredient]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -180,6 +189,8 @@ const Router = express.Router()
  *   put:
  *    summary: Update ingredient by ID
  *    tags: [ingredient]
+ *    security:
+ *      - bearerAuth: []
  *    parameters:
  *      - in: path
  *        name: id
@@ -234,6 +245,8 @@ const Router = express.Router()
  *   patch:
  *     summary: Activate ingredient by ID (set isActive to true)
  *     tags: [ingredient]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -262,6 +275,8 @@ const Router = express.Router()
  *   patch:
  *     summary: Deactivate ingredient by ID (set isActive to false)
  *     tags: [ingredient]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -317,12 +332,36 @@ const Router = express.Router()
  * 
  */
 
-Router.route('/').get(ingredientController.getAll).post(ingredientValidation.createNew, ingredientController.createNew)
-Router.route('/by-dish/:dishId').get(ingredientController.getDetailsByDishId)
+Router.route('/')
+  .get(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['admin']), ingredientController.getAll)
+  .post(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['admin']),
+    ingredientValidation.createNew,
+    ingredientController.createNew
+  )
+Router.route('/by-dish/:dishId').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin', 'user']),
+  ingredientController.getDetailsByDishId
+)
 Router.route('/:id')
-  .get(ingredientController.getDetails)
-  .put(ingredientValidation.updateIngredient, ingredientController.updateIngredient)
-Router.route('/:id/activate').patch(ingredientController.activateIngredient)
-Router.route('/:id/deactivate').patch(ingredientController.deactivateIngredient)
+  .get(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['admin']), ingredientController.getDetails)
+  .put(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['admin']),
+    ingredientValidation.updateIngredient,
+    ingredientController.updateIngredient
+  )
+Router.route('/:id/activate').patch(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  ingredientController.activateIngredient
+)
+Router.route('/:id/deactivate').patch(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  ingredientController.deactivateIngredient
+)
 
 export const ingredientRoute = Router

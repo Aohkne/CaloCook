@@ -1,5 +1,7 @@
 import expesss from 'express'
 
+import { authMiddleware } from '@/middlewares/authMiddleware'
+
 import { userController } from '@/controllers/userController'
 import { dishController } from '@/controllers/dishController'
 const Router = expesss.Router()
@@ -10,6 +12,8 @@ const Router = expesss.Router()
  *   get:
  *     summary: Get all users count
  *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
  *     description: Get the total number of users in the system
  *     responses:
  *       200:
@@ -34,6 +38,8 @@ const Router = expesss.Router()
  *   get:
  *     summary: Get all dishes count
  *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
  *     description: Get the total number of dishes in the system
  *     responses:
  *       200:
@@ -53,7 +59,16 @@ const Router = expesss.Router()
  *                   type: number
  *                   example: 10
  */
-Router.route('/user-count').get(userController.getUserCount)
-Router.route('/dish-count').get(dishController.getDishCount)
+Router.route('/user-count').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  userController.getUserCount
+)
+
+Router.route('/dish-count').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  dishController.getDishCount
+)
 
 export const dashboardRoute = Router

@@ -51,7 +51,7 @@ Track your daily calories through every homemade dish
 │   ├── 📄 settings.json            # Cài đặt riêng cho môi trường dev
 │   └── 📄 README.md                # Tài liệu hướng dẫn sử dụng
 │
-└── 📁 Front-end/                   # Client-side applications
+└── 📁 Front-end
     │
     ├── 📁 app/                     # Ứng dụng di động React Native
     │   ├── 📁 .expo/               # Tệp cấu hình Expo
@@ -67,7 +67,7 @@ Track your daily calories through every homemade dish
     │   │   ├── 📁 services/        # Gọi API và các dịch vụ bên ngoài
     │   │   ├── 📁 styles/          # Stylesheet và theme configuration
     │   │   └── 📁 utils/           # Các hàm tiện ích
-    │   │
+    |   |
     │   ├── 📄 .env                 # Biến môi trường cho ứng dụng di động
     │   ├── 📄 .env.example         # Mẫu biến môi trường
     │   ├── 📄 .gitignore           # Quy tắc bỏ qua của Git
@@ -80,25 +80,23 @@ Track your daily calories through every homemade dish
     │   ├── 📄 package.json         # Các gói phụ thuộc và script
     │   └── 📄 package-lock.json    # Phiên bản phụ thuộc được khóa
     │
-    └── 📁 web/                     # Ứng dụng web React (Vite)
-        ├── 📁 node_modules/        # Các gói đã cài đặt cho ứng dụng web
-        ├── 📁 public/              # Tệp tĩnh công khai
-        ├── 📁 src/                 # Mã nguồn của ứng dụng web
-        │   ├── 📁 assets/          # Hình ảnh, phông chữ và các tệp tĩnh
-        │   ├── 📁 components/      # Các thành phần UI có thể tái sử dụng
-        │   ├── 📁 pages/           # Các trang của ứng dụng web
-        │   ├── 📁 hooks/           # Custom React hooks
-        │   ├── 📁 services/        # Gọi API và các dịch vụ
-        │   ├── 📁 styles/          # CSS và SCSS files
-        │   └── 📁 utils/           # Các hàm tiện ích
-        │
-        ├── 📄 .env                 # Biến môi trường cho ứng dụng web
-        ├── 📄 .env.example         # Mẫu biến môi trường
-        ├── 📄 .gitignore           # Quy tắc bỏ qua của Git
-        ├── 📄 index.html           # HTML template chính
-        ├── 📄 package.json         # Các gói phụ thuộc và script
-        ├── 📄 package-lock.json    # Phiên bản phụ thuộc được khóa
-        └── 📄 vite.config.js       # Cấu hình Vite
+    ├── 📁 web/                     # Ứng dụng web quản trị sử dụng React + Vite
+    │    ├── 📁 node_modules/       # Các gói npm cài đặt
+    │    ├── 📁 public/             # Thư mục chứa các tệp tĩnh như favicon, ảnh public
+    │    ├── 📁 src/                # Mã nguồn chính của ứng dụng web
+    │    │   ├── 📁 api/            # Gọi API và các service liên quan
+    │    │   ├── 📁 assets/         # Hình ảnh, phông chữ, v.v...
+    │    │   ├── 📁 components/     # Các component UI có thể tái sử dụng
+    │    │   ├── 📁 pages/          # Các trang chính của ứng dụng (như Home, Login,...)
+    |    |
+    │    ├── 📄 .env                # Biến môi trường (được ignore khi push code)
+    │    ├── 📄 .env.example        # File mẫu cho biến môi trường
+    │    ├── 📄 .gitignore          # File để loại trừ file/thư mục khi push Git
+    │    ├── 📄 eslint.config.js    # Cấu hình linting
+    │    ├── 📄 index.html          # HTML gốc của ứng dụng web
+    │    ├── 📄 vite.config.js      # Cấu hình Vite
+    │    ├── 📄 package.json        # Danh sách dependency và script
+    │    └── 📄 package-lock.json   # Phiên bản cố định của dependency
 ```
 
 ## ✨ Features
@@ -117,10 +115,6 @@ Track your daily calories through every homemade dish
    - API Documentation: http://localhost:8080/api-docs
    - Web App: http://localhost:3000
    - Mobile App: Scan QR code từ Expo CLI
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 👥 Team
 
@@ -141,6 +135,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **GitHub**: https://github.com/Aohkne/CaloCook
 - **Project Repository**: https://github.com/Aohkne/CaloCook
 - **Support**: Xem [SUPPORT.md](./SUPPORT.md) để được hỗ trợ kỹ thuật
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ### 🌟 Star Us on GitHub!
 

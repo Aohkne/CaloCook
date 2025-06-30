@@ -69,6 +69,8 @@ const Router = expesss.Router()
  * /api/v1/auth/logout:
  *   post:
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     summary: Logout user
  *     requestBody:
  *       required: true
@@ -129,6 +131,8 @@ const Router = expesss.Router()
  * /api/v1/auth/change-password:
  *   post:
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     summary: Change password
  *     requestBody:
  *       required: true
@@ -149,6 +153,8 @@ const Router = expesss.Router()
  * /api/v1/auth/profile:
   *   get:
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get user profile
  *     responses:
  *       200:
@@ -199,6 +205,8 @@ const Router = expesss.Router()
  *
  *   post:
  *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
  *     summary: Edit user profile
  *     requestBody:
  *       required: true
@@ -239,11 +247,37 @@ const Router = expesss.Router()
 Router.post('/login', authController.login)
 Router.post('/signup', authController.signup)
 Router.post('/refresh-token', authController.refreshToken)
-Router.post('/logout', authMiddleware.authenticateUser, authController.logout)
+
+Router.post(
+  '/logout',
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin', 'user']),
+  authMiddleware.authenticateUser,
+  authController.logout
+)
 Router.post('/forgot-password', authController.forgotPassword)
 Router.post('/forgot-password/:token', authController.resetPassword)
-Router.post('/change-password', authMiddleware.authenticateUser, authController.changePassword)
-Router.get('/profile', authMiddleware.authenticateUser, authController.getProfile)
-Router.post('/profile', authMiddleware.authenticateUser, authController.editProfile)
+
+Router.post(
+  '/change-password',
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin', 'user']),
+  authMiddleware.authenticateUser,
+  authController.changePassword
+)
+Router.get(
+  '/profile',
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin', 'user']),
+  authMiddleware.authenticateUser,
+  authController.getProfile
+)
+Router.post(
+  '/profile',
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin', 'user']),
+  authMiddleware.authenticateUser,
+  authController.editProfile
+)
 
 export const authRoute = Router

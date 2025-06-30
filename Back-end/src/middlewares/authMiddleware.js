@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
-import { StatusCodes } from 'http-status-codes'
 import { userModel as User } from '@/models/userModel'
+import { StatusCodes } from 'http-status-codes'
 import { env } from '@/config/environment'
 
 const authenticateUser = async (req, res, next) => {
@@ -14,16 +14,16 @@ const authenticateUser = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET)
     const userId = decoded.userId
-    // console.log('userId:', userId, typeof userId)
+
     if (!userId) {
       return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Unauthorized: Invalid token or user not found' })
     }
+
     const user = await User.findById(userId)
-    // console.log('user:', user)
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
     }
-    delete user.password_hash // hoặc password_hash nếu cần
+    delete user.password_hash
     req.user = user
     next()
   } catch (err) {

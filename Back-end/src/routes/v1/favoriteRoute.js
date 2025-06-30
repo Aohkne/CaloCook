@@ -1,23 +1,21 @@
 import express from 'express'
+
 import { favoriteController } from '@/controllers/favoriteController'
 import { favoriteValidation } from '@/validations/favoriteValidation'
 import { paginationHelper } from '@/utils/pagination'
+import { authMiddleware } from '@/middlewares/authMiddleware'
 
 const Router = express.Router()
 
 /**
  * @swagger
- * /api/v1/favorite/{userId}:
- *   post:
+ * /api/v1/favorite:
+ *    post:
  *     summary: Add a dish to user's favorites
  *     tags: [favorite]
- *     parameters:
- *       - in: path
- *         name: userId
- *         schema:
- *           type: string
- *         required: true
- *         description: User ID
+ *     security:
+ *       - bearerAuth: []
+ *
  *     requestBody:
  *       required: true
  *       content:
@@ -25,8 +23,13 @@ const Router = express.Router()
  *           schema:
  *             type: object
  *             required:
+ *               - userId
  *               - dishId
  *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: "68306f4d4928f3fe108df627"
+ *                 description: ID of the user
  *               dishId:
  *                 type: string
  *                 example: "6841bd26594d6203e5e54c13"
@@ -34,9 +37,39 @@ const Router = express.Router()
  *     responses:
  *       201:
  *         description: Favorite added successfully
+ *    delete:
+ *     summary: Remove a dish from user's favorites
+ *     tags: [favorite]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - dishId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: "68306f4d4928f3fe108df627"
+ *                 description: ID of the user
+ *               dishId:
+ *                 type: string
+ *                 example: "6841bd26594d6203e5e54c13"
+ *                 description: ID of the dish
+ *     responses:
+ *       200:
+ *         description: Favorite removed successfully
+ *
+ * /api/v1/favorite/{userId}:
  *   get:
  *     summary: View all favorite dishes of a user
  *     tags: [favorite]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -143,33 +176,28 @@ const Router = express.Router()
  *                             type: string
  *                           updatedAt:
  *                             type: string
- * /api/v1/favorite/{userId}/{dishId}:
- *   delete:
- *     summary: Remove a dish from user's favorites
- *     tags: [favorite]
- *     parameters:
- *       - in: path
- *         name: userId
- *         schema:
- *           type: string
- *         required: true
- *         description: User ID
- *       - in: path
- *         name: dishId
- *         schema:
- *           type: string
- *         required: true
- *         description: Dish ID
- *     responses:
- *       200:
- *         description: Favorite removed successfully
  */
 
-Router.route('/:userId')
-  .post(favoriteValidation.addToFavorites, favoriteController.addToFavorites)
-  .get(paginationHelper.validatePaginationMiddleware, favoriteValidation.viewFavorites, favoriteController.viewFavorites)
+Router.route('/')
+  .post(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
+    favoriteValidation.addToFavorites,
+    favoriteController.addToFavorites
+  )
+  .delete(
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
+    favoriteValidation.deleteFromFavorites,
+    favoriteController.deleteFromFavorites
+  )
 
-Router.route('/:userId/:dishId')
-  .delete(favoriteValidation.deleteFromFavorites, favoriteController.deleteFromFavorites)
+Router.route('/:userId').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
+  paginationHelper.validatePaginationMiddleware,
+  favoriteValidation.viewFavorites,
+  favoriteController.viewFavorites
+)
 
 export const favoriteRoute = Router
