@@ -1,0 +1,46 @@
+@startuml ViewProfile
+
+actor User
+boundary "ProfilePage" as View #lightblue
+participant ":authRoute" as Route #lightblue
+control "authController" as Controller #lightblue
+participant ":authService" as Service #lightblue
+entity "userModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View Profile
+User -> View: 1.Click "View Profile"
+activate View
+
+View -> Route: 2.GET /api/v1/auth/profile
+activate Route
+
+Route -> Controller: 3.getProfile(req, res)
+activate Controller
+
+Controller -> Service: 4.getProfile(userId)
+activate Service
+
+Service -> Model: 5.findUserById(userId)
+activate Model
+
+Model -> MongoDB: 6.ExecuteQuery()
+activate MongoDB
+MongoDB --> Model: 7.Return result
+deactivate MongoDB
+
+Model --> Service: 8.Return user data
+deactivate Model
+
+Service --> Controller: 9.Return profile info
+deactivate Service
+
+Controller --> Route: 10.Return success
+deactivate Controller
+
+Route --> View: 11.Render user profile
+deactivate Route
+
+View --> User: 12.Show profile on screen
+end
+@enduml

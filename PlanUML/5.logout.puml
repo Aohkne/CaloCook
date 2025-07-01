@@ -1,0 +1,30 @@
+@startuml Logout
+
+actor User as "User/Admin"
+boundary "DashboardPage" as View #lightblue
+control "authController" as Controller #lightblue
+participant ":authService" as Service #lightblue
+
+group Logout
+User -> View: 1.Click logout button
+activate View
+
+View -> Controller: 2.POST /api/v1/auth/logout
+activate Controller
+
+Controller -> Service: 3.logout(token)
+
+Service -> Service: 4.Remove token\n(Redis/Memory)
+Service --> Controller: 5.Return success
+deactivate Service
+    
+Controller --> View: 6.Return success
+deactivate Controller
+
+View -> View: 7. Remove token from localStorage
+View -> View: 8. Clear user state
+View --> User: 9. Redirect to login page
+
+deactivate View
+end
+@enduml

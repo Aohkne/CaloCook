@@ -1,0 +1,53 @@
+@startuml Deactivate Dish
+
+actor Admin as "Admin"
+boundary "DishListView" as View #lightblue
+participant "dishRoute" as Route #lightblue
+participant "dishController" as Controller #lightblue
+participant "dishService" as Service #lightblue
+participant "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Deactivate Dish
+Admin -> View: 1. Click "Deactivate" on dish
+activate View
+Admin -> View: 2. Show confirmation dialog
+Admin -> View: 3. Confirm deactivation button
+View -> Route: 4. PATCH /api/v1/dish/:id/deactivate
+activate Route
+
+Route -> Controller: 5. deactivateDish(req, res)
+activate Controller
+
+Controller -> Service: 6. deactivateDish(dishId)
+activate Service
+
+Service -> Model: 7. updateDishStatus(dishId, isActive=false)
+activate Model
+
+Model -> MongoDB: 8. Update { isActive: false }
+activate MongoDB
+MongoDB --> Model: 9. Return update result
+deactivate MongoDB
+
+alt Dish not found
+    Model --> Service: 9.1. Return null
+    Service --> Controller: 9.1.1. 404 Not Found
+    Controller --> Route: 9.1.2. 404 Not Found
+    Route --> View: 9.1.3. Show "Dish not found"
+    View --> Admin: 9.1.4. Display error
+else Deactivation success
+    Model --> Service: 9.2. Return success
+    Service --> Controller: 9.2.1. 200 OK
+    Controller --> Route: 9.2.2. Return success
+    Route --> View: 9.2.3. Update dish status on UI
+    View --> Admin: 9.2.4. Show "Dish deactivated"
+end
+
+deactivate Model
+deactivate Service
+deactivate Controller
+deactivate Route
+deactivate View
+end
+@enduml

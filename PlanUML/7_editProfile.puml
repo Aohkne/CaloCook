@@ -1,0 +1,51 @@
+@startuml EditProfile
+
+actor User
+boundary "EditProfilePage" as View #lightblue
+participant ":authRoute" as Route #lightblue
+control "authController" as Controller #lightblue
+participant ":authService" as Service #lightblue
+entity "userModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Edit Profile
+User -> View: 1. Edit full name, avatar, phone,...
+activate View
+
+View -> Route: 2. POST /api/v1/auth/profile
+activate Route
+
+Route -> Controller: 3. editProfile(req, res)
+activate Controller
+
+Controller -> Service: 4. editProfile(userId, profileData)
+activate Service
+
+Service -> Model: 5. updateUserById(userId, profileData)
+activate Model
+
+Model -> MongoDB: 6. ExecuteQuery()
+activate MongoDB
+MongoDB --> Model: 7. Return result
+deactivate MongoDB
+
+Model --> Service: 8. Return update result
+deactivate Model
+
+alt Update Failed
+    Service --> Controller: 8.1. Return error
+    Controller --> Route: 8.1.1 Internal Server Error
+    Route --> View: 8.1.2. Show "Update failed"
+    View --> User: 8.1.3. Display error message
+else Update Success
+    Service --> Controller: 8.2.1. Return updated user
+    Controller --> Route: 8.2.2. Return success
+    Route --> View: 8.2.3. Show success
+    View --> User: 8.2.4. Display "Updated successfully"
+end
+deactivate Service
+deactivate Controller
+deactivate Route
+deactivate View
+end
+@enduml

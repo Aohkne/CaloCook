@@ -1,0 +1,77 @@
+@startuml LoginWithGoogle
+
+actor User as "User/Admin"
+boundary "LoginWithGooglePage" as View #lightblue
+participant ":authRoute" as Route #lightblue
+control "authController" as Controller #lightblue
+participant ":authService" as Service #lightblue
+entity "userModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+participant ":GoogleOAuth" as Google #pink
+
+group Login with Google
+User -> View: 1.Click "Login with Google"
+activate View
+
+View -> Google: 2.Redirect to Google OAuth
+activate Google
+
+Google --> View: 3.Redirect back with id_token
+deactivate Google
+
+View -> Route: 4.Request API with id_token
+activate Route
+
+Route -> Controller: 5.loginGoogle(req, res)
+activate Controller
+
+Controller -> Service: 6.verifyGoogleToken(id_token)
+activate Service
+
+Service -> Google: 7.Verify token with Google API
+activate Google
+Google --> Service: 8.Return user info (email, name, etc.)
+deactivate Google
+
+Service -> Model: 9.findUserByEmail(email)
+activate Model
+
+Model -> MongoDB: 10.Query user by email
+activate MongoDB
+MongoDB --> Model: 11.Return user or null
+deactivate MongoDB
+
+Model --> Service: 12.Return user object or null
+deactivate Model
+
+alt User exists
+    Service -> Service: 13.Generate app token (JWT)
+else New user
+    Service -> Model: 13.1.createUser({ email, name, avatar, provider: 'google' })
+    activate Model
+
+    Model -> MongoDB: 13.2.Insert new user
+    activate MongoDB
+    MongoDB --> Model: 13.3.Return new user
+    deactivate MongoDB
+
+    Model --> Service: 13.4.Return new user
+    deactivate Model
+
+    Service -> Service: 13.5.Generate app token (JWT)
+end
+
+Service --> Controller: 14.Return token
+deactivate Service
+
+Controller --> Route: Return success { token }
+deactivate Controller
+
+Route --> View: 16. Save token & redirect
+deactivate Route
+
+View --> User: 17. Redirect to dashboard
+
+deactivate View
+end
+@enduml
