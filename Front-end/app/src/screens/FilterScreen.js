@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useMemo } from 'react'
 import {
     StyleSheet,
     Text,
@@ -12,31 +12,102 @@ import {
     Animated
 } from 'react-native'
 import { useTheme } from '@contexts/ThemeProvider'
-import { X, Search, ChevronRight } from 'lucide-react-native';
+import { X, Search, ChevronRight, RotateCcw } from 'lucide-react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+    getFilteredDishes, resetDishes, getIngredients
+} from '@redux/slices/dishSlice'
 
 export default function FilterScreen({ navigation }) {
     const { colors } = useTheme()
     const styles = createStyles(colors)
+    const dispatch = useDispatch()
+
+    // Get user from Redux
+    const { user } = useSelector(state => state.auth)
 
     const [searchText, setSearchText] = useState('')
     const [selectedIngredients, setSelectedIngredients] = useState([])
-    const [selectedDifficulty, setSelectedDifficulty] = useState('Easy')
+    const [selectedDifficulty, setSelectedDifficulty] = useState([])
     const [cookingTime, setCookingTime] = useState([5, 60]) // min - max in minutes
     const [calories, setCalories] = useState([140, 450])
     const [timeSliderWidth, setTimeSliderWidth] = useState(0)
     const [calorieSliderWidth, setCalorieSliderWidth] = useState(0)
+    const [randomIngredients, setRandomIngredients] = useState([])
+    const [showIngredientSuggestions, setShowIngredientSuggestions] = useState(false)
+    const [ingredientSearchText, setIngredientSearchText] = useState('')
 
-    const ingredients = ['Eggs', 'Chicken', 'Tomatoes', 'Rice', 'Pasta', 'Cream']
+    // Static ingredients list - bạn có thể load từ API hoặc định nghĩa sẵn
+    const staticIngredients = [
+        'Eggs', 'Chicken', 'Tomatoes', 'Rice', 'Pasta', 'Cream',
+        'Beef', 'Pork', 'Fish', 'Shrimp', 'Cheese', 'Milk',
+        'Onion', 'Garlic', 'Carrot', 'Potato', 'Mushroom', 'Spinach'
+    ]
 
-    const toggleIngredient = (ingredient) => {
+    const { ingredients, isLoadingIngredients } = useSelector(state => state.dish)
+
+    // Memoize available ingredients to prevent unnecessary recalculations
+    const availableIngredients = useMemo(() => {
+        return ingredients.length > 0
+            ? ingredients.map(ing => ing.name || ing).filter(Boolean)
+            : staticIngredients
+    }, [ingredients])
+
+    // Filter ingredients based on search text
+    const filteredIngredients = useMemo(() => {
+        if (!ingredientSearchText.trim()) return []
+
+        return availableIngredients.filter(ingredient =>
+            ingredient.toLowerCase().includes(ingredientSearchText.toLowerCase()) &&
+            !selectedIngredients.includes(ingredient)
+        ).slice(0, 10) // Limit to 10 suggestions
+    }, [availableIngredients, ingredientSearchText, selectedIngredients])
+
+    // Function to get 5 random ingredients - memoized with useCallback
+    const getRandomIngredients = useCallback((ingredientsList, count = 5) => {
+        if (!ingredientsList || ingredientsList.length === 0) return []
+
+        const shuffled = [...ingredientsList].sort(() => 0.5 - Math.random())
+        return shuffled.slice(0, Math.min(count, ingredientsList.length))
+    }, [])
+
+    // Load ingredients once when component mounts
+    React.useEffect(() => {
+        dispatch(getIngredients())
+    }, [dispatch])
+
+    // Set random ingredients when available ingredients change
+    React.useEffect(() => {
+        if (availableIngredients.length > 0) {
+            const randomSelected = getRandomIngredients(availableIngredients, 5)
+            setRandomIngredients(randomSelected)
+        }
+    }, [availableIngredients, getRandomIngredients])
+
+    const toggleIngredient = useCallback((ingredient) => {
         setSelectedIngredients(prev =>
             prev.includes(ingredient)
                 ? prev.filter(item => item !== ingredient)
                 : [...prev, ingredient]
         )
-    }
+        // Clear ingredient search when adding
+        setIngredientSearchText('')
+        setShowIngredientSuggestions(false)
+    }, [])
 
-    const formatTime = (minutes) => {
+    const removeIngredient = useCallback((ingredientToRemove) => {
+        setSelectedIngredients(prev => prev.filter(item => item !== ingredientToRemove))
+    }, [])
+
+    const toggleDifficulty = useCallback((difficulty) => {
+        setSelectedDifficulty(prev =>
+            prev.includes(difficulty)
+                ? prev.filter(item => item !== difficulty)
+                : [...prev, difficulty]
+        )
+    }, [])
+
+    const formatTime = useCallback((minutes) => {
         if (minutes < 60) {
             return `${minutes} min`
         } else {
@@ -44,7 +115,145 @@ export default function FilterScreen({ navigation }) {
             const mins = minutes % 60
             return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`
         }
-    }
+    }, [])
+
+    // Function to refresh random ingredients
+    const refreshRandomIngredients = useCallback(() => {
+        const newRandomSelected = getRandomIngredients(availableIngredients, 5)
+        setRandomIngredients(newRandomSelected)
+        // Don't clear selected ingredients, just refresh the random suggestions
+    }, [availableIngredients, getRandomIngredients])
+
+    // Handle search text change
+    const handleSearchTextChange = useCallback((text) => {
+        setSearchText(text)
+
+        // Extract potential ingredients from search text
+        const words = text.split(/[,\s]+/).filter(word => word.trim().length > 0)
+        const lastWord = words[words.length - 1]?.trim() || ''
+
+        // If the last word might be an ingredient, show suggestions
+        if (lastWord.length >= 2) {
+            setIngredientSearchText(lastWord)
+            setShowIngredientSuggestions(true)
+        } else {
+            setIngredientSearchText('')
+            setShowIngredientSuggestions(false)
+        }
+    }, [])
+
+    // Add ingredient from suggestion
+    const addIngredientFromSuggestion = useCallback((ingredient) => {
+        // Add to selected ingredients
+        if (!selectedIngredients.includes(ingredient)) {
+            setSelectedIngredients(prev => [...prev, ingredient])
+        }
+
+        // Update search text - remove the last word and add the ingredient
+        const words = searchText.split(/[,\s]+/).filter(word => word.trim().length > 0)
+        const newWords = words.slice(0, -1) // Remove last word
+        const newSearchText = newWords.length > 0 ? newWords.join(' ') + ' ' : ''
+
+        setSearchText(newSearchText)
+        setIngredientSearchText('')
+        setShowIngredientSuggestions(false)
+    }, [searchText, selectedIngredients])
+
+    const applyFilters = useCallback(async () => {
+        try {
+            dispatch(resetDishes())
+
+            const filters = {
+                page: 1,
+                limit: 10,
+                sortBy: 'createdAt',
+                order: 'desc'
+            }
+
+            // User ID
+            if (user?._id) {
+                filters.userId = user._id;
+            }
+
+            // Name search - clean the search text by removing ingredient words
+            if (searchText.trim()) {
+                let cleanSearchText = searchText.trim()
+
+                // Remove selected ingredients from search text
+                selectedIngredients.forEach(ingredient => {
+                    const regex = new RegExp(`\\b${ingredient}\\b`, 'gi')
+                    cleanSearchText = cleanSearchText.replace(regex, '').trim()
+                })
+
+                // Clean up extra spaces and commas
+                cleanSearchText = cleanSearchText.replace(/[,\s]+/g, ' ').trim()
+
+                if (cleanSearchText) {
+                    filters.name = cleanSearchText;
+                }
+            }
+
+            // Ingredients - XỬ LÝ ĐẶC BIỆT CHO CONTAINS PRODUCTS
+            if (selectedIngredients.length > 0) {
+                // Nếu có ingredients từ Redux store, tìm dishIds
+                if (ingredients.length > 0) {
+                    const dishIds = new Set();
+
+                    selectedIngredients.forEach(selectedIngredient => {
+                        const foundIngredients = ingredients.filter(
+                            ingredient => (ingredient.name || ingredient) === selectedIngredient
+                        );
+
+                        foundIngredients.forEach(ingredient => {
+                            if (ingredient.dishId) {
+                                dishIds.add(ingredient.dishId);
+                            }
+                        });
+                    });
+
+                    if (dishIds.size > 0) {
+                        filters.dishIds = Array.from(dishIds);
+                    }
+                } else {
+                    // Fallback: sử dụng ingredients như query parameter
+                    filters.ingredients = selectedIngredients;
+                }
+            }
+
+            // Cooking time
+            if (cookingTime[0] !== 5 || cookingTime[1] !== 60) {
+                filters.minCookingTime = cookingTime[0];
+                filters.maxCookingTime = cookingTime[1];
+            }
+
+            // Calories
+            if (calories[0] !== 140 || calories[1] !== 450) {
+                filters.minCalorie = calories[0];
+                filters.maxCalorie = calories[1];
+            }
+
+            // Difficulty
+            if (selectedDifficulty.length > 0) {
+                filters.difficulty = selectedDifficulty;
+            }
+            const result = await dispatch(getFilteredDishes(filters));
+
+            navigation.goBack();
+        } catch (error) {
+            console.error('Error applying filters:', error);
+        }
+    }, [dispatch, user, searchText, selectedIngredients, ingredients, cookingTime, calories, selectedDifficulty, navigation])
+
+    const clearAllFilters = useCallback(() => {
+        setSearchText('')
+        setSelectedIngredients([])
+        setSelectedDifficulty([])
+        setCookingTime([5, 60])
+        setCalories([140, 450])
+        setIngredientSearchText('')
+        setShowIngredientSuggestions(false)
+        // Không refresh random ingredients khi clear all
+    }, [])
 
     const CustomRangeSlider = ({
         values,
@@ -241,7 +450,7 @@ export default function FilterScreen({ navigation }) {
         )
     }
 
-    const IngredientTag = ({ ingredient, isSelected, onPress }) => (
+    const IngredientTag = React.memo(({ ingredient, isSelected, onPress, showRemove = false, onRemove }) => (
         <TouchableOpacity
             style={[
                 styles.ingredientTag,
@@ -255,10 +464,21 @@ export default function FilterScreen({ navigation }) {
             ]}>
                 {ingredient}
             </Text>
+            {showRemove && isSelected && (
+                <TouchableOpacity
+                    style={styles.removeIngredientButton}
+                    onPress={(e) => {
+                        e.stopPropagation()
+                        onRemove(ingredient)
+                    }}
+                >
+                    <X size={14} color="#fff" />
+                </TouchableOpacity>
+            )}
         </TouchableOpacity>
-    )
+    ))
 
-    const DifficultyButton = ({ difficulty, isSelected, onPress }) => (
+    const DifficultyButton = React.memo(({ difficulty, isSelected, onPress }) => (
         <TouchableOpacity
             style={[
                 styles.difficultyButton,
@@ -273,42 +493,96 @@ export default function FilterScreen({ navigation }) {
                 {difficulty}
             </Text>
         </TouchableOpacity>
-    )
+    ))
 
     return (
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.title}>Filters</Text>
-                <TouchableOpacity
-                    style={styles.iconButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <X size={24} color={colors.text} />
-                </TouchableOpacity>
+                <View style={styles.headerRight}>
+                    <TouchableOpacity
+                        style={styles.clearButton}
+                        onPress={clearAllFilters}
+                    >
+                        <Text style={styles.clearButtonText}>Clear All</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.iconButton}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <X size={24} color={colors.text} />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                {/* Contains products */}
-                <Text style={styles.sectionTitle}>Contains products</Text>
-
-                {/* Search Input */}
+                {/* Combined Search */}
+                <Text style={styles.sectionTitle}>Search</Text>
                 <View style={styles.searchContainer}>
                     <Search size={20} color={colors.textSecondary} style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Search"
+                        placeholder="Search dish name or ingredients..."
                         placeholderTextColor={colors.textSecondary}
                         value={searchText}
-                        onChangeText={setSearchText}
+                        onChangeText={handleSearchTextChange}
+                        onFocus={() => {
+                            if (ingredientSearchText.length >= 2) {
+                                setShowIngredientSuggestions(true)
+                            }
+                        }}
                     />
                 </View>
 
-                {/* Ingredients Tags */}
+                {/* Ingredient Suggestions */}
+                {showIngredientSuggestions && filteredIngredients.length > 0 && (
+                    <View style={styles.suggestionsContainer}>
+                        <Text style={styles.suggestionsTitle}>Add ingredients:</Text>
+                        <View style={styles.suggestionsWrapper}>
+                            {filteredIngredients.map((ingredient, index) => (
+                                <TouchableOpacity
+                                    key={`suggestion-${ingredient}-${index}`}
+                                    style={styles.suggestionItem}
+                                    onPress={() => addIngredientFromSuggestion(ingredient)}
+                                >
+                                    <Text style={styles.suggestionText}>{ingredient}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+                )}
+
+                {/* Selected Ingredients Display */}
+                {selectedIngredients.length > 0 && (
+                    <View style={styles.selectedIngredientsContainer}>
+                        <Text style={styles.selectedIngredientsTitle}>Selected Ingredients:</Text>
+                        <View style={styles.selectedIngredientsWrapper}>
+                            {selectedIngredients.map((ingredient, index) => (
+                                <IngredientTag
+                                    key={`selected-${ingredient}-${index}`}
+                                    ingredient={ingredient}
+                                    isSelected={true}
+                                    onPress={() => { }}
+                                    showRemove={true}
+                                    onRemove={removeIngredient}
+                                />
+                            ))}
+                        </View>
+                    </View>
+                )}
+
+                {/* Contains products suggestions */}
+                <View style={styles.containsProductsHeader}>
+                    <Text style={styles.sectionTitle}>Quick ingredient suggestions</Text>
+
+                </View>
+
+                {/* Random 5 Ingredients */}
                 <View style={styles.tagsContainer}>
-                    {ingredients.map((ingredient) => (
+                    {randomIngredients.map((ingredient, index) => (
                         <IngredientTag
-                            key={ingredient}
+                            key={`random-${ingredient}-${index}`}
                             ingredient={ingredient}
                             isSelected={selectedIngredients.includes(ingredient)}
                             onPress={() => toggleIngredient(ingredient)}
@@ -323,8 +597,8 @@ export default function FilterScreen({ navigation }) {
                         <DifficultyButton
                             key={difficulty}
                             difficulty={difficulty}
-                            isSelected={selectedDifficulty === difficulty}
-                            onPress={() => setSelectedDifficulty(difficulty)}
+                            isSelected={selectedDifficulty.includes(difficulty)}
+                            onPress={() => toggleDifficulty(difficulty)}
                         />
                     ))}
                 </View>
@@ -360,12 +634,9 @@ export default function FilterScreen({ navigation }) {
             <View style={styles.bottomContainer}>
                 <TouchableOpacity
                     style={styles.showResultsButton}
-                    onPress={() => {
-                        // Handle filter application
-                        navigation.goBack()
-                    }}
+                    onPress={applyFilters}
                 >
-                    <Text style={styles.showResultsText}>Show 256 dishes</Text>
+                    <Text style={styles.showResultsText}>Apply Filters</Text>
                     <ChevronRight size={20} color="#fff" />
                 </TouchableOpacity>
             </View>
@@ -388,6 +659,22 @@ const createStyles = (colors) =>
             paddingBottom: 20,
             backgroundColor: colors.background,
         },
+        headerRight: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+        },
+        clearButton: {
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 6,
+            backgroundColor: colors.card || '#F5F5F5',
+        },
+        clearButtonText: {
+            fontSize: 14,
+            color: colors.text,
+            fontWeight: '500',
+        },
         title: {
             color: colors.title,
             fontSize: 32,
@@ -408,6 +695,26 @@ const createStyles = (colors) =>
             marginTop: 24,
             marginBottom: 16,
         },
+        containsProductsHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: 24,
+            marginBottom: 16,
+        },
+        refreshButton: {
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: colors.secondary,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        refreshButtonText: {
+            fontSize: 12,
+            color: '#fff',
+            fontWeight: '500',
+        },
         searchContainer: {
             flexDirection: 'row',
             alignItems: 'center',
@@ -424,6 +731,50 @@ const createStyles = (colors) =>
             flex: 1,
             fontSize: 16,
             color: colors.text,
+        },
+        suggestionsContainer: {
+            backgroundColor: colors.card || '#F5F5F5',
+            borderRadius: 12,
+            padding: 12,
+            marginBottom: 16,
+        },
+        suggestionsTitle: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: colors.textSecondary,
+            marginBottom: 8,
+        },
+        suggestionsWrapper: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 6,
+        },
+        suggestionItem: {
+            backgroundColor: colors.background,
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: colors.secondary,
+        },
+        suggestionText: {
+            fontSize: 12,
+            color: colors.secondary,
+            fontWeight: '500',
+        },
+        selectedIngredientsContainer: {
+            marginBottom: 16,
+        },
+        selectedIngredientsTitle: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: colors.text,
+            marginBottom: 8,
+        },
+        selectedIngredientsWrapper: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 8,
         },
         tagsContainer: {
             flexDirection: 'row',
@@ -451,6 +802,10 @@ const createStyles = (colors) =>
         },
         ingredientTextSelected: {
             color: '#fff',
+        },
+        removeIngredientButton: {
+            marginLeft: 6,
+            padding: 2,
         },
         closeIcon: {
             marginLeft: 6,
@@ -483,9 +838,6 @@ const createStyles = (colors) =>
             color: '#fff',
         },
         sliderContainer: {
-            marginBottom: 8,
-        },
-        customSliderContainer: {
             marginBottom: 24,
         },
         sliderLabel: {
