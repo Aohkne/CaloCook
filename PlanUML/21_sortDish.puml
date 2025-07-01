@@ -1,0 +1,48 @@
+@startuml Sort Dishes
+
+actor User
+boundary "DishListPage" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Sort Dishe
+User -> View: 1. Click "Sort "
+activate View
+
+View -> Route: 2. GET /dishes?order=asc
+activate Route
+
+Route -> Controller: 3. getSortedDishes(req, res)
+activate Controller
+
+Controller -> Service: 4. getSortedDishes("asc")
+activate Service
+
+Service -> Model: 5. findDishesSorted("asc")
+activate Model
+
+Model -> MongoDB: 6. Query dishes sorted by "asc"
+activate MongoDB
+MongoDB --> Model: 7. Return sorted dish list
+deactivate MongoDB
+
+Model --> Service: 8. Return result
+deactivate Model
+
+Service --> Controller: 9. Return sorted data
+deactivate Service
+
+Controller --> Route: 10. 200 OK + dishes
+deactivate Controller
+
+Route --> View: 11. Render sorted list
+deactivate Route
+
+View --> User: 12. Display sorted dishes
+
+deactivate View
+end
+@enduml

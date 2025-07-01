@@ -1,0 +1,70 @@
+@startuml Update Dish
+
+actor Admin as "Admin"
+boundary "EditDishView" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "dishValidation" as Validation #orange
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Update Dish
+Admin -> View: 1. Click "Edit" button
+activate View
+Admin -> View: 2. Edit dish info (name, price, etc.)
+Admin -> View: 3. Save dish info.
+
+View -> Route: 4. PUT /api/v1/dish/{dishId}
+activate Route
+
+Route -> Validation: 5. validateUpdateDish(data)
+activate Validation
+
+alt Validation Failed
+    Validation --> Route: 6. 400 Bad Request
+    Route --> View: 6.1 Show validation error
+    View --> Admin: 6.1.1 Display error message
+    deactivate Validation
+    deactivate Route
+    deactivate View
+else Validation Passed
+    Validation --> Route: 7. Proceed
+    deactivate Validation
+
+    Route -> Controller: 8. updateDish(req, res)
+    activate Controller
+
+    Controller -> Service: 9. updateDish(dishId, updateData)
+    activate Service
+
+    Service -> Model: 10. updateDishById(dishId, updateData)
+    activate Model
+
+    Model -> MongoDB:11. Execute update query
+    activate MongoDB
+    MongoDB --> Model: 12. Return update result
+    deactivate MongoDB
+
+    alt Dish not found
+        Model --> Service: 12.1 Return null
+        Service --> Controller: 12.1.1. 404 Not Found
+        Controller --> Route: 12.1.2. 404 Not Found
+        Route --> View: 12.1.3. Show "Dish not found"
+        View --> Admin: 12.1.4. Display error
+    else Dish updated
+        Model --> Service: 12.2. Return updated dish
+        Service --> Controller: 12.2.1. Return success
+        Controller --> Route: 12.2.2. 200 OK + updated dish
+        Route --> View: 12.2.3. Show updated dish
+        View --> Admin: 12.2.4. Display success message
+    end
+
+    deactivate Model
+    deactivate Service
+    deactivate Controller
+    deactivate Route
+    deactivate View
+end
+end
+@enduml

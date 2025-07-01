@@ -1,0 +1,56 @@
+@startuml BlockUser
+
+actor Admin
+boundary "UserListPage" as View #lightblue
+participant ":userRoute" as Route #lightblue
+control "userController" as Controller #lightblue
+participant ":userService" as Service #lightblue
+entity "userModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Block User
+Admin -> View: 1. Click "Block" on\n a User Management
+activate View
+Admin -> View: 2. Show confirmation dialog
+Admin -> View: 3. Confirm block user
+
+
+View -> Route: 4. PATCH /api/v1/user/:id/deactivate
+activate Route
+
+Route -> Controller: 5. deactivateUser(req, res)
+activate Controller
+
+Controller -> Service: 6. deactivateUser(userId)
+activate Service
+
+Service -> Model: 7. updateUserStatus(userId, "blocked")
+activate Model
+
+Model -> MongoDB: 8. Update user document\nset status = "blocked"
+activate MongoDB
+
+MongoDB --> Model: 9. Return update result
+deactivate MongoDB
+
+Model --> Service: 10. Return update status
+deactivate Model
+
+alt User not found
+    Service --> Controller:10.1. Return fail
+    Controller --> Route: 10.1.1. Return fail
+    Route --> View: 10.1.2. Show "User not found"
+    View --> Admin: 10.1.3. Display error message
+else Block success
+    Service --> Controller: 10.2. Return success
+    Controller --> Route: 10.2.1. Return success
+    Route --> View: 10.2.2. Update user row status
+    View --> Admin: 10.2.3. Display "User blocked"
+end
+
+deactivate Service
+deactivate Controller
+deactivate Route
+deactivate View
+end
+@enduml
