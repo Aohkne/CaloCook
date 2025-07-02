@@ -9,14 +9,20 @@ export default function Card({ dish, onHeartPress, onCardPress }) {
     const { colors } = useTheme()
     const styles = createStyles(colors)
 
+    // Helper function to capitalize first letter
+    const capitalizeFirstLetter = (string) => {
+        if (!string) return string;
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    }
+
     // Transform API data to match component needs
     const transformedDish = {
         id: dish._id, // Keep the original _id
         _id: dish._id, // Also keep _id for consistency
         name: dish.name,
-        time: `${dish.cookingTime} min`,
-        calories: `${dish.calorie} kcal`,
-        difficulty: dish.difficulty,
+        time: `${dish.cookingTime} Min`,
+        calories: `${dish.calorie} Kcal`,
+        difficulty: capitalizeFirstLetter(dish.difficulty), // Capitalize difficulty
         ingredients: dish.description,
         image: dish.imageUrl,
         isLiked: dish.isLiked || false

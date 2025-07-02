@@ -69,19 +69,32 @@ export const getStepsByDishService = async (dishId) => {
   }
 };
 
-// GET FILTERED DISHES
+// GET FILTERED DISHES - Optimized version
+// GET FILTERED DISHES - Fixed version with proper filtering
 export const getFilteredDishesService = async (filters = {}) => {
   try {
     if (filters.dishIds && filters.dishIds.length > 0) {
+      // Tối ưu: Gọi song song thay vì tuần tự
       const dishPromises = filters.dishIds.map(dishId =>
         getDishDetailService(dishId)
       );
 
-      const dishResponses = await Promise.allSettled(dishPromises);
+      // Sử dụng Promise.allSettled với timeout để tránh chờ quá lâu
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout')), 10000) // 10s timeout
+      );
 
-      const dishes = dishResponses
+      const dishResponses = await Promise.race([
+        Promise.allSettled(dishPromises),
+        timeoutPromise
+      ]);
+
+      let dishes = dishResponses
         .filter(response => response.status === 'fulfilled')
         .map(response => response.value.data || response.value);
+
+      // FIXED: Apply ALL filters consistently
+      dishes = applyClientSideFilters(dishes, filters);
 
       return {
         data: dishes,
@@ -95,6 +108,7 @@ export const getFilteredDishesService = async (filters = {}) => {
       };
     }
 
+    // Build query params for server-side filtering
     const queryParams = new URLSearchParams();
     queryParams.append('page', filters.page || 1);
     queryParams.append('limit', filters.limit || 10);
@@ -105,10 +119,7 @@ export const getFilteredDishesService = async (filters = {}) => {
       queryParams.append('userId', filters.userId);
     }
 
-    if (filters.name && filters.name.trim()) {
-      queryParams.append('name', encodeURIComponent(filters.name.trim()));
-    }
-
+    // Add all filter parameters to query
     if (filters.minCookingTime !== undefined && filters.minCookingTime !== null) {
       queryParams.append('minCookingTime', filters.minCookingTime);
     }
@@ -136,8 +147,81 @@ export const getFilteredDishesService = async (filters = {}) => {
 
     const url = `/dish?${queryParams.toString()}`;
     const response = await api.get(url);
+
+    // FIXED: Apply client-side filtering consistently for name search
+    // and as backup for server-side filtering
+    if (response.data?.data) {
+      const filteredDishes = applyClientSideFilters(response.data.data, filters);
+
+      return {
+        ...response.data,
+        data: filteredDishes,
+        pagination: {
+          ...response.data.pagination,
+          totalItems: filteredDishes.length
+        }
+      };
+    }
+
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Get filtered dishes failed' };
   }
+};
+
+// ADDED: Consistent client-side filtering function
+const applyClientSideFilters = (dishes, filters) => {
+  let filteredDishes = [...dishes];
+
+  // Filter by name
+  if (filters.name && filters.name.trim()) {
+    const searchWords = filters.name.trim().toLowerCase().split(/\s+/);
+    filteredDishes = filteredDishes.filter(dish => {
+      const dishName = (dish.name || '').toLowerCase();
+      return searchWords.every(word => dishName.includes(word));
+    });
+  }
+
+  // FIXED: Apply cooking time filter with AND logic
+  if (filters.minCookingTime !== undefined || filters.maxCookingTime !== undefined) {
+    filteredDishes = filteredDishes.filter(dish => {
+      const cookingTime = dish.cookingTime || 0;
+
+      // Must satisfy BOTH min AND max conditions if specified
+      if (filters.minCookingTime !== undefined && cookingTime < filters.minCookingTime) {
+        return false;
+      }
+      if (filters.maxCookingTime !== undefined && cookingTime > filters.maxCookingTime) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  // FIXED: Apply calorie filter with AND logic
+  if (filters.minCalorie !== undefined || filters.maxCalorie !== undefined) {
+    filteredDishes = filteredDishes.filter(dish => {
+      const calorie = dish.calorie || dish.calories || 0;
+
+      // Must satisfy BOTH min AND max conditions if specified
+      if (filters.minCalorie !== undefined && calorie < filters.minCalorie) {
+        return false;
+      }
+      if (filters.maxCalorie !== undefined && calorie > filters.maxCalorie) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  // Apply difficulty filter
+  if (filters.difficulty && filters.difficulty.length > 0) {
+    const normalizedDifficulties = filters.difficulty.map(d => d.toLowerCase());
+    filteredDishes = filteredDishes.filter(dish => {
+      const dishDifficulty = (dish.difficulty || '').toLowerCase();
+      return normalizedDifficulties.includes(dishDifficulty);
+    });
+  }
+
+  return filteredDishes;
 };

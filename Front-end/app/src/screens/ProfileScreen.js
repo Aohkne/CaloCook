@@ -4,7 +4,7 @@ import { useTheme } from '@contexts/ThemeProvider'
 import { Lock, User, Edit3, Calendar, Ruler, Weight, Target, Crown, X, Save, Users, Activity, Flame, ThumbsUp, ThumbsDown, Mars, Venus, Sun, Moon } from 'lucide-react-native'
 import Svg, { Circle } from 'react-native-svg'
 import { useDispatch, useSelector } from 'react-redux'
-import { getUserProfile, updateUserProfile, clearError, updateLocalUserData } from '@/redux/slices/userSlice'
+import { getUserProfile, updateUserProfile, clearError, updateLocalUserData, getTotalCalories } from '@/redux/slices/userSlice'
 
 export default function ProfileScreen({ navigation }) {
   const { colors, toggleTheme, isDark } = useTheme()
@@ -12,7 +12,43 @@ export default function ProfileScreen({ navigation }) {
   const dispatch = useDispatch()
 
   // Redux state
-  const { userData, isLoading, isUpdating, error } = useSelector(state => state.user)
+  const { userData, totalCalories, isLoading, isUpdating, error } = useSelector(state => state.user)
+  // Thay thế useEffect này trong ProfileScreen:
+  useEffect(() => {
+    const loadUserData = async () => {
+      await dispatch(getUserProfile())
+
+      // Load total calories cho hôm nay với timezone đúng
+      if (userData?._id) {
+        const today = new Date();
+        const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+        const todayString = localDate.toISOString().split('T')[0];
+        dispatch(getTotalCalories({
+          userId: userData._id,
+          date: todayString
+        }))
+      }
+    }
+
+    loadUserData()
+  }, [dispatch, userData?._id])
+
+  // Sửa useEffect focus listener
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (userData?._id) {
+        const today = new Date();
+        const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+        const todayString = localDate.toISOString().split('T')[0];
+        dispatch(getTotalCalories({
+          userId: userData._id,
+          date: todayString
+        }))
+      }
+    })
+
+    return unsubscribe
+  }, [navigation, userData?._id, dispatch])
 
   // Modal state
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
@@ -121,9 +157,10 @@ export default function ProfileScreen({ navigation }) {
   const flameScale = useRef(new Animated.Value(1)).current
   const flameOpacity = useRef(new Animated.Value(1)).current
   const flameRotation = useRef(new Animated.Value(0)).current
-  const currentCalories = 4000
+  const currentCalories = totalCalories || 0
   const targetCalories = userData?.calorieLimit || 2000
   const progressPercentage = targetCalories > 0 ? (currentCalories / targetCalories) * 100 : 0
+
 
 
   // Circle progress calculations
@@ -379,7 +416,7 @@ export default function ProfileScreen({ navigation }) {
                 {userData?.avatarUrl ? (
                   <Image
                     source={{ uri: userData?.avatarUrl }}
-                    style={styles.avatarImage}  // Thêm style này
+                    style={styles.avatarImage}
                   />
                 ) : (
                   <User size={50} color="#888888" />
@@ -1220,10 +1257,10 @@ const createStyles = (colors) =>
       fontWeight: '600',
     },
     modalScrollContent: {
-      paddingBottom: 100, // Thêm padding bottom
+      paddingBottom: 100,
     },
     bottomPadding: {
-      height: 50, // Thêm không gian trống ở cuối
+      height: 50,
     },
     themeToggleButton: {
       padding: 8,

@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getDishDetailData, clearDishDetail, updateDishLikeStatus } from '@redux/slices/dishSlice'
 import { likeDish, dislikeDish, updateFavoriteItem } from '@redux/slices/favoriteSlice'
 import { imageMap } from '@/constants/imageAssets';
+import { addEatingHistory, getTotalCalories } from '@redux/slices/userSlice'
 
 export default function Detail({ route, navigation }) {
     const { dish } = route.params
@@ -40,6 +41,12 @@ export default function Detail({ route, navigation }) {
     const dishId = dish._id || dish.id
     const isFavoriteDish = favorites.some(fav => fav.dishId === dishId)
     const [isLiked, setIsLiked] = useState(dish.isLiked || isFavoriteDish)
+
+    // Helper function để capitalize text
+    const capitalizeText = (text) => {
+        if (!text) return '';
+        return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    }
 
     // Sync local state with favorites when favorites change
     useEffect(() => {
@@ -124,7 +131,7 @@ export default function Detail({ route, navigation }) {
 
             }
         } catch (error) {
-            console.error('❌ Error updating favorite status:', error)
+            console.error('Error updating favorite status:', error)
 
             // Revert local state on error
             setIsLiked(!isLiked)
@@ -133,10 +140,53 @@ export default function Detail({ route, navigation }) {
         }
     }, [dispatch, user, isLiked, dish, dishDetail, dishId])
 
-    const handleLetsCook = () => {
-        console.log('Let\'s Cook pressed!')
-    }
+    const handleLetsCook = async () => {
+        if (!user?._id) {
+            Alert.alert('Error', 'Please login to track calories')
+            return
+        }
 
+        try {
+            // Thêm vào history
+            const historyResult = await dispatch(addEatingHistory({
+                userId: user._id,
+                dishId: dishId
+            })).unwrap()
+            // Tính ngày hiện tại với timezone đúng
+            const today = new Date();
+            const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+            const todayString = localDate.toISOString().split('T')[0];
+            setTimeout(async () => {
+                await dispatch(getTotalCalories({
+                    userId: user._id,
+                    date: todayString
+                }))
+            }, 1000)
+
+            // Thông báo thành công
+            Alert.alert(
+                'Success!',
+                `Added "${dishData.name}" (${dishData.calorie || dishData.calories} Kcal) to your eating history!`,
+                [
+                    {
+                        text: 'View Profile',
+                        onPress: () => {
+                            navigation.navigate('MainTabs', {
+                                screen: 'Profile'
+                            })
+                        }
+                    },
+                    {
+                        text: 'OK',
+                        style: 'default'
+                    }
+                ]
+            )
+
+        } catch (error) {
+            Alert.alert('Error', error.message || 'Failed to add to eating history')
+        }
+    }
     // Sử dụng data từ API thay vì hardcode
     const dishData = dishDetail || dish;
     const ingredients = dishIngredients || [];
@@ -217,20 +267,22 @@ export default function Detail({ route, navigation }) {
                         <View style={styles.metaItem}>
                             <Clock size={16} color={colors.description} />
                             <Text style={styles.metaText}>
-                                {dishData.cookingTime || dishData.time} min
+                                {dishData.cookingTime || dishData.time} Min
                             </Text>
                         </View>
 
                         <View style={styles.metaItem}>
                             <Flame size={16} color={colors.description} />
                             <Text style={styles.metaText}>
-                                {dishData.calorie || dishData.calories} cal
+                                {dishData.calorie || dishData.calories} Kcal
                             </Text>
                         </View>
 
                         <View style={styles.metaItem}>
                             <ChefHat size={16} color={colors.description} />
-                            <Text style={styles.metaText}>{dishData.difficulty}</Text>
+                            <Text style={styles.metaText}>
+                                {capitalizeText(dishData.difficulty)}
+                            </Text>
                         </View>
                     </View>
 
@@ -266,14 +318,22 @@ export default function Detail({ route, navigation }) {
                         {steps.length > 0 ? (
                             steps.map((step, index) => (
                                 <View key={index} style={styles.stepContainer}>
-                                    <Text style={styles.stepTitle}>
-                                        Step {step.stepNumber || index + 1}
-                                        {step.title ? `: ${step.title}` : ''}
-                                    </Text>
-                                    <Text style={styles.stepText}>{step.description}</Text>
+                                    <View style={styles.stepHeader}>
+                                        <Text style={styles.stepNumber}>
+                                            {step.stepNumber || index + 1}:
+                                        </Text>
+                                        <Text style={styles.stepDescription}>
+                                            {step.description}
+                                        </Text>
+                                    </View>
+                                    {step.title && (
+                                        <Text style={styles.stepTitle}>
+                                            {step.title}
+                                        </Text>
+                                    )}
                                     {step.duration && (
                                         <Text style={styles.stepDuration}>
-                                            ⏱️ {step.duration} minutes
+                                            {step.duration} Minutes
                                         </Text>
                                     )}
                                 </View>
@@ -366,13 +426,13 @@ const createStyles = (colors) =>
         },
         sectionTitle: {
             fontSize: 18,
-            fontWeight: '600',
-            color: colors.title,
+            fontWeight: '800',
+            color: colors.secondary,
             marginBottom: 12,
         },
         description: {
             fontSize: 14,
-            color: colors.textSecondary,
+            color: colors.description,
             lineHeight: 22,
             textAlign: 'justify',
         },
@@ -390,22 +450,44 @@ const createStyles = (colors) =>
         },
         ingredientText: {
             fontSize: 14,
-            color: colors.textSecondary,
+            color: colors.description,
             lineHeight: 20,
             flex: 1,
         },
         stepContainer: {
             marginBottom: 16,
         },
-        stepTitle: {
+        stepHeader: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            marginBottom: 4,
+        },
+        stepDescription: {
+            fontSize: 14,
+            color: colors.description,
+            lineHeight: 20,
+            flex: 1,
+
+        },
+        stepNumber: {
             fontSize: 15,
             fontWeight: '600',
-            color: colors.text,
-            marginBottom: 8,
+            color: colors.title,
+            marginRight: 8,
+            minWidth: 16,
+            lineHeight: 20,
+            textAlignVertical: 'center',
+        },
+        stepTitle: {
+            fontSize: 13,
+            fontWeight: '500',
+            color: colors.textSecondary,
+            marginLeft: 33,
+            marginBottom: 4,
         },
         stepText: {
             fontSize: 14,
-            color: colors.textSecondary,
+            color: colors.description,
             lineHeight: 20,
             paddingLeft: 8,
             paddingRight: 10,

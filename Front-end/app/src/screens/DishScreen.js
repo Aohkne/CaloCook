@@ -26,6 +26,12 @@ export default function DishScreen({ navigation }) {
   const { user } = useSelector(state => state.auth)
   const { favorites } = useSelector(state => state.favorite)
 
+  // Helper function để capitalize text
+  const capitalizeText = (text) => {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  }
+
   // Fetch initial dishes and favorites
   useEffect(() => {
     const fetchData = async () => {

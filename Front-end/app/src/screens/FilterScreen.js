@@ -175,9 +175,10 @@ export default function FilterScreen({ navigation }) {
                 filters.userId = user._id;
             }
 
-            // Name search - clean the search text by removing ingredient words
+            // Xử lý search text và ingredients riêng biệt
+            let cleanSearchText = '';
             if (searchText.trim()) {
-                let cleanSearchText = searchText.trim()
+                cleanSearchText = searchText.trim()
 
                 // Remove selected ingredients from search text
                 selectedIngredients.forEach(ingredient => {
@@ -187,15 +188,80 @@ export default function FilterScreen({ navigation }) {
 
                 // Clean up extra spaces and commas
                 cleanSearchText = cleanSearchText.replace(/[,\s]+/g, ' ').trim()
-
-                if (cleanSearchText) {
-                    filters.name = cleanSearchText;
-                }
             }
 
-            // Ingredients - XỬ LÝ ĐẶC BIỆT CHO CONTAINS PRODUCTS
-            if (selectedIngredients.length > 0) {
-                // Nếu có ingredients từ Redux store, tìm dishIds
+            // Apply other filters to base filters
+            if (cookingTime[0] !== 5 || cookingTime[1] !== 60) {
+                filters.minCookingTime = cookingTime[0];
+                filters.maxCookingTime = cookingTime[1];
+            }
+            if (calories[0] !== 140 || calories[1] !== 450) {
+                filters.minCalorie = calories[0];
+                filters.maxCalorie = calories[1];
+            }
+            if (selectedDifficulty.length > 0) {
+                filters.difficulty = selectedDifficulty;
+            }
+
+            // Nếu có cả search text và ingredients - tối ưu bằng cách gọi song song
+            if (cleanSearchText && selectedIngredients.length > 0) {
+                // Tạo promise để gọi song song thay vì tuần tự
+                const [nameResult, ingredientDishIds] = await Promise.all([
+                    // 1. Fetch dishes by name
+                    dispatch(getFilteredDishes({
+                        ...filters,
+                        name: cleanSearchText
+                    })),
+
+                    // 2. Get dish IDs from ingredients (không cần fetch full dishes)
+                    Promise.resolve().then(() => {
+                        if (ingredients.length > 0) {
+                            const dishIds = new Set();
+                            selectedIngredients.forEach(selectedIngredient => {
+                                const foundIngredients = ingredients.filter(
+                                    ingredient => (ingredient.name || ingredient) === selectedIngredient
+                                );
+                                foundIngredients.forEach(ingredient => {
+                                    if (ingredient.dishId) {
+                                        dishIds.add(ingredient.dishId);
+                                    }
+                                });
+                            });
+                            return Array.from(dishIds);
+                        }
+                        return [];
+                    })
+                ]);
+
+                // Combine results
+                const allDishIds = new Set();
+
+                // Add dishes from name search
+                if (nameResult.payload?.data) {
+                    nameResult.payload.data.forEach(dish => {
+                        allDishIds.add(dish.id || dish._id);
+                    });
+                }
+
+                // Add dish IDs from ingredients
+                ingredientDishIds.forEach(dishId => {
+                    allDishIds.add(dishId);
+                });
+
+                // Fetch final filtered results với dishIds
+                if (allDishIds.size > 0) {
+                    filters.dishIds = Array.from(allDishIds);
+                    const result = await dispatch(getFilteredDishes(filters));
+                    navigation.goBack();
+                    return;
+                }
+            }
+            // Chỉ có search text
+            else if (cleanSearchText) {
+                filters.name = cleanSearchText;
+            }
+            // Chỉ có ingredients
+            else if (selectedIngredients.length > 0) {
                 if (ingredients.length > 0) {
                     const dishIds = new Set();
 
@@ -220,24 +286,7 @@ export default function FilterScreen({ navigation }) {
                 }
             }
 
-            // Cooking time
-            if (cookingTime[0] !== 5 || cookingTime[1] !== 60) {
-                filters.minCookingTime = cookingTime[0];
-                filters.maxCookingTime = cookingTime[1];
-            }
-
-            // Calories
-            if (calories[0] !== 140 || calories[1] !== 450) {
-                filters.minCalorie = calories[0];
-                filters.maxCalorie = calories[1];
-            }
-
-            // Difficulty
-            if (selectedDifficulty.length > 0) {
-                filters.difficulty = selectedDifficulty;
-            }
             const result = await dispatch(getFilteredDishes(filters));
-
             navigation.goBack();
         } catch (error) {
             console.error('Error applying filters:', error);
