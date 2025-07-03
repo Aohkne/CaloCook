@@ -3,55 +3,82 @@ import { StyleSheet, Text, View, Image, Pressable } from 'react-native'
 import { useTheme } from '@contexts/ThemeProvider'
 import { Ionicons } from '@expo/vector-icons'
 import { Heart, Clock, Flame, ChefHat } from 'lucide-react-native';
+import { imageMap } from '@/constants/imageAssets';
 
 export default function Card({ dish, onHeartPress, onCardPress }) {
     const { colors } = useTheme()
     const styles = createStyles(colors)
 
+    // Helper function to capitalize first letter
+    const capitalizeFirstLetter = (string) => {
+        if (!string) return string;
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    }
+
+    // Transform API data to match component needs
+    const transformedDish = {
+        id: dish._id, // Keep the original _id
+        _id: dish._id, // Also keep _id for consistency
+        name: dish.name,
+        time: `${dish.cookingTime} Min`,
+        calories: `${dish.calorie} Kcal`,
+        difficulty: capitalizeFirstLetter(dish.difficulty), // Capitalize difficulty
+        ingredients: dish.description,
+        image: dish.imageUrl,
+        isLiked: dish.isLiked || false
+    }
+
     return (
         <Pressable
             style={styles.Card}
-            onPress={() => onCardPress && onCardPress(dish)}
+            onPress={() => onCardPress && onCardPress(dish)} // Pass original dish data
         >
             <View style={styles.imageContainer}>
-                <Image source={dish.image} style={styles.dishImage} />
+                <Image
+                    source={
+                        transformedDish.image?.startsWith('http')
+                            ? { uri: transformedDish.image }
+                            : imageMap[transformedDish.image] || require('../assets/img/testImage.png')
+                    }
+                    style={styles.dishImage}
+                    resizeMode='cover'
+                />
 
                 <Pressable
                     style={styles.heartIcon}
-                    onPress={() => onHeartPress && onHeartPress(dish.id)}
+                    onPress={() => onHeartPress && onHeartPress(dish._id)} // Use dish._id directly
                 >
                     <Heart
                         size={28}
                         color={colors.red}
-                        fill={dish.isLiked ? colors.red : 'none'}
+                        fill={transformedDish.isLiked ? colors.red : 'none'}
                     />
                 </Pressable>
             </View>
 
             <View style={styles.dishInfo}>
-                <Text style={styles.dishName}>{dish.name}</Text>
+                <Text style={styles.dishName}>{transformedDish.name}</Text>
 
                 <View style={styles.dishMeta}>
                     <View style={styles.metaItem}>
-
                         <Clock size={14} color={colors.description} />
-                        <Text style={styles.title}>{dish.time}</Text>
+                        <Text style={styles.title}>{transformedDish.time}</Text>
                     </View>
 
                     <View style={styles.metaItem}>
                         <Flame size={14} color={colors.description} />
-                        <Text style={styles.title}>{dish.calories}</Text>
+                        <Text style={styles.title}>{transformedDish.calories}</Text>
                     </View>
 
-                    {dish.difficulty && (
+                    {transformedDish.difficulty && (
                         <View style={styles.metaItem}>
                             <ChefHat size={14} color={colors.description} />
-                            <Text style={styles.title}>{dish.difficulty}</Text>
+                            <Text style={styles.title}>{transformedDish.difficulty}</Text>
                         </View>
                     )}
                 </View>
 
-                <Text style={styles.ingredients}>{dish.ingredients}</Text>
+                <Text style={styles.ingredients}>{transformedDish.ingredients}</Text>
             </View>
         </Pressable>
     )
@@ -123,9 +150,9 @@ const createStyles = (colors) =>
             alignItems: 'center',
             gap: 4,
         },
-        metaText: {
+        title: {
             fontSize: 12,
-            color: colors.textSecondary || '#666',
+            color: colors.title,
             fontWeight: '500'
         },
         ingredients: {

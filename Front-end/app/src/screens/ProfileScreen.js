@@ -1,54 +1,100 @@
-
 import React, { useEffect, useRef, useState } from 'react'
 import { StyleSheet, Text, View, Image, TouchableOpacity, Animated, ScrollView, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, Button } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTheme } from '@contexts/ThemeProvider'
 import { Lock, User, Edit3, Calendar, Ruler, Weight, Target, Crown, X, Save, Users, Activity, Flame, ThumbsUp, ThumbsDown, Mars, Venus, Sun, Moon } from 'lucide-react-native'
 import Svg, { Circle } from 'react-native-svg'
-
+import { useDispatch, useSelector } from 'react-redux'
+import { getUserProfile, updateUserProfile, clearError, updateLocalUserData, getTotalCalories } from '@/redux/slices/userSlice'
 
 export default function ProfileScreen({ navigation }) {
   const { colors, toggleTheme, isDark } = useTheme()
   const styles = createStyles(colors)
+  const dispatch = useDispatch()
 
+  // Redux state
+  const { userData, totalCalories, isLoading, isUpdating, error } = useSelector(state => state.user)
+  // Thay thế useEffect này trong ProfileScreen:
+  useEffect(() => {
+    const loadUserData = async () => {
+      await dispatch(getUserProfile())
 
-  // Animation values cho ngọn lửa
-  const flameScale = useRef(new Animated.Value(1)).current
-  const flameOpacity = useRef(new Animated.Value(1)).current
-  const flameRotation = useRef(new Animated.Value(0)).current
+      // Load total calories cho hôm nay với timezone đúng
+      if (userData?._id) {
+        const today = new Date();
+        const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+        const todayString = localDate.toISOString().split('T')[0];
+        dispatch(getTotalCalories({
+          userId: userData._id,
+          date: todayString
+        }))
+      }
+    }
+
+    loadUserData()
+  }, [dispatch, userData?._id])
+
+  // Sửa useEffect focus listener
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (userData?._id) {
+        const today = new Date();
+        const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+        const todayString = localDate.toISOString().split('T')[0];
+        dispatch(getTotalCalories({
+          userId: userData._id,
+          date: todayString
+        }))
+      }
+    })
+
+    return unsubscribe
+  }, [navigation, userData?._id, dispatch])
 
   // Modal state
   const [isEditModalVisible, setIsEditModalVisible] = useState(false)
 
-  // User data từ database
-  const [userData, setUserData] = useState({
-    username: "nguyenthanhbao",
-    email: "bao.nguyen@gmail.com",
-    password: "••••••••",
-    role: "user",
-    calorieLimit: 2213,
-    avatarUrl: null,
-    gender: "male",
-    dob: "1995-05-15",
-    height: 175,
-    weight: 70,
-    isActive: true,
-    createdAt: "2024-01-15T08:30:00Z",
-    updatedAt: "2024-06-15T10:45:00Z"
-  })
-
   // Edit form data
   const [editData, setEditData] = useState({
-    displayName: "Nguyen Thanh Bao",
-    email: userData.email,
-    height: userData.height.toString(),
-    weight: userData.weight.toString(),
-    calorieLimit: userData.calorieLimit.toString(),
-    gender: userData.gender,
-    dob: userData.dob
+    username: '',
+    email: '',
+    height: '',
+    weight: '',
+    calorieLimit: '',
+    gender: 'male',
+    dob: '',
+    avatarUrl: ''
   })
 
-  const userName = editData.displayName // Display name từ username hoặc tên riêng
+  // Load user profile on component mount
+  useEffect(() => {
+    dispatch(getUserProfile())
+  }, [dispatch])
+
+  // Update editData when userData changes
+  useEffect(() => {
+    if (userData) {
+      setEditData({
+        username: userData.username || '',
+        email: userData.email || '',
+        height: userData.height?.toString() || '',
+        weight: userData.weight?.toString() || '',
+        calorieLimit: userData.calorieLimit?.toString() || '',
+        gender: userData.gender || 'male',
+        dob: userData.dob || '',
+        avatarUrl: userData.avatarUrl || ''
+      })
+    }
+  }, [userData])
+
+  // Handle error display
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error)
+      dispatch(clearError())
+    }
+  }, [error, dispatch])
+
+  const userName = userData?.username || 'User'
 
   // Function to get initials from name (first and last word)
   const getInitials = (name) => {
@@ -61,40 +107,61 @@ export default function ProfileScreen({ navigation }) {
     return firstInitial + lastInitial
   }
 
-  // Format date
+  // Sửa format date function:
   const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })
+    if (!dateString) return 'N/A'
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return 'N/A'
+      return date.toLocaleDateString('en-US', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+    } catch (error) {
+      return 'N/A'
+    }
   }
 
   // Calculate age
   const calculateAge = (dateString) => {
-    const today = new Date()
-    const birthDate = new Date(dateString)
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const monthDiff = today.getMonth() - birthDate.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--
+    if (!dateString) return 0
+    try {
+      const today = new Date()
+      const birthDate = new Date(dateString)
+      let age = today.getFullYear() - birthDate.getFullYear()
+      const monthDiff = today.getMonth() - birthDate.getMonth()
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--
+      }
+      return age
+    } catch (error) {
+      return 0
     }
-    return age
   }
 
-  // Calculate BMI
   const calculateBMI = (weight, height) => {
-    const heightInM = height / 100
-    return (weight / (heightInM * heightInM)).toFixed(1)
+    if (!weight || !height || weight <= 0 || height <= 0) return '0.0'
+    try {
+      const heightInM = height / 100
+      return (weight / (heightInM * heightInM)).toFixed(1)
+    } catch (error) {
+      return '0.0'
+    }
   }
-
 
   // Hình tròn
   // Progress data (có thể lấy từ API riêng)
-  const currentCalories = 4000
-  const targetCalories = userData.calorieLimit
-  const progressPercentage = (currentCalories / targetCalories) * 100
+
+  // Animation values cho ngọn lửa
+  const flameScale = useRef(new Animated.Value(1)).current
+  const flameOpacity = useRef(new Animated.Value(1)).current
+  const flameRotation = useRef(new Animated.Value(0)).current
+  const currentCalories = totalCalories || 0
+  const targetCalories = userData?.calorieLimit || 2000
+  const progressPercentage = targetCalories > 0 ? (currentCalories / targetCalories) * 100 : 0
+
+
 
   // Circle progress calculations
   const radius = 120
@@ -229,56 +296,74 @@ export default function ProfileScreen({ navigation }) {
     setIsEditModalVisible(true)
   }
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     // Validate input
-    if (!editData.displayName.trim()) {
-      Alert.alert('Error', 'Display name cannot be empty')
+    if (!editData.username.trim()) {
+      Alert.alert('Error', 'Username cannot be empty')
       return
     }
     if (!editData.email.trim()) {
       Alert.alert('Error', 'Email cannot be empty')
       return
     }
-    if (isNaN(parseInt(editData.height)) || parseInt(editData.height) <= 0) {
+    if (editData.height && (isNaN(parseInt(editData.height)) || parseInt(editData.height) <= 0)) {
       Alert.alert('Error', 'Please enter a valid height')
       return
     }
-    if (isNaN(parseInt(editData.weight)) || parseInt(editData.weight) <= 0) {
+    if (editData.weight && (isNaN(parseInt(editData.weight)) || parseInt(editData.weight) <= 0)) {
       Alert.alert('Error', 'Please enter a valid weight')
       return
     }
-    if (isNaN(parseInt(editData.calorieLimit)) || parseInt(editData.calorieLimit) <= 0) {
+    if (editData.calorieLimit && (isNaN(parseInt(editData.calorieLimit)) || parseInt(editData.calorieLimit) <= 0)) {
       Alert.alert('Error', 'Please enter a valid calorie limit')
       return
     }
 
-    // Update userData
-    setUserData(prev => ({
-      ...prev,
+    // Prepare update data
+    const updateData = {
+      username: editData.username,
       email: editData.email,
-      height: parseInt(editData.height),
-      weight: parseInt(editData.weight),
-      calorieLimit: parseInt(editData.calorieLimit),
+      height: editData.height ? parseInt(editData.height) : null,
+      weight: editData.weight ? parseInt(editData.weight) : null,
+      calorieLimit: editData.calorieLimit ? parseInt(editData.calorieLimit) : null,
       gender: editData.gender,
       dob: editData.dob,
-      updatedAt: new Date().toISOString()
-    }))
+      avatarUrl: editData.avatarUrl
+    }
 
-    setIsEditModalVisible(false)
-    Alert.alert('Success', 'Profile updated successfully!')
+    try {
+
+      // Dispatch update action
+      const result = await dispatch(updateUserProfile(updateData))
+
+      if (updateUserProfile.fulfilled.match(result)) {
+        setIsEditModalVisible(false)
+        Alert.alert('Success', 'Profile updated successfully!')
+
+        // Delay một chút trước khi refresh data
+        setTimeout(() => {
+          dispatch(getUserProfile())
+        }, 100)
+      }
+    } catch (error) {
+      // Error will be handled by useEffect
+    }
   }
 
   const handleCancelEdit = () => {
     // Reset edit data to original values
-    setEditData({
-      displayName: userName,
-      email: userData.email,
-      height: userData.height.toString(),
-      weight: userData.weight.toString(),
-      calorieLimit: userData.calorieLimit.toString(),
-      gender: userData.gender,
-      dob: userData.dob
-    })
+    if (userData) {
+      setEditData({
+        username: userData.username || '',
+        email: userData.email || '',
+        height: userData.height?.toString() || '',
+        weight: userData.weight?.toString() || '',
+        calorieLimit: userData.calorieLimit?.toString() || '',
+        gender: userData.gender || 'male',
+        dob: userData.dob || '',
+        avatarUrl: userData.avatarUrl || ''
+      })
+    }
     setIsEditModalVisible(false)
   }
 
@@ -294,6 +379,15 @@ export default function ProfileScreen({ navigation }) {
       </View>
     </View>
   )
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={styles.title}>Loading...</Text>
+      </View>
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -319,9 +413,9 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.cardContainer}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                {userData.avatarUrl ? (
+                {userData?.avatarUrl ? (
                   <Image
-                    source={{ uri: userData.avatarUrl }}
+                    source={{ uri: userData?.avatarUrl }}
                     style={styles.avatarImage}
                   />
                 ) : (
@@ -342,9 +436,9 @@ export default function ProfileScreen({ navigation }) {
                   <View style={styles.nameDetails}>
                     <Text style={styles.displayName}>{userName}</Text>
                     <View style={styles.roleTag}>
-                      {userData.role === 'admin' && <Crown size={10} color="#0EA5E9" />}
+                      {userData?.role === 'admin' && <Crown size={10} color="#0EA5E9" />}
                       <Text style={styles.roleText}>
-                        {userData.role === 'admin' ? 'Admin User' : 'User'}
+                        {userData?.role === 'admin' ? 'Admin User' : 'User'}
                       </Text>
                     </View>
                   </View>
@@ -356,7 +450,7 @@ export default function ProfileScreen({ navigation }) {
                       <View style={styles.fieldDot} />
                       <Text style={styles.fieldTitle}>EMAIL</Text>
                     </View>
-                    <Text style={styles.emailValue}>{userData.email}</Text>
+                    <Text style={styles.emailValue}>{userData?.email || 'N/A'}</Text>
                   </View>
                 </View>
               </View>
@@ -370,18 +464,18 @@ export default function ProfileScreen({ navigation }) {
                 <InfoCard
                   icon={<Calendar size={20} color="#FF6B35" />}
                   title="Age"
-                  value={`${calculateAge(userData.dob)} years`}
-                  subtitle={formatDate(userData.dob)}
+                  value={`${calculateAge(userData?.dob)} years`}
+                  subtitle={formatDate(userData?.dob)}
                   backgroundColor="#FFF5F0"
                 />
 
                 <InfoCard
-                  icon={userData.gender === 'male' ?
+                  icon={userData?.gender === 'male' ?
                     <Mars size={20} color="#3B82F6" /> :
                     <Venus size={20} color="#EC4899" />
                   }
                   title="Gender"
-                  value={userData.gender === 'male' ? 'Male' : 'Female'}
+                  value={userData?.gender === 'male' ? 'Male' : 'Female'}
                   backgroundColor="#F0F9FF"
                 />
               </View>
@@ -390,14 +484,14 @@ export default function ProfileScreen({ navigation }) {
                 <InfoCard
                   icon={<Ruler size={20} color="#10B981" />}
                   title="Height"
-                  value={`${userData.height} cm`}
+                  value={`${userData?.height || 0} cm`}
                   backgroundColor="#F0FDF4"
                 />
 
                 <InfoCard
                   icon={<Weight size={20} color="#8B5CF6" />}
                   title="Weight"
-                  value={`${userData.weight} kg`}
+                  value={`${userData?.weight || 0} kg`}
                   backgroundColor="#FAF5FF"
                 />
               </View>
@@ -406,7 +500,7 @@ export default function ProfileScreen({ navigation }) {
                 <InfoCard
                   icon={<Activity size={20} color="#EF4444" />}
                   title="BMI"
-                  value={calculateBMI(userData.weight, userData.height)}
+                  value={calculateBMI(userData?.weight, userData?.height)}
                   subtitle="Normal"
                   backgroundColor="#FEF2F2"
                 />
@@ -414,12 +508,14 @@ export default function ProfileScreen({ navigation }) {
                 <InfoCard
                   icon={<Target size={20} color="#F59E0B" />}
                   title="Target"
-                  value={`${userData.calorieLimit} kcal`}
+                  value={`${userData?.calorieLimit || 0} kcal`}
                   subtitle="Daily"
                   backgroundColor="#FFFBEB"
                 />
               </View>
             </View>
+
+            {/* TT */}
 
             {/* JSX RENDER HÌNH TRÒN */}
             <View style={styles.progressContainer}>
@@ -485,25 +581,28 @@ export default function ProfileScreen({ navigation }) {
                   </Animated.View>
                   <Text style={styles.calorieNumber}>{currentCalories}</Text>
                   <Text style={styles.calorieUnit}>kcal</Text>
-                  <Text style={styles.calorieTarget}>of {targetCalories} kcal</Text>
+                  <Text style={styles.calorieTarget}>of {targetCalories || 0} kcal</Text>
                 </View>
               </View>
             </View>
 
             {/* End hình tròn */}
 
+
+            {/* TT */}
+
             {/* Account Status */}
             <View style={styles.statusSection}>
               <View style={styles.statusCard}>
                 <View style={styles.statusHeader}>
                   <Text style={styles.statusTitle}>Account Status</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: userData.isActive ? colors.primary : '#EF4444' }]}>
-                    <Text style={styles.statusText}>{userData.isActive ? 'Active' : 'Suspended'}</Text>
+                  <View style={[styles.statusBadge, { backgroundColor: userData?.isActive ? colors.primary : '#EF4444' }]}>
+                    <Text style={styles.statusText}>{userData?.isActive ? 'Active' : 'Suspended'}</Text>
                   </View>
                 </View>
                 <View style={styles.statusInfo}>
-                  <Text style={styles.statusLabel}>Joined: {formatDate(userData.createdAt)}</Text>
-                  <Text style={styles.statusLabel}>Last updated: {formatDate(userData.updatedAt)}</Text>
+                  <Text style={styles.statusLabel}>Joined: {formatDate(userData?.createdAt)}</Text>
+                  <Text style={styles.statusLabel}>Last updated: {formatDate(userData?.updatedAt)}</Text>
                 </View>
               </View>
             </View>
@@ -512,7 +611,6 @@ export default function ProfileScreen({ navigation }) {
       </ScrollView>
 
       {/* Edit Modal */}
-
       <Modal
         visible={isEditModalVisible}
         animationType="slide"
@@ -529,9 +627,13 @@ export default function ProfileScreen({ navigation }) {
               <X size={24} color={colors.text} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Edit Profile</Text>
-            <TouchableOpacity onPress={handleSaveChanges} style={styles.modalSaveButton}>
+            <TouchableOpacity
+              onPress={handleSaveChanges}
+              style={[styles.modalSaveButton, { opacity: isUpdating ? 0.6 : 1 }]}
+              disabled={isUpdating}
+            >
               <Save size={20} color="#FFFFFF" />
-              <Text style={styles.modalSaveText}>Save</Text>
+              <Text style={styles.modalSaveText}>{isUpdating ? 'Saving...' : 'Save'}</Text>
             </TouchableOpacity>
           </View>
 
@@ -541,15 +643,14 @@ export default function ProfileScreen({ navigation }) {
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.modalScrollContent}
           >
-            {/* Nội dung form giữ nguyên */}
-            {/* Display Name */}
+            {/* Username */}
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Display Name</Text>
+              <Text style={styles.inputLabel}>Username</Text>
               <TextInput
                 style={styles.textInput}
-                value={editData.displayName}
-                onChangeText={(text) => setEditData(prev => ({ ...prev, displayName: text }))}
-                placeholder="Enter your display name"
+                value={editData.username}
+                onChangeText={(text) => setEditData(prev => ({ ...prev, username: text }))}
+                placeholder="Enter your username"
                 placeholderTextColor="#999"
               />
             </View>
@@ -651,6 +752,19 @@ export default function ProfileScreen({ navigation }) {
                 placeholderTextColor="#999"
               />
               <Text style={styles.inputHint}>Format: YYYY-MM-DD (e.g., 1995-05-15)</Text>
+            </View>
+
+            {/* Avatar URL */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Avatar URL (Optional)</Text>
+              <TextInput
+                style={styles.textInput}
+                value={editData.avatarUrl}
+                onChangeText={(text) => setEditData(prev => ({ ...prev, avatarUrl: text }))}
+                placeholder="Enter avatar image URL"
+                placeholderTextColor="#999"
+                autoCapitalize="none"
+              />
             </View>
 
             {/* Thêm padding bottom để tránh bị che */}
@@ -1143,10 +1257,10 @@ const createStyles = (colors) =>
       fontWeight: '600',
     },
     modalScrollContent: {
-      paddingBottom: 100, // Thêm padding bottom
+      paddingBottom: 100,
     },
     bottomPadding: {
-      height: 50, // Thêm không gian trống ở cuối
+      height: 50,
     },
     themeToggleButton: {
       padding: 8,

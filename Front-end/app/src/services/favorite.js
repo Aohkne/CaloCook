@@ -25,7 +25,7 @@ export const likeDishService = async (data) => {
 // Dislike DISHES
 export const disLikeDishService = async (data) => {
   try {
-    const response = await api.delete('/favorite', data);
+    const response = await api.delete('/favorite', { data });
     return response.data.data;
   } catch (error) {
     throw error.response?.data || { message: 'DisLike dish failed' };

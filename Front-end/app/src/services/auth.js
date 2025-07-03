@@ -56,6 +56,20 @@ export const resetPasswordService = async (token, newPassword) => {
   }
 };
 
+// CHANGE PASSWORD - CLEAN VERSION
+export const changePasswordService = async (passwordData) => {
+  try {
+    const response = await api.post('/auth/change-password', {
+      oldPassword: passwordData.oldPassword,
+      newPassword: passwordData.newPassword
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Change password failed' };
+  }
+};
+
 // PROFILE
 export const getProfileService = async () => {
   try {

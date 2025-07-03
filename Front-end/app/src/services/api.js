@@ -54,7 +54,6 @@ api.interceptors.response.use(
     // Handle 401 (Unauthorized)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
       try {
         // GET REFRESH TOKEN
         const refreshToken = await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
@@ -63,15 +62,22 @@ api.interceptors.response.use(
           throw new Error('No refresh token available');
         }
 
-        // GET REFRESH TOKEN
-        const refreshResponse = await axios.post(`${API_URL}/auth/refresh-token`, {
+        // CALL REFRESH TOKEN API - FIX: sử dụng endpoint đúng
+        const refreshResponse = await axios.post(`${API_URL}/auth/refresh`, {
           refreshToken: refreshToken
         });
 
-        // SAVE
+        // FIX: Lấy data từ response
+        const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data;
+
+        if (!accessToken) {
+          throw new Error('No access token in refresh response');
+        }
+
+        // SAVE NEW TOKENS
         await AsyncStorage.multiSet([
           [STORAGE_KEYS.TOKEN, accessToken],
-          [STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken]
+          [STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken || refreshToken]
         ]);
 
         // UPDATE Redux store
@@ -83,12 +89,12 @@ api.interceptors.response.use(
             setCredentials({
               user: currentUser,
               token: accessToken,
-              refreshToken: newRefreshToken
+              refreshToken: newRefreshToken || refreshToken
             })
           );
         }
 
-        // Retry new token
+        // Retry with new token
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {

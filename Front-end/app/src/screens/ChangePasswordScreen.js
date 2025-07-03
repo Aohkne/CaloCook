@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     StyleSheet,
     Text,
@@ -8,9 +8,12 @@ import {
     Alert,
     KeyboardAvoidingView,
     Platform,
-    ScrollView
+    ScrollView,
+    ActivityIndicator
 } from 'react-native'
 import { useTheme } from '@contexts/ThemeProvider'
+import { useDispatch, useSelector } from 'react-redux'
+import { changePassword, clearError, clearMessage } from '@/redux/slices/authSlice'
 import {
     ArrowLeft,
     ShieldCheck,
@@ -25,6 +28,10 @@ import {
 export default function ChangePasswordScreen({ navigation }) {
     const { colors } = useTheme()
     const styles = createStyles(colors)
+    const dispatch = useDispatch()
+
+    // Redux state
+    const { isLoading, error, message } = useSelector((state) => state.auth)
 
     const [currentPassword, setCurrentPassword] = useState('')
     const [newPassword, setNewPassword] = useState('')
@@ -33,8 +40,48 @@ export default function ChangePasswordScreen({ navigation }) {
     const [showNewPassword, setShowNewPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-    const handleChangePassword = () => {
-        // Validation
+    // Clear error/message when component mounts
+    useEffect(() => {
+        dispatch(clearError())
+        dispatch(clearMessage())
+    }, [dispatch])
+
+    // Handle success/error messages
+    useEffect(() => {
+        if (message) {
+            Alert.alert(
+                'Success',
+                message,
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => {
+                            dispatch(clearMessage())
+                            navigation.goBack()
+                        }
+                    }
+                ]
+            )
+        }
+    }, [message, dispatch, navigation])
+
+    useEffect(() => {
+        if (error) {
+            Alert.alert(
+                'Error',
+                error,
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => dispatch(clearError())
+                    }
+                ]
+            )
+        }
+    }, [error, dispatch])
+
+    const handleChangePassword = async () => {
+        // Client-side validation
         if (!currentPassword || !newPassword || !confirmPassword) {
             Alert.alert('Error', 'Please fill in all information')
             return
@@ -50,17 +97,19 @@ export default function ChangePasswordScreen({ navigation }) {
             return
         }
 
-        // Here you would typically call your API to change password
-        Alert.alert(
-            'Success',
-            'Password changed successfully!',
-            [
-                {
-                    text: 'OK',
-                    onPress: () => navigation.goBack()
-                }
-            ]
-        )
+        // Dispatch change password action
+        dispatch(changePassword({
+            oldPassword: currentPassword,
+            newPassword: newPassword
+        }))
+    }
+
+    const isFormValid = () => {
+        return currentPassword &&
+            newPassword &&
+            confirmPassword &&
+            newPassword === confirmPassword &&
+            newPassword.length >= 6
     }
 
     return (
@@ -73,6 +122,7 @@ export default function ChangePasswordScreen({ navigation }) {
                 <TouchableOpacity
                     style={styles.backButton}
                     onPress={() => navigation.goBack()}
+                    disabled={isLoading}
                 >
                     <ArrowLeft size={24} color={colors.text} />
                 </TouchableOpacity>
@@ -109,10 +159,12 @@ export default function ChangePasswordScreen({ navigation }) {
                                 secureTextEntry={!showCurrentPassword}
                                 placeholder="Enter current password"
                                 placeholderTextColor="#999999"
+                                editable={!isLoading}
                             />
                             <TouchableOpacity
                                 style={styles.eyeButton}
                                 onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                                disabled={isLoading}
                             >
                                 {showCurrentPassword ? (
                                     <EyeOff size={20} color="#999999" />
@@ -134,10 +186,12 @@ export default function ChangePasswordScreen({ navigation }) {
                                 secureTextEntry={!showNewPassword}
                                 placeholder="Enter new password (at least 6 characters)"
                                 placeholderTextColor="#999999"
+                                editable={!isLoading}
                             />
                             <TouchableOpacity
                                 style={styles.eyeButton}
                                 onPress={() => setShowNewPassword(!showNewPassword)}
+                                disabled={isLoading}
                             >
                                 {showNewPassword ? (
                                     <EyeOff size={20} color="#999999" />
@@ -159,10 +213,12 @@ export default function ChangePasswordScreen({ navigation }) {
                                 secureTextEntry={!showConfirmPassword}
                                 placeholder="Re-enter new password"
                                 placeholderTextColor="#999999"
+                                editable={!isLoading}
                             />
                             <TouchableOpacity
                                 style={styles.eyeButton}
                                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                                disabled={isLoading}
                             >
                                 {showConfirmPassword ? (
                                     <EyeOff size={20} color="#999999" />
@@ -209,18 +265,20 @@ export default function ChangePasswordScreen({ navigation }) {
                         style={[
                             styles.changeButton,
                             {
-                                opacity: currentPassword && newPassword && confirmPassword &&
-                                    newPassword === confirmPassword && newPassword.length >= 6 ? 1 : 0.6
+                                opacity: isFormValid() && !isLoading ? 1 : 0.6
                             }
                         ]}
                         onPress={handleChangePassword}
-                        disabled={
-                            !currentPassword || !newPassword || !confirmPassword ||
-                            newPassword !== confirmPassword || newPassword.length < 6
-                        }
+                        disabled={!isFormValid() || isLoading}
                     >
-                        <Lock size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                        <Text style={styles.changeButtonText}>Change Password</Text>
+                        {isLoading ? (
+                            <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 8 }} />
+                        ) : (
+                            <Lock size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+                        )}
+                        <Text style={styles.changeButtonText}>
+                            {isLoading ? 'Changing...' : 'Change Password'}
+                        </Text>
                     </TouchableOpacity>
 
                     {/* Security Tips */}

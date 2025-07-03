@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
     StyleSheet,
     Text,
@@ -6,86 +6,221 @@ import {
     ScrollView,
     Image,
     TouchableOpacity,
-    SafeAreaView
+    SafeAreaView,
+    ActivityIndicator,
+    Alert
 } from 'react-native'
 import { useTheme } from '@contexts/ThemeProvider'
 import { Heart, Clock, Flame, ChefHat, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { useDispatch, useSelector } from 'react-redux'
+import { getDishDetailData, clearDishDetail, updateDishLikeStatus } from '@redux/slices/dishSlice'
+import { likeDish, dislikeDish, updateFavoriteItem } from '@redux/slices/favoriteSlice'
+import { imageMap } from '@/constants/imageAssets';
+import { addEatingHistory, getTotalCalories } from '@redux/slices/userSlice'
+
 export default function Detail({ route, navigation }) {
     const { dish } = route.params
     const { colors } = useTheme()
     const styles = createStyles(colors)
+    const dispatch = useDispatch()
 
-    const [isLiked, setIsLiked] = useState(dish.isLiked)
+    // Get detail data from Redux
+    const {
+        dishDetail,
+        dishIngredients,
+        dishSteps,
+        isLoadingDetail,
+        detailError
+    } = useSelector(state => state.dish)
+
+    // Get user and favorites data
+    const { user } = useSelector(state => state.auth)
+    const { favorites } = useSelector(state => state.favorite)
+
+    // Check if current dish is in favorites and sync state
+    const dishId = dish._id || dish.id
+    const isFavoriteDish = favorites.some(fav => fav.dishId === dishId)
+    const [isLiked, setIsLiked] = useState(dish.isLiked || isFavoriteDish)
+
+    // Helper function để capitalize text
+    const capitalizeText = (text) => {
+        if (!text) return '';
+        return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    }
+
+    // Sync local state with favorites when favorites change
+    useEffect(() => {
+        const isFavorite = favorites.some(fav => fav.dishId === dishId)
+        setIsLiked(isFavorite)
+    }, [favorites, dishId])
+
+    // Fetch detail data khi component mount
+    useEffect(() => {
+        if (dish._id || dish.id) {
+            const dishId = dish._id || dish.id;
+            dispatch(getDishDetailData(dishId));
+        }
+
+        // Cleanup khi component unmount
+        return () => {
+            dispatch(clearDishDetail());
+        };
+    }, [dispatch, dish._id, dish.id]);
+
+    // Handle error
+    useEffect(() => {
+        if (detailError) {
+            Alert.alert('Error', detailError);
+        }
+    }, [detailError]);
 
     const handleBackPress = () => {
         navigation.goBack()
     }
 
-    const handleHeartPress = () => {
-        setIsLiked(!isLiked)
-    }
+    // Updated heart press handler with API integration
+    const handleHeartPress = useCallback(async () => {
+        if (!user?._id) {
+            Alert.alert('Error', 'Please login to add favorites')
+            return
+        }
 
-    const handleLetsCook = () => {
-        // Navigate to cooking screen or start cooking timer
-        console.log('Let\'s Cook pressed!')
-    }
+        try {
+            if (isLiked) {
 
-    // Sample detailed data - you can expand this based on your dish object
-    const dishDetails = {
-        ...dish,
-        description: "A hearty and flavorful dish that brings together tender, juicy chicken with perfectly cooked eggs. Simmered in a savory blend of spices and herbs. This comforting meal balances protein-rich goodness with rich, satisfying textures. Whether served over steamed rice or pasta with crusty bread, this delicious combination is a wholesome feast for any time of day.",
-        ingredients: [
-            "2 chicken thighs or breasts, sliced into bite-sized pieces",
-            "2-3 eggs",
-            "1 small onion, thinly sliced",
-            "1 tablespoon soy sauce",
-            "1 tablespoon mirin (or sugar as a substitute)",
-            "1 tablespoon cooking oil",
-            "1/4 cup water or chicken broth",
-            "Salt to taste",
-            "Optional: green onions or parsley for garnish",
-            "Steamed rice or bread for serving"
-        ],
-        steps: [
-            {
-                title: "Prepare ingredients:",
-                details: [
-                    "Slice the chicken, onions, and any garnish (green onions, herbs).",
-                    "Crack the eggs into a bowl and beat lightly."
-                ]
-            },
-            {
-                title: "Sauté onions:",
-                details: [
-                    "Heat oil in a pan over medium heat.",
-                    "Add the sliced onions and cook until soft and slightly golden."
-                ]
-            },
-            {
-                title: "Cook the chicken:",
-                details: [
-                    "Add the chicken to the pan with the onions.",
-                    "Cook until the chicken turns white and starts to brown lightly.",
-                    "Add seasoning."
-                ]
-            },
-            {
-                title: "Add the eggs:",
-                details: [
-                    "Pour the beaten eggs evenly over the chicken.",
-                    "Cover the pan with a lid and cook for 1-2 minutes, until the eggs are just set (still slightly runny, is traditional in oyakodon).",
-                    "Cook longer for firmer eggs."
-                ]
-            },
-            {
-                title: "Serve:",
-                details: [
-                    "Turn off the heat and let it sit covered for a minute.",
-                    "Serve hot over steamed rice or with bread.",
-                    "Garnish with chopped green onions or herbs if desired."
-                ]
+                // Update local state immediately for instant UI feedback
+                setIsLiked(false)
+
+                // Call API to dislike
+                await dispatch(dislikeDish({
+                    userId: user._id,
+                    dishId: dishId
+                })).unwrap()
+
+                // Update dish slice to sync with other screens
+                dispatch(updateDishLikeStatus({ dishId, isLiked: false }))
+
+            } else {
+
+                // Update local state immediately for instant UI feedback
+                setIsLiked(true)
+
+                // Call API to like
+                const result = await dispatch(likeDish({
+                    userId: user._id,
+                    dishId: dishId
+                })).unwrap()
+
+                // Update dish slice to sync with other screens
+                dispatch(updateDishLikeStatus({ dishId, isLiked: true }))
+
+                // Create new favorite item for immediate UI update
+                const newFavoriteItem = {
+                    _id: result._id || `temp_${dishId}_${Date.now()}`,
+                    dishId: dishId,
+                    dish: dishDetail || dish,
+                    createdAt: new Date().toISOString()
+                }
+
+                // Update favorites list
+                dispatch(updateFavoriteItem({
+                    dishId,
+                    favoriteData: newFavoriteItem,
+                    action: 'like'
+                }))
+
             }
-        ]
+        } catch (error) {
+            console.error('Error updating favorite status:', error)
+
+            // Revert local state on error
+            setIsLiked(!isLiked)
+
+            Alert.alert('Error', error.message || 'Failed to update favorite')
+        }
+    }, [dispatch, user, isLiked, dish, dishDetail, dishId])
+
+    const handleLetsCook = async () => {
+        if (!user?._id) {
+            Alert.alert('Error', 'Please login to track calories')
+            return
+        }
+
+        try {
+            // Thêm vào history
+            const historyResult = await dispatch(addEatingHistory({
+                userId: user._id,
+                dishId: dishId
+            })).unwrap()
+            // Tính ngày hiện tại với timezone đúng
+            const today = new Date();
+            const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+            const todayString = localDate.toISOString().split('T')[0];
+            setTimeout(async () => {
+                await dispatch(getTotalCalories({
+                    userId: user._id,
+                    date: todayString
+                }))
+            }, 1000)
+
+            // Thông báo thành công
+            Alert.alert(
+                'Success!',
+                `Added "${dishData.name}" (${dishData.calorie || dishData.calories} Kcal) to your eating history!`,
+                [
+                    {
+                        text: 'View Profile',
+                        onPress: () => {
+                            navigation.navigate('MainTabs', {
+                                screen: 'Profile'
+                            })
+                        }
+                    },
+                    {
+                        text: 'OK',
+                        style: 'default'
+                    }
+                ]
+            )
+
+        } catch (error) {
+            Alert.alert('Error', error.message || 'Failed to add to eating history')
+        }
+    }
+    // Sử dụng data từ API thay vì hardcode
+    const dishData = dishDetail || dish;
+    const ingredients = dishIngredients || [];
+    const steps = dishSteps || [];
+
+    // Function để xử lý image source giống như Card component
+    const getImageSource = () => {
+        // Ưu tiên imageUrl từ dishData (API response)
+        const imageUrl = dishData.imageUrl || dish.imageUrl || dish.image;
+
+        if (imageUrl?.startsWith('http')) {
+            return { uri: imageUrl };
+        } else if (imageUrl && imageMap[imageUrl]) {
+            return imageMap[imageUrl];
+        } else {
+            return require('../assets/img/testImage.png');
+        }
+    };
+
+    // Loading state
+    if (isLoadingDetail) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
+                        <ChevronLeft size={24} color={colors.text} />
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <Text style={styles.loadingText}>Loading dish details...</Text>
+                </View>
+            </SafeAreaView>
+        );
     }
 
     return (
@@ -96,7 +231,6 @@ export default function Detail({ route, navigation }) {
                     style={styles.backButton}
                     onPress={handleBackPress}
                 >
-
                     <ChevronLeft size={24} color={colors.text} />
                 </TouchableOpacity>
 
@@ -116,64 +250,97 @@ export default function Detail({ route, navigation }) {
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Dish Image */}
+                {/* Dish Image - Sử dụng logic xử lý image giống Card */}
                 <View style={styles.imageContainer}>
-                    <Image source={dish.image} style={styles.dishImage} />
+                    <Image
+                        source={getImageSource()}
+                        style={styles.dishImage}
+                    />
                 </View>
 
                 {/* Dish Info */}
                 <View style={styles.content}>
-                    <Text style={styles.dishName}>{dishDetails.name}</Text>
+                    <Text style={styles.dishName}>{dishData.name}</Text>
 
                     {/* Meta Information */}
                     <View style={styles.metaContainer}>
                         <View style={styles.metaItem}>
                             <Clock size={16} color={colors.description} />
-                            <Text style={styles.metaText}>{dishDetails.time}</Text>
+                            <Text style={styles.metaText}>
+                                {dishData.cookingTime || dishData.time} Min
+                            </Text>
                         </View>
 
                         <View style={styles.metaItem}>
                             <Flame size={16} color={colors.description} />
-                            <Text style={styles.metaText}>{dishDetails.calories}</Text>
+                            <Text style={styles.metaText}>
+                                {dishData.calorie || dishData.calories} Kcal
+                            </Text>
                         </View>
 
                         <View style={styles.metaItem}>
                             <ChefHat size={16} color={colors.description} />
-                            <Text style={styles.metaText}>{dishDetails.difficulty}</Text>
+                            <Text style={styles.metaText}>
+                                {capitalizeText(dishData.difficulty)}
+                            </Text>
                         </View>
                     </View>
 
                     {/* Description */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Description</Text>
-                        <Text style={styles.description}>{dishDetails.description}</Text>
+                        <Text style={styles.description}>{dishData.description}</Text>
                     </View>
 
-                    {/* Ingredients */}
+                    {/* Ingredients từ API */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Ingredients</Text>
-                        {dishDetails.ingredients.map((ingredient, index) => (
-                            <View key={index} style={styles.ingredientItem}>
-                                <Text style={styles.bullet}>•</Text>
-                                <Text style={styles.ingredientText}>{ingredient}</Text>
-                            </View>
-                        ))}
+                        {ingredients.length > 0 ? (
+                            ingredients.map((ingredient, index) => (
+                                <View key={index} style={styles.ingredientItem}>
+                                    <Text style={styles.bullet}>•</Text>
+                                    <Text style={styles.ingredientText}>
+                                        {ingredient.quantity && ingredient.unit
+                                            ? `${ingredient.quantity} ${ingredient.unit} ${ingredient.name}`
+                                            : ingredient.name
+                                        }
+                                    </Text>
+                                </View>
+                            ))
+                        ) : (
+                            <Text style={styles.noDataText}>No ingredients available</Text>
+                        )}
                     </View>
 
-                    {/* Steps */}
+                    {/* Steps từ API */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Steps</Text>
-                        {dishDetails.steps.map((step, index) => (
-                            <View key={index} style={styles.stepContainer}>
-                                <Text style={styles.stepTitle}>{step.title}</Text>
-                                {step.details.map((detail, detailIndex) => (
-                                    <View key={detailIndex} style={styles.stepDetail}>
-                                        <Text style={styles.bullet}>•</Text>
-                                        <Text style={styles.stepText}>{detail}</Text>
+                        {steps.length > 0 ? (
+                            steps.map((step, index) => (
+                                <View key={index} style={styles.stepContainer}>
+                                    <View style={styles.stepHeader}>
+                                        <Text style={styles.stepNumber}>
+                                            {step.stepNumber || index + 1}:
+                                        </Text>
+                                        <Text style={styles.stepDescription}>
+                                            {step.description}
+                                        </Text>
                                     </View>
-                                ))}
-                            </View>
-                        ))}
+                                    {step.title && (
+                                        <Text style={styles.stepTitle}>
+                                            {step.title}
+                                        </Text>
+                                    )}
+                                    {step.duration && (
+                                        <Text style={styles.stepDuration}>
+                                            {step.duration} Minutes
+                                        </Text>
+                                    )}
+                                </View>
+                            ))
+                        ) : (
+                            <Text style={styles.noDataText}>No steps available</Text>
+                        )}
                     </View>
                 </View>
             </ScrollView>
@@ -221,7 +388,7 @@ const createStyles = (colors) =>
         },
         dishImage: {
             width: '100%',
-            height: 300,
+            height: 320,
             borderRadius: 16,
             resizeMode: 'cover',
         },
@@ -259,13 +426,13 @@ const createStyles = (colors) =>
         },
         sectionTitle: {
             fontSize: 18,
-            fontWeight: '600',
-            color: colors.title,
+            fontWeight: '800',
+            color: colors.secondary,
             marginBottom: 12,
         },
         description: {
             fontSize: 14,
-            color: colors.textSecondary,
+            color: colors.description,
             lineHeight: 22,
             textAlign: 'justify',
         },
@@ -283,31 +450,54 @@ const createStyles = (colors) =>
         },
         ingredientText: {
             fontSize: 14,
-            color: colors.textSecondary,
+            color: colors.description,
             lineHeight: 20,
             flex: 1,
         },
         stepContainer: {
             marginBottom: 16,
         },
-        stepTitle: {
-            fontSize: 15,
-            fontWeight: '600',
-            color: colors.text,
-            marginBottom: 8,
-        },
-        stepDetail: {
+        stepHeader: {
             flexDirection: 'row',
             alignItems: 'flex-start',
-            marginBottom: 6,
-            paddingLeft: 8,
-            paddingRight: 10,
+            marginBottom: 4,
+        },
+        stepDescription: {
+            fontSize: 14,
+            color: colors.description,
+            lineHeight: 20,
+            flex: 1,
+
+        },
+        stepNumber: {
+            fontSize: 15,
+            fontWeight: '600',
+            color: colors.title,
+            marginRight: 8,
+            minWidth: 16,
+            lineHeight: 20,
+            textAlignVertical: 'center',
+        },
+        stepTitle: {
+            fontSize: 13,
+            fontWeight: '500',
+            color: colors.textSecondary,
+            marginLeft: 33,
+            marginBottom: 4,
         },
         stepText: {
             fontSize: 14,
-            color: colors.textSecondary,
+            color: colors.description,
             lineHeight: 20,
-            flex: 1,
+            paddingLeft: 8,
+            paddingRight: 10,
+        },
+        stepDuration: {
+            fontSize: 12,
+            color: colors.primary,
+            marginTop: 4,
+            fontWeight: '500',
+            paddingLeft: 8,
         },
         bottomContainer: {
             position: 'absolute',
@@ -332,5 +522,22 @@ const createStyles = (colors) =>
             fontSize: 16,
             fontWeight: '600',
             color: '#fff',
+        },
+        loadingContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        loadingText: {
+            marginTop: 10,
+            fontSize: 16,
+            color: colors.text,
+            opacity: 0.7,
+        },
+        noDataText: {
+            fontSize: 14,
+            color: colors.textSecondary,
+            fontStyle: 'italic',
+            opacity: 0.7,
         },
     })
