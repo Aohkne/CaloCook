@@ -2,6 +2,7 @@ import { userModel } from '@/models/userModel'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
 import { ObjectId } from 'mongodb'
+import cloudinary from '@/config/cloudinary.js'
 const getAll = async (paginationParams) => {
   try {
     return await userModel.getAll(paginationParams)
@@ -116,7 +117,11 @@ const getUserProfile = async (userId) => {
   }
 }
 const editProfileService = async (userId, profileData) => {
-  
+  if (profileData.avatarUrl) {
+    cloudinaryResponse = await cloudinary.uploader.upload(profileData.avatarUrl, {
+      folder: 'avatars'
+    })
+  }
   const result = await userModel.updateOne(
     { _id: new ObjectId(userId) },
     {
@@ -124,7 +129,7 @@ const editProfileService = async (userId, profileData) => {
         username: profileData.username,
         email: profileData.email,
         calorieLimit: profileData.calorieLimit,
-        avatarUrl: profileData.avatarUrl,
+        avatarUrl: cloudinaryResponse?.secure_url ? cloudinaryResponse.secure_url : '',
         gender: profileData.gender,
         dob: profileData.dob,
         height: profileData.height,
