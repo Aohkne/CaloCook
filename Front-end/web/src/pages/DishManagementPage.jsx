@@ -1,7 +1,7 @@
-import { Plus } from "lucide-react";
+import { Filter, Plus } from "lucide-react";
 import DishTable from "../components/DishTable";
 import { useState } from "react";
-import { Form, Input, Modal, Radio, Select, Switch } from "antd";
+import { Form, Input, Modal, Radio, Select, Slider, Switch } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { addDish } from "../api/dish";
 import Tabs from "../components/Tabs";
@@ -24,9 +24,9 @@ export default function DishManagementPage() {
   // Search states
   const [searchText, setSearchText] = useState("");
   // Filter states
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [order, setOrder] = useState("asc");
-  // Modal handlers
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [cookingTimeRange, setCookingTimeRange] = useState([0, 240]);
+  // Add Modal handlers
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -76,6 +76,16 @@ export default function DishManagementPage() {
   const handleActivateDish = (checked) => {
     setIsActive(checked);
   };
+  // Filter Modal handlers
+  const handleFilterOk = () => {
+    setIsFilterOpen(false);
+  };
+  const handleFilterCancel = () => {
+    setIsFilterOpen(false);
+  };
+  const showFilterModal = () => {
+    setIsFilterOpen(true);
+  };
   return (
     <div>
       <h2 className="text-3xl font-bold h-10 items-center flex">
@@ -98,7 +108,12 @@ export default function DishManagementPage() {
           setSearchText={setSearchText}
           classname="flex-1"
         />
-
+        <button
+          className="flex border border-gray-500 rounded-md items-center gap-1 py-1 px-2 font-medium text-sm hover:bg-gray-100 hover:cursor-pointer select-none"
+          onClick={showFilterModal}
+        >
+          Filter <Filter size={16} />
+        </button>
         <button
           className="flex border border-gray-500 rounded-md items-center gap-1 py-1 px-2 font-medium text-sm hover:bg-gray-100 hover:cursor-pointer select-none"
           onClick={showModal}
@@ -110,10 +125,8 @@ export default function DishManagementPage() {
         tabs={selectedTab}
         handleOk={handleOk}
         searchText={searchText}
-        sortBy={sortBy}
-        order={order}
       />
-      {/* Add New Item */}
+      {/* Add New Item Modal */}
       <Modal
         title="Add New Dish"
         closable={{ "aria-label": "Custom Close Button" }}
@@ -188,6 +201,55 @@ export default function DishManagementPage() {
               id="activate"
               checked={isActive}
               onChange={handleActivateDish}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+      {/* Filter Modal */}
+      <Modal
+        title="Filter Dishes"
+        closable={{ "aria-label": "Custom Close Button" }}
+        open={isFilterOpen}
+        onOk={handleFilterOk}
+        onCancel={handleFilterCancel}
+        centered
+      >
+        <Form layout="vertical">
+          <Form.Item label="Sort By" name="sortBy">
+            <Select placeholder="Sort By" defaultValue={"createdAt"}>
+              <Select.Option value="createdAt">Created At</Select.Option>
+              <Select.Option value="name">Name</Select.Option>
+              <Select.Option value="cookingTime">Cooking Time</Select.Option>
+              <Select.Option value="calorie">Calorie</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item label="Order" name="order">
+            <Radio.Group defaultValue="desc">
+              <Radio value="asc">Ascending</Radio>
+              <Radio value="desc">Descending</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Cooking Time (minutes)">
+            <div style={{ marginBottom: 8, fontWeight: 500 }}>
+              {cookingTimeRange[0]} min - {cookingTimeRange[1]} min
+            </div>
+            <Slider
+              range
+              min={0}
+              max={240}
+              step={5}
+              marks={{
+                0: "0",
+                30: "30",
+                60: "1h",
+                120: "2h",
+                180: "3h",
+                240: "4h",
+              }}
+              value={cookingTimeRange}
+              onChange={setCookingTimeRange}
+              tooltip={{ open: isFilterOpen, formatter: (v) => `${v} min` }}
+              style={{ marginLeft: 8, marginRight: 8 }}
             />
           </Form.Item>
         </Form>

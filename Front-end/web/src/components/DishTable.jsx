@@ -8,8 +8,6 @@ const DishTable = React.memo(function DishTable({
   tabs,
   handleOk,
   searchText = "",
-  sortBy,
-  order,
 }) {
   const { accessToken } = useAuth();
   const [dishes, setDishes] = useState([]);
@@ -24,8 +22,6 @@ const DishTable = React.memo(function DishTable({
       if (searchText) {
         params.name = searchText;
       }
-      params.sortBy = sortBy;
-      params.order = order;
       const response = await getDish({ accessToken, ...params });
       if (response) setDishes(response.data);
       else setDishes([]);
@@ -35,7 +31,7 @@ const DishTable = React.memo(function DishTable({
       console.error("Failed to fetch dishes:", error);
     }
     setLoading(false);
-  }, [tabs, searchText, sortBy, order, accessToken]);
+  }, [tabs, searchText, accessToken]);
 
   useEffect(() => {
     fetchData();
