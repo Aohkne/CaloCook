@@ -123,9 +123,9 @@ export default function LoginScreen() {
           <View style={styles.line}></View>
         </View>
 
-        <TouchableOpacity style={styles.googleButton}>
+        {/* <TouchableOpacity style={styles.googleButton}>
           <Text style={styles.googleButtonText}>Google</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <View
           style={{
             flexDirection: 'row',
