@@ -175,13 +175,13 @@ export default function SignUpScreen() {
           <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
 
-        <View style={styles.lineContainer}>
+        {/* <View style={styles.lineContainer}>
           <View style={styles.line}></View>
           <Text style={{ opacity: 0.6, fontSize: 16 }}>OR</Text>
           <View style={styles.line}></View>
         </View>
 
-        {/* <TouchableOpacity style={styles.googleButton}>
+        <TouchableOpacity style={styles.googleButton}>
           <Text style={styles.googleButtonText}>Google</Text>
         </TouchableOpacity> */}
       </View>
