@@ -464,48 +464,56 @@ const Router = express.Router()
 
 Router.route('/:userId/history')
   .get(
-  
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
     historyValidation.viewHistory,
     historyController.viewHistory
   )
   .post(
-   
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
     historyValidation.addToHistory,
     historyController.addToHistory
   )
 
 Router.route('/user/:userId').get(
- 
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
   historyValidation.searchByUserId,
   historyController.searchByUserId
 )
 
 Router.route('/dish/:dishId').get(
-  
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
   historyValidation.searchByDishId,
   historyController.searchByDishId
 )
 
 Router.route('/:historyId')
   .delete(
-   
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
     historyValidation.deleteFromHistory,
     historyController.deleteFromHistory
   )
   .put(
-    
+    authMiddleware.authenticateUser,
+    authMiddleware.authorizeRole(['user']),
     historyValidation.editHistory,
     historyController.editHistory
   )
 
 Router.route('/:historyId/detail').get(
- 
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
   historyValidation.viewHistoryDetail,
   historyController.viewHistoryDetail
 )
 
 Router.route('/:userId/total-calories').get(
- 
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
   historyValidation.getTotalCalories,
   historyController.getTotalCalories
 )
