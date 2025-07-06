@@ -1,0 +1,92 @@
+@startuml Signup
+
+actor User as "User"
+boundary "SignupPage" as View #lightblue
+participant ":authRoute" as Routes_FE #lightblue
+control "authController" as Controller #lightblue
+participant ":authService" as Service #lightblue
+entity "userModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+
+group Signup
+User -> View: 1.Enter signup information\n(username, email, password)
+activate View
+
+View -> View: 2.Validate input
+    View -> Routes_FE: 3.POST /api/v1/auth/signup
+    activate Routes_FE
+    
+    Routes_FE -> Controller: 4.signup(req, res)
+    activate Controller
+    
+    Controller -> Controller: 5.Validate request body
+    
+    alt Validation Data
+        Controller -> Service: 6.createUser(userData)
+        activate Service
+        
+        Service -> Service: 7.Hash password
+        Service -> Model: 8.findOne({email},{username})
+        activate Model
+        
+        Model -> MongoDB: 9.Check email/username exist 
+        activate MongoDB
+        MongoDB --> Model: 10.Return result
+        deactivate MongoDB
+        
+        Model --> Service: 11.Return result
+        deactivate Model
+        
+        alt Email/Username not exist
+            Service -> Model: 12.create(userData)
+            activate Model
+            
+            Model -> MongoDB: 13.ExecuteQuery()
+            activate MongoDB
+            MongoDB --> Model: 14.Return result
+            deactivate MongoDB
+            
+            Model --> Service: 15.Return result
+            deactivate Model
+            
+            Service -> Service: 16.Generate JWT token
+            Service --> Controller: 16.1.Return success{token}
+            deactivate Service
+            
+            Controller --> Routes_FE: 16.1.1.Created\n{message, user, token}
+            deactivate Controller
+            
+            Routes_FE --> View: 16.1.2.Success response
+            deactivate Routes_FE
+            
+            View -> View: 16.1.3.Save token to localStorage
+            View --> User: 16.1.4.Redirect to login
+            
+        else Email/Username Exist
+            Service --> Controller: 16.2.Fail message: "Email/Username existes"
+            deactivate Service
+            
+            Controller --> Routes_FE: 16.2.1.Return Fail\n message: "Email/Username exists"
+            deactivate Controller
+            
+            Routes_FE --> View: 16.2.2.Error response
+            deactivate Routes_FE
+            
+            View --> User: 16.2.3.Show error "Email/Username exists"
+        end
+        
+    else Invalid data
+        Controller --> Routes_FE: 16.2.2.Bad Request\n{message: "Invalid data"}
+        deactivate Controller
+        
+        Routes_FE --> View: 16.2.3.Validation error
+        deactivate Routes_FE
+        
+        View --> User: 16.2.4.Show validation errors
+    end
+    
+
+deactivate View
+end
+@enduml
