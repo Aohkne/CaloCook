@@ -22,7 +22,7 @@ const viewFavorites = async (req, res, next) => {
   try {
     const { userId } = req.params
     const paginationParams = req.pagination
-    console.log('Controller: viewFavorites', { userId, paginationParams })
+    //console.log('Controller: viewFavorites', { userId, paginationParams })
 
     const result = await favoriteService.viewFavorites(userId, paginationParams)
     const response = paginationHelper.formatPaginatedResponse(

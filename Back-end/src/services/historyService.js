@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb'
 
 const addToHistory = async (userId, dishId) => {
   try {
-    console.log('Service: addToHistory', { userId, dishId })
+    //console.log('Service: addToHistory', { userId, dishId })
  
     if (!ObjectId.isValid(userId) || !ObjectId.isValid(dishId)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid userId or dishId')
@@ -25,7 +25,7 @@ const addToHistory = async (userId, dishId) => {
 }
 const viewHistoryDetail = async (historyId) => {
   try {
-    console.log('Service: viewHistoryDetail', { historyId })
+    //console.log('Service: viewHistoryDetail', { historyId })
     if (!ObjectId.isValid(historyId)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid historyId')
     }
@@ -44,7 +44,7 @@ const viewHistoryDetail = async (historyId) => {
 
 const viewHistory = async (userId) => {
   try {
-    console.log('Service: viewHistory', { userId })
+    //console.log('Service: viewHistory', { userId })
     if (!ObjectId.isValid(userId)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid userId')
     }
@@ -59,7 +59,7 @@ const viewHistory = async (userId) => {
 
 const searchHistoryByUserId = async (userId) => {
   try {
-    console.log('Service: searchHistoryByUserId', { userId })
+    //console.log('Service: searchHistoryByUserId', { userId })
     if (!ObjectId.isValid(userId)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid userId')
     }
@@ -74,7 +74,7 @@ const searchHistoryByUserId = async (userId) => {
 
 const searchHistoryByDishId = async (dishId) => {
   try {
-    console.log('Service: searchHistoryByDishId', { dishId })
+    //console.log('Service: searchHistoryByDishId', { dishId })
     if (!ObjectId.isValid(dishId)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid dishId')
     }
@@ -89,7 +89,7 @@ const searchHistoryByDishId = async (dishId) => {
 
 const deleteHistory = async (historyId) => {
   try {
-    console.log('Service: deleteHistory', { historyId })
+    //console.log('Service: deleteHistory', { historyId })
     if (!ObjectId.isValid(historyId)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid historyId')
     }
@@ -107,7 +107,7 @@ const deleteHistory = async (historyId) => {
 
 const editHistory = async (historyId, consumedAt) => {
   try {
-    console.log('Service: editHistory', { historyId, consumedAt })
+    //console.log('Service: editHistory', { historyId, consumedAt })
  
     if (!ObjectId.isValid(historyId)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid historyId')
@@ -128,7 +128,7 @@ const editHistory = async (historyId, consumedAt) => {
 }
 const getTotalCalories = async (userId, date) => {
   try {
-    console.log('Service: getTotalCalories', { userId, date })
+    //console.log('Service: getTotalCalories', { userId, date })
     if (!ObjectId.isValid(userId)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid userId')
     }

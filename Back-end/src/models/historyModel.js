@@ -6,7 +6,7 @@ const _COLLECTION_NAME = 'history'
 
 const viewHistory = async (userId) => {
   try {
-    console.log('Model: viewHistory', { userId })
+    //console.log('Model: viewHistory', { userId })
     const histories = await GET_DB()
       .collection(_COLLECTION_NAME)
       .aggregate([
@@ -51,7 +51,7 @@ const viewHistory = async (userId) => {
 
 const addToHistory = async ({ userId, dishId }) => {
   try {
-    console.log('addToHistory called with:', { userId, dishId })
+    //console.log('addToHistory called with:', { userId, dishId })
     const newHistory = {
       userId: new ObjectId(userId),
       dishId: new ObjectId(dishId),
@@ -62,7 +62,7 @@ const addToHistory = async ({ userId, dishId }) => {
     const result = await GET_DB()
       .collection(_COLLECTION_NAME)
       .insertOne(newHistory)
-    console.log('addToHistory result:', result)
+    //console.log('addToHistory result:', result)
     return result
   } catch (error) {
     console.error('Error in addToHistory:', error)
@@ -71,7 +71,7 @@ const addToHistory = async ({ userId, dishId }) => {
 }
 const viewHistoryDetail = async (historyId) => {
   try {
-    console.log('Model: viewHistoryDetail', { historyId })
+    //console.log('Model: viewHistoryDetail', { historyId })
     const history = await GET_DB()
       .collection(_COLLECTION_NAME)
       .aggregate([
@@ -107,7 +107,7 @@ const viewHistoryDetail = async (historyId) => {
         }
       ])
       .toArray()
-       console.log('viewHistoryDetail result:', history)
+       //console.log('viewHistoryDetail result:', history)
     return history.length > 0 ? history[0] : null
   } catch (error) {
     console.error('Error in viewHistoryDetail:', error)
@@ -162,7 +162,7 @@ const editHistory = async ({ historyId, consumedAt }) => {
         { returnDocument: 'after' }
       );
 
-    console.log('Update result:', result);
+    //console.log('Update result:', result);
 
     if (!result) {
       throw new Error('History not found');
@@ -176,7 +176,7 @@ const editHistory = async ({ historyId, consumedAt }) => {
 }
 const getTotalCaloriesByDate = async (userId, date) => {
   try {
-    console.log('Model: getTotalCaloriesByDate', { userId, date })
+    //console.log('Model: getTotalCaloriesByDate', { userId, date })
     const startOfDay = new Date(date)
     startOfDay.setHours(0, 0, 0, 0)
     const endOfDay = new Date(date)
@@ -226,10 +226,10 @@ const result = await GET_DB()
       ])
       .toArray()
 
-    console.log('getTotalCaloriesByDate result:', result)
+    //console.log('getTotalCaloriesByDate result:', result)
     return result.length > 0 ? result[0] : { totalCalories: 0, dishes: [] }
     } catch (error) {
-    console.error('Error in getTotalCaloriesByDate:', error)
+    //console.error('Error in getTotalCaloriesByDate:', error)
     throw error
   }
 }

@@ -36,7 +36,7 @@ const viewHistory = async (req, res, next) => {
 const viewHistoryDetail = async (req, res, next) => {
   try {
     const { historyId } = req.params
-    console.log('Controller: viewHistoryDetail', { historyId })
+    //console.log('Controller: viewHistoryDetail', { historyId })
     const history = await historyService.viewHistoryDetail(historyId)
     res.status(StatusCodes.OK).json({
       code: StatusCodes.OK,

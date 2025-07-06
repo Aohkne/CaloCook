@@ -68,7 +68,7 @@ const addToFavorites = async (userId, dishId) => {
 
 const viewFavorites = async (userId, paginationParams) => {
   try {
-    console.log('Model: viewFavorites', { userId, paginationParams })
+    //console.log('Model: viewFavorites', { userId, paginationParams })
     const { skip, limit, sortBy, order } = paginationParams
     const sortObject = createSortObject(sortBy, order)
 
@@ -114,7 +114,7 @@ const viewFavorites = async (userId, paginationParams) => {
         .countDocuments({ userId: new ObjectId(userId) })
     ])
 
-    console.log('viewFavorites result:', { data, totalCount })
+    //console.log('viewFavorites result:', { data, totalCount })
     return { data, totalCount }
   } catch (error) {
     console.error('Error in viewFavorites:', error)
