@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { StyleSheet, Text, View, Image, TouchableOpacity, Animated, ScrollView, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, Button } from 'react-native'
 import { useTheme } from '@contexts/ThemeProvider'
-import { Lock, User, Edit3, Calendar, Ruler, Weight, Target, Crown, X, Save, Users, Activity, Flame, ThumbsUp, ThumbsDown, Mars, Venus, Sun, Moon } from 'lucide-react-native'
+import { Lock, User, Edit3, Calendar, Ruler, Weight, Target, Crown, X, Save, Users, Activity, Flame, ThumbsUp, ThumbsDown, Mars, Venus, Sun, Moon, History } from 'lucide-react-native'
 import Svg, { Circle } from 'react-native-svg'
 import { useDispatch, useSelector } from 'react-redux'
 import { getUserProfile, updateUserProfile, clearError, updateLocalUserData, getTotalCalories } from '@/redux/slices/userSlice'
@@ -396,6 +396,13 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.headerIcons}>
           <TouchableOpacity style={styles.iconButton} onPress={handleLockPress}>
             <Lock size={24} color={colors.text} />
+          </TouchableOpacity>
+          {/* History Icon - Add this */}
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => navigation.navigate('History')}
+          >
+            <History size={24} color={colors.text} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.themeToggleButton} onPress={toggleTheme}>
             {isDark ? (

@@ -45,3 +45,13 @@ export const getTotalCaloriesService = async (userId, date = null) => {
         throw error.response?.data || { message: 'Get total calories failed' };
     }
 };
+
+// GET EATING HISTORY
+export const getEatingHistoryService = async (userId) => {
+    try {
+        const response = await api.get(`/history/${userId}/history`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: 'Get eating history failed' };
+    }
+};
