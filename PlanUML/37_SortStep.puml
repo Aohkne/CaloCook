@@ -11,6 +11,7 @@ database "MongoDB" as MongoDB #yellow
 group Sort Steps by Dish ID
 Admin -> View: 1. Select sort for specific dish steps
 activate View
+
 View -> Route: 2. GET /api/v1/step/by-dish/:dishId?sortBy=stepNumber&order=asc
 activate Route
 
