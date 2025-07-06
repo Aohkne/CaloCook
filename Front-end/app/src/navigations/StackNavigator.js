@@ -13,6 +13,7 @@ import SignUpScreen from '@screens/(auth)/SignUpScreen';
 //SCREEN
 import FilterScreen from '@screens/FilterScreen';
 import ChangePasswordScreen from '@screens/ChangePasswordScreen';
+import HistoryScreen from '@screens/HistoryScreen';
 import Detail from '@screens/Detail';
 
 const Stack = createNativeStackNavigator();
@@ -32,6 +33,7 @@ export default function StackNavigator() {
           <Stack.Screen name='Detail' component={Detail} />
           <Stack.Screen name='FilterScreen' component={FilterScreen} />
           <Stack.Screen name='ChangePassword' component={ChangePasswordScreen} />
+          <Stack.Screen name='History' component={HistoryScreen} />
         </>
       ) : (
         <>

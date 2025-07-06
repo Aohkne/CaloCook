@@ -1,16 +1,17 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getUserProfileService, updateUserProfileService, addEatingHistoryService, getTotalCaloriesService } from '@/services/user';
+import { getUserProfileService, updateUserProfileService, addEatingHistoryService, getTotalCaloriesService, getEatingHistoryService } from '@/services/user';
 
 // Initial state
 const initialState = {
     userData: null,
     totalCalories: 0,
+    eatingHistory: [],
     isLoading: false,
     isUpdating: false,
     isAddingHistory: false,
+    isLoadingHistory: false,
     error: null,
 };
-
 
 export const addEatingHistory = createAsyncThunk(
     'user/addEatingHistory',
@@ -36,6 +37,17 @@ export const getTotalCalories = createAsyncThunk(
     }
 );
 
+export const getEatingHistory = createAsyncThunk(
+    'user/getEatingHistory',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await getEatingHistoryService(userId);
+            return response;
+        } catch (error) {
+            return rejectWithValue(error);
+        }
+    }
+);
 
 // Async thunk for getting user profile
 export const getUserProfile = createAsyncThunk(
@@ -74,6 +86,7 @@ const userSlice = createSlice({
         resetUserData: (state) => {
             state.userData = null;
             state.totalCalories = 0;
+            state.eatingHistory = [];
             state.error = null;
         },
         // Local update for immediate UI response
@@ -168,6 +181,26 @@ const userSlice = createSlice({
             .addCase(getTotalCalories.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload?.message || 'Failed to get total calories';
+            })
+
+            // Get eating history cases
+            .addCase(getEatingHistory.pending, (state) => {
+                state.isLoadingHistory = true;
+                state.error = null;
+            })
+            .addCase(getEatingHistory.fulfilled, (state, action) => {
+                state.isLoadingHistory = false;
+                // Xử lý response data
+                if (action.payload && action.payload.data) {
+                    state.eatingHistory = action.payload.data;
+                } else {
+                    state.eatingHistory = [];
+                }
+                state.error = null;
+            })
+            .addCase(getEatingHistory.rejected, (state, action) => {
+                state.isLoadingHistory = false;
+                state.error = action.payload?.message || 'Failed to get eating history';
             })
     }
 });
