@@ -41,7 +41,7 @@ const addToFavorites = async (userId, dishId) => {
 
 const viewFavorites = async (userId, paginationParams) => {
   try {
-    console.log('Service: viewFavorites', { userId, paginationParams })
+    //console.log('Service: viewFavorites', { userId, paginationParams })
     if (!ObjectId.isValid(userId)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid userId')
     }
