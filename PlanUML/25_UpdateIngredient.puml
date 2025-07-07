@@ -12,6 +12,7 @@ database "MongoDB" as MongoDB #yellow
 group Update Ingredient
 
 Admin -> View: 1. Click "Edit Ingredient" button
+activate Admin
 activate View
 
 View -> Admin: 2. Show edit form with current data\n(dishId, name, quantity, isActive)
@@ -25,11 +26,8 @@ note right of Route: Body: {\n  dishId: "66574e301a6d1f001e8a1c01",\n  name: "Up
 Route -> Validation: 5. updateIngredient(req, res, next)
 activate Validation
 
-note right of Validation: Validate using Joi:\n- dishId: required, 24 chars hex\n- name: required, 1-100 chars\n- quantity: required, 1-50 chars\n- isActive: boolean, default true
-
 alt Validation Success
     Validation -> Controller: 6. next() - validation passed
-    deactivate Validation
     
     activate Controller
     Controller -> Service: 7. updateIngredient(ingredientId, updateData)
@@ -43,19 +41,14 @@ alt Validation Success
     
     alt Ingredient Found & Updated
         MongoDB --> IngredientModel: 10. Return updated ingredient
-        deactivate MongoDB
         
         IngredientModel --> Service: 11. Return updated ingredient
-        deactivate IngredientModel
         
         Service --> Controller: 12. Return updated ingredient
-        deactivate Service
         
         Controller --> Route: 13. Send 200 JSON response
-        deactivate Controller
         
         Route --> View: 14. Return success response
-        deactivate Route
         
         View --> Admin: 15. Show success message & update ingredient display
         
@@ -73,7 +66,6 @@ alt Validation Success
         deactivate Controller
         
         Route --> View: 14. Return 404 error
-        deactivate Route
         
         View --> Admin: 15. Show error message
     end
@@ -86,9 +78,10 @@ else Validation Failed
     deactivate Route
     
     View --> Admin: 8. Show validation error messages
+    deactivate View
+    deactivate Admin
 end
 
-deactivate View
 end
 
 @enduml

@@ -10,7 +10,9 @@ database "MongoDB" as MongoDB #yellow
 
 group Delete Step (Deactivate)
 Admin -> View: 1. Click Delete/Deactivate Step
+activate Admin
 activate View
+
 View -> Route: 2. PATCH /api/v1/step/:id/deactivate
 activate Route
 
@@ -27,23 +29,17 @@ Model -> MongoDB: 6. ExecuteQuery()
 activate MongoDB
 
 MongoDB --> Model: 7. Return updated step or null
-deactivate MongoDB
 
 Model --> Service: 8. Return updated step
-deactivate Model
 
 alt Step Found and Deactivated
     Service --> Controller: 9. Return deactivated step
-    deactivate Service
 
     Controller --> Route: 10. Send JSON response (200, deactivated step)
-    deactivate Controller
 
     Route --> View: 11. Show success message
-    deactivate Route
 
     View --> Admin: 12. Display step as inactive/deleted
-    deactivate View
 
 else Step Not Found
     Service --> Controller: 13. Throw ApiError (404, Step not found)
@@ -55,21 +51,16 @@ end
 
 group Alternative: Activate Step
 Admin -> View: 17. Click Activate Step
-activate View
+
 View -> Route: 18. PATCH /api/v1/step/:id/activate
-activate Route
 
 Route -> Controller: 19. activateStep(req, res)
-activate Controller
 
 Controller -> Service: 20. activateStep(stepId)
-activate Service
 
 Service -> Model: 21. updateIsActive(stepId, true)
-activate Model
 
 Model -> MongoDB: 22. ExecuteQuery()
-activate MongoDB
 
 MongoDB --> Model: 23. Return updated step
 deactivate MongoDB
@@ -88,6 +79,8 @@ deactivate Route
 
 View --> Admin: 28. Display step as active
 deactivate View
+deactivate Admin
+
 end
 
 @enduml

@@ -11,6 +11,7 @@ database "MongoDB" as MongoDB #yellow
 group Search Dish
 note right User: User searches for dishes by name
 User -> View: 1. Enter keyword (eg. "pizza")
+activate User
 activate View
 
 View -> Route: 2. GET /dishes?search=pizza
@@ -40,14 +41,15 @@ alt No dish found
     View --> User: Display empty state
 else Dish(es) found
     Service --> Controller: Return dishes
+    deactivate Service
     Controller --> Route: 200 OK + result
+    deactivate Controller
     Route --> View: Render dish list
+    deactivate Route
     View --> User: Show matching dishes
+    deactivate View
+    deactivate User
 end
 
-deactivate Service
-deactivate Controller
-deactivate Route
-deactivate View
 end
 @enduml

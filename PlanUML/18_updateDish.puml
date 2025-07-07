@@ -11,6 +11,7 @@ database "MongoDB" as MongoDB #yellow
 
 group Update Dish
 Admin -> View: 1. Click "Edit" button
+activate Admin
 activate View
 Admin -> View: 2. Edit dish info (name, price, etc.)
 Admin -> View: 3. Save dish info.
@@ -25,9 +26,6 @@ alt Validation Failed
     Validation --> Route: 6. 400 Bad Request
     Route --> View: 6.1 Show validation error
     View --> Admin: 6.1.1 Display error message
-    deactivate Validation
-    deactivate Route
-    deactivate View
 else Validation Passed
     Validation --> Route: 7. Proceed
     deactivate Validation
@@ -54,17 +52,18 @@ else Validation Passed
         View --> Admin: 12.1.4. Display error
     else Dish updated
         Model --> Service: 12.2. Return updated dish
+        deactivate Model
         Service --> Controller: 12.2.1. Return success
+        deactivate Service
         Controller --> Route: 12.2.2. 200 OK + updated dish
+        deactivate Controller
         Route --> View: 12.2.3. Show updated dish
+        deactivate Route
         View --> Admin: 12.2.4. Display success message
+        deactivate View 
+        deactivate Admin 
     end
 
-    deactivate Model
-    deactivate Service
-    deactivate Controller
-    deactivate Route
-    deactivate View
 end
 end
 @enduml
