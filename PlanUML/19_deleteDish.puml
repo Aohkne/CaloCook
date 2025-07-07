@@ -10,6 +10,7 @@ database "MongoDB" as MongoDB #yellow
 
 group Deactivate Dish
 Admin -> View: 1. Click "Deactivate" on dish
+activate Admin
 activate View
 Admin -> View: 2. Show confirmation dialog
 Admin -> View: 3. Confirm deactivation button
@@ -38,16 +39,17 @@ alt Dish not found
     View --> Admin: 9.1.4. Display error
 else Deactivation success
     Model --> Service: 9.2. Return success
+    deactivate Model
     Service --> Controller: 9.2.1. 200 OK
+    deactivate Service
     Controller --> Route: 9.2.2. Return success
+    deactivate Controller
     Route --> View: 9.2.3. Update dish status on UI
+    deactivate Route
     View --> Admin: 9.2.4. Show "Dish deactivated"
+    deactivate View
+    deactivate Admin
 end
 
-deactivate Model
-deactivate Service
-deactivate Controller
-deactivate Route
-deactivate View
 end
 @enduml

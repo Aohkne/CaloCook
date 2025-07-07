@@ -14,6 +14,7 @@ group Create New Ingredient
 
 Admin -> View: 1. Click "Add Ingredient" button
 activate View
+activate Admin
 
 View -> Admin: 2. Show ingredient form (dishId, name, quantity, isActive)
 
@@ -26,11 +27,8 @@ note right of Route: Body: {\n  dishId: "66574e301a6d1f001e8a1c01",\n  name: "Ga
 Route -> Validation: 5. createNew(req, res, next)
 activate Validation
 
-note right of Validation: Validate using Joi:\n- dishId: required, 24 chars hex\n- name: required, 1-100 chars\n- quantity: required, 1-50 chars\n- isActive: boolean, default true
-
 alt Validation Success
     Validation -> Controller: 6. next() - validation passed
-    deactivate Validation
     
     activate Controller
     Controller -> Service: 7. createNew(req.body)
@@ -44,45 +42,32 @@ alt Validation Success
     
     alt Dish Found
         MongoDB --> DishModel: 10. Return dish data
-        deactivate MongoDB
+
         DishModel --> Service: 11. Return dish
-        deactivate DishModel
-        
-        note right of Service: Create newIngredient object:\n{\n  ...reqBody,\n  dishId: ObjectId(dishId),\n  createdAt: new Date(),\n  updatedAt: new Date()\n}
         
         Service -> IngredientModel: 12. createNew(newIngredient)
         activate IngredientModel
         
         IngredientModel -> MongoDB: 13. ExecuteQuery()
-        activate MongoDB
         
         MongoDB --> IngredientModel: 14. Return insertedId
-        deactivate MongoDB
         
         IngredientModel --> Service: 15. Return creation result
-        deactivate IngredientModel
         
         Service -> IngredientModel: 16. getDetails(insertedId)
-        activate IngredientModel
         
         IngredientModel -> MongoDB: 17. ExecuteQuery()
-        activate MongoDB
         
         MongoDB --> IngredientModel: 18. Return created ingredient
-        deactivate MongoDB
         
         IngredientModel --> Service: 19. Return ingredient details
         deactivate IngredientModel
         
         Service --> Controller: 20. Return created ingredient
-        deactivate Service
         
         Controller --> Route: 21. Send 201 JSON response
-        note right of Controller: {\n  code: 201,\n  message: "Create successful",\n  data: createdIngredient\n}
-        deactivate Controller
         
         Route --> View: 22. Return success response
-        deactivate Route
         
         View --> Admin: 23. Show success message & update ingredient list
         
@@ -99,7 +84,6 @@ alt Validation Success
         deactivate Controller
         
         Route --> View: 14. Return 404 error
-        deactivate Route
         
         View --> Admin: 15. Show error message
     end
@@ -112,9 +96,10 @@ else Validation Failed
     deactivate Route
     
     View --> Admin: 8. Show validation error messages
+    deactivate Admin
+    deactivate View
 end
 
-deactivate View
 end
 
 @enduml

@@ -10,6 +10,7 @@ database "MongoDB" as MongoDB #yellow
 
 group View Top 10 Favorites
 Admin -> View: 1. Navigate to Dashboard
+activate Admin
 activate View
 
 View -> Route: 2. GET /api/v1/dashboard/top-favorites?limit=10
@@ -42,7 +43,8 @@ Route --> View: 11. Render top favorites
 deactivate Route
 
 View --> Admin: 12. Display top 10 favorite dishes
-
 deactivate View
+deactivate Admin
+
 end
 @enduml

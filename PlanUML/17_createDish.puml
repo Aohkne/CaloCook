@@ -11,6 +11,7 @@ database "MongoDB" as MongoDB #yellow
 
 
 Admin -> View: 1. Click "Create Dish"
+activate Admin
 activate View
 Admin -> View: 2. Fill form(name, cookingTime,\n, calorie, difficulty, description, image)
 Admin -> View: 3. Click "Submit"
@@ -25,9 +26,7 @@ alt Validation Failed
     Validation --> Route: 6. Return 400 Bad Request
     Route --> View: 6.1. Show validation error
     View --> Admin: 6.1.1. Display error message
-    deactivate Validation
-    deactivate Route
-    deactivate View
+
 else Validation Passed
     Validation --> Route: 7. Proceed
     deactivate Validation
@@ -53,12 +52,15 @@ else Validation Passed
     deactivate Service
 
     Controller --> Route: 15. 201 Created + dish
+    deactivate Route
     deactivate Controller
 
     Route --> View: 16. Show success
     deactivate Route
 
     View --> Admin: 17. Display "Dish created successfully"
+    deactivate Admin
+    deactivate View
 end
 
 deactivate View

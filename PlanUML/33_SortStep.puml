@@ -1,17 +1,18 @@
-@startuml ViewStepByDish
+@startuml SortStep
 
-actor "User" as User
 actor "Admin" as Admin
-boundary "DishDetailPage" as View #lightblue
+boundary "StepListPage" as View #lightblue
 participant ":stepRoute" as Route #lightblue
 control "stepController" as Controller #lightblue
 participant ":stepService" as Service #lightblue
 entity "stepModel" as Model #lightblue
 database "MongoDB" as MongoDB #yellow
 
-group View Step Details By Dish
-User -> View: 1. Click View Steps for Dish
+group Sort Steps by Dish ID
+Admin -> View: 1. Select sort for specific dish steps
+activate Admin
 activate View
+
 View -> Route: 2. GET /api/v1/step/by-dish/:dishId?sortBy=stepNumber&order=asc
 activate Route
 
@@ -27,23 +28,25 @@ activate Model
 Model -> MongoDB: 6. ExecuteQuery()
 activate MongoDB
 
-MongoDB --> Model: 7. Return step list for dish
+MongoDB --> Model: 7. Return sorted steps for dish
 deactivate MongoDB
 
-Model --> Service: 8. Return steps array
+Model --> Service: 8. Return sorted dish steps
 deactivate Model
 
-Service --> Controller: 9. Return steps data
+Service --> Controller: 9. Return sorted dish steps
 deactivate Service
 
-Controller --> Route: 10. Send JSON response (200, steps data)
+Controller --> Route: 10. Send JSON response (200, sorted dish steps)
 deactivate Controller
 
-Route --> View: 11. Render step list
+Route --> View: 11. Render sorted dish steps
 deactivate Route
 
-View --> User: 12. Show step details for dish
+View --> Admin: 12. Display sorted steps for dish
 deactivate View
+deactivate Admin
+
 end
 
 @enduml
