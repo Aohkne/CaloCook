@@ -1,0 +1,50 @@
+@startuml ViewDishList
+
+actor User as "User/Admin"
+boundary "DishListPage" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View Dish List
+User -> View: 1. Navigate to Dish List
+activate User
+activate View
+
+View -> Route: 2. GET /api/v1/dish
+activate Route
+
+Route -> Controller: 3. getAll(req, res)
+activate Controller
+
+Controller -> Service: 4. getAll()
+activate Service
+
+Service -> Model: 5. findAll()
+activate Model
+
+Model -> MongoDB: 6. Query all dishes
+activate MongoDB
+MongoDB --> Model: 7. Return dish list
+deactivate MongoDB
+
+Model --> Service: 8. Return result
+deactivate Model
+
+Service --> Controller: 9. Return dish list
+deactivate Service
+
+Controller --> Route: 10. 200 OK + dish list
+deactivate Controller
+
+Route --> View: 11. Render dish list
+deactivate Route
+
+View --> User: 12. Display dish list
+deactivate View
+deactivate User
+
+end
+@enduml

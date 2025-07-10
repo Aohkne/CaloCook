@@ -1,0 +1,49 @@
+@startuml SortUser
+
+actor Admin
+boundary "UserListPage" as View #lightblue
+participant ":userRoute" as Route #lightblue
+control "userController" as Controller #lightblue
+participant ":userService" as Service #lightblue
+entity "userModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Sort Users
+
+Admin -> View: 1. Click "Sort" (by order)
+activate View
+
+View -> Route: 2. GET /users/sorted?order=asc
+activate Route
+
+Route -> Controller: 3. getSortedUsers(req, res)
+activate Controller
+
+Controller -> Service: 4. getSortedUsers(order)
+activate Service
+
+Service -> Model: 5. findUsersSorted(order)
+activate Model
+
+Model -> MongoDB: 6. Query sorted users
+activate MongoDB
+MongoDB --> Model: 7. Return sorted list
+deactivate MongoDB
+
+Model --> Service: 8. Return sorted users
+deactivate Model
+
+Service --> Controller: 9. Return sorted users
+deactivate Service
+
+Controller --> Route: 10. Return sorted users
+deactivate Controller
+
+Route --> View: 11. Render sorted user list
+deactivate Route
+
+View --> Admin: 12. Display sorted users
+
+deactivate View
+end
+@enduml

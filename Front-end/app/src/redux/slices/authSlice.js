@@ -7,7 +7,8 @@ import {
   logoutService,
   refreshTokenService,
   resetPasswordService,
-  registerService
+  registerService,
+  changePasswordService
 } from '@/services/auth';
 
 // Initial state
@@ -63,6 +64,19 @@ export const resetPassword = createAsyncThunk(
   async ({ token, newPassword }, { rejectWithValue }) => {
     try {
       const response = await resetPasswordService(token, newPassword);
+      return response;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+// NEW: Change Password Async Thunk
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async ({ oldPassword, newPassword }, { rejectWithValue }) => {
+    try {
+      const response = await changePasswordService({ oldPassword, newPassword });
       return response;
     } catch (error) {
       return rejectWithValue(error);
@@ -212,6 +226,20 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload?.message || 'Password reset failed';
+      })
+      //Change password cases
+      .addCase(changePassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.message = action.payload.message || 'Password changed successfully';
+        state.error = null;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || 'Change password failed';
       })
       // Get profile cases
       .addCase(getProfile.pending, (state) => {

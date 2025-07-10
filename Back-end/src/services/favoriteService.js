@@ -41,7 +41,7 @@ const addToFavorites = async (userId, dishId) => {
 
 const viewFavorites = async (userId, paginationParams) => {
   try {
-    console.log('Service: viewFavorites', { userId, paginationParams })
+    //console.log('Service: viewFavorites', { userId, paginationParams })
     if (!ObjectId.isValid(userId)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid userId')
     }
@@ -62,9 +62,18 @@ const deleteFromFavorites = async (userId, dishId) => {
     throw error
   }
 }
+const getTopFavorites = async (limit = 10) => {
+  try {
+    const result = await favoriteModel.getTopFavorites(limit)
+    return result
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
+}
 
 export const favoriteService = {
   addToFavorites,
   viewFavorites,
-  deleteFromFavorites
+  deleteFromFavorites,
+  getTopFavorites
 }

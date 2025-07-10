@@ -1,0 +1,52 @@
+@startuml ViewUserList
+
+actor Admin
+boundary "UserListPage" as View #lightblue
+participant ":userRoute" as Route #lightblue
+control "userController" as Controller #lightblue
+participant ":userService" as Service #lightblue
+entity "userModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View User List
+Admin -> View: 1. Navigate to User Management
+activate View
+
+View -> Route: 2. GET /api/v1/user
+activate Route
+
+Route -> Controller: 3. getAllUsers(req, res)
+activate Controller
+
+Controller -> Service: 4. getAllUsers()
+activate Service
+
+Service -> Model: 5. findAllUsers()
+activate Model
+
+Model -> MongoDB: 6. ExecuteQuery()
+activate MongoDB
+MongoDB --> Model: 7. Return result
+deactivate MongoDB
+
+Model --> Service: 8. Return user list
+deactivate Model
+
+alt No users found
+    Service --> Controller: 8.1. Return empty list
+    Controller --> Route: 8.1.1. Empty list
+    Route --> View: 8.1.2. Show "No users found"
+    View --> Admin: 8.1.3. Display empty state message
+else Users found
+    Service --> Controller: 8.2. Return user list
+    Controller --> Route: 8.2.1. Return user list
+    Route --> View: 8.2.2. Render user list
+    View --> Admin: 8.2.3. Display list of users
+end
+
+deactivate Service
+deactivate Controller
+deactivate Route
+deactivate View
+end
+@enduml

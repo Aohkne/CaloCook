@@ -12,6 +12,7 @@ database "MongoDB" as MongoDB #yellow
 group Filter Ingredients
 
 User -> View: 1. Open filter panel to find dishes by ingredients
+activate User
 activate View
 
 User -> View: 2. Enter ingredient name
@@ -34,11 +35,9 @@ IngredientModel -> MongoDB: 8. ExecuteQuery()
 activate MongoDB
 
 MongoDB --> IngredientModel: 9. Return filtered ingredients
-deactivate MongoDB
 
 alt Results Found
     IngredientModel --> Service: 10. Return filtered ingredients with dishIds
-    deactivate IngredientModel
     
     
     loop For each unique dishId
@@ -46,7 +45,6 @@ alt Results Found
         activate DishModel
         
         DishModel -> MongoDB: 12. ExecuteQuery()
-        activate MongoDB
         
         MongoDB --> DishModel: 13. Return dish details
         deactivate MongoDB
@@ -56,13 +54,10 @@ alt Results Found
     end
     
     Service --> Controller: 15. Return dishes found by ingredient filter
-    deactivate Service
     
     Controller --> Route: 16. Send 200 JSON response
-    deactivate Controller
     
     Route --> View: 17. Return filtered dish results
-    deactivate Route
     
     View --> User: 18. Display dishes containing filtered ingredients
     
@@ -80,9 +75,10 @@ else No Results Found
     deactivate Route
     
     View --> User: 14. Show "No dishes match the ingredient filter criteria"
+    deactivate View
+    deactivate User
 end
 
-deactivate View
 end
 
 @enduml

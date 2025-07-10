@@ -1,0 +1,63 @@
+@startuml AddToHistory
+
+actor User
+boundary "DishDetailPage" as View #lightblue
+participant ":historyRoute" as Route #lightblue
+control "historyValidation" as Validation #orange
+control "historyController" as Controller #lightblue
+participant ":historyService" as Service #lightblue
+entity "historyModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Add Dish to History
+User -> View: 1. Click "Cooked this dish"
+activate View
+
+View -> Route: 2. POST /api/v1/history (dishId)
+activate Route
+
+Route -> Validation: 3. validateAddHistory(req)
+activate Validation
+
+alt Validation Failed
+    Validation --> Route: 4. Return 400
+    Route --> View: 4.1. Show error
+    View --> User: 4.1.1. Display error message
+    deactivate Validation
+    deactivate Route
+    deactivate View
+else
+    Validation --> Route: 5. Proceed
+    deactivate Validation
+
+    Route -> Controller: 6. addHistory(req, res)
+    activate Controller
+
+    Controller -> Service: 7. addHistory(data)
+    activate Service
+
+    Service -> Model: 8. insertHistory(data)
+    activate Model
+
+    Model -> MongoDB: 9. Insert document
+    activate MongoDB
+    MongoDB --> Model: 10. Return result
+    deactivate MongoDB
+
+    Model --> Service: 11. Return insert result
+    deactivate Model
+
+    Service --> Controller: 12. Return success
+    deactivate Service
+
+    Controller --> Route: 13. Send 201 Created
+    deactivate Controller
+
+    Route --> View: 14. Notify success
+    deactivate Route
+
+    View --> User: 15. Show "Added to history"
+end
+
+deactivate View
+@enduml

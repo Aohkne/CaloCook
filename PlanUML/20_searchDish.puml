@@ -1,0 +1,55 @@
+@startuml Search Dish
+
+actor User as "User/Admin" 
+boundary "DishListPage" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Search Dish
+note right User: User searches for dishes by name
+User -> View: 1. Enter keyword (eg. "pizza")
+activate User
+activate View
+
+View -> Route: 2. GET /dishes?search=pizza
+activate Route
+
+Route -> Controller: 3. searchDishes(req, res)
+activate Controller
+
+Controller -> Service: 4. searchDishesByName("pizza")
+activate Service
+
+Service -> Model: 5. findDishesByName("pizza")
+activate Model
+
+Model -> MongoDB: 6. Execute query 
+activate MongoDB
+MongoDB --> Model: 7. Return matching dishes
+deactivate MongoDB
+
+Model --> Service: 8. Return result
+deactivate Model
+
+alt No dish found
+    Service --> Controller: Return []
+    Controller --> Route: 200 OK + []
+    Route --> View: Show "No dishes found"
+    View --> User: Display empty state
+else Dish(es) found
+    Service --> Controller: Return dishes
+    deactivate Service
+    Controller --> Route: 200 OK + result
+    deactivate Controller
+    Route --> View: Render dish list
+    deactivate Route
+    View --> User: Show matching dishes
+    deactivate View
+    deactivate User
+end
+
+end
+@enduml

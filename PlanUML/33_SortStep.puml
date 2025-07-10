@@ -10,7 +10,9 @@ database "MongoDB" as MongoDB #yellow
 
 group Sort Steps by Dish ID
 Admin -> View: 1. Select sort for specific dish steps
+activate Admin
 activate View
+
 View -> Route: 2. GET /api/v1/step/by-dish/:dishId?sortBy=stepNumber&order=asc
 activate Route
 
@@ -43,6 +45,8 @@ deactivate Route
 
 View --> Admin: 12. Display sorted steps for dish
 deactivate View
+deactivate Admin
+
 end
 
 @enduml

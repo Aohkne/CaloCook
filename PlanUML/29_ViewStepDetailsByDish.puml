@@ -1,7 +1,6 @@
 @startuml ViewStepByDish
 
-actor "User" as User
-actor "Admin" as Admin
+actor "User/Admin" as User
 boundary "DishDetailPage" as View #lightblue
 participant ":stepRoute" as Route #lightblue
 control "stepController" as Controller #lightblue
@@ -11,7 +10,9 @@ database "MongoDB" as MongoDB #yellow
 
 group View Step Details By Dish
 User -> View: 1. Click View Steps for Dish
+activate User
 activate View
+
 View -> Route: 2. GET /api/v1/step/by-dish/:dishId?sortBy=stepNumber&order=asc
 activate Route
 
@@ -44,6 +45,7 @@ deactivate Route
 
 View --> User: 12. Show step details for dish
 deactivate View
+deactivate User
 end
 
 @enduml

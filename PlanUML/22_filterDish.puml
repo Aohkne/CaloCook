@@ -1,0 +1,62 @@
+@startuml Filter Dish
+
+actor User as User 
+boundary "DishListPage" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Filter Dishes
+User -> View: 1. Apply filters: \n- cookingTime ≤ 30\n- difficulty = easy\n- calorie ≥ 200\n- createdAt in range
+activate User
+activate View
+
+View -> Route: 2. GET /dishes?difficulty=easy\n&cookingTime[lte]=30\n&calorie[gte]=200\n&createdAt[gte]=2024-01-01\n&createdAt[lte]=2024-12-31
+activate Route
+
+Route -> Controller: 3. filterDishes(req, res)
+activate Controller
+
+Controller -> Service: 4. filterDishes(filterParams)
+activate Service
+
+Service -> Model: 5. filterDishes(filterParams)
+activate Model
+
+Model -> MongoDB: 6. Find dishes with:
+note right of MongoDB
+{
+  difficulty: "easy",
+  cookingTime: { $lte: 30 },
+  calorie: { $gte: 200 },
+  createdAt: {
+    $gte: ISODate("2024-01-01"),
+    $lte: ISODate("2024-12-31")
+  }
+}
+end note
+activate MongoDB
+
+MongoDB --> Model: 7. Return filtered results
+deactivate MongoDB
+
+Model --> Service: 8. Return dishes
+deactivate Model
+
+Service --> Controller: 9. Return response
+deactivate Service
+
+Controller --> Route: 10. 200 OK + filtered dishes
+deactivate Controller
+
+Route --> View: 11. Display dishes
+deactivate Route
+
+View --> User: 12. Show filtered dish list
+deactivate View
+deactivate User
+
+end
+@enduml

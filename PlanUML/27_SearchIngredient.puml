@@ -12,6 +12,7 @@ database "MongoDB" as MongoDB #yellow
 group Search Ingredient by Name
 
 User -> View: 1. Enter ingredient name to find dishes
+activate User
 activate View
 
 User -> View: 2. Click "Search Dishes by Ingredient"
@@ -34,10 +35,8 @@ activate MongoDB
 
 alt Ingredients Found
     MongoDB --> IngredientModel: 8. Return matching ingredients array
-    deactivate MongoDB
     
     IngredientModel --> Service: 9. Return ingredients list with dishIds
-    deactivate IngredientModel
     
     
     loop For each unique dishId
@@ -45,23 +44,18 @@ alt Ingredients Found
         activate DishModel
         
         DishModel -> MongoDB: 11. ExecuteQuery()
-        activate MongoDB
         
         MongoDB --> DishModel: 12. Return dish details
-        deactivate MongoDB
         
         DishModel --> Service: 13. Return dish info
         deactivate DishModel
     end
     
     Service --> Controller: 14. Return dishes found by ingredient search
-    deactivate Service
     
     Controller --> Route: 15. Send 200 JSON response
-    deactivate Controller
-    
+
     Route --> View: 16. Return dish results
-    deactivate Route
     
     View --> User: 17. Display dishes containing the searched ingredient
     
@@ -82,9 +76,10 @@ else No Ingredients Found
     deactivate Route
     
     View --> User: 13. Show "No dishes found containing this ingredient"
+    deactivate View
+    deactivate User
 end
 
-deactivate View
 end
 
 @enduml

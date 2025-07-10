@@ -3,12 +3,15 @@ import { setStore } from '@services/api';
 import authSlice from './slices/authSlice';
 import dishSlice from './slices/dishSlice';
 import favoriteSlice from './slices/favoriteSlice';
+import userSlice from './slices/userSlice';
+
 
 export const store = configureStore({
   reducer: {
     auth: authSlice,
     dish: dishSlice,
-    favorite: favoriteSlice
+    favorite: favoriteSlice,
+    user: userSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

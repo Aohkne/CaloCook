@@ -1,0 +1,48 @@
+@startuml FilterUser
+
+actor Admin
+boundary "UserListPage" as View #lightblue
+participant ":userRoute" as Route #lightblue
+control "userController" as Controller #lightblue
+participant ":userService" as Service #lightblue
+entity "userModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Filter Users
+Admin -> View: 1. Select filter "activity" or "inactive"
+activate View
+
+View -> Route: 2. GET /users/filter?isActive=true
+activate Route
+
+Route -> Controller: 3. searchByIsActive(req, res)
+activate Controller
+
+Controller -> Service: 4. searchByIsActive(isActive)
+activate Service
+
+Service -> Model: 5. searchByIsActive()
+activate Model
+
+Model -> MongoDB: 6. ExecuteQuery()
+activate MongoDB
+MongoDB --> Model: 7. Return filtered list
+deactivate MongoDB
+
+Model --> Service: 8. Return result
+deactivate Model
+
+Service --> Controller: 9. Return filtered users
+deactivate Service
+
+Controller --> Route: 10. Return filtered users
+deactivate Controller
+
+Route --> View: 11. Render filtered list
+deactivate Route
+
+View --> Admin: 12. Show filtered list of users
+
+deactivate View
+end
+@enduml

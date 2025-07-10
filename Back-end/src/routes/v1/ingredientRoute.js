@@ -333,7 +333,7 @@ const Router = express.Router()
  */
 
 Router.route('/')
-  .get(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['admin']), ingredientController.getAll)
+  .get(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['admin', 'user']), ingredientController.getAll)
   .post(
     authMiddleware.authenticateUser,
     authMiddleware.authorizeRole(['admin']),

@@ -1,0 +1,50 @@
+@startuml ViewTop10Favorites
+
+actor Admin as "Admin"
+boundary "DashboardPage" as View #lightblue
+participant ":dashboardRoute" as Route #lightblue
+control "favoriteController" as Controller #lightblue
+participant ":favoriteService" as Service #lightblue
+entity "favoriteModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View Top 10 Favorites
+Admin -> View: 1. Navigate to Dashboard
+activate Admin
+activate View
+
+View -> Route: 2. GET /api/v1/dashboard/top-favorites?limit=10
+activate Route
+
+Route -> Controller: 3. getTopFavorites(req, res)
+activate Controller
+
+Controller -> Service: 4. getTopFavorites(limit)
+activate Service
+
+Service -> Model: 5. getTopFavorites(limit)
+activate Model
+
+Model -> MongoDB: 6. Execute query
+activate MongoDB
+MongoDB --> Model: 7. Return top favorite dishes
+deactivate MongoDB
+
+Model --> Service: 8. Return aggregated result
+deactivate Model
+
+Service --> Controller: 9. Return top favorites list
+deactivate Service
+
+Controller --> Route: 10. 200 OK + top favorites
+deactivate Controller
+
+Route --> View: 11. Render top favorites
+deactivate Route
+
+View --> Admin: 12. Display top 10 favorite dishes
+deactivate View
+deactivate Admin
+
+end
+@enduml
