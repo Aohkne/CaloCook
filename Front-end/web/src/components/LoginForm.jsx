@@ -20,7 +20,7 @@ export default function LoginForm() {
       });
       localStorage.setItem("_id", result._id);
       login(result.accessToken, result.refreshToken);
-      navigate("/users", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.log(error);
       handleApiError(error);
@@ -117,7 +117,7 @@ export default function LoginForm() {
             console.log("Access Token:", result.user.accessToken);
             localStorage.setItem("_id", result.user._id);
             loginWithGoogle(result.user.accessToken, result.user.refreshToken);
-            navigate("/users", { replace: true });
+            navigate("/dashboard", { replace: true });
           }}
           onError={() => {
             console.log("Google login failed");

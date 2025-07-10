@@ -2,7 +2,11 @@ import "@ant-design/v5-patch-for-react-19";
 import { Image, Popconfirm, Space, Table } from "antd";
 import { Ban, Check, Edit2 } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { activateDish, deactivateDish, getDish } from "../api/dish";
+import {
+  getIngredients,
+  activateIngredient,
+  deactivateIngredient,
+} from "../api/ingredient";
 import { useAuth } from "./AuthContext";
 const IngredientTable = React.memo(function IngredientTable({
   tabs,
@@ -12,7 +16,7 @@ const IngredientTable = React.memo(function IngredientTable({
   order = "desc",
 }) {
   const { accessToken } = useAuth();
-  const [dishes, setDishes] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
@@ -26,13 +30,13 @@ const IngredientTable = React.memo(function IngredientTable({
       }
       if (sortBy) params.sortBy = sortBy;
       if (order) params.order = order;
-      const response = await getDish({ accessToken, ...params });
-      if (response) setDishes(response.data);
-      else setDishes([]);
+      const response = await getIngredients({ accessToken, ...params });
+      if (response) setIngredients(response.data);
+      else setIngredients([]);
     } catch (error) {
-      setDishes([]);
+      setIngredients([]);
       // Optionally log or show error
-      console.error("Failed to fetch dishes:", error);
+      console.error("Failed to fetch ingredients:", error);
     }
     setLoading(false);
   }, [tabs, searchText, sortBy, order, accessToken]);
@@ -43,35 +47,20 @@ const IngredientTable = React.memo(function IngredientTable({
 
   const handleActivate = useCallback(
     async ({ id }) => {
-      await activateDish({ id });
+      await activateIngredient({ accessToken, id });
       fetchData();
     },
-    [fetchData]
+    [fetchData, accessToken]
   );
   const handleDeactivate = useCallback(
     async ({ id }) => {
-      await deactivateDish({ id });
+      await deactivateIngredient({ accessToken, id });
       fetchData();
     },
-    [fetchData]
+    [fetchData, accessToken]
   );
   const columns = useMemo(
     () => [
-      {
-        title: "Image",
-        dataIndex: "imageUrl",
-        key: "imageUrl",
-        render: (text) => (
-          <Space>
-            <Image
-              src={text}
-              width={30}
-              height={30}
-              className="object-cover rounded"
-            />
-          </Space>
-        ),
-      },
       {
         title: "Name",
         dataIndex: "name",
@@ -83,52 +72,16 @@ const IngredientTable = React.memo(function IngredientTable({
         ),
       },
       {
-        title: "Cooking Time",
-        dataIndex: "cookingTime",
-        key: "cookingTime",
+        title: "Quantity",
+        dataIndex: "quantity",
+        key: "quantity",
         render: (text) => (
           <Space>
             <p>{text}</p>
           </Space>
         ),
       },
-      {
-        title: "Calories",
-        dataIndex: "calorie",
-        key: "calorie",
-        render: (text) => (
-          <Space>
-            <p>{text}</p>
-          </Space>
-        ),
-      },
-      {
-        title: "Difficulty",
-        dataIndex: "difficulty",
-        key: "difficulty",
-        render: (text) => {
-          switch (text) {
-            case "easy":
-              return (
-                <Space>
-                  <p className="text-green-500">{text}</p>
-                </Space>
-              );
-            case "medium":
-              return (
-                <Space>
-                  <p className="text-yellow-500">{text}</p>
-                </Space>
-              );
-            case "hard":
-              return (
-                <Space>
-                  <p className="text-red-500">{text}</p>
-                </Space>
-              );
-          }
-        },
-      },
+
       {
         title: "Status",
         dataIndex: "isActive",
@@ -158,10 +111,12 @@ const IngredientTable = React.memo(function IngredientTable({
             <Space>
               {text === true ? (
                 <Popconfirm
-                  title="Are you sure you want to deactivate this dish?"
+                  title="Are you sure you want to deactivate this ingredient?"
                   okText="Yes"
                   cancelText="Cancel"
-                  onConfirm={() => handleDeactivate({ id: record._id })}
+                  onConfirm={() =>
+                    handleDeactivate({ accessToken, id: record._id })
+                  }
                 >
                   <button className="hover:cursor-pointer">
                     <Ban size={16} color="red" />
@@ -169,10 +124,12 @@ const IngredientTable = React.memo(function IngredientTable({
                 </Popconfirm>
               ) : (
                 <Popconfirm
-                  title="Are you sure you want to activate this dish?"
+                  title="Are you sure you want to activate this ingredient?"
                   okText="Yes"
                   cancelText="Cancel"
-                  onConfirm={() => handleActivate({ id: record._id })}
+                  onConfirm={() =>
+                    handleActivate({ accessToken, id: record._id })
+                  }
                 >
                   <button className="hover:cursor-pointer">
                     <Check size={16} color="green" />
@@ -189,16 +146,16 @@ const IngredientTable = React.memo(function IngredientTable({
         },
       },
     ],
-    [handleActivate, handleDeactivate]
+    [handleActivate, handleDeactivate, accessToken]
   );
-  const dataSource = dishes.map((dish) => ({
-    ...dish,
-    key: dish._id,
+  const dataSource = ingredients.map((ingredient) => ({
+    ...ingredient,
+    key: ingredient._id,
   }));
 
   return (
     <Table
-      size="middle"
+      size="large"
       className={`border border-gray-300 rounded-md overflow-x-auto`}
       columns={columns}
       dataSource={dataSource}

@@ -65,6 +65,15 @@ export async function addDish({
   return response.data;
 }
 
+export async function getDishById({ accessToken, id }) {
+  const response = await api.get(`/dish/${id}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+
 export async function activateDish({ accessToken, id }) {
   const response = await api.patch(`/dish/${id}/activate`, {
     headers: {
