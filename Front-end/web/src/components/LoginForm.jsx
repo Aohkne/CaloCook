@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { login as apiLogin } from "../api/auth";
 import { loginWithGoogle as apiLoginWithGoogle } from "../api/auth";
-
+import { handleApiError } from "../utils/handleApiError";
 import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginForm() {
@@ -23,6 +23,7 @@ export default function LoginForm() {
       navigate("/users", { replace: true });
     } catch (error) {
       console.log(error);
+      handleApiError(error);
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -35,6 +36,7 @@ export default function LoginForm() {
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
       autoComplete="off"
+      style={{ userSelect: "none" }}
     >
       <img src={logoFull} className="w-[250px] mx-auto mb-7" />
 
@@ -77,7 +79,7 @@ export default function LoginForm() {
         name="forgot-password"
         style={{ justifyItems: "end", height: 15 }}
       >
-        <Link>
+        <Link to="/forgot-password">
           <p className="text-[#006955]">Forgot Password</p>
         </Link>
       </Form.Item>
@@ -127,9 +129,12 @@ export default function LoginForm() {
         />
       </Form.Item>
       <Form.Item>
-        <p className="flex gap-1">
-          Don't have an account? <Link to={"/register"}>Sign Up</Link>
-        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          <span>Don't have an account?</span>
+          <Link to="/register" style={{ color: "#006955", fontWeight: "600" }}>
+            Sign Up
+          </Link>
+        </div>
       </Form.Item>
     </Form>
   );

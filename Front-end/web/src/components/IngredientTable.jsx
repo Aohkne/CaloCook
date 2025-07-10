@@ -4,7 +4,7 @@ import { Ban, Check, Edit2 } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { activateDish, deactivateDish, getDish } from "../api/dish";
 import { useAuth } from "./AuthContext";
-const DishTable = React.memo(function DishTable({
+const IngredientTable = React.memo(function IngredientTable({
   tabs,
   handleOk,
   searchText = "",
@@ -208,4 +208,4 @@ const DishTable = React.memo(function DishTable({
   );
 });
 
-export default DishTable;
+export default IngredientTable;

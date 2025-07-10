@@ -1,4 +1,14 @@
-import { ChevronLeft, ChevronRight, Soup, User, Users } from "lucide-react";
+import {
+  Carrot,
+  ChartColumn,
+  ChevronLeft,
+  ChevronRight,
+  DoorOpen,
+  ListOrderedIcon,
+  Soup,
+  User,
+  Users,
+} from "lucide-react";
 import SidebarButton from "./SidebarButton";
 import { useEffect, useState } from "react";
 import logoFull from "../assets/logo-full.png";
@@ -49,16 +59,34 @@ export default function Sidebar() {
         {expanded ? (
           <>
             <SidebarButton
+              icon={<ChartColumn />}
+              text="Dashboard"
+              link="/dashboard"
+              ariaSelected={location.pathname === "/dashboard"}
+            />
+            <SidebarButton
               icon={<Users />}
-              text="Users Management"
+              text="Users"
               link="/users"
               ariaSelected={location.pathname === "/users"}
             />
             <SidebarButton
               icon={<Soup />}
-              text="Dish Management"
+              text="Dishes"
               link="/dishes"
               ariaSelected={location.pathname === "/dishes"}
+            />
+            <SidebarButton
+              icon={<Carrot />}
+              text="Ingredients"
+              link="/ingredients"
+              ariaSelected={location.pathname === "/ingredients"}
+            />
+            <SidebarButton
+              icon={<ListOrderedIcon />}
+              text="Steps"
+              link="/steps"
+              ariaSelected={location.pathname === "/steps"}
             />
             <div className="mt-auto w-full flex">
               <SettingMenu />
@@ -67,6 +95,11 @@ export default function Sidebar() {
         ) : (
           <>
             <SidebarButton
+              icon={<ChartColumn />}
+              link="/dashboard"
+              ariaSelected={location.pathname === "/dashboard"}
+            />
+            <SidebarButton
               icon={<Users />}
               link="/users"
               ariaSelected={location.pathname === "/users"}
@@ -77,10 +110,25 @@ export default function Sidebar() {
               ariaSelected={location.pathname === "/dishes"}
             />
             <SidebarButton
+              icon={<Carrot />}
+              link="/ingredients"
+              ariaSelected={location.pathname === "/ingredients"}
+            />
+            <SidebarButton
+              icon={<ListOrderedIcon />}
+              link="/steps"
+              ariaSelected={location.pathname === "/steps"}
+            />
+            <SidebarButton
               icon={<User />}
               link="/profile"
               ariaSelected={location.pathname === "/profile"}
               classname="mt-auto "
+            />
+            <SidebarButton
+              icon={<DoorOpen />}
+              link="/logout"
+              ariaSelected={location.pathname === "/logout"}
             />
           </>
         )}
