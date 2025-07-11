@@ -1,5 +1,5 @@
 import { Filter, Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DishTable from "../components/DishTable";
 import {
   Button,
@@ -12,22 +12,19 @@ import {
   Switch,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { addDish } from "../api/dish";
+import { getDish } from "../api/dish";
 import Tabs from "../components/Tabs";
 import { handleApiError } from "../utils/handleApiError";
 import SearchBar from "../components/SearchBar";
 import IngredientTable from "../components/IngredientTable";
+import { addIngredient } from "../api/ingredient";
+import { useAuth } from "../components/AuthContext";
 
 export default function IngredientManagementPage() {
+  const { accessToken } = useAuth();
+  const [form] = Form.useForm();
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [cookingTime, setCookingTime] = useState();
-  const [calorie, setCalorie] = useState();
-  const [difficulty, setDifficulty] = useState("easy");
-  const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [isActive, setIsActive] = useState(true);
   // Tabs states
   const [selectedTab, setSelectedTab] = useState("All Dishes");
   const tabs = ["All Dishes", "Active", "Banned"];
@@ -47,16 +44,15 @@ export default function IngredientManagementPage() {
   };
   const handleOk = async () => {
     try {
-      await addDish({
-        name,
-        cookingTime,
-        calorie,
-        difficulty,
-        description,
-        imageUrl,
-        isActive,
+      const values = await form.validateFields();
+      await addIngredient({
+        accessToken,
+        dishId: values.dishId,
+        name: values.name,
+        quantity: values.quantity,
+        isActive: values.isActive,
       });
-      console.log("Add new dish");
+      console.log("Add new ingredient");
       setIsModalOpen(false);
     } catch (error) {
       handleApiError(error);
@@ -64,32 +60,6 @@ export default function IngredientManagementPage() {
   };
   const handleCancel = () => {
     setIsModalOpen(false);
-  };
-  // Dish handlers
-  const handleChangeName = (e) => {
-    setName(e.target.value);
-  };
-
-  const handleChangeCookingTime = (e) => {
-    setCookingTime(e.target.value);
-  };
-
-  const handleChangeCalorie = (e) => {
-    setCalorie(e.target.value);
-  };
-
-  const handleChangeDifficulty = (e) => {
-    setDifficulty(e.target.value);
-  };
-
-  const handleChangeDescription = (e) => {
-    setDescription(e.target.value);
-  };
-  const handleChangeImageUrl = (e) => {
-    setImageUrl(e.target.value);
-  };
-  const handleActivateDish = (checked) => {
-    setIsActive(checked);
   };
   // Filter Modal handlers
   const handleFilterOk = () => {
@@ -112,6 +82,19 @@ export default function IngredientManagementPage() {
     setPendingOrder(e.target.value);
   };
 
+  // Fetch dishes for the select dropdown
+  const [dishes, setDishes] = useState([]);
+  useEffect(() => {
+    const fetchDishes = async () => {
+      try {
+        const response = await getDish({ accessToken });
+        setDishes(response.data);
+      } catch (error) {
+        handleApiError(error);
+      }
+    };
+    fetchDishes();
+  }, [accessToken]);
   return (
     <div>
       <h2 className="text-3xl font-bold h-10 items-center flex">
@@ -156,80 +139,55 @@ export default function IngredientManagementPage() {
       />
       {/* Add New Item Modal */}
       <Modal
-        title="Add New Dish"
+        title="Add New Ingredient"
         closable={{ "aria-label": "Custom Close Button" }}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
         centered
       >
-        <Form layout="vertical">
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label="Dish"
+            name="dishId"
+            rules={[{ required: true, message: "Dish is required" }]}
+          >
+            <Select
+              showSearch
+              placeholder="Select a dish"
+              optionFilterProp="label"
+              style={{ width: 200 }}
+            >
+              {dishes.map((dish) => (
+                <Select.Option key={dish._id} value={dish._id}>
+                  {dish.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
           <Form.Item
             label="Name"
             name="name"
             rules={[{ required: true, message: "Name is required" }]}
           >
-            <Input
-              onChange={handleChangeName}
-              id="name"
-              placeholder="input dish name"
-            />
+            <Input id="name" placeholder="input name of the ingredient" />
           </Form.Item>
 
           <Form.Item
-            label="Cooking Time"
-            name="cookingTime"
-            rules={[{ required: true, message: "Cooking time is required" }]}
+            label="Quantity"
+            name="quantity"
+            rules={[{ required: true, message: "Quantity is required" }]}
           >
-            <Input
-              onChange={handleChangeCookingTime}
-              id="cookingTime"
-              placeholder="input time to cook this dish"
-            />
+            <Input id="quantity" placeholder="input ingredient quantity" />
           </Form.Item>
-
           <Form.Item
-            label="Calories"
-            name="calories"
-            rules={[{ required: true, message: "Calories are required" }]}
+            label="Activate"
+            name="isActive"
+            valuePropName="checked"
+            initialValue={true}
           >
-            <Input
-              onChange={handleChangeCalorie}
-              id="calories"
-              placeholder="input dish calories"
-            />
-          </Form.Item>
-
-          <Form.Item label="Difficulty" name="difficulty">
-            <Radio.Group value={difficulty} onChange={handleChangeDifficulty}>
-              <Radio.Button value="easy">Easy</Radio.Button>
-              <Radio.Button value="medium">Medium</Radio.Button>
-              <Radio.Button value="hard">Hard</Radio.Button>
-            </Radio.Group>
-          </Form.Item>
-
-          <Form.Item label="Description" name="description">
-            <TextArea
-              onChange={handleChangeDescription}
-              id="description"
-              placeholder="input dish description"
-            />
-          </Form.Item>
-
-          <Form.Item label="Image URL" name="imageUrl">
-            <Input
-              onChange={handleChangeImageUrl}
-              id="imageUrl"
-              placeholder="input image url"
-            />
-          </Form.Item>
-
-          <Form.Item label="Activate" name="activate" valuePropName="checked">
-            <Switch
-              id="activate"
-              checked={isActive}
-              onChange={handleActivateDish}
-            />
+            <Switch id="activate" />
           </Form.Item>
         </Form>
       </Modal>

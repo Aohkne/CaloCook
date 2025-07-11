@@ -3,6 +3,7 @@ import { Ban, Check, Edit2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { activateUser, deactivateUser, getUser } from "../api/user";
 import { useAuth } from "./AuthContext";
+import { handleApiError } from "../utils/handleApiError";
 export default function UserTable({ tabs, searchText = "" }) {
   const { accessToken } = useAuth();
   const [users, setUsers] = useState([]);
@@ -30,18 +31,26 @@ export default function UserTable({ tabs, searchText = "" }) {
 
   const handleActivate = useCallback(
     async ({ id }) => {
-      await activateUser({ id });
-      fetchData();
+      try {
+        await activateUser({ accessToken, id });
+        fetchData();
+      } catch (error) {
+        handleApiError(error);
+      }
     },
-    [fetchData]
+    [fetchData, accessToken]
   );
 
   const handleDeactivate = useCallback(
     async ({ id }) => {
-      await deactivateUser({ id });
-      fetchData();
+      try {
+        await deactivateUser({ accessToken, id });
+        fetchData();
+      } catch (error) {
+        handleApiError(error);
+      }
     },
-    [fetchData]
+    [fetchData, accessToken]
   );
   const columns = useMemo(
     () => [

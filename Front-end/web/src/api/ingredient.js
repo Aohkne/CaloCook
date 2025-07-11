@@ -19,8 +19,7 @@ export async function addIngredient({
   isActive,
 }) {
   const params = { dishId, name, quantity, isActive };
-  const response = await api.post("/ingredient", {
-    params,
+  const response = await api.post("/ingredient", params, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },

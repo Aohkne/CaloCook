@@ -9,12 +9,7 @@ export async function getUser({
   order,
 }) {
   console.log(`[getUser] Fetching user`);
-  const params = {};
-  if (username) params.username = username;
-  if (email) params.email = email;
-  if (isActive != null) params.isActive = isActive;
-  if (sortBy) params.sortBy = sortBy;
-  if (order) params.order = order;
+  const params = { username, email, isActive, sortBy, order };
 
   const response = await api.get("/user", {
     params,
@@ -36,20 +31,28 @@ export async function getUserById({ accessToken, id }) {
 
 export async function activateUser({ accessToken, id }) {
   console.log(`[activateUser] user with id: ${id} activated`);
-  const response = await api.patch(`/user/${id}/activate`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const response = await api.patch(
+    `/user/${id}/activate`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
   return response.data;
 }
 
 export async function deactivateUser({ accessToken, id }) {
   console.log(`[deactivateUser] user with id: ${id} deactivated`);
-  const response = await api.patch(`/user/${id}/deactivate`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const response = await api.patch(
+    `/user/${id}/deactivate`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
   return response.data;
 }

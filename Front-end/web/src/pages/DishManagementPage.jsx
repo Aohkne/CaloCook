@@ -3,12 +3,15 @@ import { useState } from "react";
 import DishTable from "../components/DishTable";
 import {
   Button,
+  Checkbox,
   Form,
   Input,
+  InputNumber,
   Modal,
   Radio,
   Select,
   Slider,
+  Space,
   Switch,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
@@ -16,17 +19,13 @@ import { addDish } from "../api/dish";
 import Tabs from "../components/Tabs";
 import { handleApiError } from "../utils/handleApiError";
 import SearchBar from "../components/SearchBar";
+import { useAuth } from "../components/AuthContext";
 
 export default function DishManagementPage() {
+  const { accessToken } = useAuth();
+  const [form] = Form.useForm();
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [cookingTime, setCookingTime] = useState();
-  const [calorie, setCalorie] = useState();
-  const [difficulty, setDifficulty] = useState("easy");
-  const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [isActive, setIsActive] = useState(true);
   // Tabs states
   const [selectedTab, setSelectedTab] = useState("All Dishes");
   const tabs = ["All Dishes", "Active", "Banned"];
@@ -36,64 +35,60 @@ export default function DishManagementPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [sortBy, setSortBy] = useState("createdAt");
   const [order, setOrder] = useState("desc");
+  const [minCookingTime, setMinCookingTime] = useState(1);
+  const [maxCookingTime, setMaxCookingTime] = useState(10080);
+  const [minCalorie, setMinCalorie] = useState(1);
+  const [maxCalorie, setMaxCalorie] = useState(10000);
+  const [difficulty, setDifficulty] = useState(["easy", "medium", "hard"]);
   // Add filter state
   const [pendingSortBy, setPendingSortBy] = useState(sortBy);
   const [pendingOrder, setPendingOrder] = useState(order);
+  const [pendingMinCookingTime, setPendingMinCookingTime] =
+    useState(minCookingTime);
+  const [pendingMaxCookingTime, setPendingMaxCookingTime] =
+    useState(maxCookingTime);
+  const [pendingMinCalorie, setPendingMinCalorie] = useState(minCalorie);
+  const [pendingMaxCalorie, setPendingMaxCalorie] = useState(maxCalorie);
+  const [pendingDifficulty, setPendingDifficulty] = useState(difficulty);
 
   // Add Modal handlers
   const showModal = () => {
     setIsModalOpen(true);
+    form.resetFields();
   };
   const handleOk = async () => {
     try {
+      const values = await form.validateFields();
       await addDish({
-        name,
-        cookingTime,
-        calorie,
-        difficulty,
-        description,
-        imageUrl,
-        isActive,
+        accessToken,
+        name: values.name,
+        cookingTime: values.cookingTime,
+        calorie: values.calories,
+        difficulty: values.difficulty,
+        description: values.description,
+        imageUrl: values.imageUrl,
+        isActive: values.isActive,
       });
       console.log("Add new dish");
       setIsModalOpen(false);
+      form.resetFields();
     } catch (error) {
       handleApiError(error);
     }
   };
   const handleCancel = () => {
     setIsModalOpen(false);
-  };
-  // Dish handlers
-  const handleChangeName = (e) => {
-    setName(e.target.value);
-  };
-
-  const handleChangeCookingTime = (e) => {
-    setCookingTime(e.target.value);
-  };
-
-  const handleChangeCalorie = (e) => {
-    setCalorie(e.target.value);
-  };
-
-  const handleChangeDifficulty = (e) => {
-    setDifficulty(e.target.value);
-  };
-
-  const handleChangeDescription = (e) => {
-    setDescription(e.target.value);
-  };
-  const handleChangeImageUrl = (e) => {
-    setImageUrl(e.target.value);
-  };
-  const handleActivateDish = (checked) => {
-    setIsActive(checked);
+    form.resetFields();
   };
   // Filter Modal handlers
   const handleFilterOk = () => {
     setSortBy(pendingSortBy);
     setOrder(pendingOrder);
+    setMinCookingTime(pendingMinCookingTime);
+    setMaxCookingTime(pendingMaxCookingTime);
+    setMinCalorie(pendingMinCalorie);
+    setMaxCalorie(pendingMaxCalorie);
+    setDifficulty(pendingDifficulty);
     setIsFilterOpen(false);
   };
   const handleFilterCancel = () => {
@@ -162,26 +157,34 @@ export default function DishManagementPage() {
         onCancel={handleCancel}
         centered
       >
-        <Form layout="vertical">
+        <Form form={form} layout="vertical">
           <Form.Item
             label="Name"
             name="name"
-            rules={[{ required: true, message: "Name is required" }]}
+            rules={[
+              { required: true, message: "Name is required" },
+              {
+                min: 3,
+                message: "Name must be at least 3 characters",
+              },
+              {
+                max: 50,
+                message: "Name cannot exceed 50 characters",
+              },
+            ]}
           >
-            <Input
-              onChange={handleChangeName}
-              id="name"
-              placeholder="input dish name"
-            />
+            <Input id="name" placeholder="input dish name" />
           </Form.Item>
 
           <Form.Item
             label="Cooking Time"
             name="cookingTime"
-            rules={[{ required: true, message: "Cooking time is required" }]}
+            rules={[
+              { required: true, message: "Cooking time is required" },
+              { min: 1, message: "Cooking time must be at least 1 minute" },
+            ]}
           >
             <Input
-              onChange={handleChangeCookingTime}
               id="cookingTime"
               placeholder="input time to cook this dish"
             />
@@ -190,45 +193,60 @@ export default function DishManagementPage() {
           <Form.Item
             label="Calories"
             name="calories"
-            rules={[{ required: true, message: "Calories are required" }]}
+            rules={[
+              { required: true, message: "Calories are required" },
+              {
+                min: 1,
+                message: "Calories must be at least 1",
+              },
+            ]}
           >
-            <Input
-              onChange={handleChangeCalorie}
-              id="calories"
-              placeholder="input dish calories"
-            />
+            <Input id="calories" placeholder="input dish calories" />
           </Form.Item>
 
-          <Form.Item label="Difficulty" name="difficulty">
-            <Radio.Group value={difficulty} onChange={handleChangeDifficulty}>
+          <Form.Item label="Difficulty" name="difficulty" initialValue={"easy"}>
+            <Radio.Group>
               <Radio.Button value="easy">Easy</Radio.Button>
               <Radio.Button value="medium">Medium</Radio.Button>
               <Radio.Button value="hard">Hard</Radio.Button>
             </Radio.Group>
           </Form.Item>
 
-          <Form.Item label="Description" name="description">
-            <TextArea
-              onChange={handleChangeDescription}
-              id="description"
-              placeholder="input dish description"
-            />
+          <Form.Item
+            label="Description"
+            name="description"
+            rules={[
+              { required: true, message: "Description is required" },
+              {
+                min: 10,
+                message: "Description must be at least 10 characters",
+              },
+              {
+                max: 1000,
+                message: "Description cannot exceed 1000 characters",
+              },
+            ]}
+          >
+            <TextArea id="description" placeholder="input dish description" />
           </Form.Item>
 
-          <Form.Item label="Image URL" name="imageUrl">
-            <Input
-              onChange={handleChangeImageUrl}
-              id="imageUrl"
-              placeholder="input image url"
-            />
+          <Form.Item
+            label="Image URL"
+            name="imageUrl"
+            initialValue={
+              "https://cdn-icons-png.freepik.com/512/10551/10551600.png"
+            }
+          >
+            <Input id="imageUrl" placeholder="input image url" />
           </Form.Item>
 
-          <Form.Item label="Activate" name="activate" valuePropName="checked">
-            <Switch
-              id="activate"
-              checked={isActive}
-              onChange={handleActivateDish}
-            />
+          <Form.Item
+            label="Activate"
+            name="isActive"
+            valuePropName="checked"
+            initialValue={true}
+          >
+            <Switch id="activate" />
           </Form.Item>
         </Form>
       </Modal>
@@ -241,7 +259,7 @@ export default function DishManagementPage() {
         onCancel={handleFilterCancel}
         centered
       >
-        <Form layout="vertical">
+        <Form form={form} layout="vertical">
           <Form.Item label="Sort By" name="sortBy" initialValue={sortBy}>
             <Select
               placeholder="Sort By"
@@ -259,6 +277,62 @@ export default function DishManagementPage() {
               <Radio value="asc">Ascending</Radio>
               <Radio value="desc">Descending</Radio>
             </Radio.Group>
+          </Form.Item>
+          <Form.Item label="Cooking Time (minutes)">
+            <Space>
+              <Form.Item name="minCookingTime" noStyle>
+                <InputNumber
+                  min={1}
+                  max={10080}
+                  placeholder="Min"
+                  value={pendingMinCookingTime}
+                  onChange={setPendingMinCookingTime}
+                />
+              </Form.Item>
+              <span>-</span>
+              <Form.Item name="maxCookingTime" noStyle>
+                <InputNumber
+                  min={1}
+                  max={10080}
+                  placeholder="Max"
+                  value={pendingMaxCookingTime}
+                  onChange={setPendingMaxCookingTime}
+                />
+              </Form.Item>
+            </Space>
+          </Form.Item>
+          <Form.Item label="Calories">
+            <Space>
+              <Form.Item name="minCalorie" noStyle>
+                <InputNumber
+                  min={1}
+                  max={10000}
+                  placeholder="Min"
+                  value={pendingMinCalorie}
+                  onChange={setPendingMinCalorie}
+                />
+              </Form.Item>
+              <span>-</span>
+              <Form.Item name="maxCalorie" noStyle>
+                <InputNumber
+                  min={1}
+                  max={10000}
+                  placeholder="Max"
+                  value={pendingMaxCalorie}
+                  onChange={setPendingMaxCalorie}
+                />
+              </Form.Item>
+            </Space>
+          </Form.Item>
+          <Form.Item label="Difficulty" name="difficulty">
+            <Checkbox.Group
+              value={pendingDifficulty}
+              onChange={setPendingDifficulty}
+            >
+              <Checkbox value="easy">Easy</Checkbox>
+              <Checkbox value="medium">Medium</Checkbox>
+              <Checkbox value="hard">Hard</Checkbox>
+            </Checkbox.Group>
           </Form.Item>
         </Form>
       </Modal>

@@ -8,6 +8,8 @@ import {
   deactivateIngredient,
 } from "../api/ingredient";
 import { useAuth } from "./AuthContext";
+import { getDish } from "../api/dish"; // Import your getDish API
+import { handleApiError } from "../utils/handleApiError";
 const IngredientTable = React.memo(function IngredientTable({
   tabs,
   handleOk,
@@ -18,6 +20,24 @@ const IngredientTable = React.memo(function IngredientTable({
   const { accessToken } = useAuth();
   const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [dishMap, setDishMap] = useState({});
+
+  // Fetch all dishes and build a map: dishId -> dishName
+  useEffect(() => {
+    async function fetchDishes() {
+      try {
+        const response = await getDish({ accessToken });
+        const map = {};
+        response.data.forEach((dish) => {
+          map[dish._id] = dish.name;
+        });
+        setDishMap(map);
+      } catch (error) {
+        handleApiError(error);
+      }
+    }
+    fetchDishes();
+  }, [accessToken]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -62,12 +82,22 @@ const IngredientTable = React.memo(function IngredientTable({
   const columns = useMemo(
     () => [
       {
-        title: "Name",
+        title: "Ingredient Name",
         dataIndex: "name",
         key: "name",
         render: (text) => (
           <Space>
-            <a>{text}</a>
+            <p>{text}</p>
+          </Space>
+        ),
+      },
+      {
+        title: "Dish Name",
+        dataIndex: "dishId",
+        key: "dishId",
+        render: (dishId) => (
+          <Space>
+            <p>{dishMap[dishId] || "Unknown"}</p>
           </Space>
         ),
       },
@@ -81,7 +111,6 @@ const IngredientTable = React.memo(function IngredientTable({
           </Space>
         ),
       },
-
       {
         title: "Status",
         dataIndex: "isActive",
@@ -146,7 +175,7 @@ const IngredientTable = React.memo(function IngredientTable({
         },
       },
     ],
-    [handleActivate, handleDeactivate, accessToken]
+    [dishMap, handleActivate, handleDeactivate, accessToken]
   );
   const dataSource = ingredients.map((ingredient) => ({
     ...ingredient,
