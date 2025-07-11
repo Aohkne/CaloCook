@@ -25,18 +25,7 @@ activate Service
 Service -> Model: 5. filterDishes(filterParams)
 activate Model
 
-Model -> MongoDB: 6. Find dishes with:
-note right of MongoDB
-{
-  difficulty: "easy",
-  cookingTime: { $lte: 30 },
-  calorie: { $gte: 200 },
-  createdAt: {
-    $gte: ISODate("2024-01-01"),
-    $lte: ISODate("2024-12-31")
-  }
-}
-end note
+Model -> MongoDB: 6. Find dishes
 activate MongoDB
 
 MongoDB --> Model: 7. Return filtered results
