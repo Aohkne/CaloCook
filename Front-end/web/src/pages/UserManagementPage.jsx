@@ -1,14 +1,27 @@
-import { useState } from "react";
 import UserTable from "../components/UserTable";
-import Tabs from "../components/Tabs";
-import SearchBar from "../components/SearchBar";
+import FilterBar from "../components/FilterBar";
+import { useState } from "react";
 
+const userFields = [
+  { name: "username", label: "Username", type: "text" },
+  { name: "email", label: "Email", type: "text" },
+  {
+    name: "isActive",
+    label: "Active",
+    type: "select",
+    options: ["true", "false"],
+  },
+  {
+    name: "sortBy",
+    label: "Sort By",
+    type: "select",
+    options: ["username", "email", "createdAt"],
+  },
+  { name: "order", label: "Order", type: "select", options: ["asc", "desc"] },
+];
 export default function UserManagementPage() {
-  // Tabs states
-  const [selectedTab, setSelectedTab] = useState("All Users");
-  // Search states
-  const [searchText, setSearchText] = useState("");
-  const tabs = ["All Users", "Active", "Banned"];
+  const [filters, setFilters] = useState({});
+
   return (
     <div>
       <h2 className="text-3xl font-bold h-10 items-center flex">
@@ -17,21 +30,11 @@ export default function UserManagementPage() {
       <p className="text-gray-600">
         Manage user accounts, permissions and roles.
       </p>
-      {/* Tabs */}
-      <Tabs
-        tabs={tabs}
-        selectedTab={selectedTab}
-        setSelectedTab={setSelectedTab}
-      />
-      {/* Searchbar */}
-      <SearchBar
-        placeholder={"Search user..."}
-        classname={"mb-5 mt-5"}
-        searchText={searchText}
-        setSearchText={setSearchText}
-      />
+      <div className="mt-5">
+        <FilterBar fields={userFields} onFilter={setFilters} />
+      </div>
       {/* User Table */}
-      <UserTable tabs={selectedTab} searchText={searchText} />
+      <UserTable filters={filters} />
     </div>
   );
 }

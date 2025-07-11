@@ -1,10 +1,10 @@
 import { Popconfirm, Space, Table } from "antd";
-import { Ban, Check, Edit2 } from "lucide-react";
+import { Ban, Check } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { activateUser, deactivateUser, getUser } from "../api/user";
 import { useAuth } from "./AuthContext";
 import { handleApiError } from "../utils/handleApiError";
-export default function UserTable({ tabs, searchText = "" }) {
+export default function UserTable({ filters = {} }) {
   const { accessToken } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -12,18 +12,17 @@ export default function UserTable({ tabs, searchText = "" }) {
   // Move fetchData outside useEffect so it can be called elsewhere
   const fetchData = useCallback(async () => {
     setLoading(true);
-    let params = {};
-    if (tabs === "Active") params.isActive = true;
-    else if (tabs === "Banned") params.isActive = false;
-    if (searchText) {
-      params.username = searchText;
-      params.email = searchText;
-    }
+    let params = { ...filters };
+
+    // Convert isActive from string to boolean if present
+    if (params.isActive === "true") params.isActive = true;
+    else if (params.isActive === "false") params.isActive = false;
+
     const response = await getUser({ accessToken, ...params });
     if (response) setUsers(response.data);
     else setUsers([]);
     setLoading(false);
-  }, [tabs, searchText, accessToken]);
+  }, [accessToken, filters]);
 
   useEffect(() => {
     fetchData();
@@ -161,10 +160,11 @@ export default function UserTable({ tabs, searchText = "" }) {
 
   return (
     <Table
+      size="small"
       className="border border-gray-300 rounded-md overflow-x-auto select-none"
       columns={columns}
       dataSource={dataSource}
-      pagination={{ pageSize: 5 }}
+      pagination={{ pageSize: 9 }}
       loading={loading}
     />
   );
