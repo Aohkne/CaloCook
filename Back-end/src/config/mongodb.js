@@ -5,21 +5,21 @@ import { env } from '@/config/environment'
 let databaseInstance = null
 
 // SET UP: CONNECT SERVER
-/*const mongoClientInstance = new MongoClient(env.MONGODB_URI, {
+const mongoClientInstance = new MongoClient(env.MONGODB_URI, {
   // Chỉ định Stable API, lỗi các kiểu...
+  tls: true,
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
-    deprecationErrors: true,
-  },
+    deprecationErrors: true
+  }
 })
-*/
 
 // SET UP: CONNECT LOCALHOST
-const mongoClientInstance = new MongoClient(env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+// const mongoClientInstance = new MongoClient(env.MONGODB_URI, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true
+// })
 
 // CONNECT DB
 export const CONNECT_DB = async () => {
