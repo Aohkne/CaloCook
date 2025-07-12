@@ -33,10 +33,22 @@ const START_SERVER = () => {
   // Middleware - xử lý lỗi tập trung
   app.use(errorHandlingMiddleware)
 
-  app.listen(env.PORT, env.HOST, () => {
-    console.log(`Hello ${env.AUTHOR}, Server is running at http://${env.DISPLAY_HOST}:${env.PORT}/`)
-    console.log(`Swagger is running at http://${env.DISPLAY_HOST}:${env.PORT}/api-docs`)
-  })
+  console.log('NODE_ENV:', env.NODE_ENV)
+
+  if (env.NODE_ENV === 'production') {
+    // PRODUCTION
+    const port = process.env.PORT || env.PORT || 8080
+    app.listen(port, () => {
+      console.log(`Hello ${env.AUTHOR}, Server is running at: https://calocook.onrender.com`)
+      console.log(`Swagger is running at https://calocook.onrender.com/api-docs`)
+    })
+  } else {
+    // LOCAL
+    app.listen(env.PORT, env.HOST, () => {
+      console.log(`Hello ${env.AUTHOR}, Server is running at http://${env.DISPLAY_HOST}:${env.PORT}/`)
+      console.log(`Swagger is running at http://${env.DISPLAY_HOST}:${env.PORT}/api-docs`)
+    })
+  }
 
   // CLEAN UP
   exitHook(() => {
