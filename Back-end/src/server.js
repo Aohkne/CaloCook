@@ -19,7 +19,14 @@ const START_SERVER = () => {
   const swaggerSpec = swaggerJSDoc(swaggerOptions)
 
   // CORS
-  app.use(cors())
+  app.use(
+    cors({
+      origin: ['https://calocook.onrender.com', 'http://localhost:8080'],
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization']
+    })
+  )
 
   // Enable req.body json data
   app.use(express.json({ limit: '10mb' }))
