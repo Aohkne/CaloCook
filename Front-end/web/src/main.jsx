@@ -21,6 +21,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import IngredientManagementPage from "./pages/IngredientManagementPage.jsx";
 import StepManagementPage from "./pages/StepManagementPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
+import DishDetailPage from "./pages/DishDetailPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -48,7 +49,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Navigate to="/users" replace />,
+        element: <Navigate to="/dashboard" replace />,
       },
       {
         path: "/dashboard",
@@ -56,22 +57,28 @@ const router = createBrowserRouter([
         children: [{ path: "", element: <DashboardPage /> }],
       },
       {
-        path: "/users",
+        path: "/user",
         element: <App />,
         children: [{ path: "", element: <UserManagementPage /> }],
       },
       {
-        path: "/dishes",
+        path: "/dish",
         element: <App />,
-        children: [{ path: "", element: <DishManagementPage /> }],
+        children: [
+          { path: "", element: <DishManagementPage /> },
+          {
+            path: ":id",
+            element: <DishDetailPage />,
+          },
+        ],
       },
       {
-        path: "/ingredients",
+        path: "/ingredient",
         element: <App />,
         children: [{ path: "", element: <IngredientManagementPage /> }],
       },
       {
-        path: "/steps",
+        path: "/step",
         element: <App />,
         children: [{ path: "", element: <StepManagementPage /> }],
       },

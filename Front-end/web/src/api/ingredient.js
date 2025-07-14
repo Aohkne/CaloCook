@@ -11,6 +11,22 @@ export async function getIngredients({ accessToken, isActive, sortBy, order }) {
   return response.data;
 }
 
+export async function getIngredientsByDishId({
+  accessToken,
+  dishId,
+  sortBy,
+  order,
+}) {
+  const params = { dishId, sortBy, order };
+  const response = await api.get(`/ingredient/by-dish/${dishId}`, {
+    params,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+
 export async function addIngredient({
   accessToken,
   dishId,
@@ -20,6 +36,23 @@ export async function addIngredient({
 }) {
   const params = { dishId, name, quantity, isActive };
   const response = await api.post("/ingredient", params, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+
+export async function editIngredient({
+  accessToken,
+  id,
+  dishId,
+  name,
+  quantity,
+  isActive,
+}) {
+  const params = { dishId, name, quantity, isActive };
+  const response = await api.put(`/ingredient/${id}`, params, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },

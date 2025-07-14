@@ -138,9 +138,9 @@ const DishTable = React.memo(function DishTable({
         title: "Name",
         dataIndex: "name",
         key: "name",
-        render: (text) => (
+        render: (text, record) => (
           <Space>
-            <Link to="">{text}</Link>
+            <Link to={`/dish/${record._id}`}>{text}</Link>
           </Space>
         ),
       },

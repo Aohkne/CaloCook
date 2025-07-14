@@ -67,14 +67,14 @@ export default function Sidebar() {
             <SidebarButton
               icon={<Users />}
               text="Users"
-              link="/users"
-              ariaSelected={location.pathname === "/users"}
+              link="/user"
+              ariaSelected={location.pathname === "/user"}
             />
             <SidebarButton
               icon={<Soup />}
               text="Dishes"
-              link="/dishes"
-              ariaSelected={location.pathname === "/dishes"}
+              link="/dish"
+              ariaSelected={location.pathname === "/dish"}
             />
             <div className="mt-auto w-full flex">
               <SettingMenu />
@@ -89,13 +89,13 @@ export default function Sidebar() {
             />
             <SidebarButton
               icon={<Users />}
-              link="/users"
-              ariaSelected={location.pathname === "/users"}
+              link="/user"
+              ariaSelected={location.pathname === "/user"}
             />
             <SidebarButton
               icon={<Soup />}
-              link="/dishes"
-              ariaSelected={location.pathname === "/dishes"}
+              link="/dish"
+              ariaSelected={location.pathname === "/dish"}
             />
             <SidebarButton
               icon={<User />}
