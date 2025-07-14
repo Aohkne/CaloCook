@@ -25,9 +25,6 @@ export default function IngredientManagementPage() {
   const [form] = Form.useForm();
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // Tabs states
-  const [selectedTab, setSelectedTab] = useState("All Dishes");
-  const tabs = ["All Dishes", "Active", "Banned"];
   // Search states
   const [searchText, setSearchText] = useState("");
   // Filter states
@@ -70,11 +67,6 @@ export default function IngredientManagementPage() {
   const handleFilterCancel = () => {
     setIsFilterOpen(false);
   };
-  const showFilterModal = () => {
-    setPendingSortBy(sortBy);
-    setPendingOrder(order);
-    setIsFilterOpen(true);
-  };
   const handleSortByChange = (value) => {
     setPendingSortBy(value);
   };
@@ -97,18 +89,12 @@ export default function IngredientManagementPage() {
   }, [accessToken]);
   return (
     <div>
-      <h2 className="text-3xl font-bold h-10 items-center flex">
+      <h2 className="text-xl md:text-3xl font-bold h-10 items-center flex">
         Ingredient Management
       </h2>
       <p className="text-gray-600">
         Manage dish details, ingredients, and categories.
       </p>
-      {/* Tabs */}
-      <Tabs
-        tabs={tabs}
-        selectedTab={selectedTab}
-        setSelectedTab={setSelectedTab}
-      />
       {/* Searchbar, filter and create */}
       <div className="flex mt-5 mb-5 items-center gap-2">
         <SearchBar
@@ -119,19 +105,12 @@ export default function IngredientManagementPage() {
         />
         <button
           className="flex border border-gray-500 rounded-md items-center gap-1 py-1 px-2 font-medium text-sm hover:bg-gray-100 hover:cursor-pointer select-none"
-          onClick={showFilterModal}
-        >
-          Filter <Filter size={16} />
-        </button>
-        <button
-          className="flex border border-gray-500 rounded-md items-center gap-1 py-1 px-2 font-medium text-sm hover:bg-gray-100 hover:cursor-pointer select-none"
           onClick={showModal}
         >
           Create <Plus size={16} />
         </button>
       </div>
       <IngredientTable
-        tabs={selectedTab}
         handleOk={handleOk}
         searchText={searchText}
         sortBy={sortBy}

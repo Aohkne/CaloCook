@@ -1,19 +1,17 @@
-import { Input, Select } from "antd";
+import { Input } from "antd";
 
 export default function SearchBar({
-  placeholder,
-  searchText,
-  setSearchText,
-  classname,
+  onSearch,
+  placeholder = "Search...",
+  width = 250,
 }) {
   return (
-    // Search bar with a search icon and a filter button
-    <div className={`${classname}`}>
-      <Input
-        placeholder={placeholder}
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-      />
-    </div>
+    <Input.Search
+      allowClear
+      enterButton
+      placeholder={placeholder}
+      onSearch={(value) => onSearch({ search: value })}
+      style={{ width }}
+    />
   );
 }

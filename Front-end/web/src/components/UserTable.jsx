@@ -58,7 +58,6 @@ export default function UserTable({ filters = {} }) {
         dataIndex: "username",
         filterSearch: true,
         key: "username",
-        sorter: (a, b) => a.username.localeCompare(b.username),
         render: (text) => (
           <Space>
             <a>{text}</a>
@@ -69,7 +68,6 @@ export default function UserTable({ filters = {} }) {
         title: "Email",
         dataIndex: "email",
         key: "email",
-        sorter: (a, b) => a.email.localeCompare(b.email),
         render: (text) => (
           <Space>
             <p>{text}</p>
@@ -166,6 +164,7 @@ export default function UserTable({ filters = {} }) {
       dataSource={dataSource}
       pagination={{ pageSize: 9 }}
       loading={loading}
+      scroll={{ x: 600 }}
     />
   );
 }

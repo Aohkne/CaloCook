@@ -21,7 +21,9 @@ export default function DashboardPage() {
   }, []);
   return (
     <div>
-      <h2 className="text-3xl font-bold h-10 items-center flex">Dashboard</h2>
+      <h2 className="text-xl md:text-3xl font-bold h-10 items-center flex">
+        Dashboard
+      </h2>
       <p className="text-gray-600">
         Manage dish details, ingredients, and categories.
       </p>

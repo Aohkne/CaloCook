@@ -1,6 +1,7 @@
 import UserTable from "../components/UserTable";
-import FilterBar from "../components/FilterBar";
 import { useState } from "react";
+import FilterModal from "../components/FilterModal";
+import SearchBar from "../components/SearchBar";
 
 const userFields = [
   { name: "username", label: "Username", type: "text" },
@@ -21,20 +22,33 @@ const userFields = [
 ];
 export default function UserManagementPage() {
   const [filters, setFilters] = useState({});
+  const [search, setSearch] = useState("");
+
+  // Combine filters and search for UserTable
+  const combinedFilters = { ...filters };
+  if (search) {
+    combinedFilters.username = search;
+    // Or use 'email' if you want to search by email
+    // combinedFilters.email = search;
+  }
 
   return (
     <div>
-      <h2 className="text-3xl font-bold h-10 items-center flex">
+      <h2 className="text-xl md:text-3xl font-bold h-10 items-center flex">
         User Management
       </h2>
       <p className="text-gray-600">
         Manage user accounts, permissions and roles.
       </p>
-      <div className="mt-5">
-        <FilterBar fields={userFields} onFilter={setFilters} />
+      <div className="flex gap-2 mt-5 mb-5">
+        <SearchBar
+          placeholder="Search username..."
+          onSearch={({ search }) => setSearch(search)}
+        />
+        <FilterModal fields={userFields} onFilter={setFilters} />
       </div>
       {/* User Table */}
-      <UserTable filters={filters} />
+      <UserTable filters={combinedFilters} />
     </div>
   );
 }

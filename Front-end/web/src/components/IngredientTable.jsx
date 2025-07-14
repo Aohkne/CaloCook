@@ -11,7 +11,6 @@ import { useAuth } from "./AuthContext";
 import { getDish } from "../api/dish"; // Import your getDish API
 import { handleApiError } from "../utils/handleApiError";
 const IngredientTable = React.memo(function IngredientTable({
-  tabs,
   handleOk,
   searchText = "",
   sortBy = "createdAt",
@@ -43,8 +42,6 @@ const IngredientTable = React.memo(function IngredientTable({
     setLoading(true);
     try {
       let params = {};
-      if (tabs === "Active") params.isActive = true;
-      else if (tabs === "Banned") params.isActive = false;
       if (searchText) {
         params.name = searchText;
       }
@@ -59,7 +56,7 @@ const IngredientTable = React.memo(function IngredientTable({
       console.error("Failed to fetch ingredients:", error);
     }
     setLoading(false);
-  }, [tabs, searchText, sortBy, order, accessToken]);
+  }, [searchText, sortBy, order, accessToken]);
 
   useEffect(() => {
     fetchData();
@@ -184,12 +181,13 @@ const IngredientTable = React.memo(function IngredientTable({
 
   return (
     <Table
-      size="large"
+      size="small"
       className={`border border-gray-300 rounded-md overflow-x-auto`}
       columns={columns}
       dataSource={dataSource}
-      pagination={{ pageSize: 5 }}
+      pagination={{ pageSize: 8 }}
       loading={loading}
+      scroll={{ x: 600 }}
     />
   );
 });

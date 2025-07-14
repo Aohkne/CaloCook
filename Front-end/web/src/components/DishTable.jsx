@@ -126,8 +126,8 @@ const DishTable = React.memo(function DishTable({
           <Space>
             <Image
               src={text}
-              width={30}
-              height={30}
+              width={20}
+              height={20}
               className="object-cover rounded"
             />
           </Space>
@@ -264,12 +264,13 @@ const DishTable = React.memo(function DishTable({
   return (
     <>
       <Table
-        size="middle"
+        size="small"
         className={`border border-gray-300 rounded-md overflow-x-auto`}
         columns={columns}
         dataSource={dataSource}
-        pagination={{ pageSize: 5 }}
+        pagination={{ pageSize: 8 }}
         loading={loading}
+        scroll={{ x: 600 }}
       />
       <Modal
         title="Edit Dish"
