@@ -17,3 +17,14 @@ export async function dishCount(accessToken) {
   });
   return response.data;
 }
+
+export async function getTopFavorites({ accessToken, limit }) {
+  const params = { limit };
+  const response = await api.get("/dashboard/top-favorites", {
+    params,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}

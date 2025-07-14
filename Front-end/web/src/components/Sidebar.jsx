@@ -76,18 +76,6 @@ export default function Sidebar() {
               link="/dishes"
               ariaSelected={location.pathname === "/dishes"}
             />
-            <SidebarButton
-              icon={<Carrot />}
-              text="Ingredients"
-              link="/ingredients"
-              ariaSelected={location.pathname === "/ingredients"}
-            />
-            <SidebarButton
-              icon={<ListOrderedIcon />}
-              text="Steps"
-              link="/steps"
-              ariaSelected={location.pathname === "/steps"}
-            />
             <div className="mt-auto w-full flex">
               <SettingMenu />
             </div>
@@ -108,16 +96,6 @@ export default function Sidebar() {
               icon={<Soup />}
               link="/dishes"
               ariaSelected={location.pathname === "/dishes"}
-            />
-            <SidebarButton
-              icon={<Carrot />}
-              link="/ingredients"
-              ariaSelected={location.pathname === "/ingredients"}
-            />
-            <SidebarButton
-              icon={<ListOrderedIcon />}
-              link="/steps"
-              ariaSelected={location.pathname === "/steps"}
             />
             <SidebarButton
               icon={<User />}

@@ -1,4 +1,5 @@
 import "@ant-design/v5-patch-for-react-19";
+import { Link } from "react-router-dom";
 import {
   Form,
   Image,
@@ -139,7 +140,7 @@ const DishTable = React.memo(function DishTable({
         key: "name",
         render: (text) => (
           <Space>
-            <a>{text}</a>
+            <Link to="">{text}</Link>
           </Space>
         ),
       },
