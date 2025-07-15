@@ -28,6 +28,7 @@ activate Validation
 
 alt Validation Success
     Validation -> Controller: 6. next() - validation passed
+
     
     activate Controller
     Controller -> Service: 7. updateIngredient(ingredientId, updateData)
@@ -38,10 +39,10 @@ alt Validation Success
     
     IngredientModel -> MongoDB: 9. ExecuteQuery()
     activate MongoDB
+    MongoDB --> IngredientModel: 10. Return update result
+    deactivate MongoDB
     
     alt Ingredient Found & Updated
-        MongoDB --> IngredientModel: 10. Return updated ingredient
-        
         IngredientModel --> Service: 11. Return updated ingredient
         
         Service --> Controller: 12. Return updated ingredient
@@ -53,31 +54,28 @@ alt Validation Success
         View --> Admin: 15. Show success message & update ingredient display
         
     else Ingredient Not Found
-        MongoDB --> IngredientModel: 10. Return null
-        deactivate MongoDB
-        
-        IngredientModel --> Service: 11. Return null
+        IngredientModel --> Service: 10.1 Return null
         deactivate IngredientModel
         
-        Service --> Controller: 12. Throw ApiError(404, "Ingredient not found!")
+        Service --> Controller: 10.2 Throw ApiError(404, "Ingredient not found!")
         deactivate Service
         
-        Controller --> Route: 13. next(error)
+        Controller --> Route: 10.3 next(error)
         deactivate Controller
         
-        Route --> View: 14. Return 404 error
+        Route --> View: 10.4 Return 404 error
         
-        View --> Admin: 15. Show error message
+        View --> Admin: 10.5 Show error message
     end
     
 else Validation Failed
-    Validation --> Route: 6. next(ApiError(422, validation errors))
+    Validation --> Route: 5.1 next(ApiError(422, validation errors))
     deactivate Validation
     
-    Route --> View: 7. Return 422 validation errors
+    Route --> View: 5.2 Return 422 validation errors
     deactivate Route
     
-    View --> Admin: 8. Show validation error messages
+    View --> Admin: 5.3 Show validation error messages
     deactivate View
     deactivate Admin
 end

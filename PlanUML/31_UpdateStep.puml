@@ -21,6 +21,7 @@ Route -> Validation: 3. updateStep validation
 activate Validation
 
 Validation -> Validation: 4. Validate dishId, stepNumber, description, isActive
+
 alt Validation Success
     Validation -> Controller: 5. updateStep(req, res)
     activate Controller
@@ -34,13 +35,13 @@ alt Validation Success
     Model -> MongoDB: 8. ExecuteQuery()
     activate MongoDB
 
-    MongoDB --> Model: 9. Return updated step or null
+    MongoDB --> Model: 9. Return updated step 
     deactivate MongoDB
 
-    Model --> Service: 10. Return updated step
-    deactivate Model
 
     alt Step Found and Updated
+        Model --> Service: 10. Return updated step
+
         Service --> Controller: 11. Return updated step
 
         Controller --> Route: 12. Send JSON response (200, updated step)
@@ -50,27 +51,32 @@ alt Validation Success
         View --> Admin: 14. Display updated step
 
     else Step Not Found
-        Service --> Controller: 15. Throw ApiError (404, Step not found)
+        Model --> Service: 9.1 Step Not Found
+        deactivate Model
+
+        Service --> Controller: 9.2 Throw ApiError(404, "Step not found!")
         deactivate Service
 
-        Controller --> Route: 16. Send error response
+        Controller --> Route: 9.3 next(error)
         deactivate Controller
 
-        Route --> View: 17. Show error message
-        View --> Admin: 18. Display error
+        Route --> View: 9.4 Return 404 error
+
+        View --> Admin: 9.5 Show error message
     end
 
 else Validation Failed
-    Validation --> Route: 19. Throw validation error
+    Validation --> Route: 4.1 Throw validation error
     deactivate Validation
 
-    Route --> View: 20. Send validation error
+    Route --> View: 4.2 Return validation error
     deactivate Route
 
-    View --> Admin: 21. Display validation errors
+    View --> Admin: 4.3 Display validation errors
     deactivate View
     deactivate Admin
 end
+
 end
 
 @enduml
