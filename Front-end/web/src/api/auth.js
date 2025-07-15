@@ -1,3 +1,4 @@
+import axios from "axios";
 import api from "./api";
 
 export async function login({ emailOrUsername, password }) {
@@ -24,6 +25,36 @@ export async function changePassword({ token, password }) {
   return response.data;
 }
 
+export async function editProfile({
+  accessToken,
+  username,
+  email,
+  calorieLimit,
+  avatarUrl,
+  gender,
+  dob,
+  height,
+  weight,
+}) {
+  const params = {
+    username,
+    email,
+    calorieLimit,
+    avatarUrl,
+    gender,
+    dob,
+    height,
+    weight,
+  };
+  console.log(params);
+  const response = await api.post(`/auth/profile`, params, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+
 export async function loginWithGoogle(credential) {
   const params = { credential };
   const response = await api.post("/auth/google-login", params);
@@ -36,4 +67,23 @@ export async function logout({ accessToken, refreshToken }) {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   return response.data;
+}
+
+export async function uploadToCloudinary({ accessToken, file }) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "your_unsigned_preset"); // replace with your preset
+
+  const response = await axios.post(
+    "https://api.cloudinary.com/v1_1/your_cloud_name/image/upload",
+    {
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+  return data.secure_url; // this is the image URL you save
 }

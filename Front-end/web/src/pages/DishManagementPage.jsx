@@ -52,10 +52,17 @@ const dishFields = [
 export default function DishManagementPage() {
   const { accessToken } = useAuth();
   const [form] = Form.useForm();
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState({});
+  // Combine filters and search for UserTable
+  const combinedFilters = { ...filters };
+  if (search) {
+    combinedFilters.name = search;
+    // Or use 'email' if you want to search by email
+    // combinedFilters.email = search;
+  }
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // Search states
-  const [searchText, setSearchText] = useState("");
   // Add Modal handlers
   const showModal = () => {
     setIsModalOpen(true);
@@ -96,12 +103,10 @@ export default function DishManagementPage() {
       {/* Searchbar, filter and create */}
       <div className="flex mt-5 mb-5 items-center gap-2">
         <SearchBar
-          placeholder={"Search dish..."}
-          searchText={searchText}
-          setSearchText={setSearchText}
-          classname="flex-1"
+          placeholder="Search username..."
+          onSearch={({ search }) => setSearch(search)}
         />
-        <FilterModal fields={dishFields} />
+        <FilterModal fields={dishFields} onFilter={setFilters} />
         <button
           className="flex border border-gray-500 rounded-md items-center gap-1 py-1 px-2 font-medium text-sm hover:bg-gray-100 hover:cursor-pointer select-none"
           onClick={showModal}
@@ -109,7 +114,7 @@ export default function DishManagementPage() {
           Create <Plus size={16} />
         </button>
       </div>
-      <DishTable handleOk={handleOk} searchText={searchText} />
+      <DishTable filters={combinedFilters} />
       {/* Add New Item Modal */}
       <Modal
         title="Add New Dish"

@@ -1,39 +1,80 @@
-import { Avatar, Divider } from "antd";
+import { Avatar, Form, Input, message, Button, Upload } from "antd";
 import { Edit, Mail, Shield, Target, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getUserById } from "../api/user";
 import { useAuth } from "../components/AuthContext";
+import { editProfile, uploadToCloudinary } from "../api/auth";
 
 export default function ProfilePage() {
   const { accessToken } = useAuth();
   const [activateEdit, setActivateEdit] = useState(false);
   const [user, setUser] = useState(null);
-  const [id, setId] = useState(localStorage.getItem("_id"));
+  const [id] = useState(localStorage.getItem("_id"));
+  const [form] = Form.useForm();
 
   useEffect(() => {
-    if (!accessToken || !id) return; // 👈 skip until both exist
-
+    if (!accessToken || !id) return;
     const fetchUser = async () => {
       try {
         const userData = await getUserById({ accessToken, id });
         setUser(userData.data);
+        form.setFieldsValue({
+          username: userData.data.username,
+          email: userData.data.email,
+          calorieLimit: userData.data.calorieLimit,
+          avatarUrl: userData.data.avatar_url,
+          gender: userData.data.gender,
+          dob: userData.data.dob,
+          height: userData.data.height,
+          weight: userData.data.weight,
+        });
       } catch (err) {
         console.error("Failed to fetch user:", err);
       }
     };
     fetchUser();
-  }, [accessToken, id]);
+  }, [accessToken, id, form]);
 
-  const handleActivateEdit = () => {
-    setActivateEdit(!activateEdit);
-  };
-
+  const handleActivateEdit = () => setActivateEdit(true);
   const handleCancelEdit = () => {
     setActivateEdit(false);
+    // Reset form to original user values
+    if (user) {
+      form.setFieldsValue({
+        username: user.username,
+        email: user.email,
+        calorieLimit: user.calorieLimit,
+        avatarUrl: user.avatar_url,
+        gender: user.gender,
+        dob: user.dob,
+        height: user.height,
+        weight: user.weight,
+      });
+    }
   };
 
-  const handleSaveEdit = () => {
-    setActivateEdit(false);
+  const handleSaveEdit = async () => {
+    try {
+      const values = await form.validateFields();
+      await editProfile({
+        accessToken,
+        username: values.username,
+        email: values.email,
+        calorieLimit: values.calorieLimit,
+        avatarUrl: values.avatarUrl,
+        gender: values.gender,
+        dob: values.dob,
+        height: values.height,
+        weight: values.weight,
+      });
+      message.success("Profile updated!");
+      setActivateEdit(false);
+      // Optionally, refetch user data
+      const userData = await getUserById({ accessToken, id });
+      setUser(userData.data);
+    } catch (err) {
+      message.error("Failed to update profile.", err);
+    }
   };
 
   return (
@@ -78,130 +119,86 @@ export default function ProfilePage() {
             </div>
             {activateEdit ? (
               <div className="static lg:absolute right-[20px] top-[20px] flex gap-2">
-                <button
-                  className="flex items-center gap-2 border border-gray-300 py-2 px-3 rounded-md font-medium text-sm hover:bg-gray-100 transition-all hover:cursor-pointer"
-                  onClick={handleCancelEdit}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="flex items-center gap-2 border border-gray-300 py-2 px-3 rounded-md font-medium text-sm hover:bg-gray-100 transition-all hover:cursor-pointer"
-                  onClick={handleSaveEdit}
-                >
+                <Button onClick={handleCancelEdit}>Cancel</Button>
+                <Button type="primary" onClick={handleSaveEdit}>
                   Save
-                </button>
+                </Button>
               </div>
             ) : (
-              <button
-                className="flex items-center gap-2 border border-gray-300 static lg:absolute right-[20px] top-[20px] py-2 px-3 rounded-md font-medium text-sm hover:bg-gray-100 transition-all hover:cursor-pointer"
-                onClick={handleActivateEdit}
-              >
-                <Edit size={16} />
-                Edit Profile
-              </button>
+              <div className="static lg:absolute right-[20px] top-[20px]">
+                <Button icon={<Edit size={16} />} onClick={handleActivateEdit}>
+                  Edit Profile
+                </Button>
+              </div>
             )}
           </div>
-          {/* Basic Information */}
+          {/* Editable Form */}
           <div className="col-span-2 p-5 relative border border-gray-300 rounded-md">
-            <h2 className="flex items-center gap-1 ">
-              <User />
-              <span className="font-bold text-xl whitespace-nowrap">
-                Personal Information
-              </span>
-            </h2>
-            <p className="text-sm text-black/60 mb-4">Basic personal details</p>
-            <ul>
-              <li className="flex justify-between">
-                <label
-                  htmlFor="dob"
-                  className="text-sm font-medium text-black/60"
+            <Form
+              form={form}
+              layout="vertical"
+              disabled={!activateEdit}
+              initialValues={{
+                username: user.username,
+                email: user.email,
+                calorieLimit: user.calorieLimit,
+                avatarUrl: user.avatar_url,
+                gender: user.gender,
+                dob: user.dob,
+                height: user.height,
+                weight: user.weight,
+              }}
+            >
+              <Form.Item
+                label="Username"
+                name="username"
+                rules={[{ required: true }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[{ required: true, type: "email" }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item label="Avatar" name="avatarUrl">
+                <Upload
+                  showUploadList={false}
+                  beforeUpload={async (file) => {
+                    try {
+                      const url = await uploadToCloudinary({
+                        accessToken,
+                        file,
+                      });
+                      form.setFieldsValue({ avatarUrl: url });
+                      message.success("Avatar uploaded successfully!");
+                    } catch (err) {
+                      message.error("Failed to upload avatar.", err);
+                    }
+                    return false; // prevent automatic upload
+                  }}
                 >
-                  Date of Birth
-                </label>
-                <input
-                  type="text"
-                  id="dob"
-                  defaultValue={user.dob}
-                  className="text-md text-end"
-                  disabled={!activateEdit}
-                />
-              </li>
-              <Divider size="small" />
-              <li className="flex justify-between">
-                <label
-                  htmlFor="gender"
-                  className="text-sm font-medium text-black/60"
-                >
-                  Gender
-                </label>
-                <input
-                  type="text"
-                  id="gender"
-                  defaultValue={user.gender}
-                  className="text-md text-end"
-                  disabled={!activateEdit}
-                />
-              </li>
-              <Divider size="small" />
-              <li className="flex justify-between">
-                <label
-                  htmlFor="height"
-                  className="text-sm font-medium text-black/60"
-                >
-                  Height
-                </label>
-                <input
-                  type="text"
-                  id="height"
-                  defaultValue={`${user.height} cm`}
-                  className="text-md text-end"
-                  disabled={!activateEdit}
-                />
-              </li>
-              <Divider size="small" />
-              <li className="flex justify-between">
-                <label
-                  htmlFor="weight"
-                  className="text-sm font-medium text-black/60"
-                >
-                  Weight
-                </label>
-                <input
-                  type="text"
-                  id="weight"
-                  defaultValue={`${user.weight} kg`}
-                  className="text-md text-end"
-                  disabled={!activateEdit}
-                />
-              </li>
-            </ul>
-          </div>
-          {/* Health & Activity */}
-          <div className="col-span-2 p-5 relative border border-gray-300 rounded-md">
-            <h2 className="flex items-center gap-1 ">
-              <Target />
-              <span className="font-bold text-xl">Health & Activity</span>
-            </h2>
-            <p className="text-sm text-black/60 mb-4">
-              Fitness and health information
-            </p>
-            <ul>
-              <li className="flex justify-between">
-                <label
-                  htmlFor="calorieLimit"
-                  className="text-sm font-medium text-black/60"
-                >
-                  Daily Calorie Limit
-                </label>
-                <input
-                  type="text"
-                  id="calorieLimit"
-                  defaultValue={`${user.calorieLimit} Kcal`}
-                  className="text-md text-end"
-                  disabled={!activateEdit}
-                />
-              </li>
-            </ul>
+                  <Button>Change Avatar</Button>
+                </Upload>
+              </Form.Item>
+              <Form.Item label="Gender" name="gender">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Date of Birth" name="dob">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Height (cm)" name="height">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Weight (kg)" name="weight">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Daily Calorie Limit" name="calorieLimit">
+                <Input />
+              </Form.Item>
+            </Form>
           </div>
           {/* Account Details */}
           <div className="col-span-2 p-5 relative border border-gray-300 rounded-md">
@@ -220,13 +217,7 @@ export default function ProfilePage() {
                 >
                   Account Created
                 </label>
-                <input
-                  type="text"
-                  id="createdAt"
-                  defaultValue={user.createdAt}
-                  className="text-md"
-                  disabled={!activateEdit}
-                />
+                <Input id="createdAt" value={user.createdAt} disabled />
               </li>
               <li className="flex flex-col gap-2">
                 <label
@@ -235,13 +226,7 @@ export default function ProfilePage() {
                 >
                   Last Updated
                 </label>
-                <input
-                  type="text"
-                  id="updatedAt"
-                  defaultValue={user.updatedAt}
-                  className="text-md"
-                  disabled={!activateEdit}
-                />
+                <Input id="updatedAt" value={user.updatedAt} disabled />
               </li>
             </ul>
           </div>

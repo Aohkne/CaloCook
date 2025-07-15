@@ -22,13 +22,7 @@ import {
 import { useAuth } from "./AuthContext";
 import { handleApiError } from "../utils/handleApiError";
 import TextArea from "antd/es/input/TextArea";
-const DishTable = React.memo(function DishTable({
-  tabs,
-  handleOk,
-  searchText = "",
-  sortBy = "createdAt",
-  order = "desc",
-}) {
+const DishTable = React.memo(function DishTable({ filters = {} }) {
   const { accessToken } = useAuth();
   const [form] = Form.useForm();
   const [dishes, setDishes] = useState([]);
@@ -41,14 +35,12 @@ const DishTable = React.memo(function DishTable({
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      let params = {};
-      if (tabs === "Active") params.isActive = true;
-      else if (tabs === "Banned") params.isActive = false;
-      if (searchText) {
-        params.name = searchText;
-      }
-      if (sortBy) params.sortBy = sortBy;
-      if (order) params.order = order;
+      let params = { ...filters };
+
+      // Convert isActive from string to boolean if present
+      if (params.isActive === "true") params.isActive = true;
+      else if (params.isActive === "false") params.isActive = false;
+
       const response = await getDish({ accessToken, ...params });
       if (response) setDishes(response.data);
       else setDishes([]);
@@ -58,11 +50,11 @@ const DishTable = React.memo(function DishTable({
       console.error("Failed to fetch dishes:", error);
     }
     setLoading(false);
-  }, [tabs, searchText, sortBy, order, accessToken]);
+  }, [accessToken, filters]);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData, handleOk]);
+  }, [fetchData]);
 
   // Edit Modal handlers
   const showModal = useCallback(
