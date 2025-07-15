@@ -30,56 +30,75 @@ activate MongoDB
 
 MongoDB --> Model: 7. Return updated step or null
 
-Model --> Service: 8. Return updated step
-
 alt Step Found and Deactivated
+    Model --> Service: 8. Return deactivated step
+    
     Service --> Controller: 9. Return deactivated step
-
+    
     Controller --> Route: 10. Send JSON response (200, deactivated step)
-
+    
     Route --> View: 11. Show success message
-
+    
     View --> Admin: 12. Display step as inactive/deleted
 
 else Step Not Found
-    Service --> Controller: 13. Throw ApiError (404, Step not found)
-    Controller --> Route: 14. Send error response
-    Route --> View: 15. Show error message
-    View --> Admin: 16. Display error message
+    Model --> Service: 7.1 Return null
+    
+    Service --> Controller: 7.2 Throw ApiError(404, "Step not found!")
+    
+    Controller --> Route: 7.3 next(error)
+    
+    Route --> View: 7.4 Return 404 error
+    
+    View --> Admin: 7.5 Show error message
 end
+
 end
 
 group Alternative: Activate Step
-Admin -> View: 17. Click Activate Step
+Admin -> View: 13. Click Activate Step
 
-View -> Route: 18. PATCH /api/v1/step/:id/activate
+View -> Route: 14. PATCH /api/v1/step/:id/activate
 
-Route -> Controller: 19. activateStep(req, res)
+Route -> Controller: 15. activateStep(req, res)
 
-Controller -> Service: 20. activateStep(stepId)
+Controller -> Service: 16. activateStep(stepId)
 
-Service -> Model: 21. updateIsActive(stepId, true)
+Service -> Model: 17. updateIsActive(stepId, true)
 
-Model -> MongoDB: 22. ExecuteQuery()
+Model -> MongoDB: 18. ExecuteQuery()
 
-MongoDB --> Model: 23. Return updated step
+MongoDB --> Model: 19. Return updated step or null
 deactivate MongoDB
 
-Model --> Service: 24. Return activated step
-deactivate Model
+alt Step Found and Activated
+    Model --> Service: 20. Return activated step
+    
+    Service --> Controller: 21. Return activated step
+    
+    Controller --> Route: 22. Send JSON response (200, activated step)
+    
+    Route --> View: 23. Show success message
+    
+    View --> Admin: 24. Display step as active
 
-Service --> Controller: 25. Return activated step
-deactivate Service
-
-Controller --> Route: 26. Send JSON response (200, activated step)
-deactivate Controller
-
-Route --> View: 27. Show success message
-deactivate Route
-
-View --> Admin: 28. Display step as active
-deactivate View
-deactivate Admin
+else Step Not Found
+    Model --> Service: 19.1 Return null
+    deactivate Model
+    
+    Service --> Controller: 19.2 Throw ApiError(404, "Step not found!")
+    deactivate Service
+    
+    Controller --> Route: 19.3 next(error)
+    deactivate Controller
+    
+    Route --> View: 19.4 Return 404 error
+    deactivate Route
+    
+    View --> Admin: 19.5 Show error message
+    deactivate View
+    deactivate Admin
+end
 
 end
 

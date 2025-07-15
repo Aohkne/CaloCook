@@ -19,10 +19,8 @@ User -> View: 2. Click "Search Dishes by Ingredient"
 View -> Route: 3. GET /api/v1/ingredient/search-dishes?name={searchName}
 activate Route
 
-
 Route -> Controller: 4. searchIngredientForDish(req, res, next)
 activate Controller
-
 
 Controller -> Service: 5. searchByName(name, sortBy, order)
 activate Service
@@ -38,7 +36,6 @@ alt Ingredients Found
     
     IngredientModel --> Service: 9. Return ingredients list with dishIds
     
-    
     loop For each unique dishId
         Service -> DishModel: 10. getDetails(dishId)
         activate DishModel
@@ -46,6 +43,7 @@ alt Ingredients Found
         DishModel -> MongoDB: 11. ExecuteQuery()
         
         MongoDB --> DishModel: 12. Return dish details
+        deactivate MongoDB
         
         DishModel --> Service: 13. Return dish info
         deactivate DishModel
@@ -58,24 +56,22 @@ alt Ingredients Found
     Route --> View: 16. Return dish results
     
     View --> User: 17. Display dishes containing the searched ingredient
-    
+
 else No Ingredients Found
-    MongoDB --> IngredientModel: 8. Return empty array
-    deactivate MongoDB
     
-    IngredientModel --> Service: 9. Return empty array
+    IngredientModel --> Service: 8.1 Return empty array
     deactivate IngredientModel
     
-    Service --> Controller: 10. Throw ApiError(404, "No dishes found with this ingredient!")
+    Service --> Controller: 8.2 Throw ApiError(404, "No dishes found with this ingredient!")
     deactivate Service
     
-    Controller --> Route: 11. next(error)
+    Controller --> Route: 8.3 next(error)
     deactivate Controller
     
-    Route --> View: 12. Return 404 error
+    Route --> View: 8.4 Return 404 error
     deactivate Route
     
-    View --> User: 13. Show "No dishes found containing this ingredient"
+    View --> User: 8.5 Show "No dishes found containing this ingredient"
     deactivate View
     deactivate User
 end
