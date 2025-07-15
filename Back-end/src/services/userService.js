@@ -117,6 +117,7 @@ const getUserProfile = async (userId) => {
   }
 }
 const editProfileService = async (userId, profileData) => {
+  let cloudinaryResponse = null
   if (profileData.avatarUrl) {
     cloudinaryResponse = await cloudinary.uploader.upload(profileData.avatarUrl, {
       folder: 'avatars'
