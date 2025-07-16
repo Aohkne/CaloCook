@@ -33,10 +33,9 @@ activate IngredientModel
 
 IngredientModel -> MongoDB: 8. ExecuteQuery()
 activate MongoDB
+MongoDB --> IngredientModel: 9. Return update result
 
 alt Ingredient Found & Deactivated
-    MongoDB --> IngredientModel: 9. Return deactivated ingredient
-    
     IngredientModel --> Service: 10. Return ingredient
     
     Service --> Controller: 11. Return deactivated ingredient
@@ -48,55 +47,66 @@ alt Ingredient Found & Deactivated
     View --> Admin: 14. Show success message\n& hide ingredient from active list
     
 else Ingredient Not Found
-    MongoDB --> IngredientModel: 9. Return null
+    IngredientModel --> Service: 9.1 Return null
     
-    IngredientModel --> Service: 10. Return null
+    Service --> Controller: 9.2 Throw ApiError(404, "Ingredient not found!")
     
-    Service --> Controller: 11. Throw ApiError(404, "Ingredient not found!")
+    Controller --> Route: 9.3 next(error)
     
-    Controller --> Route: 12. next(error)
+    Route --> View: 9.4 Return 404 error
     
-    Route --> View: 13. Return 404 error
-    
-    View --> Admin: 14. Show error message
+    View --> Admin: 9.5 Show error message
 end
 
 end
 
 group Alternative: Activate Ingredient (Restore)
 
-Admin -> View: 1. View deactivated ingredients
+Admin -> View: 15. View deactivated ingredients
 
-Admin -> View: 2. Click "Restore Ingredient" button
+Admin -> View: 16. Click "Restore Ingredient" button
 
-View -> Route: 3. PATCH /api/v1/ingredient/:id/activate
+View -> Route: 17. PATCH /api/v1/ingredient/:id/activate
 
-Route -> Controller: 4. activateIngredient(req, res, next)
+Route -> Controller: 18. activateIngredient(req, res, next)
 
-Controller -> Service: 5. activateIngredient(ingredientId)
+Controller -> Service: 19. activateIngredient(ingredientId)
 
-Service -> IngredientModel: 6. updateIsActive(ingredientId, true)
+Service -> IngredientModel: 20. updateIsActive(ingredientId, true)
 
-IngredientModel -> MongoDB: 7. ExecuteQuery()
+IngredientModel -> MongoDB: 21. ExecuteQuery()
 
-MongoDB --> IngredientModel: 8. Return activated ingredient
+MongoDB --> IngredientModel: 22. Return update result
 deactivate MongoDB
 
-IngredientModel --> Service: 9. Return ingredient
-deactivate IngredientModel
+alt Ingredient Found & Activated
+    IngredientModel --> Service: 23. Return activated ingredient
 
-Service --> Controller: 10. Return activated ingredient
-deactivate Service
+    Service --> Controller: 24. Return activated ingredient
 
-Controller --> Route: 11. Send 200 JSON response
-deactivate Controller
+    Controller --> Route: 25. Send 200 JSON response
 
-Route --> View: 12. Return success response
-deactivate Route
+    Route --> View: 26. Return success response
 
-View --> Admin: 13. Show success message\n& add ingredient back to active list
-deactivate Admin
-deactivate View
+    View --> Admin: 27. Show success message\n& add ingredient back to active list
+
+else Ingredient Not Found
+    IngredientModel --> Service: 22.1 Return null
+    deactivate IngredientModel
+    
+    Service --> Controller: 22.2 Throw ApiError(404, "Ingredient not found!")
+    deactivate Service
+    
+    Controller --> Route: 22.3 next(error)
+    deactivate Controller
+    
+    Route --> View: 22.4 Return 404 error
+    deactivate Route
+    
+    View --> Admin: 22.5 Show error message
+    deactivate View
+    deactivate Admin
+end
 
 end
 

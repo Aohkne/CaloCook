@@ -20,6 +20,21 @@
 | ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)               | JavaScript library for web UI           |
 | ![Expo Go](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)                | Development platform for React Native   |
 
+---
+
+## 🔗 Deployed Servers
+
+### Backend:
+
+- [https://calocook.onrender.com/api-docs/#/](https://calocook.onrender.com/api-docs/#/)
+
+### Frontend:
+
+- **Web**: _(updating...)_
+- **Mobile App (APK)**: [Xem hướng dẫn build APK](#-build-apk-for-android-expo-eas)
+
+---
+
 ## ⚙️ Environment Variables
 
 ### Backend (.env)
@@ -62,6 +77,8 @@ VITE_APP_NAME=''
 VITE_APP_VERSION=''
 ```
 
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -73,103 +90,99 @@ VITE_APP_VERSION=''
 
 ### Backend Setup
 
-1. Clone repository và di chuyển vào thư mục backend:
-
 ```bash
+# 1. Clone project và vào thư mục backend
 git clone https://github.com/Aohkne/CaloCook.git
 cd CaloCook/Back-end
-```
 
-2. Cài đặt dependencies:
-
-```bash
+# 2. Cài đặt dependencies
 npm install
-```
 
-3. Tạo file `.env` từ `.env.example` và cấu hình các biến môi trường:
-
-```bash
+# 3. Tạo file .env
 cp .env.example .env
-```
 
-4. Khởi chạy server:
-
-```bash
+# 4. Chạy server
 npm run dev
 ```
 
-Server sẽ chạy trên `http://localhost:8080` và Swagger documentation tại `http://localhost:8080/api-docs`
+Server chạy tại `http://localhost:8080`  
+Swagger docs tại `http://localhost:8080/api-docs`
+
+---
 
 ### Frontend Setup
 
 #### Mobile App (React Native)
 
-1. Di chuyển vào thư mục app:
-
 ```bash
+# 1. Vào thư mục app
 cd Front-end/app
-```
 
-2. Cài đặt dependencies:
-
-```bash
+# 2. Cài dependencies
 npm install
-```
 
-3. Tạo file `.env` từ `.env.example`:
-
-```bash
+# 3. Tạo file .env
 cp .env.example .env
-```
 
-4. Khởi chạy app với Expo:
-
-```bash
+# 4. Khởi chạy với Expo
 npx expo start
-```
-
-hoặc
-
-```bash
+# hoặc
 npm start
 ```
 
-App sẽ chạy trên Metro bundler. Địa chỉ chính xác sẽ được hiển thị trong terminal khi chạy lệnh `npm start` (thường là `exp://[YOUR_LOCAL_IP]:8081`)
-
 #### Web App (React + Vite)
 
-1. Di chuyển vào thư mục web:
-
 ```bash
+# 1. Vào thư mục web
 cd Front-end/web
-```
 
-2. Cài đặt dependencies:
-
-```bash
+# 2. Cài dependencies
 npm install
-```
 
-3. Tạo file `.env` từ `.env.example`:
-
-```bash
+# 3. Tạo file .env
 cp .env.example .env
-```
 
-4. Khởi chạy development server:
-
-```bash
+# 4. Chạy web
 npm run dev
 ```
 
-Web app sẽ chạy trên `http://localhost:3000`
+---
+
+## 📦 Build APK for Android (Expo EAS)
+
+```bash
+# 👉 Bước 1: Đảm bảo backend đang ở môi trường production
+# Trong file .env của Back-end, thêm dòng sau:
+NODE_ENV=production
+
+# 👉 Bước 2: Cài đặt eas-cli vào dự án
+npm install eas-cli --save-dev
+
+# 👉 Bước 3: Đăng nhập vào tài khoản Expo (nếu chưa đăng nhập)
+npx eas login
+# Sẽ yêu cầu:
+# username/email:
+# password:
+
+# 👉 Bước 4: Cấu hình eas build
+npx eas build:configure
+
+# 👉 Bước 5: Tiến hành build file APK
+npx eas build -p android --profile preview
+```
+
+Sau khi build xong, bạn sẽ nhận được link tải file APK trong terminal.
+
+---
 
 ## 🔗 Application URLs
 
 - **Backend API**: http://localhost:8080
 - **Swagger Documentation**: http://localhost:8080/api-docs
 - **Web Application**: http://localhost:3000
-- **Mobile App**: Metro bundler sẽ hiển thị địa chỉ (thường là exp://[YOUR_LOCAL_IP]:8081)
+- **Mobile App**: Thông qua Metro bundler (exp://[YOUR_LOCAL_IP]:[PORT])
+
+---
 
 ## 🤝 Contributing
 
@@ -179,25 +192,29 @@ Web app sẽ chạy trên `http://localhost:3000`
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Mở Pull Request
 
+---
+
 ## 🆘 Troubleshooting
 
 ### Backend Issues
 
-- **MongoDB Connection Error**: Kiểm tra lại `MONGODB_URI` trong file `.env`
-- **Port Already in Use**: Thay đổi `PORT` trong file `.env` hoặc kill process đang sử dụng port
+- **MongoDB Connection Error**: Kiểm tra `MONGODB_URI`
+- **Port Already in Use**: Thay đổi `PORT` hoặc kill process
 - **Dependencies Error**: Xóa `node_modules` và chạy lại `npm install`
 
 ### Frontend Issues
 
-- **API Connection Error**: Kiểm tra lại `API_BASE_URL` hoặc `VITE_API_BASE_URL`
-- **Expo Error**: Đảm bảo Expo CLI đã được cài đặt: `npm install -g @expo/cli`
-- **Metro Bundler Error**: Xóa cache với `npx expo start -c`
+- **API Connection Error**: Kiểm tra `API_BASE_URL` hoặc `VITE_API_BASE_URL`
+- **Expo Error**: Đảm bảo Expo CLI đã được cài đặt
+- **Metro Bundler Error**: Dọn cache với `npx expo start -c`
 
 ### General Issues
 
-- **Node.js Version**: Đảm bảo sử dụng Node.js v16 trở lên
-- **Network Issues**: Kiểm tra firewall và network permissions
-- **Environment Variables**: Đảm bảo tất cả biến môi trường đã được cấu hình đúng
+- **Node.js Version**: >= v16
+- **Network Issues**: Kiểm tra firewall và mạng nội bộ
+- **Environment Variables**: Đảm bảo `.env` đúng và đầy đủ
+
+---
 
 ## 📞 Support Contact
 
