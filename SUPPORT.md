@@ -30,7 +30,7 @@
 
 ### Frontend:
 
-- **Web**: _(updating...)_
+- **Web**: [https://calo-cook.vercel.app/](https://calo-cook.vercel.app/)
 - **Mobile App (APK)**: [Xem hướng dẫn build APK](#-build-apk-for-android-expo-eas)
 
 ---
