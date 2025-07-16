@@ -1,66 +1,17 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import DishTable from "../components/DishTable";
-import { Form, Input, Modal, Radio, Switch } from "antd";
+import { Button, Form, Input, Modal, Radio, Switch } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { addDish } from "../api/dish";
 import { handleApiError } from "../utils/handleApiError";
-import SearchBar from "../components/SearchBar";
 import { useAuth } from "../components/AuthContext";
-import FilterModal from "../components/FilterModal";
-
-const dishFields = [
-  { name: "name", label: "Name", type: "text" },
-  {
-    type: "group",
-    label: "Cooking Time",
-    children: [
-      { name: "minCookingTime", label: "Min", type: "number" },
-      { name: "maxCookingTime", label: "Max", type: "number" },
-    ],
-  },
-  {
-    type: "group",
-    label: "Calories",
-    children: [
-      { name: "minCalorie", label: "Min", type: "number" },
-      { name: "maxCalorie", label: "Max", type: "number" },
-    ],
-  },
-  {
-    name: "difficulty",
-    label: "Difficulty",
-    type: "select",
-    mode: "multiple",
-    options: ["easy", "medium", "hard"],
-  },
-  {
-    name: "isActive",
-    label: "Active",
-    type: "select",
-    options: ["true", "false"],
-  },
-  {
-    name: "sortBy",
-    label: "Sort By",
-    type: "select",
-    options: ["name", "cookingTime", "calorie", "createdAt"],
-  },
-  { name: "order", label: "Order", type: "select", options: ["asc", "desc"] },
-];
+import DishFilterBar from "../components/DishFilterBar";
 
 export default function DishManagementPage() {
   const { accessToken } = useAuth();
   const [form] = Form.useForm();
-  const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({});
-  // Combine filters and search for UserTable
-  const combinedFilters = { ...filters };
-  if (search) {
-    combinedFilters.name = search;
-    // Or use 'email' if you want to search by email
-    // combinedFilters.email = search;
-  }
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   // Add Modal handlers
@@ -100,21 +51,16 @@ export default function DishManagementPage() {
       <p className="text-gray-600">
         Manage dish details, ingredients, and categories.
       </p>
+
       {/* Searchbar, filter and create */}
-      <div className="flex mt-5 mb-5 items-center gap-2">
-        <SearchBar
-          placeholder="Search username..."
-          onSearch={({ search }) => setSearch(search)}
-        />
-        <FilterModal fields={dishFields} onFilter={setFilters} />
-        <button
-          className="flex border border-gray-500 rounded-md items-center gap-1 py-1 px-2 font-medium text-sm hover:bg-gray-100 hover:cursor-pointer select-none"
-          onClick={showModal}
-        >
-          Create <Plus size={16} />
-        </button>
+
+      <div className="flex mt-5 mb-5 gap-3">
+        <DishFilterBar onChange={setFilters} />
+        <Button type="primary" onClick={showModal}>
+          Add
+        </Button>
       </div>
-      <DishTable filters={combinedFilters} />
+      <DishTable filters={filters} />
       {/* Add New Item Modal */}
       <Modal
         title="Add New Dish"

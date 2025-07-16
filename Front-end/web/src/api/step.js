@@ -1,7 +1,12 @@
 import api from "./api";
 
-export async function getStep({ accessToken, isActive, sortBy, orderBy }) {
-  const params = { isActive, sortBy, orderBy };
+export async function getStep({
+  accessToken,
+  isActive,
+  sortBy = "stepNumber",
+  order = "asc",
+}) {
+  const params = { isActive, sortBy, order };
   const response = await api.get("/step", {
     params,
     headers: {
@@ -11,7 +16,12 @@ export async function getStep({ accessToken, isActive, sortBy, orderBy }) {
   return response.data;
 }
 
-export async function getStepByDishId({ accessToken, dishId, sortBy, order }) {
+export async function getStepByDishId({
+  accessToken,
+  dishId,
+  sortBy = "stepNumber",
+  order = "asc",
+}) {
   const params = { dishId, sortBy, order };
   const response = await api.get(`/step/by-dish/${dishId}`, {
     params,

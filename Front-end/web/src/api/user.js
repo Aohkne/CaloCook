@@ -5,8 +5,8 @@ export async function getUser({
   username,
   email,
   isActive,
-  sortBy,
-  order,
+  sortBy = "createdAt",
+  order = "desc",
 }) {
   console.log(`[getUser] Fetching user`);
   const params = { username, email, isActive, sortBy, order };

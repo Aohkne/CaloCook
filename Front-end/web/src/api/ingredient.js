@@ -1,6 +1,11 @@
 import api from "./api";
 
-export async function getIngredients({ accessToken, isActive, sortBy, order }) {
+export async function getIngredients({
+  accessToken,
+  isActive,
+  sortBy = "createdAt",
+  order = "desc",
+}) {
   const params = { isActive, sortBy, order };
   const response = await api.get("/ingredient", {
     params,
@@ -14,8 +19,8 @@ export async function getIngredients({ accessToken, isActive, sortBy, order }) {
 export async function getIngredientsByDishId({
   accessToken,
   dishId,
-  sortBy,
-  order,
+  sortBy = "createdAt",
+  order = "desc",
 }) {
   const params = { dishId, sortBy, order };
   const response = await api.get(`/ingredient/by-dish/${dishId}`, {

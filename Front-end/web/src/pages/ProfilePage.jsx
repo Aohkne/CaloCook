@@ -3,7 +3,7 @@ import { Edit, Mail, Shield, Target, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getUserById } from "../api/user";
 import { useAuth } from "../components/AuthContext";
-import { editProfile, uploadToCloudinary } from "../api/auth";
+import { editProfile } from "../api/auth";
 
 export default function ProfilePage() {
   const { accessToken } = useAuth();
@@ -22,7 +22,7 @@ export default function ProfilePage() {
           username: userData.data.username,
           email: userData.data.email,
           calorieLimit: userData.data.calorieLimit,
-          avatarUrl: userData.data.avatar_url,
+          avatarUrl: userData.data.avatarUrl,
           gender: userData.data.gender,
           dob: userData.data.dob,
           height: userData.data.height,
@@ -34,7 +34,17 @@ export default function ProfilePage() {
     };
     fetchUser();
   }, [accessToken, id, form]);
-
+  // Cloudinary
+  const handleImageChange = (info) => {
+    const file = info.fileList[0]?.originFileObj;
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        form.setFieldValue("avatarUrl", reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleActivateEdit = () => setActivateEdit(true);
   const handleCancelEdit = () => {
     setActivateEdit(false);
@@ -44,7 +54,7 @@ export default function ProfilePage() {
         username: user.username,
         email: user.email,
         calorieLimit: user.calorieLimit,
-        avatarUrl: user.avatar_url,
+        avatarUrl: user.avatarUrl,
         gender: user.gender,
         dob: user.dob,
         height: user.height,
@@ -85,10 +95,10 @@ export default function ProfilePage() {
         <div className="grid grid-cols-2 gap-5 mt-5">
           {/* Username & Email */}
           <div className="col-span-2 relative border border-gray-300 rounded-md flex flex-col lg:flex-row items-center p-5 gap-4">
-            {user.avatar_url === "" ? (
+            {user.avatarUrl === "" ? (
               <Avatar size={80} icon={<User />} />
             ) : (
-              <Avatar size={80} icon={<User />} src={user.avatar_url} />
+              <Avatar size={80} icon={<User />} src={user.avatarUrl} />
             )}
 
             <div className="flex flex-col gap-2">
@@ -142,7 +152,7 @@ export default function ProfilePage() {
                 username: user.username,
                 email: user.email,
                 calorieLimit: user.calorieLimit,
-                avatarUrl: user.avatar_url,
+                avatarUrl: user.avatarUrl,
                 gender: user.gender,
                 dob: user.dob,
                 height: user.height,
@@ -166,21 +176,11 @@ export default function ProfilePage() {
               <Form.Item label="Avatar" name="avatarUrl">
                 <Upload
                   showUploadList={false}
-                  beforeUpload={async (file) => {
-                    try {
-                      const url = await uploadToCloudinary({
-                        accessToken,
-                        file,
-                      });
-                      form.setFieldsValue({ avatarUrl: url });
-                      message.success("Avatar uploaded successfully!");
-                    } catch (err) {
-                      message.error("Failed to upload avatar.", err);
-                    }
-                    return false; // prevent automatic upload
-                  }}
+                  accept="image/*"
+                  beforeUpload={() => false} // Prevent auto upload
+                  onChange={handleImageChange}
                 >
-                  <Button>Change Avatar</Button>
+                  <Button>Upload Avatar</Button>
                 </Upload>
               </Form.Item>
               <Form.Item label="Gender" name="gender">
