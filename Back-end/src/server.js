@@ -21,7 +21,10 @@ const START_SERVER = () => {
   // CORS
   app.use(
     cors({
-      origin: ['https://calocook.onrender.com', 'http://localhost:8080', 'http://localhost:5173'],
+      // FOR TEST
+      // origin: ['https://calocook.onrender.com', 'http://localhost:8080', 'http://localhost:5173'],
+      // FOR DEVELOP
+      origin: ['https://calocook.onrender.com', 'https://calo-cook.vercel.app/'],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization']
