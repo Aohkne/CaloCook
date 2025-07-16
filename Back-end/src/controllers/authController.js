@@ -9,6 +9,7 @@ import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import { StatusCodes } from 'http-status-codes'
 import sendEmail from '@/utils/sendEmail.js'
+import { cloud } from '@/config/cloud'
 
 // 1. Tạo access và refresh token
 const generateTokens = (userId) => {
@@ -305,6 +306,75 @@ export const editProfile = async (req, res) => {
   }
 }
 
+// 11. Login with Google - not implemented yet
+export const loginWithGoogle = async (req, res) => {
+  try {
+    const { credential } = req.body
+
+    if (!credential) {
+      return res.status(400).json({ message: 'No credential provided' })
+    }
+
+    const ticket = await cloud.verifyIdToken({
+      idToken: credential,
+      audience: env.YOUR_GOOGLE_CLIENT_ID
+    })
+
+    const payload = ticket.getPayload()
+    const { email, name, picture, sub } = payload
+    // console.log('Google payload:', payload)
+
+    if (!email) {
+      return res.status(400).json({ message: 'Google did not return email' })
+    }
+
+    // Tìm user theo email
+    let user = await User.findOne({ email })
+
+    // Nếu không có, tạo mới
+    if (!user) {
+      const newUserData = {
+        username: name,
+        email: email,
+        password_hash: '',
+        role: 'user',
+        calorieLimit: 2000,
+        avatarUrl: picture,
+        gender: null,
+        dob: null,
+        height: null,
+        weight: null,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+      await User.create(newUserData)
+    }
+    user = await User.findOne({ email })
+    // Tạo token
+    const { accessToken, refreshToken } = generateTokens(user._id)
+
+    // Lưu token vào Redis
+    await storeRefreshToken(user._id, refreshToken)
+
+    res.json({
+      message: 'Login successfully',
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        accessToken,
+        refreshToken,
+        googleId: sub
+      }
+    })
+  } catch (error) {
+    console.error('Google login error:', error.message)
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error', error: error.message })
+  }
+}
+
 export const authController = {
   login,
   refreshToken,
@@ -314,5 +384,6 @@ export const authController = {
   resetPassword,
   changePassword,
   getProfile,
-  editProfile
+  editProfile,
+  loginWithGoogle
 }

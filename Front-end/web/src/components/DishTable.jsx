@@ -1,271 +1,386 @@
-import { Space, Table } from "antd";
+import "@ant-design/v5-patch-for-react-19";
+import { Link } from "react-router-dom";
+import {
+  Form,
+  Image,
+  Input,
+  Modal,
+  Popconfirm,
+  Radio,
+  Space,
+  Switch,
+  Table,
+} from "antd";
 import { Ban, Check, Edit2 } from "lucide-react";
-const users = [
-  {
-    _id: {
-      $oid: "68306f4d4928f3fe108df627",
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  activateDish,
+  deactivateDish,
+  editDishById,
+  getDish,
+} from "../api/dish";
+import { useAuth } from "./AuthContext";
+import { handleApiError } from "../utils/handleApiError";
+import TextArea from "antd/es/input/TextArea";
+const DishTable = React.memo(function DishTable({ filters = {} }) {
+  const { accessToken } = useAuth();
+  const [form] = Form.useForm();
+  const [dishes, setDishes] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Fetch data
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      let params = { ...filters };
+
+      // Convert isActive from string to boolean if present
+      if (params.isActive === "true") params.isActive = true;
+      else if (params.isActive === "false") params.isActive = false;
+
+      const response = await getDish({ accessToken, ...params });
+      if (response) setDishes(response.data);
+      else setDishes([]);
+    } catch (error) {
+      setDishes([]);
+      // Optionally log or show error
+      console.error("Failed to fetch dishes:", error);
+    }
+    setLoading(false);
+  }, [accessToken, filters]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Edit Modal handlers
+  const showModal = useCallback(
+    (record) => {
+      form.setFieldsValue({
+        ...record,
+      });
+      setIsModalOpen(true);
     },
-    email: "nguyenvana@example.com",
-    password_hash: "$2b$10$abcdefghij1234567890mnopqrstuv",
-    role: "admin",
-    username: "nguyenvana",
-    calorieLimit: 2200,
-    avatar_url: "",
-    gender: "male",
-    dob: "1990-05-01",
-    height: 170,
-    weight: 65,
-    isActive: true,
-    createdAt: {
-      $date: "2025-05-23T07:00:00.000Z",
+    [form]
+  );
+  // Modal handlers
+  const handleOkModal = useCallback(async () => {
+    try {
+      const values = await form.validateFields();
+      await editDishById({
+        accessToken,
+        id: values._id,
+        name: values.name,
+        cookingTime: values.cookingTime,
+        calorie: values.calorie,
+        difficulty: values.difficulty,
+        description: values.description,
+        imageUrl: values.imageUrl,
+        isActive: values.isActive,
+      });
+      setIsModalOpen(false);
+      form.resetFields();
+    } catch (error) {
+      handleApiError(error);
+    }
+    fetchData();
+  }, [accessToken, form, fetchData]);
+
+  const handleCancelModal = () => {
+    setIsModalOpen(false);
+    form.resetFields();
+  };
+
+  // Handlers for activating and deactivating dishes
+  const handleActivate = useCallback(
+    async ({ id }) => {
+      await activateDish({ accessToken, id });
+      fetchData();
     },
-    updatedAt: {
-      $date: "2025-05-23T07:00:00.000Z",
+    [fetchData, accessToken]
+  );
+  const handleDeactivate = useCallback(
+    async ({ id }) => {
+      await deactivateDish({ accessToken, id });
+      fetchData();
     },
-  },
-  {
-    _id: {
-      $oid: "68306f4d4928f3fe108df628",
-    },
-    email: "tranthib@example.com",
-    password_hash: "$2b$10$klmnopqrstuv1234567890abcdefghij",
-    role: "user",
-    username: "tranthib",
-    calorieLimit: 1800,
-    avatar_url: "",
-    gender: "female",
-    dob: "1995-07-20",
-    height: 160,
-    weight: 50,
-    isActive: true,
-    createdAt: {
-      $date: "2025-05-24T07:00:00.000Z",
-    },
-    updatedAt: {
-      $date: "2025-05-24T07:00:00.000Z",
-    },
-  },
-  {
-    _id: {
-      $oid: "68306f4d4928f3fe108df629",
-    },
-    email: "lecuong@example.com",
-    password_hash: "$2b$10$1234567890abcdefghijklmnpqrstuv",
-    role: "user",
-    username: "lecuong",
-    calorieLimit: 2000,
-    avatar_url: "",
-    gender: "male",
-    dob: "1992-09-15",
-    height: 175,
-    weight: 70,
-    isActive: false,
-    createdAt: {
-      $date: "2025-05-25T07:00:00.000Z",
-    },
-    updatedAt: {
-      $date: "2025-05-25T07:00:00.000Z",
-    },
-  },
-  {
-    _id: {
-      $oid: "68306f4d4928f3fe108df62a",
-    },
-    email: "phamthi@example.com",
-    password_hash: "$2b$10$mnopqrstuvabcdefghij1234567890",
-    role: "user",
-    username: "phamthi",
-    calorieLimit: 2100,
-    avatar_url: "",
-    gender: "female",
-    dob: "1988-12-10",
-    height: 158,
-    weight: 55,
-    isActive: true,
-    createdAt: {
-      $date: "2025-05-26T07:00:00.000Z",
-    },
-    updatedAt: {
-      $date: "2025-05-26T07:00:00.000Z",
-    },
-  },
-  {
-    _id: {
-      $oid: "68306f4d4928f3fe108df62b",
-    },
-    email: "doanh@example.com",
-    password_hash: "$2b$10$abcdefghijklmnopqrstuv1234567890",
-    role: "user",
-    username: "doanhuuanh",
-    calorieLimit: 1900,
-    avatar_url: "",
-    gender: "male",
-    dob: "1993-03-30",
-    height: 172,
-    weight: 68,
-    isActive: false,
-    createdAt: {
-      $date: "2025-05-27T07:00:00.000Z",
-    },
-    updatedAt: {
-      $date: "2025-05-27T07:00:00.000Z",
-    },
-  },
-  {
-    _id: {
-      $oid: "68306f4d4928f3fe108d",
-    },
-    email: "doanh@example.com",
-    password_hash: "$2b$10$abcdefghijklmnopqrstuv1234567890",
-    role: "user",
-    username: "doanhuuanh",
-    calorieLimit: 1900,
-    avatar_url: "",
-    gender: "male",
-    dob: "1993-03-30",
-    height: 172,
-    weight: 68,
-    isActive: false,
-    createdAt: {
-      $date: "2025-05-27T07:00:00.000Z",
-    },
-    updatedAt: {
-      $date: "2025-05-27T07:00:00.000Z",
-    },
-  },
-];
-const columns = [
-  {
-    title: "Username",
-    dataIndex: "username",
-    filterSearch: true,
-    key: "username",
-    render: (text) => (
-      <Space>
-        <a>{text}</a>
-      </Space>
-    ),
-  },
-  {
-    title: "Email",
-    dataIndex: "email",
-    key: "email",
-    render: (text) => (
-      <Space>
-        <p>{text}</p>
-      </Space>
-    ),
-  },
-  {
-    title: "Role",
-    dataIndex: "role",
-    key: "email",
-    render: (text) => {
-      return text === "admin" ? (
-        <Space>
-          <p className=" bg-amber-50 text-amber-600 border border-amber-400 px-1 rounded-md">
-            {text}
-          </p>
-        </Space>
-      ) : (
-        <Space>
-          <p className="bg-gray-50 text-gray-600 border border-gray-400 px-1 rounded-md">
-            {text}
-          </p>
-        </Space>
-      );
-    },
-  },
-  {
-    title: "Status",
-    dataIndex: "isActive",
-    key: "status",
-    render: (text) => {
-      return text === true ? (
-        <Space>
-          <p className="bg-green-50 text-green-600 border border-green-500 px-1 rounded-md">
-            Active
-          </p>
-        </Space>
-      ) : (
-        <Space>
-          <p className=" bg-red-50 text-red-600 border border-red-400 px-1 rounded-md">
-            Banned
-          </p>
-        </Space>
-      );
-    },
-  },
-  {
-    title: "Action",
-    dataIndex: "isActive",
-    key: "ban",
-    render: (text) => {
-      return (
-        <Space>
-          {text === true ? (
+    [fetchData, accessToken]
+  );
+  const columns = useMemo(
+    () => [
+      {
+        title: "Image",
+        dataIndex: "imageUrl",
+        key: "imageUrl",
+        render: (text) => {
+          let fixedUrl;
+          if (!text) {
+            fixedUrl = "/assets/img/default-img.png";
+          } else {
+            fixedUrl = text.startsWith("@") ? text.replace(/^@/, "/") : text;
+          }
+          return (
             <Space>
-              <button className="hover:cursor-pointer">
-                <Ban size={16} color="red" />
-              </button>
+              <Image
+                src={fixedUrl}
+                width={20}
+                height={20}
+                className="object-cover rounded"
+              />
+            </Space>
+          );
+        },
+      },
+      {
+        title: "Name",
+        dataIndex: "name",
+        key: "name",
+        render: (text, record) => (
+          <Space>
+            <Link style={{ color: "#006955" }} to={`/dish/${record._id}`}>
+              {text}
+            </Link>
+          </Space>
+        ),
+      },
+      {
+        title: "Cooking Time",
+        dataIndex: "cookingTime",
+        key: "cookingTime",
+        render: (text) => (
+          <Space>
+            <p>{text}</p>
+          </Space>
+        ),
+      },
+      {
+        title: "Calories",
+        dataIndex: "calorie",
+        key: "calorie",
+        render: (text) => (
+          <Space>
+            <p>{text}</p>
+          </Space>
+        ),
+      },
+      {
+        title: "Difficulty",
+        dataIndex: "difficulty",
+        key: "difficulty",
+        render: (text) => {
+          switch (text) {
+            case "easy":
+              return (
+                <Space>
+                  <p className="text-green-500">{text}</p>
+                </Space>
+              );
+            case "medium":
+              return (
+                <Space>
+                  <p className="text-yellow-500">{text}</p>
+                </Space>
+              );
+            case "hard":
+              return (
+                <Space>
+                  <p className="text-red-500">{text}</p>
+                </Space>
+              );
+          }
+        },
+      },
+      {
+        title: "Status",
+        dataIndex: "isActive",
+        key: "isActive",
+        render: (text) => {
+          return text === true ? (
+            <Space>
+              <p className="bg-green-50 text-green-600 border border-green-500 px-1 rounded-md">
+                Active
+              </p>
             </Space>
           ) : (
             <Space>
-              <button className="hover:cursor-pointer">
-                <Check size={16} color="green" />
-              </button>
+              <p className=" bg-red-50 text-red-600 border border-red-400 px-1 rounded-md">
+                Banned
+              </p>
             </Space>
-          )}
-          <Space>
-            <button className="hover:cursor-pointer">
-              <Edit2 size={16} color="gray" />
-            </button>
-          </Space>
-        </Space>
-      );
-    },
-  },
-];
-
-export default function DishTable({
-  tabs,
-  searchText = "",
-  roleFilter = "all",
-}) {
-  // Filter users by isActive
-  let filteredUsers = users;
-  if (tabs === "Active") {
-    filteredUsers = users.filter((user) => user.isActive);
-  } else if (tabs === "Banned") {
-    filteredUsers = users.filter((user) => !user.isActive);
-  }
-
-  // Filter by role
-  if (roleFilter !== "all") {
-    filteredUsers = filteredUsers.filter((user) => user.role === roleFilter);
-  }
-
-  // Filter by search text (username or email)
-  if (searchText.trim() !== "") {
-    const lower = searchText.toLowerCase();
-    filteredUsers = filteredUsers.filter(
-      (user) =>
-        user.username.toLowerCase().includes(lower) ||
-        user.email.toLowerCase().includes(lower)
-    );
-  }
-
-  // Adding a key variable to each user its value is taken from _id
-  const dataSource = filteredUsers.map((user) => ({
-    ...user,
-    key: user._id.$oid,
-  }));
-  return (
-    <Table
-      className="border border-gray-300 rounded-md overflow-x-auto select-none"
-      columns={columns}
-      dataSource={dataSource}
-      pagination={{ pageSize: 5 }}
-    />
+          );
+        },
+      },
+      {
+        title: "Action",
+        dataIndex: "isActive",
+        key: "ban",
+        render: (text, record) => {
+          return (
+            <Space>
+              {text === true ? (
+                <Popconfirm
+                  title="Are you sure you want to deactivate this dish?"
+                  okText="Yes"
+                  cancelText="Cancel"
+                  onConfirm={() => handleDeactivate({ id: record._id })}
+                >
+                  <button className="hover:cursor-pointer">
+                    <Ban size={16} color="red" />
+                  </button>
+                </Popconfirm>
+              ) : (
+                <Popconfirm
+                  title="Are you sure you want to activate this dish?"
+                  okText="Yes"
+                  cancelText="Cancel"
+                  onConfirm={() => handleActivate({ id: record._id })}
+                >
+                  <button className="hover:cursor-pointer">
+                    <Check size={16} color="green" />
+                  </button>
+                </Popconfirm>
+              )}
+              <Space>
+                <button className="hover:cursor-pointer">
+                  <Edit2
+                    size={16}
+                    color="gray"
+                    onClick={() => showModal(record)}
+                  />
+                </button>
+              </Space>
+            </Space>
+          );
+        },
+      },
+    ],
+    [handleActivate, handleDeactivate, showModal]
   );
-}
+  const dataSource = dishes.map((dish) => ({
+    ...dish,
+    key: dish._id,
+  }));
+
+  return (
+    <>
+      <Table
+        size="small"
+        className={`border border-gray-300 rounded-md overflow-x-auto`}
+        columns={columns}
+        dataSource={dataSource}
+        pagination={{ pageSize: 8 }}
+        loading={loading}
+        scroll={{ x: 600 }}
+      />
+      <Modal
+        title="Edit Dish"
+        closable={{ "aria-label": "Custom Close Button" }}
+        open={isModalOpen}
+        onOk={handleOkModal}
+        onCancel={handleCancelModal}
+        centered
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item name="_id" noStyle>
+            <Input type="hidden" />
+          </Form.Item>
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[
+              { required: true, message: "Name is required" },
+              {
+                min: 3,
+                message: "Name must be at least 3 characters",
+              },
+              {
+                max: 50,
+                message: "Name cannot exceed 50 characters",
+              },
+            ]}
+          >
+            <Input id="name" placeholder="input dish name" />
+          </Form.Item>
+
+          <Form.Item
+            label="Cooking Time"
+            name="cookingTime"
+            rules={[
+              { required: true, message: "Cooking time is required" },
+              { min: 1, message: "Cooking time must be at least 1 minute" },
+            ]}
+          >
+            <Input
+              id="cookingTime"
+              placeholder="input time to cook this dish"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Calories"
+            name="calorie"
+            rules={[
+              { required: true, message: "Calories are required" },
+              {
+                min: 1,
+                message: "Calories must be at least 1",
+              },
+            ]}
+          >
+            <Input id="calories" placeholder="input dish calories" />
+          </Form.Item>
+
+          <Form.Item label="Difficulty" name="difficulty" initialValue={"easy"}>
+            <Radio.Group>
+              <Radio.Button value="easy">Easy</Radio.Button>
+              <Radio.Button value="medium">Medium</Radio.Button>
+              <Radio.Button value="hard">Hard</Radio.Button>
+            </Radio.Group>
+          </Form.Item>
+
+          <Form.Item
+            label="Description"
+            name="description"
+            rules={[
+              { required: true, message: "Description is required" },
+              {
+                min: 10,
+                message: "Description must be at least 10 characters",
+              },
+              {
+                max: 1000,
+                message: "Description cannot exceed 1000 characters",
+              },
+            ]}
+          >
+            <TextArea id="description" placeholder="input dish description" />
+          </Form.Item>
+
+          <Form.Item
+            label="Image URL"
+            name="imageUrl"
+            initialValue={
+              "https://cdn-icons-png.freepik.com/512/10551/10551600.png"
+            }
+          >
+            <Input id="imageUrl" placeholder="input image url" />
+          </Form.Item>
+
+          <Form.Item
+            label="Activate"
+            name="isActive"
+            valuePropName="checked"
+            initialValue={true}
+          >
+            <Switch id="activate" />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
+  );
+});
+
+export default DishTable;
