@@ -1,8 +1,19 @@
-import { ChevronLeft, ChevronRight, Soup, Users } from "lucide-react";
+import {
+  Carrot,
+  ChartColumn,
+  ChevronLeft,
+  ChevronRight,
+  DoorOpen,
+  ListOrderedIcon,
+  Soup,
+  User,
+  Users,
+} from "lucide-react";
 import SidebarButton from "./SidebarButton";
 import { useEffect, useState } from "react";
 import logoFull from "../assets/logo-full.png";
 import { useLocation } from "react-router-dom";
+import SettingMenu from "./SettingMenu";
 export default function Sidebar() {
   const [expanded, setExpanded] = useState(true);
   const location = useLocation();
@@ -44,33 +55,58 @@ export default function Sidebar() {
       {expanded && <img src={logoFull} className="w-40" />}
 
       {/* Sidebar item list */}
-      <ul className="flex flex-col items-center gap-1 transition-all">
+      <ul className="flex flex-col items-center gap-1 transition-al h-full">
         {expanded ? (
           <>
             <SidebarButton
+              icon={<ChartColumn />}
+              text="Dashboard"
+              link="/dashboard"
+              ariaSelected={location.pathname === "/dashboard"}
+            />
+            <SidebarButton
               icon={<Users />}
-              text="Users Management"
-              link="/users"
-              ariaSelected={location.pathname === "/users"}
+              text="Users"
+              link="/user"
+              ariaSelected={location.pathname === "/user"}
             />
             <SidebarButton
               icon={<Soup />}
-              text="Dish Management"
-              link="/dishes"
-              ariaSelected={location.pathname === "/dishes"}
+              text="Dishes"
+              link="/dish"
+              ariaSelected={location.pathname === "/dish"}
             />
+            <div className="mt-auto w-full flex">
+              <SettingMenu />
+            </div>
           </>
         ) : (
           <>
             <SidebarButton
+              icon={<ChartColumn />}
+              link="/dashboard"
+              ariaSelected={location.pathname === "/dashboard"}
+            />
+            <SidebarButton
               icon={<Users />}
-              link="/users"
-              ariaSelected={location.pathname === "/users"}
+              link="/user"
+              ariaSelected={location.pathname === "/user"}
             />
             <SidebarButton
               icon={<Soup />}
-              link="/dishes"
-              ariaSelected={location.pathname === "/dishes"}
+              link="/dish"
+              ariaSelected={location.pathname === "/dish"}
+            />
+            <SidebarButton
+              icon={<User />}
+              link="/profile"
+              ariaSelected={location.pathname === "/profile"}
+              classname="mt-auto "
+            />
+            <SidebarButton
+              icon={<DoorOpen />}
+              link="/logout"
+              ariaSelected={location.pathname === "/logout"}
             />
           </>
         )}

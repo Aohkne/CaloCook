@@ -1,16 +1,134 @@
 import api from "./api";
+import qs from "qs";
 
-export async function getAllDish(page = 1, limit = 10) {
-  console.log(123);
+export async function getDish({
+  accessToken,
+  page,
+  limit,
+  sortBy = "createdAt",
+  order = "desc",
+  name,
+  minCookingTime,
+  maxCookingTime,
+  minCalorie,
+  maxCalorie,
+  difficulty,
+  isActive,
+}) {
+  console.log(`[getDish] Fetching dish`);
 
-  try {
-    const response = await api.get("/dish", {
-      params: { page, limit },
-    });
+  const params = {
+    page,
+    limit,
+    sortBy,
+    order,
+    name,
+    minCookingTime,
+    maxCookingTime,
+    minCalorie,
+    maxCalorie,
+    difficulty,
+    isActive,
+  };
+  console.log(params);
+  const response = await api.get("/dish", {
+    params,
+    paramsSerializer: (params) =>
+      qs.stringify(params, { arrayFormat: "repeat" }),
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
 
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch dishes:", error);
-    return null;
-  }
+export async function addDish({
+  accessToken,
+  name,
+  cookingTime,
+  calorie,
+  difficulty,
+  description,
+  imageUrl,
+  isActive,
+}) {
+  const params = {
+    name,
+    cookingTime,
+    calorie,
+    difficulty,
+    description,
+    imageUrl,
+    isActive,
+  };
+
+  const response = await api.post("/dish", params, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+
+export async function getDishById({ accessToken, id }) {
+  const response = await api.get(`/dish/${id}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+
+export async function editDishById({
+  accessToken,
+  id,
+  name,
+  cookingTime,
+  calorie,
+  difficulty,
+  description,
+  imageUrl,
+  isActive,
+}) {
+  const params = {
+    name,
+    cookingTime,
+    calorie,
+    difficulty,
+    description,
+    imageUrl,
+    isActive,
+  };
+  const response = await api.put(`/dish/${id}`, params, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+}
+
+export async function activateDish({ accessToken, id }) {
+  const response = await api.patch(
+    `/dish/${id}/activate`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+export async function deactivateDish({ accessToken, id }) {
+  const response = await api.patch(
+    `/dish/${id}/deactivate`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+  return response.data;
 }
