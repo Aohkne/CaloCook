@@ -115,16 +115,24 @@ const DishTable = React.memo(function DishTable({ filters = {} }) {
         title: "Image",
         dataIndex: "imageUrl",
         key: "imageUrl",
-        render: (text) => (
-          <Space>
-            <Image
-              src={text}
-              width={20}
-              height={20}
-              className="object-cover rounded"
-            />
-          </Space>
-        ),
+        render: (text) => {
+          let fixedUrl;
+          if (!text) {
+            fixedUrl = "/assets/img/default-img.png";
+          } else {
+            fixedUrl = text.startsWith("@") ? text.replace(/^@/, "/") : text;
+          }
+          return (
+            <Space>
+              <Image
+                src={fixedUrl}
+                width={20}
+                height={20}
+                className="object-cover rounded"
+              />
+            </Space>
+          );
+        },
       },
       {
         title: "Name",
@@ -132,7 +140,9 @@ const DishTable = React.memo(function DishTable({ filters = {} }) {
         key: "name",
         render: (text, record) => (
           <Space>
-            <Link to={`/dish/${record._id}`}>{text}</Link>
+            <Link style={{ color: "#006955" }} to={`/dish/${record._id}`}>
+              {text}
+            </Link>
           </Space>
         ),
       },

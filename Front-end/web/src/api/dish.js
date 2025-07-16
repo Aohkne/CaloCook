@@ -1,4 +1,5 @@
 import api from "./api";
+import qs from "qs";
 
 export async function getDish({
   accessToken,
@@ -29,9 +30,11 @@ export async function getDish({
     difficulty,
     isActive,
   };
-
+  console.log(params);
   const response = await api.get("/dish", {
     params,
+    paramsSerializer: (params) =>
+      qs.stringify(params, { arrayFormat: "repeat" }),
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },

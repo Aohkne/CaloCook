@@ -6,7 +6,6 @@ import {
   Row,
   Col,
   Space,
-  Switch,
   Modal,
   Radio,
 } from "antd";
@@ -18,12 +17,6 @@ const { Option } = Select;
 export default function UserFilterBar({ onChange }) {
   const [form] = Form.useForm();
   const [showFilter, setShowFilter] = useState(false);
-
-  const handleApply = () => {
-    const values = form.getFieldsValue();
-    onChange(values);
-    setShowFilter(false);
-  };
 
   const handleReset = () => {
     form.resetFields();
@@ -49,6 +42,10 @@ export default function UserFilterBar({ onChange }) {
       initialValues={{
         sortBy: "createdAt",
         order: "desc",
+      }}
+      onValuesChange={() => {
+        const values = form.getFieldsValue();
+        onChange(values);
       }}
     >
       {/* Top row: Search + Sort */}
@@ -84,9 +81,6 @@ export default function UserFilterBar({ onChange }) {
                 <Option value="desc">Desc</Option>
               </Select>
             </Form.Item>
-            <Button onClick={handleApply} type="primary">
-              Apply
-            </Button>
           </Space>
         </Col>
       </Row>
@@ -99,12 +93,6 @@ export default function UserFilterBar({ onChange }) {
         footer={[
           <Button key="reset" onClick={handleReset}>
             Reset
-          </Button>,
-          <Button key="cancel" onClick={() => setShowFilter(false)}>
-            Cancel
-          </Button>,
-          <Button key="apply" type="primary" onClick={handleApply}>
-            Apply
           </Button>,
         ]}
       >

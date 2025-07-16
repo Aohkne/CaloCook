@@ -60,7 +60,7 @@ export default function UserTable({ filters = {} }) {
         key: "username",
         render: (text) => (
           <Space>
-            <a>{text}</a>
+            <p>{text}</p>
           </Space>
         ),
       },
