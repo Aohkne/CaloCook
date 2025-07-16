@@ -5,25 +5,49 @@ import {
   message,
   Modal,
   Popconfirm,
+  Select,
   Switch,
   Tabs,
 } from "antd";
-import { Ban, Check, Edit2, Plus } from "lucide-react";
+import { Ban, Check, Edit2, Plus, Search } from "lucide-react";
 import { useAuth } from "./AuthContext";
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { handleApiError } from "../utils/handleApiError";
 import {
   activateIngredient,
   addIngredient,
   deactivateIngredient,
   editIngredient,
+  getIngredientsByDishId,
 } from "../api/ingredient";
-import { activateStep, addStep, deactivateStep, editStep } from "../api/step";
+import {
+  activateStep,
+  addStep,
+  deactivateStep,
+  editStep,
+  getStepByDishId,
+} from "../api/step";
 
-export default function DishTabs({ ingredients, steps, onRefresh }) {
+export default function DishTabs({
+  ingredients: initialIngredients,
+  steps: initialSteps,
+  onRefresh,
+}) {
   const { accessToken } = useAuth();
   const { id: dishId } = useParams();
+
+  // ======= INGREDIENT SEARCH STATE =======
+  const [ingredientSearch, setIngredientSearch] = useState("");
+  const [ingredientSortBy, setIngredientSortBy] = useState("createdAt");
+  const [ingredientOrder, setIngredientOrder] = useState("desc");
+  const [ingredients, setIngredients] = useState(initialIngredients || []);
+
+  // ====== STEP SEARCCH STATE =======
+  const [stepSearch, setStepSearch] = useState("");
+  const [stepSortBy, setStepSortBy] = useState("stepNumber");
+  const [stepOrder, setStepOrder] = useState("asc");
+  const [steps, setSteps] = useState(initialSteps || []);
 
   // ======= INGREDIENT MODAL STATE =======
   const [ingredientModalOpen, setIngredientModalOpen] = useState(false);
@@ -182,6 +206,61 @@ export default function DishTabs({ ingredients, steps, onRefresh }) {
       handleApiError(error);
     }
   };
+
+  // ======= Fetch Ingredients =======
+  useEffect(() => {
+    async function fetchIngredients() {
+      try {
+        const res = await getIngredientsByDishId({
+          accessToken,
+          dishId,
+          sortBy: ingredientSortBy,
+          order: ingredientOrder,
+        });
+        let filtered = res.data;
+        if (ingredientSearch) {
+          filtered = filtered.filter((i) =>
+            i.name.toLowerCase().includes(ingredientSearch.toLowerCase())
+          );
+        }
+        setIngredients(filtered);
+      } catch (err) {
+        handleApiError(err);
+      }
+    }
+    fetchIngredients();
+  }, [
+    accessToken,
+    dishId,
+    ingredientSearch,
+    ingredientSortBy,
+    ingredientOrder,
+    onRefresh,
+  ]);
+
+  // ======= Fetch Steps =======
+  useEffect(() => {
+    async function fetchSteps() {
+      try {
+        const res = await getStepByDishId({
+          accessToken,
+          dishId,
+          sortBy: stepSortBy,
+          order: stepOrder,
+        });
+        let filtered = res.data;
+        if (stepSearch) {
+          filtered = filtered.filter((s) =>
+            s.description.toLowerCase().includes(stepSearch.toLowerCase())
+          );
+        }
+        setSteps(filtered);
+      } catch (err) {
+        handleApiError(err);
+      }
+    }
+    fetchSteps();
+  }, [accessToken, dishId, stepSearch, stepSortBy, stepOrder, onRefresh]);
   const items = [
     {
       key: "1",
@@ -190,7 +269,33 @@ export default function DishTabs({ ingredients, steps, onRefresh }) {
         <>
           {/* Search and Add Row */}
           <div className="flex gap-4 items-center mb-4">
-            <Input placeholder="Search ingredients..." />
+            <Input
+              placeholder="Search ingredients..."
+              prefix={<Search size={16} />}
+              style={{ width: 300 }}
+              value={ingredientSearch}
+              onChange={(e) => setIngredientSearch(e.target.value)}
+              allowClear
+            />
+            <Select
+              value={ingredientSortBy}
+              onChange={setIngredientSortBy}
+              style={{ width: 130 }}
+              options={[
+                { value: "name", label: "Name" },
+                { value: "quantity", label: "Quantity" },
+                { value: "createdAt", label: "Created At" },
+              ]}
+            />
+            <Select
+              value={ingredientOrder}
+              onChange={setIngredientOrder}
+              style={{ width: 90 }}
+              options={[
+                { value: "asc", label: "Asc" },
+                { value: "desc", label: "Desc" },
+              ]}
+            />
             <Button
               type="primary"
               icon={<Plus size={16} />}
@@ -352,7 +457,33 @@ export default function DishTabs({ ingredients, steps, onRefresh }) {
         <>
           {/* Search and Add Row */}
           <div className="flex gap-4 items-center mb-4">
-            <Input placeholder="Search ingredients..." />
+            <Input
+              placeholder="Search steps..."
+              prefix={<Search size={16} />}
+              value={stepSearch}
+              onChange={(e) => setStepSearch(e.target.value)}
+              style={{ width: 300 }}
+              allowClear
+            />
+            <Select
+              value={stepSortBy}
+              onChange={setStepSortBy}
+              style={{ width: 130 }}
+              options={[
+                { value: "stepNumber", label: "Step Number" },
+                { value: "description", label: "Description" },
+                { value: "createdAt", label: "Created At" },
+              ]}
+            />
+            <Select
+              value={stepOrder}
+              onChange={setStepOrder}
+              style={{ width: 90 }}
+              options={[
+                { value: "asc", label: "Asc" },
+                { value: "desc", label: "Desc" },
+              ]}
+            />
             <Button
               type="primary"
               icon={<Plus size={16} />}

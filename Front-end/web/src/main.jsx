@@ -18,8 +18,6 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import LogoutPage from "./pages/LogoutPage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
-import IngredientManagementPage from "./pages/IngredientManagementPage.jsx";
-import StepManagementPage from "./pages/StepManagementPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import DishDetailPage from "./pages/DishDetailPage.jsx";
 
@@ -71,16 +69,6 @@ const router = createBrowserRouter([
             element: <DishDetailPage />,
           },
         ],
-      },
-      {
-        path: "/ingredient",
-        element: <App />,
-        children: [{ path: "", element: <IngredientManagementPage /> }],
-      },
-      {
-        path: "/step",
-        element: <App />,
-        children: [{ path: "", element: <StepManagementPage /> }],
       },
       {
         path: "/profile",
