@@ -35,28 +35,17 @@ IngredientModel -> MongoDB: 8. ExecuteQuery()
 activate MongoDB
 MongoDB --> IngredientModel: 9. Return update result
 
-alt Ingredient Found & Deactivated
-    IngredientModel --> Service: 10. Return ingredient
-    
-    Service --> Controller: 11. Return deactivated ingredient
-    
-    Controller --> Route: 12. Send 200 JSON response
-    
-    Route --> View: 13. Return success response
-    
-    View --> Admin: 14. Show success message\n& hide ingredient from active list
-    
-else Ingredient Not Found
-    IngredientModel --> Service: 9.1 Return null
-    
-    Service --> Controller: 9.2 Throw ApiError(404, "Ingredient not found!")
-    
-    Controller --> Route: 9.3 next(error)
-    
-    Route --> View: 9.4 Return 404 error
-    
-    View --> Admin: 9.5 Show error message
-end
+IngredientModel --> Service: 10. Return ingredient
+
+Service --> Controller: 11. Return deactivated ingredient
+
+Controller --> Route: 12. Send 200 JSON response
+
+Route --> View: 13. Return success response
+
+View --> Admin: 14. Show success message\n& hide ingredient from active list
+
+
 
 end
 
@@ -79,35 +68,22 @@ IngredientModel -> MongoDB: 21. ExecuteQuery()
 MongoDB --> IngredientModel: 22. Return update result
 deactivate MongoDB
 
-alt Ingredient Found & Activated
-    IngredientModel --> Service: 23. Return activated ingredient
 
-    Service --> Controller: 24. Return activated ingredient
+IngredientModel --> Service: 23. Return activated ingredient
+deactivate IngredientModel
 
-    Controller --> Route: 25. Send 200 JSON response
+Service --> Controller: 24. Return activated ingredient
+deactivate Service
 
-    Route --> View: 26. Return success response
+Controller --> Route: 25. Send 200 JSON response
+deactivate Controller
 
-    View --> Admin: 27. Show success message\n& add ingredient back to active list
+Route --> View: 26. Return success response
+deactivate Route
 
-else Ingredient Not Found
-    IngredientModel --> Service: 22.1 Return null
-    deactivate IngredientModel
-    
-    Service --> Controller: 22.2 Throw ApiError(404, "Ingredient not found!")
-    deactivate Service
-    
-    Controller --> Route: 22.3 next(error)
-    deactivate Controller
-    
-    Route --> View: 22.4 Return 404 error
-    deactivate Route
-    
-    View --> Admin: 22.5 Show error message
-    deactivate View
-    deactivate Admin
-end
-
+View --> Admin: 27. Show success message\n& add ingredient back to active list
+deactivate View
+deactivate Admin
 end
 
 @enduml
