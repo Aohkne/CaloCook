@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { StyleSheet, Text, View, Image, TouchableOpacity, Animated, ScrollView, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, Button } from 'react-native'
 import { useTheme } from '@contexts/ThemeProvider'
-import { Lock, User, Edit3, Calendar, Ruler, Weight, Target, Crown, X, Save, Users, Activity, Flame, ThumbsUp, ThumbsDown, Mars, Venus, Sun, Moon, History } from 'lucide-react-native'
+import { Lock, User, Edit3, Calendar, Ruler, Weight, Target, Crown, X, Save, Users, Activity, Flame, ThumbsUp, ThumbsDown, Mars, Venus, Sun, Moon, History, LogOut } from 'lucide-react-native'
 import Svg, { Circle } from 'react-native-svg'
 import { useDispatch, useSelector } from 'react-redux'
 import { getUserProfile, updateUserProfile, clearError, updateLocalUserData, getTotalCalories } from '@/redux/slices/userSlice'
-
+import { logout, logoutLocal } from '@/redux/slices/authSlice'
 export default function ProfileScreen({ navigation }) {
   const { colors, toggleTheme, isDark } = useTheme()
   const styles = createStyles(colors)
@@ -150,6 +150,27 @@ export default function ProfileScreen({ navigation }) {
     }
   }
 
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: () => {
+            // Chỉ clear local state, không gọi API
+            dispatch(logoutLocal())
+          },
+        },
+      ]
+    )
+  }
   // Hình tròn
   // Progress data (có thể lấy từ API riêng)
 
@@ -595,7 +616,6 @@ export default function ProfileScreen({ navigation }) {
 
             {/* End hình tròn */}
 
-
             {/* TT */}
 
             {/* Account Status */}
@@ -614,6 +634,14 @@ export default function ProfileScreen({ navigation }) {
               </View>
             </View>
           </View>
+        </View>
+
+
+        <View style={styles.logoutSection}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <LogOut size={20} color="#FFFFFF" />
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -1272,4 +1300,33 @@ const createStyles = (colors) =>
     themeToggleButton: {
       padding: 8,
     },
+
+    logoutSection: {
+      marginTop: 20,
+      marginBottom: 30,
+      paddingHorizontal: 20,
+    },
+    logoutButton: {
+      backgroundColor: '#EF4444',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+      borderRadius: 12,
+      gap: 8,
+      shadowColor: '#EF4444',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    logoutButtonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: '600',
+    }
   })
