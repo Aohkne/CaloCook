@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, Eye, EyeClosed } from 'lucide-react-native';
+import { ChevronLeft, Eye, EyeClosed, Moon, Sun } from 'lucide-react-native';
 import { Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
@@ -9,7 +9,7 @@ import { register } from '@/redux/slices/authSlice';
 import { useTheme } from '@/contexts/ThemeProvider';
 
 export default function SignUpScreen() {
-  const { colors } = useTheme();
+  const { colors, toggleTheme, isDark } = useTheme();
   const styles = createStyles(colors);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -58,6 +58,9 @@ export default function SignUpScreen() {
   };
   return (
     <SafeAreaView style={styles.safeAreaView}>
+      <TouchableOpacity style={styles.themeToggleButton} onPress={toggleTheme}>
+        {isDark ? <Moon size={24} color='#4A90E2' /> : <Sun size={24} color='#FFA500' />}
+      </TouchableOpacity>
       <TouchableOpacity
         style={{
           position: 'absolute',
@@ -205,6 +208,11 @@ const createStyles = (colors) =>
       justifyContent: 'center',
       width: 343
     },
+    themeToggleButton: {
+      position: 'absolute',
+      top: 50,
+      right: 20
+    },
     logo: {
       width: 100,
       height: 100
@@ -212,17 +220,18 @@ const createStyles = (colors) =>
     bigText: {
       fontSize: 32,
       fontWeight: 700,
-      textAlign: 'center'
+      textAlign: 'center',
+      color: colors.title
     },
     smallText: {
       fontSize: 16,
-      color: 'rgba(8, 14, 45, 0.6)',
+      color: colors.description,
       width: 343,
       textAlign: 'center'
     },
     input: {
-      backgroundColor: 'rgba(8, 14, 45, 0.04)',
-      borderColor: 'rgba(8, 14, 45, 0.06)',
+      backgroundColor: colors.inputBg,
+      borderColor: colors.inputBorder,
       borderWidth: 1,
       borderRadius: 16,
       width: 343,

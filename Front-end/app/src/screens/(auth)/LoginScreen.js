@@ -1,6 +1,6 @@
 import { Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Eye, EyeClosed } from 'lucide-react-native';
+import { Eye, EyeClosed, Moon, Sun } from 'lucide-react-native';
 
 import { useState } from 'react';
 
@@ -10,7 +10,7 @@ import { useTheme } from '@/contexts/ThemeProvider';
 
 export default function LoginScreen() {
   // Theme
-  const { colors } = useTheme();
+  const { colors, toggleTheme, isDark } = useTheme();
   const styles = createStyles(colors);
 
   // Inputs
@@ -56,6 +56,9 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safeAreaView}>
+      <TouchableOpacity style={styles.themeToggleButton} onPress={toggleTheme}>
+        {isDark ? <Moon size={24} color='#4A90E2' /> : <Sun size={24} color='#FFA500' />}
+      </TouchableOpacity>
       <View style={styles.container}>
         <Image style={styles.logo} source={require('@assets/login/logo-removebg-preview 2.png')} />
         <Text style={[styles.bigText, { marginBottom: 10 }]}>Create a meal plan on the go</Text>
@@ -167,6 +170,11 @@ const createStyles = (colors) =>
       justifyContent: 'center',
       width: 343
     },
+    themeToggleButton: {
+      position: 'absolute',
+      top: 50,
+      right: 20
+    },
     logo: {
       width: 100,
       height: 100
@@ -183,8 +191,8 @@ const createStyles = (colors) =>
       color: colors.description
     },
     input: {
-      backgroundColor: 'rgba(8, 14, 45, 0.04)',
-      borderColor: 'rgba(8, 14, 45, 0.06)',
+      backgroundColor: colors.inputBg,
+      borderColor: colors.inputBorder,
       borderWidth: 1,
       borderRadius: 16,
       width: 343,
@@ -212,8 +220,8 @@ const createStyles = (colors) =>
     googleButton: {
       width: 343,
       height: 60,
-      backgroundColor: 'rgba(8, 14, 45, 0.04)',
-      borderColor: 'rgba(8, 14, 45, 0.06)',
+      backgroundColor: colors.inputBg,
+      borderColor: colors.inputBorder,
       borderWidth: 1,
       borderRadius: 76,
       justifyContent: 'center',

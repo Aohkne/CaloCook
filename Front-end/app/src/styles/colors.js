@@ -11,6 +11,9 @@ export const lightColors = {
   border: '#1B1C1D',
   shadow: '#1B1C1D',
 
+  inputBg: 'rgba(8, 14, 45, 0.04)',
+  inputBorder: 'rgba(8, 14, 45, 0.06)',
+
   black: '#1B1C1D',
   white: '#FFFFFF',
   red: '#DC2E60',
@@ -29,6 +32,9 @@ export const darkColors = {
   btnBg: '#1B1C1D',
   border: '#FCFAF3',
   shadow: '#FCFAF3',
+
+  inputBg: '#ffffff',
+  inputBorder: '#0E0F1A',
 
   red: '#FF4D6D',
   yellow: '#FFD85F'

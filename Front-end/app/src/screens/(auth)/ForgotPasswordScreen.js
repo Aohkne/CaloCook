@@ -13,13 +13,13 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { forgotPassword, clearError, clearMessage } from '@/redux/slices/authSlice'; // ✅ path may vary
 import logoFull from '@/assets/logo.png'; // ✅ adjust this path as needed
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, Moon, Sun } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@/contexts/ThemeProvider';
 
 export default function ForgotPasswordScreen() {
   const dispatch = useDispatch();
-  const { colors } = useTheme();
+  const { colors, toggleTheme, isDark } = useTheme();
   const styles = createStyles(colors);
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
@@ -51,6 +51,9 @@ export default function ForgotPasswordScreen() {
 
   return (
     <SafeAreaView style={styles.safeAreaView}>
+      <TouchableOpacity style={styles.themeToggleButton} onPress={toggleTheme}>
+        {isDark ? <Moon size={24} color='#4A90E2' /> : <Sun size={24} color='#FFA500' />}
+      </TouchableOpacity>
       <TouchableOpacity
         style={{
           position: 'absolute',
@@ -93,7 +96,7 @@ export default function ForgotPasswordScreen() {
               onPress={handleSend}
               disabled={isLoading}
             >
-              {isLoading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Send</Text>}
+              {isLoading ? <ActivityIndicator color={'#ffffff'} /> : <Text style={styles.buttonText}>Send</Text>}
             </TouchableOpacity>
           </>
         )}
@@ -121,6 +124,11 @@ const createStyles = (colors) =>
       justifyContent: 'center',
       width: 343
     },
+    themeToggleButton: {
+      position: 'absolute',
+      top: 50,
+      right: 20
+    },
     logo: {
       width: 200,
       height: 80,
@@ -130,7 +138,8 @@ const createStyles = (colors) =>
       fontSize: 24,
       fontWeight: 'bold',
       marginBottom: 8,
-      textAlign: 'center'
+      textAlign: 'center',
+      color: colors.title
     },
     description: {
       fontSize: 14,
@@ -139,8 +148,8 @@ const createStyles = (colors) =>
       textAlign: 'center'
     },
     input: {
-      backgroundColor: 'rgba(8, 14, 45, 0.04)',
-      borderColor: 'rgba(8, 14, 45, 0.06)',
+      backgroundColor: colors.inputBg,
+      borderColor: colors.inputBorder,
       borderWidth: 1,
       borderRadius: 16,
       width: 343,
