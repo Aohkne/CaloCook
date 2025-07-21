@@ -9,12 +9,14 @@ import TabNavigator from '@navigations/TabNavigator';
 //AUTH
 import LoginScreen from '@screens/(auth)/LoginScreen';
 import SignUpScreen from '@screens/(auth)/SignUpScreen';
+import ForgotPasswordScreen from '@/screens/(auth)/ForgotPasswordScreen';
 
 //SCREEN
 import FilterScreen from '@screens/FilterScreen';
 import ChangePasswordScreen from '@screens/ChangePasswordScreen';
 import HistoryScreen from '@screens/HistoryScreen';
 import Detail from '@screens/Detail';
+import ResetPasswordScreen from '@/screens/(auth)/ResetPasswordScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +41,8 @@ export default function StackNavigator() {
         <>
           <Stack.Screen name='Login' component={LoginScreen} />
           <Stack.Screen name='SignUp' component={SignUpScreen} />
+          <Stack.Screen name='ForgotPassword' component={ForgotPasswordScreen} />
+          <Stack.Screen name='ResetPassword' component={ResetPasswordScreen} />
         </>
       )}
     </Stack.Navigator>
