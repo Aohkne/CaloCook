@@ -84,7 +84,7 @@ export default function SignUpScreen() {
         <TextInput
           style={[styles.input, { marginBottom: 10 }]}
           placeholder='Email'
-          placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+          placeholderTextColor={colors.inputPlaceHolder}
           value={email}
           onChangeText={setEmail}
           keyboardType='email-address'
@@ -94,7 +94,7 @@ export default function SignUpScreen() {
         <TextInput
           style={[styles.input, { marginBottom: 10 }]}
           placeholder='Username'
-          placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+          placeholderTextColor={colors.inputPlaceHolder}
           value={username}
           onChangeText={setUsername}
           autoCapitalize='none'
@@ -103,7 +103,7 @@ export default function SignUpScreen() {
           <TextInput
             style={[styles.input, { paddingRight: 50, marginBottom: 10 }]}
             placeholder='Password'
-            placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+            placeholderTextColor={colors.inputPlaceHolder}
             secureTextEntry={!showPassword}
             value={password}
             onChangeText={setPassword}
@@ -117,7 +117,7 @@ export default function SignUpScreen() {
                 top: '40%',
                 transform: [{ translateY: '-50%' }]
               }}
-              color='black'
+              color={colors.inputText}
               size={24}
               onPress={handleShowPassword}
             />
@@ -129,7 +129,7 @@ export default function SignUpScreen() {
                 top: '40%',
                 transform: [{ translateY: '-50%' }]
               }}
-              color='black'
+              color={colors.inputText}
               size={24}
               onPress={handleShowPassword}
             />
@@ -139,7 +139,7 @@ export default function SignUpScreen() {
           <TextInput
             style={[styles.input, { paddingRight: 50, marginBottom: 10 }]}
             placeholder='Confirm Password'
-            placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+            placeholderTextColor={colors.inputPlaceHolder}
             secureTextEntry={!showConfirmPassword}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
@@ -153,7 +153,7 @@ export default function SignUpScreen() {
                 top: '40%',
                 transform: [{ translateY: '-50%' }]
               }}
-              color='black'
+              color={colors.inputText}
               size={24}
               onPress={handleShowConfirmPassword}
             />
@@ -165,7 +165,7 @@ export default function SignUpScreen() {
                 top: '40%',
                 transform: [{ translateY: '-50%' }]
               }}
-              color='black'
+              color={colors.inputText}
               size={24}
               onPress={handleShowConfirmPassword}
             />
@@ -236,7 +236,8 @@ const createStyles = (colors) =>
       borderRadius: 16,
       width: 343,
       height: 51,
-      paddingHorizontal: 10
+      paddingHorizontal: 10,
+      color: colors.inputText
     },
     button: {
       backgroundColor: colors.secondary,

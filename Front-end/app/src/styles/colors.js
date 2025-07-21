@@ -13,6 +13,8 @@ export const lightColors = {
 
   inputBg: 'rgba(8, 14, 45, 0.04)',
   inputBorder: 'rgba(8, 14, 45, 0.06)',
+  inputText: '#000000',
+  inputPlaceHolder: 'rgba(8, 14, 45, 0.6)',
 
   black: '#1B1C1D',
   white: '#FFFFFF',
@@ -33,8 +35,10 @@ export const darkColors = {
   border: '#FCFAF3',
   shadow: '#FCFAF3',
 
-  inputBg: '#ffffff',
-  inputBorder: '#0E0F1A',
+  inputBg: 'rgba(255, 255, 255, 0.05)',
+  inputBorder: 'rgba(255, 255, 255, 0.2)',
+  inputText: '#FFFFFF',
+  inputPlaceHolder: '#BBBBBB',
 
   red: '#FF4D6D',
   yellow: '#FFD85F'

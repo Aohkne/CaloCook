@@ -69,7 +69,7 @@ export default function LoginScreen() {
         <TextInput
           style={[styles.input, { marginBottom: 10 }]}
           placeholder='Email or Username'
-          placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+          placeholderTextColor={colors.inputPlaceHolder}
           value={email}
           onChangeText={setEmail}
           keyboardType='email-address'
@@ -80,7 +80,7 @@ export default function LoginScreen() {
           <TextInput
             style={[styles.input, { paddingRight: 50 }]}
             placeholder='Password'
-            placeholderTextColor={'rgba(8, 14, 45, 0.6)'}
+            placeholderTextColor={colors.inputPlaceHolder}
             secureTextEntry={!showPassword}
             value={password}
             onChangeText={setPassword}
@@ -94,7 +94,7 @@ export default function LoginScreen() {
                 top: '50%',
                 transform: [{ translateY: '-50%' }]
               }}
-              color='black'
+              color={colors.inputText}
               size={24}
               onPress={handleShowPassword}
             />
@@ -106,7 +106,7 @@ export default function LoginScreen() {
                 top: '50%',
                 transform: [{ translateY: '-50%' }]
               }}
-              color='black'
+              color={colors.inputText}
               size={24}
               onPress={handleShowPassword}
             />
@@ -197,7 +197,8 @@ const createStyles = (colors) =>
       borderRadius: 16,
       width: 343,
       height: 51,
-      paddingHorizontal: 10
+      paddingHorizontal: 10,
+      color: colors.inputText
     },
     forgotPassword: {
       fontSize: 13,
