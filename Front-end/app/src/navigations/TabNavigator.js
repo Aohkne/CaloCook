@@ -53,15 +53,15 @@ export default function TabNavigator() {
             return <IconComponent size={25} color={color} fill={fillColor()} />;
           },
           tabBarActiveTintColor: colors.secondary,
-          tabBarInactiveTintColor: colors.black + '80',
+          tabBarInactiveTintColor: colors.description + '80',
           tabBarLabelActiveTintColor: colors.secondary,
-          tabBarLabelActiveTintColor: colors.black + '80',
+          tabBarLabelActiveTintColor: colors.description + '80',
           tabBarStyle: {
             height: 80,
             paddingBottom: 10,
             paddingTop: 8,
             borderTopWidth: 1,
-            borderTopColor: colors.black + '20',
+            borderTopColor: colors.border + '20',
             backgroundColor: colors.background,
             elevation: 2,
             shadowColor: '#000',

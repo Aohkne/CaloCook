@@ -212,11 +212,11 @@ const createStyles = (colors) =>
       borderRadius: 50,
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: colors.black,
+      shadowColor: colors.shadow,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.3,
       shadowRadius: 5,
       elevation: 5,
-      backgroundColor: colors.white
+      backgroundColor: colors.btnBg
     }
   });

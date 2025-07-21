@@ -283,12 +283,12 @@ const createStyles = (colors) =>
       paddingVertical: 15,
       paddingHorizontal: 22,
       borderRadius: 20,
-      shadowColor: colors.black,
+      shadowColor: colors.shadow,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.3,
       shadowRadius: 5,
       elevation: 5,
-      backgroundColor: colors.white
+      backgroundColor: colors.cardBg
     },
 
     topCard: {
