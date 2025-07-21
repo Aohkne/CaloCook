@@ -189,7 +189,7 @@ const createStyles = (colors) =>
       borderBottomWidth: 0,
       borderTopLeftRadius: 25,
       borderTopRightRadius: 25,
-      borderColor: colors.black,
+      borderColor: colors.border,
       backgroundColor: colors.background + '80'
     },
     header: {
@@ -233,7 +233,7 @@ const createStyles = (colors) =>
       lineHeight: 22,
       color: colors.white,
 
-      shadowColor: colors.black,
+      shadowColor: colors.shadow,
       shadowOffset: { width: 1, height: 1 },
       shadowOpacity: 0.8,
       shadowRadius: 0,
