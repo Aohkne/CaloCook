@@ -13,7 +13,6 @@ export default function ProfileScreen({ navigation }) {
 
   // Redux state
   const { userData, totalCalories, isLoading, isUpdating, error } = useSelector(state => state.user)
-  // Thay thế useEffect này trong ProfileScreen:
   useEffect(() => {
     const loadUserData = async () => {
       await dispatch(getUserProfile())
@@ -33,8 +32,9 @@ export default function ProfileScreen({ navigation }) {
     loadUserData()
   }, [dispatch, userData?._id])
 
-  // Sửa useEffect focus listener
+  //useEffect focus listener
   useEffect(() => {
+    //unsubscribe đảm bảo listener được xóa khi component unmount để tránh memory leak.
     const unsubscribe = navigation.addListener('focus', () => {
       if (userData?._id) {
         const today = new Date();
@@ -190,7 +190,7 @@ export default function ProfileScreen({ navigation }) {
   const circumference = 2 * Math.PI * radius
   const strokeDasharray = circumference
 
-  // FIX: Giới hạn progress không vượt quá 100% cho hiển thị vòng tròn
+  //Giới hạn progress không vượt quá 100% cho hiển thị vòng tròn
   const displayPercentage = Math.min(progressPercentage, 100)
   const strokeDashoffset = circumference - (displayPercentage / 100) * circumference
 
@@ -416,14 +416,14 @@ export default function ProfileScreen({ navigation }) {
         <Text style={styles.title}>Profile</Text>
         <View style={styles.headerIcons}>
           <TouchableOpacity style={styles.iconButton} onPress={handleLockPress}>
-            <Lock size={24} color={colors.text} />
+            <Lock size={24} color={colors.title} />
           </TouchableOpacity>
           {/* History Icon - Add this */}
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.navigate('History')}
           >
-            <History size={24} color={colors.text} />
+            <History size={24} color={colors.title} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.themeToggleButton} onPress={toggleTheme}>
             {isDark ? (
@@ -559,7 +559,7 @@ export default function ProfileScreen({ navigation }) {
                     strokeWidth={strokeWidth}
                     fill="none"
                   />
-                  {/* Progress circle - sử dụng displayPercentage thay vì progressPercentage */}
+                  {/* Progress circle - sử dụng displayPercentage*/}
                   <Circle
                     cx={radius + strokeWidth}
                     cy={radius + strokeWidth}
@@ -896,7 +896,7 @@ const createStyles = (colors) =>
     },
     cardContainer: {
       width: '100%',
-      backgroundColor: '#FFFFFF',
+      backgroundColor: colors.cardBg,
       borderTopLeftRadius: 40,
       borderTopRightRadius: 40,
       paddingVertical: 30,
@@ -960,7 +960,7 @@ const createStyles = (colors) =>
     displayName: {
       fontSize: 18,
       fontWeight: '800',
-      color: colors.title || '#1A1A1A',
+      color: '#000000',
       marginBottom: 4,
       letterSpacing: -0.2,
     },
@@ -1013,7 +1013,7 @@ const createStyles = (colors) =>
     emailValue: {
       fontSize: 14,
       fontWeight: '600',
-      color: colors.title || '#374151',
+      color: '#000000',
       letterSpacing: 0.1,
       paddingLeft: 11,
     },
@@ -1081,7 +1081,7 @@ const createStyles = (colors) =>
     infoValue: {
       fontSize: 16,
       fontWeight: '700',
-      color: colors.title || '#1A1A1A',
+      color: '#000000',
       marginBottom: 2,
     },
     infoSubtitle: {
@@ -1171,7 +1171,7 @@ const createStyles = (colors) =>
     statusTitle: {
       fontSize: 16,
       fontWeight: '700',
-      color: colors.title || '#1A1A1A',
+      color: '#000000',
     },
     statusBadge: {
       paddingHorizontal: 12,

@@ -221,7 +221,7 @@ export default function DishScreen({ navigation }) {
             style={styles.iconButton}
             onPress={() => navigation.navigate('FilterScreen')}
           >
-            <Search size={24} color={colors.text} />
+            <Search size={24} color={colors.title} />
           </TouchableOpacity>
         </View>
       </View>

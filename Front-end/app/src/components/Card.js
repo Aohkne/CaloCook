@@ -87,7 +87,7 @@ export default function Card({ dish, onHeartPress, onCardPress }) {
 const createStyles = (colors) =>
     StyleSheet.create({
         Card: {
-            backgroundColor: colors.card || '#FFFFFF',
+            backgroundColor: colors.cardBg,
             borderRadius: 16,
             marginBottom: 20,
             padding: 18,
@@ -119,7 +119,7 @@ const createStyles = (colors) =>
             position: 'absolute',
             top: -2,
             right: -2,
-            backgroundColor: '#fff',
+            backgroundColor: colors.cardBg,
             borderRadius: 24,
             padding: 8,
         },
@@ -131,7 +131,7 @@ const createStyles = (colors) =>
         dishName: {
             fontSize: 16,
             fontWeight: '700',
-            color: colors.text,
+            color: colors.title,
             marginBottom: 12,
             letterSpacing: 0.5,
             textAlign: 'center',

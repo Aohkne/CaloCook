@@ -124,7 +124,7 @@ export default function ChangePasswordScreen({ navigation }) {
                     onPress={() => navigation.goBack()}
                     disabled={isLoading}
                 >
-                    <ArrowLeft size={24} color={colors.text} />
+                    <ArrowLeft size={24} color={colors.title} />
                 </TouchableOpacity>
                 <Text style={styles.title}>Change Password</Text>
                 <View style={styles.placeholder} />
