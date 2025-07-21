@@ -6,6 +6,11 @@ export const lightColors = {
   description: '#888888',
   background: '#FCFAF3',
 
+  cardBg: '#FFFFFF',
+  btnBg: '#FFFFFF',
+  border: '#1B1C1D',
+  shadow: '#1B1C1D',
+
   black: '#1B1C1D',
   white: '#FFFFFF',
   red: '#DC2E60',
@@ -14,16 +19,19 @@ export const lightColors = {
 
 export const darkColors = {
   primary: '#9AF10C',
-  secondary: '#006955',
+  secondary: '#1DB59E',
 
-  title: '#080E2D',
-  description: '#888888',
-  background: '#FCFAF3',
+  title: '#FCFAF3',
+  description: '#AAAAAA',
+  background: '#0E0F1A',
 
-  black: '#1B1C1D',
-  white: '#FFFFFF',
-  red: '#DC2E60',
-  yellow: '#EEC756'
+  cardBg: '#1B1C1D',
+  btnBg: '#1B1C1D',
+  border: '#FCFAF3',
+  shadow: '#FCFAF3',
+
+  red: '#FF4D6D',
+  yellow: '#FFD85F'
 };
 
 export const getColors = (isDark) => {
