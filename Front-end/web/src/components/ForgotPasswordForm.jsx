@@ -6,7 +6,9 @@ import { useState } from "react";
 
 export default function ForgotPasswordForm() {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
   const onFinish = async (values) => {
+    setLoading(true);
     try {
       await forgotPassword({
         email: values.email,
@@ -15,6 +17,8 @@ export default function ForgotPasswordForm() {
     } catch (error) {
       console.log(error);
       handleApiError(error);
+    } finally {
+      setLoading(false);
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -77,6 +81,7 @@ export default function ForgotPasswordForm() {
       </Form.Item>
       <Form.Item>
         <Button
+          loading={loading}
           style={{
             backgroundColor: "#006955",
             width: 343,
