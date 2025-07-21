@@ -15,9 +15,12 @@ import { forgotPassword, clearError, clearMessage } from '@/redux/slices/authSli
 import logoFull from '@/assets/logo.png'; // ✅ adjust this path as needed
 import { ChevronLeft } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '@/contexts/ThemeProvider';
 
 export default function ForgotPasswordScreen() {
   const dispatch = useDispatch();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
@@ -32,7 +35,7 @@ export default function ForgotPasswordScreen() {
     if (!emailRegex.test(email)) {
       return Alert.alert('Validation Error', 'Please enter a valid email.');
     }
-    await dispatch(forgotPassword({ email: email.trim() }));
+    await dispatch(forgotPassword(email));
   };
 
   useEffect(() => {
@@ -47,7 +50,7 @@ export default function ForgotPasswordScreen() {
   }, [message, error]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FCFAF3', alignItems: 'center' }}>
+    <SafeAreaView style={styles.safeAreaView}>
       <TouchableOpacity
         style={{
           position: 'absolute',
@@ -58,8 +61,8 @@ export default function ForgotPasswordScreen() {
         }}
         onPress={() => navigation.navigate('Login')}
       >
-        <ChevronLeft color={'#006955'} />
-        <Text style={{ fontSize: 14, color: '#006955', fontWeight: 600 }}>Back to Login</Text>
+        <ChevronLeft color={colors.secondary} />
+        <Text style={{ fontSize: 14, color: colors.secondary, fontWeight: 600 }}>Back to Login</Text>
       </TouchableOpacity>
       <View style={styles.box}>
         <Image source={logoFull} style={styles.logo} resizeMode='contain' />
@@ -90,7 +93,7 @@ export default function ForgotPasswordScreen() {
               onPress={handleSend}
               disabled={isLoading}
             >
-              {isLoading ? <ActivityIndicator color='#fff' /> : <Text style={styles.buttonText}>Send</Text>}
+              {isLoading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Send</Text>}
             </TouchableOpacity>
           </>
         )}
@@ -99,56 +102,62 @@ export default function ForgotPasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  box: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 343
-  },
-  logo: {
-    width: 200,
-    height: 80,
-    marginBottom: 28
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center'
-  },
-  description: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 24,
-    textAlign: 'center'
-  },
-  input: {
-    backgroundColor: 'rgba(8, 14, 45, 0.04)',
-    borderColor: 'rgba(8, 14, 45, 0.06)',
-    borderWidth: 1,
-    borderRadius: 16,
-    width: 343,
-    height: 51,
-    paddingHorizontal: 10
-  },
-  button: {
-    backgroundColor: '#006955',
-    width: 343,
-    height: 49,
-    justifyContent: 'center',
-    borderRadius: 76
-  },
-  buttonText: {
-    textAlign: 'center',
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 600
-  }
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    safeAreaView: {
+      flex: 1,
+      backgroundColor: colors.background,
+      alignItems: 'center'
+    },
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    box: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 343
+    },
+    logo: {
+      width: 200,
+      height: 80,
+      marginBottom: 28
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 8,
+      textAlign: 'center'
+    },
+    description: {
+      fontSize: 14,
+      color: colors.description,
+      marginBottom: 24,
+      textAlign: 'center'
+    },
+    input: {
+      backgroundColor: 'rgba(8, 14, 45, 0.04)',
+      borderColor: 'rgba(8, 14, 45, 0.06)',
+      borderWidth: 1,
+      borderRadius: 16,
+      width: 343,
+      height: 51,
+      paddingHorizontal: 10
+    },
+    button: {
+      backgroundColor: colors.secondary,
+      width: 343,
+      height: 49,
+      justifyContent: 'center',
+      borderRadius: 76
+    },
+    buttonText: {
+      textAlign: 'center',
+      color: colors.white,
+      fontSize: 14,
+      fontWeight: 600
+    }
+  });

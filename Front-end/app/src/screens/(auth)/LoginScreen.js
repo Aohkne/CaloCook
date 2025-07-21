@@ -6,17 +6,28 @@ import { useState } from 'react';
 
 import { useDispatch } from 'react-redux';
 import { login } from '@/redux/slices/authSlice';
+import { useTheme } from '@/contexts/ThemeProvider';
 
 export default function LoginScreen() {
-  const [showPassword, setShowPassword] = useState(false);
+  // Theme
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
+  // Inputs
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // Loading
   const [isLoading, setIsLoading] = useState(false);
 
+  // Navigation
   const navigation = useNavigation();
+
+  // Redux
   const dispatch = useDispatch();
 
+  // Handlers
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -44,7 +55,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FCFAF3', alignItems: 'center' }}>
+    <SafeAreaView style={styles.safeAreaView}>
       <View style={styles.container}>
         <Image style={styles.logo} source={require('@assets/login/logo-removebg-preview 2.png')} />
         <Text style={[styles.bigText, { marginBottom: 10 }]}>Create a meal plan on the go</Text>
@@ -143,78 +154,89 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 343
-  },
-  logo: {
-    width: 100,
-    height: 100
-  },
-  bigText: {
-    fontSize: 32,
-    fontWeight: 700,
-    textAlign: 'center'
-  },
-  smallText: {
-    fontSize: 16,
-    color: 'rgba(8, 14, 45, 0.6)',
-    textAlign: 'center'
-  },
-  input: {
-    backgroundColor: 'rgba(8, 14, 45, 0.04)',
-    borderColor: 'rgba(8, 14, 45, 0.06)',
-    borderWidth: 1,
-    borderRadius: 16,
-    width: 343,
-    height: 51,
-    paddingHorizontal: 10
-  },
-  forgotPassword: { fontSize: 13, color: '#006955', marginVertical: 10 },
-  button: {
-    backgroundColor: '#006955',
-    width: 343,
-    height: 49,
-    justifyContent: 'center',
-    borderRadius: 76
-  },
-  buttonText: {
-    textAlign: 'center',
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 600
-  },
-  googleButton: {
-    width: 343,
-    height: 60,
-    backgroundColor: 'rgba(8, 14, 45, 0.04)',
-    borderColor: 'rgba(8, 14, 45, 0.06)',
-    borderWidth: 1,
-    borderRadius: 76,
-    justifyContent: 'center',
-    marginBottom: 20
-  },
-  googleButtonText: {
-    fontWeight: 600,
-    textAlign: 'center'
-  },
-  line: {
-    width: 144.5,
-    height: 2,
-    borderColor: 'rgba(8, 14, 45, 0.06)',
-    borderWidth: 1
-  },
-  lineContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 15,
-    marginVertical: 15
-  },
-  link: {
-    color: '#006955',
-    fontWeight: 900
-  }
-});
+const createStyles = (colors) =>
+  StyleSheet.create({
+    safeAreaView: {
+      flex: 1,
+      backgroundColor: colors.background,
+      alignItems: 'center'
+    },
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 343
+    },
+    logo: {
+      width: 100,
+      height: 100
+    },
+    bigText: {
+      fontSize: 32,
+      fontWeight: 700,
+      textAlign: 'center',
+      color: colors.title
+    },
+    smallText: {
+      fontSize: 16,
+      textAlign: 'center',
+      color: colors.description
+    },
+    input: {
+      backgroundColor: 'rgba(8, 14, 45, 0.04)',
+      borderColor: 'rgba(8, 14, 45, 0.06)',
+      borderWidth: 1,
+      borderRadius: 16,
+      width: 343,
+      height: 51,
+      paddingHorizontal: 10
+    },
+    forgotPassword: {
+      fontSize: 13,
+      color: colors.secondary,
+      marginVertical: 10
+    },
+    button: {
+      backgroundColor: colors.secondary,
+      width: 343,
+      height: 49,
+      justifyContent: 'center',
+      borderRadius: 76
+    },
+    buttonText: {
+      textAlign: 'center',
+      color: colors.white,
+      fontSize: 14,
+      fontWeight: 600
+    },
+    googleButton: {
+      width: 343,
+      height: 60,
+      backgroundColor: 'rgba(8, 14, 45, 0.04)',
+      borderColor: 'rgba(8, 14, 45, 0.06)',
+      borderWidth: 1,
+      borderRadius: 76,
+      justifyContent: 'center',
+      marginBottom: 20
+    },
+    googleButtonText: {
+      fontWeight: 600,
+      textAlign: 'center'
+    },
+    line: {
+      width: 144.5,
+      height: 2,
+      borderColor: 'rgba(8, 14, 45, 0.06)',
+      borderWidth: 1
+    },
+    lineContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 15,
+      marginVertical: 15
+    },
+    link: {
+      color: colors.secondary,
+      fontWeight: 900
+    }
+  });
