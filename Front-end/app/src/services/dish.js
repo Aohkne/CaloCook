@@ -69,12 +69,12 @@ export const getStepsByDishService = async (dishId) => {
   }
 };
 
-// GET FILTERED DISHES - Optimized version
-// GET FILTERED DISHES - Fixed version with proper filtering
+
+// GET FILTERED DISHES 
 export const getFilteredDishesService = async (filters = {}) => {
   try {
     if (filters.dishIds && filters.dishIds.length > 0) {
-      // Tối ưu: Gọi song song thay vì tuần tự
+      //Gọi song song thay vì tuần tự
       const dishPromises = filters.dishIds.map(dishId =>
         getDishDetailService(dishId)
       );
@@ -93,7 +93,6 @@ export const getFilteredDishesService = async (filters = {}) => {
         .filter(response => response.status === 'fulfilled')
         .map(response => response.value.data || response.value);
 
-      // FIXED: Apply ALL filters consistently
       dishes = applyClientSideFilters(dishes, filters);
 
       return {
@@ -169,7 +168,7 @@ export const getFilteredDishesService = async (filters = {}) => {
   }
 };
 
-// ADDED: Consistent client-side filtering function
+// Consistent client-side filtering function
 const applyClientSideFilters = (dishes, filters) => {
   let filteredDishes = [...dishes];
 
@@ -182,7 +181,7 @@ const applyClientSideFilters = (dishes, filters) => {
     });
   }
 
-  // FIXED: Apply cooking time filter with AND logic
+  // Apply cooking time filter with AND logic
   if (filters.minCookingTime !== undefined || filters.maxCookingTime !== undefined) {
     filteredDishes = filteredDishes.filter(dish => {
       const cookingTime = dish.cookingTime || 0;
@@ -198,7 +197,7 @@ const applyClientSideFilters = (dishes, filters) => {
     });
   }
 
-  // FIXED: Apply calorie filter with AND logic
+  // Apply calorie filter with AND logic
   if (filters.minCalorie !== undefined || filters.maxCalorie !== undefined) {
     filteredDishes = filteredDishes.filter(dish => {
       const calorie = dish.calorie || dish.calories || 0;

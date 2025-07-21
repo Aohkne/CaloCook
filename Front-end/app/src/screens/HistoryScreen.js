@@ -220,7 +220,7 @@ export default function HistoryScreen({ navigation }) {
                     style={styles.backButton}
                     onPress={() => navigation.goBack()}
                 >
-                    <ArrowLeft size={24} color={colors.text} />
+                    <ArrowLeft size={24} color={colors.title} />
                 </TouchableOpacity>
                 <Text style={styles.title}>Eating History</Text>
                 <View style={styles.placeholder} />
@@ -301,7 +301,7 @@ const createStyles = (colors) =>
         title: {
             fontSize: 20,
             fontWeight: '600',
-            color: colors.text,
+            color: colors.title,
         },
         placeholder: {
             width: 40,
@@ -399,7 +399,7 @@ const createStyles = (colors) =>
         dateTitle: {
             fontSize: 16,
             fontWeight: '600',
-            color: colors.text,
+            color: colors.title,
             marginLeft: 8,
             flex: 1,
         },

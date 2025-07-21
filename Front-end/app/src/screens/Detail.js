@@ -187,12 +187,11 @@ export default function Detail({ route, navigation }) {
             Alert.alert('Error', error.message || 'Failed to add to eating history')
         }
     }
-    // Sử dụng data từ API thay vì hardcode
+    // Sử dụng data từ API 
     const dishData = dishDetail || dish;
     const ingredients = dishIngredients || [];
     const steps = dishSteps || [];
 
-    // Function để xử lý image source giống như Card component
     const getImageSource = () => {
         // Ưu tiên imageUrl từ dishData (API response)
         const imageUrl = dishData.imageUrl || dish.imageUrl || dish.image;
@@ -212,7 +211,7 @@ export default function Detail({ route, navigation }) {
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-                        <ChevronLeft size={24} color={colors.text} />
+                        <ChevronLeft size={24} color={colors.title} />
                     </TouchableOpacity>
                 </View>
                 <View style={styles.loadingContainer}>
@@ -231,7 +230,7 @@ export default function Detail({ route, navigation }) {
                     style={styles.backButton}
                     onPress={handleBackPress}
                 >
-                    <ChevronLeft size={24} color={colors.text} />
+                    <ChevronLeft size={24} color={colors.title} />
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -352,7 +351,7 @@ export default function Detail({ route, navigation }) {
                     onPress={handleLetsCook}
                 >
                     <Text style={styles.cookButtonText}>Let's Cook</Text>
-                    <ChevronRight size={20} color="#fff" />
+                    <ChevronRight size={20} color={colors.title} />
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -399,7 +398,7 @@ const createStyles = (colors) =>
         dishName: {
             fontSize: 24,
             fontWeight: '700',
-            color: colors.text,
+            color: colors.title,
             textAlign: 'center',
             marginBottom: 16,
             letterSpacing: 0.5,
@@ -418,7 +417,7 @@ const createStyles = (colors) =>
         },
         metaText: {
             fontSize: 14,
-            color: colors.textSecondary,
+            color: colors.title,
             fontWeight: '500',
         },
         section: {

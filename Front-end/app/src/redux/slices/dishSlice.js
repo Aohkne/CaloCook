@@ -145,6 +145,8 @@ const syncDishLikeStatus = (dishes, favorites) => {
 const dishSlice = createSlice({
   name: 'dish',
   initialState,
+
+  //Xử lý các hành động đồng bộ
   reducers: {
     clearError: (state) => {
       state.error = null;

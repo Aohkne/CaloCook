@@ -37,7 +37,7 @@ export default function FilterScreen({ navigation }) {
     const [showIngredientSuggestions, setShowIngredientSuggestions] = useState(false)
     const [ingredientSearchText, setIngredientSearchText] = useState('')
 
-    // Static ingredients list - bạn có thể load từ API hoặc định nghĩa sẵn
+    // Static ingredients list
     const staticIngredients = [
         'Eggs', 'Chicken', 'Tomatoes', 'Rice', 'Pasta', 'Cream',
         'Beef', 'Pork', 'Fish', 'Shrimp', 'Cheese', 'Milk',
@@ -56,7 +56,6 @@ export default function FilterScreen({ navigation }) {
     // Filter ingredients based on search text
     const filteredIngredients = useMemo(() => {
         if (!ingredientSearchText.trim()) return []
-
         return availableIngredients.filter(ingredient =>
             ingredient.toLowerCase().includes(ingredientSearchText.toLowerCase()) &&
             !selectedIngredients.includes(ingredient)
@@ -203,17 +202,17 @@ export default function FilterScreen({ navigation }) {
                 filters.difficulty = selectedDifficulty;
             }
 
-            // Nếu có cả search text và ingredients - tối ưu bằng cách gọi song song
+            // Nếu có cả search text và ingredients
             if (cleanSearchText && selectedIngredients.length > 0) {
                 // Tạo promise để gọi song song thay vì tuần tự
                 const [nameResult, ingredientDishIds] = await Promise.all([
-                    // 1. Fetch dishes by name
+                    //Fetch dishes by name
                     dispatch(getFilteredDishes({
                         ...filters,
                         name: cleanSearchText
                     })),
 
-                    // 2. Get dish IDs from ingredients (không cần fetch full dishes)
+                    //Get dish IDs from ingredients (không cần fetch full dishes)
                     Promise.resolve().then(() => {
                         if (ingredients.length > 0) {
                             const dishIds = new Set();
@@ -560,7 +559,7 @@ export default function FilterScreen({ navigation }) {
                         style={styles.iconButton}
                         onPress={() => navigation.goBack()}
                     >
-                        <X size={24} color={colors.text} />
+                        <X size={24} color={colors.title} />
                     </TouchableOpacity>
                 </View>
             </View>
