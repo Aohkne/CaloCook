@@ -39,11 +39,22 @@ alt Validation Success
     
     DishModel -> MongoDB: 9. ExecuteQuery()
     activate MongoDB
-    
-    alt Dish Found
-        MongoDB --> DishModel: 10. Return dish data
+    MongoDB --> DishModel: 10. Return Dish data
 
-        DishModel --> Service: 11. Return dish
+    alt Dish Not Found
+        DishModel --> Service: 10.1 Dish not Found
+        
+        Service --> Controller: 10.2 Throw ApiError(404, "Dish ID not found!")
+        
+        Controller --> Route: 10.3 next(error)
+        
+        Route --> View: 10.4 Return 404 error
+        
+        View --> Admin: 10.5 Show error message
+
+    else Dish Found
+        DishModel --> Service: 11. Dish Found
+        deactivate DishModel
         
         Service -> IngredientModel: 12. createNew(newIngredient)
         activate IngredientModel
@@ -59,45 +70,32 @@ alt Validation Success
         IngredientModel -> MongoDB: 17. ExecuteQuery()
         
         MongoDB --> IngredientModel: 18. Return created ingredient
+        deactivate MongoDB
         
         IngredientModel --> Service: 19. Return ingredient details
         deactivate IngredientModel
         
         Service --> Controller: 20. Return created ingredient
+        deactivate Service
         
         Controller --> Route: 21. Send 201 JSON response
+        deactivate Controller
         
         Route --> View: 22. Return success response
         
         View --> Admin: 23. Show success message & update ingredient list
-        
-    else Dish Not Found
-        MongoDB --> DishModel: 10. Return null
-        deactivate MongoDB
-        DishModel --> Service: 11. Return null
-        deactivate DishModel
-        
-        Service --> Controller: 12. Throw ApiError(404, "Dish ID not found!")
-        deactivate Service
-        
-        Controller --> Route: 13. next(error)
-        deactivate Controller
-        
-        Route --> View: 14. Return 404 error
-        
-        View --> Admin: 15. Show error message
     end
     
 else Validation Failed
-    Validation --> Route: 6. next(ApiError(422, validation errors))
+    Validation --> Route: 5.1 next(ApiError(422, validation errors))
     deactivate Validation
     
-    Route --> View: 7. Return 422 validation errors
+    Route --> View: 5.2 Return 422 validation errors
     deactivate Route
     
-    View --> Admin: 8. Show validation error messages
-    deactivate Admin
+    View --> Admin: 5.3 Show validation error messages
     deactivate View
+    deactivate Admin
 end
 
 end

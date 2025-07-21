@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "",
+    "name": "CaloCook",
     "slug": "calocook",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,10 +20,16 @@
         "foregroundImage": "./src/assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.aohk.calocook"
     },
     "web": {
       "favicon": "./src/assets/logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "adf075b6-69ea-4044-a400-c661a8dfb4b3"
+      }
     }
   }
 }

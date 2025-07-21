@@ -33,71 +33,57 @@ activate IngredientModel
 
 IngredientModel -> MongoDB: 8. ExecuteQuery()
 activate MongoDB
+MongoDB --> IngredientModel: 9. Return update result
 
-alt Ingredient Found & Deactivated
-    MongoDB --> IngredientModel: 9. Return deactivated ingredient
-    
-    IngredientModel --> Service: 10. Return ingredient
-    
-    Service --> Controller: 11. Return deactivated ingredient
-    
-    Controller --> Route: 12. Send 200 JSON response
-    
-    Route --> View: 13. Return success response
-    
-    View --> Admin: 14. Show success message\n& hide ingredient from active list
-    
-else Ingredient Not Found
-    MongoDB --> IngredientModel: 9. Return null
-    
-    IngredientModel --> Service: 10. Return null
-    
-    Service --> Controller: 11. Throw ApiError(404, "Ingredient not found!")
-    
-    Controller --> Route: 12. next(error)
-    
-    Route --> View: 13. Return 404 error
-    
-    View --> Admin: 14. Show error message
-end
+IngredientModel --> Service: 10. Return ingredient
+
+Service --> Controller: 11. Return deactivated ingredient
+
+Controller --> Route: 12. Send 200 JSON response
+
+Route --> View: 13. Return success response
+
+View --> Admin: 14. Show success message\n& hide ingredient from active list
+
+
 
 end
 
 group Alternative: Activate Ingredient (Restore)
 
-Admin -> View: 1. View deactivated ingredients
+Admin -> View: 15. View deactivated ingredients
 
-Admin -> View: 2. Click "Restore Ingredient" button
+Admin -> View: 16. Click "Restore Ingredient" button
 
-View -> Route: 3. PATCH /api/v1/ingredient/:id/activate
+View -> Route: 17. PATCH /api/v1/ingredient/:id/activate
 
-Route -> Controller: 4. activateIngredient(req, res, next)
+Route -> Controller: 18. activateIngredient(req, res, next)
 
-Controller -> Service: 5. activateIngredient(ingredientId)
+Controller -> Service: 19. activateIngredient(ingredientId)
 
-Service -> IngredientModel: 6. updateIsActive(ingredientId, true)
+Service -> IngredientModel: 20. updateIsActive(ingredientId, true)
 
-IngredientModel -> MongoDB: 7. ExecuteQuery()
+IngredientModel -> MongoDB: 21. ExecuteQuery()
 
-MongoDB --> IngredientModel: 8. Return activated ingredient
+MongoDB --> IngredientModel: 22. Return update result
 deactivate MongoDB
 
-IngredientModel --> Service: 9. Return ingredient
+
+IngredientModel --> Service: 23. Return activated ingredient
 deactivate IngredientModel
 
-Service --> Controller: 10. Return activated ingredient
+Service --> Controller: 24. Return activated ingredient
 deactivate Service
 
-Controller --> Route: 11. Send 200 JSON response
+Controller --> Route: 25. Send 200 JSON response
 deactivate Controller
 
-Route --> View: 12. Return success response
+Route --> View: 26. Return success response
 deactivate Route
 
-View --> Admin: 13. Show success message\n& add ingredient back to active list
-deactivate Admin
+View --> Admin: 27. Show success message\n& add ingredient back to active list
 deactivate View
-
+deactivate Admin
 end
 
 @enduml

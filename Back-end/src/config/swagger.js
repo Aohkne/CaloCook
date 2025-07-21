@@ -21,6 +21,10 @@ export const swaggerOptions = {
       {
         url: `http://localhost:${env.PORT || 8080}`,
         description: 'Development server'
+      },
+      {
+        url: 'https://calocook.onrender.com',
+        description: 'Production server'
       }
     ]
   },
