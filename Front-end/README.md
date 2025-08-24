@@ -39,21 +39,37 @@
 │   ├── 📄 package.json             # Các gói phụ thuộc và script
 │   └── 📄 package-lock.json        # Phiên bản phụ thuộc được khóa
 │
-├── 📁 web/                         # Ứng dụng web quản trị sử dụng React + Vite
-│    ├── 📁 node_modules/           # Các gói npm cài đặt
-│    ├── 📁 public/                 # Thư mục chứa các tệp tĩnh như favicon, ảnh public
-│    ├── 📁 src/                    # Mã nguồn chính của ứng dụng web
-│    │   ├── 📁 api/                # Gọi API và các service liên quan
-│    │   ├── 📁 assets/             # Hình ảnh, phông chữ, v.v...
-│    │   ├── 📁 components/         # Các component UI có thể tái sử dụng
-│    │   ├── 📁 pages/              # Các trang chính của ứng dụng (như Home, Login,...)
-|    |
-│    ├── 📄 .env                    # Biến môi trường (được ignore khi push code)
-│    ├── 📄 .env.example            # File mẫu cho biến môi trường
-│    ├── 📄 .gitignore              # File để loại trừ file/thư mục khi push Git
-│    ├── 📄 eslint.config.js        # Cấu hình linting
-│    ├── 📄 index.html              # HTML gốc của ứng dụng web
-│    ├── 📄 vite.config.js          # Cấu hình Vite
-│    ├── 📄 package.json            # Danh sách dependency và script
-│    └── 📄 package-lock.json       # Phiên bản cố định của dependency
+├── 📁 web/                               # Ứng dụng web quản trị sử dụng React + Vite
+|   ├── 📁 .vscode/                       # Cấu hình riêng cho VS Code
+|   ├── 📁 node_modules/                  # Thư viện phụ thuộc đã cài đặt
+|   ├── 📁 public/                        # Tài nguyên tĩnh, không qua xử lý Vite
+|   ├── 📁 src/                           # Mã nguồn chính của ứng dụng web
+|   │   ├── 📁 api/                       # Định nghĩa các request API
+|   │   ├── 📁 assets/                    # Tài nguyên tĩnh cần bundle
+|   │   ├── 📁 components/                # Các thành phần UI có thể tái sử dụng
+|   │   │   ├── 📁 sections/              # Các section lớn (Header, Footer, Sidebar…)
+|   │   │   └── 📁 ui/                    # Thành phần UI nhỏ (Button, Input, Modal…)
+|   │   ├── 📁 constants/                 # Các hằng số
+|   │   ├── 📁 contexts/                  # React Context (Theme, Auth, Language…)
+|   │   ├── 📁 hooks/                     # Custom hooks
+|   │   ├── 📁 pages/                     # Các trang chính
+|   │   │   ├── 📁 (admin)/               # Trang cho admin
+|   │   │   ├── 📁 (user)/                # Trang cho user
+|   │   ├── 📁 routes/                    # Định nghĩa route React Router
+|   │   ├── 📁 styles/                    # SCSS/CSS
+|   │   ├── 📁 utils/                     # Hàm tiện ích
+|   │   ├── 📄 App.jsx                    # Thành phần gốc của ứng dụng
+|   │   └── 📄 main.jsx                   # Điểm khởi đầu
+|   |
+|   ├── 📄 .env                           # Biến môi trường
+|   ├── 📄 .env.example                   # Template biến môi trường để tham khảo
+|   ├── 📄 .gitignore                     # Quy tắc loại trừ khi commit Git
+|   ├── 📄 .prettierrc                    # Cấu hình Prettier
+|   ├── 📄 eslint.config.js               # Cấu hình ESLint
+|   ├── 📄 index.html                     # File HTML gốc, mount React app
+|   ├── 📄 jsconfig.json                  # Cấu hình alias cho import
+|   ├── 📄 package-lock.json              # Phiên bản chính xác của dependency
+|   ├── 📄 package.json                   # Thông tin dự án + script npm
+|   └── 📄 vite.config.js                 # Cấu hình Vite (alias, plugins…)
+
 ```
