@@ -10,6 +10,7 @@ import { dashboardRoute } from '@/routes/v1/dashboardRoute'
 import { favoriteRoute } from '@/routes/v1/favoriteRoute'
 import { historyRoute } from '@/routes/v1/historyRoute'
 import { commentRoute } from '@/routes/v1/commentRoute'
+import { reactionRoute } from '@/routes/v1/reactionRoute'
 
 const Router = express.Router()
 
@@ -28,5 +29,6 @@ Router.use('/dashboard', dashboardRoute)
 Router.use('/favorite', favoriteRoute)
 Router.use('/history', historyRoute)
 Router.use('/comment', commentRoute)
+Router.use('/reaction', reactionRoute)
 
 export const APIs_V1 = Router
