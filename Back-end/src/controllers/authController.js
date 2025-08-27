@@ -31,9 +31,7 @@ const storeRefreshToken = async (userId, refreshToken) => {
 }
 const signup = async (req, res) => {
   const { username, email, password } = req.body
-  // console.log('Raw body:', req.body)
   try {
-    // console.log('Signup request:', { username, email, password })
     if (!email || !password || !username) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Email, password and username are required' })
     }
@@ -159,7 +157,6 @@ const logout = async (req, res) => {
     // Cố gắng lấy token từ body hoặc header
     const refreshToken = req.body.refreshToken
 
-    // console.log('Refresh token request:', { refreshToken })
     if (!refreshToken) return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'No refresh token provided' })
 
     const decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET)
@@ -176,8 +173,6 @@ const logout = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body
-    // debug email
-    // console.log(email)
     const user = await User.findOne({ email })
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
@@ -210,25 +205,18 @@ export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params
     const { password } = req.body
-    // debug token
-    // console.log('token', token)
-    // debug password
-    // console.log('password', password)
     if (!token || !password) {
       return res.status(400).json({ message: 'Token và mật khẩu là bắt buộc' })
     }
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
 
-    // debug hashedToken
-    // console.log('hashedToken', hashedToken)
-
     const userId = await redis.get(`reset_token:${hashedToken}`)
 
     if (!userId) {
       return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' })
     }
-    // ✅ Tìm user theo userId lấy từ Redis
+    // Tìm user theo userId lấy từ Redis
     const user = await User.findById(userId)
 
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -237,7 +225,7 @@ export const resetPassword = async (req, res) => {
       { $set: { password_hash: hashedPassword, updated_at: new Date() } }
     )
 
-    // 🧹 Xóa token khỏi Redis
+    // Xóa token khỏi Redis
     await redis.del(`reset_token:${hashedToken}`)
 
     const { accessToken, refreshToken } = generateTokens(user._id)
@@ -294,9 +282,7 @@ export const editProfile = async (req, res) => {
   try {
     // const { username, email, calorieLimit, avatarUrl, gender, dob, height, weight } = req.body
     const profileData = req.body
-    // console.log('Profile data:', profileData)
     const userId = req.user._id // req.user là user đã được xác thực từ middleware
-    // console.log('User ID:', userId)
     await userService.editProfileService(userId, profileData)
 
     res.json({ message: 'Profile updated successfully' })

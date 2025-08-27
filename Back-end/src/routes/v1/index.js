@@ -9,6 +9,7 @@ import { stepRoute } from '@/routes/v1/stepRoute'
 import { dashboardRoute } from '@/routes/v1/dashboardRoute'
 import { favoriteRoute } from '@/routes/v1/favoriteRoute'
 import { historyRoute } from '@/routes/v1/historyRoute'
+import { commentRoute } from '@/routes/v1/commentRoute'
 
 const Router = express.Router()
 
@@ -26,5 +27,6 @@ Router.use('/step', stepRoute)
 Router.use('/dashboard', dashboardRoute)
 Router.use('/favorite', favoriteRoute)
 Router.use('/history', historyRoute)
+Router.use('/comment', commentRoute)
 
 export const APIs_V1 = Router
