@@ -105,7 +105,9 @@ const getCommentsByDishId = async (dishId) => {
       }
     })
 
-    return roots
+    const totalRoot = roots.length
+    const totalComment = items.length
+    return { comments: roots, totalRoot, totalComment }
   } catch (error) {
     throw new Error(error)
   }

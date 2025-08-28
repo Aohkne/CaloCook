@@ -4,7 +4,6 @@ import { authMiddleware } from '@/middlewares/authMiddleware'
 import { favoriteController } from '@/controllers/favoriteController'
 import { userController } from '@/controllers/userController'
 import { dishController } from '@/controllers/dishController'
-import { commentController } from '@/controllers/commentController'
 const Router = expesss.Router()
 
 /**
@@ -60,30 +59,6 @@ const Router = expesss.Router()
  *                   type: number
  *                   example: 10
  * 
- * /api/v1/dashboard/comment-count:
- *  get:
- *    summary: Get total number of comments
- *    tags: [Dashboard]
- *    security:
- *      - bearerAuth: []
- *    description: Get the total number of comments in the system
- *    responses:
- *      200:
- *        description: Successfully retrieved comment count
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                code:
- *                  type: number
- *                  example: 200
- *                message:
- *                  type: string
- *                  example: "Get successful"
- *                data:
- *                  type: number
- *                  example: 10
  * 
  * /api/v1/dashboard/top-favorites:
  *   get:
@@ -154,12 +129,6 @@ Router.route('/dish-count').get(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['admin']),
   dishController.getDishCount
-)
-
-Router.route('/comment-count').get(
-  authMiddleware.authenticateUser,
-  authMiddleware.authorizeRole(['admin', 'user']),
-  commentController.getCommentCount
 )
 
 Router.route('/top-favorites').get(

@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
 import { commentModel } from '@/models/commentModel'
+import { reactionCommentModel } from '@/models/reactionCommentModel'
 import { ObjectId } from 'mongodb'
 import cloudinary from '@/config/cloudinary'
 
@@ -99,6 +100,9 @@ const deleteCommentById = async (commentId) => {
         })
       )
     }
+    // nếu xóa comment thì sẽ xóa luôn cái reaction có commentId tương ứng
+    await reactionCommentModel.deleteReactionsByCommentId(new ObjectId(commentId))
+
     const deletedComment = await commentModel.deleteCommentById(new ObjectId(commentId))
     return deletedComment
   } catch (error) {

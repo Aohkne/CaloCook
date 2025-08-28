@@ -21,6 +21,17 @@ const addReaction = async (req, res, next) => {
     }
 }
 
+// Get reactions by commentId
+const getReactionsByCommentId = async (req, res, next) => {
+    try {
+        const commentId = req.params.commentId
+        const { reactions, totalReaction, reactionCounts } = await reactionService.getReactionsByCommentId(commentId)
+        res.status(StatusCodes.OK).json({ reactions, totalReaction, reactionCounts })
+    } catch (error) {
+        next(error)
+    }
+}
+
 // Update a reaction
 const updateReaction = async (req, res, next) => {
     try {
@@ -47,6 +58,7 @@ const deleteReaction = async (req, res, next) => {
 export const reactionController = {
     getAllReactions,
     addReaction,
+    getReactionsByCommentId,
     updateReaction,
     deleteReaction
 }

@@ -49,7 +49,7 @@ const getCommentsByParentId = async (req, res, next) => {
   try {
     const parentId = req.params.id
     const comments = await commentService.getCommentsByParentId(parentId)
-    res.status(StatusCodes.OK).json(comments)
+    res.status(StatusCodes.OK).json([comments])
   } catch (error) {
     next(error)
   }
@@ -59,8 +59,8 @@ const getCommentsByParentId = async (req, res, next) => {
 const getCommentsByDishId = async (req, res, next) => {
   try {
     const dishId = req.params.dishId
-    const comments = await commentService.getCommentsByDishId(dishId)
-    res.status(StatusCodes.OK).json({ comments, totalCount: comments.length })
+    const { comments, totalRoot, totalComment } = await commentService.getCommentsByDishId(dishId)
+    res.status(StatusCodes.OK).json({ comments, totalRoot, totalComment })
   } catch (error) {
     next(error)
   }

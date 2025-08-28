@@ -40,6 +40,16 @@ const addReaction = async (payload) => {
   }
 }
 
+// Get reaction by commentId
+const getReactionsByCommentId = async (commentId) => {
+  try {
+    const reactions = await reactionCommentModel.getReactionsByCommentId(commentId)
+    return reactions
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching reactions by commentId')
+  }
+}
+
 // Update a reaction
 const updateReaction = async (reactionId, payload) => {
   try {
@@ -63,6 +73,7 @@ const deleteReaction = async (reactionId) => {
 export const reactionService = {
   getAllReactions,
   addReaction,
+  getReactionsByCommentId,
   updateReaction,
   deleteReaction
 }

@@ -35,6 +35,27 @@ export const addReaction = async (data) => {
   }
 }
 
+// getReactionsByCommentId
+export const getReactionsByCommentId = async (commentId) => {
+  try {
+    const reactions = await GET_DB().collection(_COLLECTION_NAME).find({ commentId: new ObjectId(commentId) }).toArray()
+    const totalReaction = reactions.length
+
+    // aggregate counts per reactionType
+    const agg = await GET_DB().collection(_COLLECTION_NAME).aggregate([
+      { $match: { commentId: new ObjectId(commentId) } },
+      { $group: { _id: '$reactionType', count: { $sum: 1 } } }
+    ]).toArray()
+    const counts = { like: 0, love: 0, haha: 0, angry: 0, sad: 0, wow: 0 }
+    agg.forEach(item => {
+      counts[item._id] = item.count
+    })
+    return { reactions, totalReaction, reactionCounts: counts }
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 // updateReaction
 export const updateReaction = async (id, data) => {
   try {
@@ -59,9 +80,23 @@ export const deleteReaction = async (id) => {
   }
 }
 
+// deleteReactionsByCommentId
+export const deleteReactionsByCommentId = async (commentId) => {
+  try {
+    const deletedReactions = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .deleteMany({ commentId: new ObjectId(commentId) })
+    return deletedReactions
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const reactionCommentModel = {
   getAllReactions,
   addReaction,
+  getReactionsByCommentId,
+  deleteReactionsByCommentId,
   updateReaction,
   deleteReaction
 }

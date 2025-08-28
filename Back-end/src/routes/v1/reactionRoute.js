@@ -11,7 +11,7 @@ const Router = express.Router()
  *   get:
  *     summary: Get all reactions
  *     tags:
- *       - Reaction
+ *       - reaction
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -53,7 +53,7 @@ const Router = express.Router()
  *   post:
  *     summary: Add a reaction
  *     tags:
- *       - Reaction
+ *       - reaction
  *     security:
  *       - bearerAuth: []
  *     description: Add a reaction to a comment. Each user can only react once per comment.
@@ -108,7 +108,7 @@ const Router = express.Router()
  *   patch:
  *     summary: Update a reaction
  *     tags:
- *       - Reaction
+ *       - reaction
  *     security:
  *       - bearerAuth: []
  *     description: Update the type of an existing reaction.
@@ -167,7 +167,7 @@ const Router = express.Router()
  *   delete:
  *     summary: Delete a reaction
  *     tags:
- *       - Reaction
+ *       - reaction
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -211,7 +211,58 @@ const Router = express.Router()
  *                       type: string
  *                       format: date-time
  *                       example: "2023-03-15T12:00:00Z"
+ *
+ * /api/v1/reaction/{commentId}:
+ *   get:
+ *     summary: Get reactions by commentId
+ *     tags: [reaction]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: The ID of the comment to get reactions for
+ *         schema:
+ *           type: string
+ *           example: "68adc41072effd308d4ecfc5"
+ *     responses:
+ *       '200':
+ *         description: Successfully fetched reactions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Successfully fetched reactions"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: "68af2344df76d9c69b2c7d11"
+ *                       commentId:
+ *                         type: string
+ *                         example: "68adc41072effd308d4ecfc5"
+ *                       userId:
+ *                         type: string
+ *                         example: "68306f4d4928f3fe108df628"
+ *                       reactionType:
+ *                         type: string
+ *                         example: "haha"
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2023-03-15T12:00:00Z"
  */
+
 // Get all reactions
 Router.route('/').get(
   authMiddleware.authenticateUser,
@@ -225,6 +276,13 @@ Router.route('/').post(
   authMiddleware.authorizeRole(['admin', 'user']),
   reactionValidation.addReaction,
   reactionController.addReaction
+)
+
+// Get reaction by commentId
+Router.route('/:commentId').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin', 'user']),
+  reactionController.getReactionsByCommentId
 )
 
 // Update a reaction
