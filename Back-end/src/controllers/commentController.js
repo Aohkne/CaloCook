@@ -12,6 +12,16 @@ const getAllComments = async (req, res, next) => {
   }
 }
 
+// Get comment count
+const getCommentCount = async (req, res, next) => {
+  try {
+    const count = await commentService.getCommentCount()
+    res.status(StatusCodes.OK).json(count)
+  } catch (error) {
+    next(error)
+  }
+}
+
 // Create a new comment
 const createComment = async (req, res, next) => {
   try {
@@ -45,6 +55,17 @@ const getCommentsByParentId = async (req, res, next) => {
   }
 }
 
+// Get a comment by dishId
+const getCommentsByDishId = async (req, res, next) => {
+  try {
+    const dishId = req.params.dishId
+    const comments = await commentService.getCommentsByDishId(dishId)
+    res.status(StatusCodes.OK).json({ comments, totalCount: comments.length })
+  } catch (error) {
+    next(error)
+  }
+}
+
 // Update a comment by ID
 const updateCommentById = async (req, res, next) => {
   try {
@@ -70,8 +91,10 @@ const deleteCommentById = async (req, res, next) => {
 
 export const commentController = {
   getAllComments,
+  getCommentCount,
   createComment,
   getCommentById,
+  getCommentsByDishId,
   getCommentsByParentId,
   updateCommentById,
   deleteCommentById

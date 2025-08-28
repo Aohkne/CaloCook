@@ -14,6 +14,16 @@ const getAllComments = async () => {
   }
 }
 
+// Get comment count
+const getCommentCount = async () => {
+  try {
+    const count = await commentModel.getCommentCount()
+    return { count }
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching comment count')
+  }
+}
+
 // Create a new comment
 const createComment = async (commentPayload) => {
   let cloudinaryResponse = null
@@ -57,6 +67,16 @@ const getCommentsByParentId = async (parentId) => {
   }
 }
 
+// Get comments by dishId
+const getCommentsByDishId = async (dishId) => {
+  try {
+    const comments = await commentModel.getCommentsByDishId(new ObjectId(dishId))
+    return comments
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching comments by dishId')
+  }
+}
+
 // Update a comment by ID
 const updateCommentById = async (commentId, updateData) => {
   try {
@@ -88,9 +108,11 @@ const deleteCommentById = async (commentId) => {
 
 export const commentService = {
   getAllComments,
+  getCommentCount,
   createComment,
   getCommentById,
   getCommentsByParentId,
+  getCommentsByDishId,
   updateCommentById,
   deleteCommentById
 }

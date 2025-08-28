@@ -358,6 +358,63 @@ const Router = express.Router()
  *                         type: string
  *                         format: date-time
  *                         example: "2023-06-15T12:34:56.789Z"
+ * 
+ * /api/v1/comment/{dishId}/dish:
+ *  get:
+ *    summary: Get all comments for a specific dish
+ *    tags: [Comment]
+ *    security:
+ *      - bearerAuth: []
+ *    description: Get all comments for a specific dish
+ *    parameters:
+ *      - in: path
+ *        name: dishId
+ *        required: true
+ *        description: The ID of the dish to retrieve comments for
+ *        schema:
+ *          type: string
+ *          example: "64a3b2dc410a1db97da1ad22"
+ *    responses:
+ *      200:
+ *        description: Comments retrieved successfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                code:
+ *                  type: integer
+ *                  example: 200
+ *                message:
+ *                  type: string
+ *                  example: "Comments retrieved successfully"
+ *                data:
+ *                  type: array
+ *                  items:
+ *                    type: object
+ *                    properties:
+ *                      _id:
+ *                        type: string
+ *                        example: "68adcc2d9b25248d3c9bb695"
+ *                      dishId:
+ *                        type: string
+ *                        example: "64a3b2dc410a1db97da1ad22"
+ *                      userId:
+ *                        type: string
+ *                        example: "68306f4d4928f3fe108df628"
+ *                      content:
+ *                        type: string
+ *                        example: "This is a comment"
+ *                      parentId:
+ *                        type: string
+ *                        example: "68adc41072effd308d4ecfc5"
+ *                      image:
+ *                        type: string
+ *                        example: "https://example.com/image.jpg"
+ *                      createdAt:
+ *                        type: string
+ *                        format: date-time
+ *                        example: "2023-06-15T12:34:56.789Z"
  */
 
 // Get all comments
@@ -387,6 +444,13 @@ Router.route('/:id/comments').get(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['admin', 'user']),
   commentController.getCommentsByParentId
+)
+
+// Get a comment by dishId
+Router.route('/:dishId/dish').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin', 'user']),
+  commentController.getCommentsByDishId
 )
 
 // Update a comment by ID

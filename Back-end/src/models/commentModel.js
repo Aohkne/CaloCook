@@ -33,6 +33,16 @@ export const getAllComments = async () => {
   }
 }
 
+//getCommentCount
+const getCommentCount = async () => {
+  try {
+    const count = await GET_DB().collection(_COLLECTION_NAME).countDocuments()
+    return count
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 // createComment
 const createComment = async (data) => {
   try {
@@ -57,6 +67,45 @@ const getCommentsByParentId = async (parentId) => {
       .find({ parentId: new ObjectId(parentId) })
       .toArray()
     return comments
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+// Get comments by dishId
+const getCommentsByDishId = async (dishId) => {
+  try {
+    const comments = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .find({ dishId: new ObjectId(dishId) })
+      .toArray()
+
+    // normalize ids to string for easy mapping
+    const items = comments.map((c) => ({
+      ...c,
+      _id: c._id.toString(),
+      parentId: c.parentId ? c.parentId.toString() : null,
+      createdAt: c.createdAt ? new Date(c.createdAt) : c.createdAt,
+      children: []
+    }))
+
+    const map = {} // Map to hold the normalized comments
+    items.forEach((item) => {
+      map[item._id] = item // Map each item by its ID
+    })
+
+    const roots = [] // Array to hold root comments
+    // Build the tree structure
+    items.forEach((item) => {
+      // If the item has a parentId, add it to the children of the parent
+      if (item.parentId && map[item.parentId]) {
+        map[item.parentId].children.push(item)
+      } else {
+        roots.push(item)
+      }
+    })
+
+    return roots
   } catch (error) {
     throw new Error(error)
   }
@@ -88,9 +137,11 @@ const deleteCommentById = async (id) => {
 
 export const commentModel = {
   getAllComments,
+  getCommentCount,
   createComment,
   getCommentById,
   getCommentsByParentId,
+  getCommentsByDishId,
   updateCommentById,
   deleteCommentById
 }
