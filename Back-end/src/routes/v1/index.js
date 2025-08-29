@@ -9,7 +9,7 @@ import { stepRoute } from '@/routes/v1/stepRoute'
 import { dashboardRoute } from '@/routes/v1/dashboardRoute'
 import { favoriteRoute } from '@/routes/v1/favoriteRoute'
 import { historyRoute } from '@/routes/v1/historyRoute'
-
+import { ratingRoute } from '@/routes/v1/ratingRoute'
 const Router = express.Router()
 
 /* Check API-v1 status */
@@ -26,5 +26,5 @@ Router.use('/step', stepRoute)
 Router.use('/dashboard', dashboardRoute)
 Router.use('/favorite', favoriteRoute)
 Router.use('/history', historyRoute)
-
+Router.use('/rating', ratingRoute)
 export const APIs_V1 = Router
