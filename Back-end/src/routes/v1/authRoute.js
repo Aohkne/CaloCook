@@ -245,6 +245,48 @@ const Router = expesss.Router()
  *     responses:
  *       200:
  *         description: Profile updated successfully
+ *
+ * /api/v1/auth/forgot-password-otp:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Send OTP for forgot password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ * 
+ * /api/v1/auth/reset-password-otp:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Verify OTP and reset password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               otp:
+ *                 type: string
+ *                 example: 123456
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               newPassword:
+ *                 type: string
+ *                 example: newPassword123
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
  */
 Router.post('/login', authController.login)
 Router.post('/signup', authController.signup)
@@ -260,6 +302,9 @@ Router.post(
 )
 Router.post('/forgot-password', authController.forgotPassword)
 Router.post('/forgot-password/:token', authController.resetPassword)
+
+Router.post('/forgot-password-otp', authController.forgotPasswordOtp)
+Router.post('/reset-password-otp', authController.resetPasswordOtp)
 
 Router.post(
   '/change-password',

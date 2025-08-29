@@ -3,7 +3,7 @@ import { env } from '@/config/environment'
 import { redis } from '@/config/redis.js'
 import { ObjectId } from 'mongodb'
 import { userModel as User } from '@/models/userModel.js'
-import { authService as Auth } from '@/services/authService.js'
+import { authService } from '@/services/authService.js'
 import { userService } from '@/services/userService.js'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
@@ -31,9 +31,7 @@ const storeRefreshToken = async (userId, refreshToken) => {
 }
 const signup = async (req, res) => {
   const { username, email, password } = req.body
-  // console.log('Raw body:', req.body)
   try {
-    // console.log('Signup request:', { username, email, password })
     if (!email || !password || !username) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Email, password and username are required' })
     }
@@ -159,7 +157,6 @@ const logout = async (req, res) => {
     // Cố gắng lấy token từ body hoặc header
     const refreshToken = req.body.refreshToken
 
-    // console.log('Refresh token request:', { refreshToken })
     if (!refreshToken) return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'No refresh token provided' })
 
     const decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET)
@@ -176,8 +173,6 @@ const logout = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body
-    // debug email
-    // console.log(email)
     const user = await User.findOne({ email })
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
@@ -210,25 +205,18 @@ export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params
     const { password } = req.body
-    // debug token
-    // console.log('token', token)
-    // debug password
-    // console.log('password', password)
     if (!token || !password) {
       return res.status(400).json({ message: 'Token và mật khẩu là bắt buộc' })
     }
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
 
-    // debug hashedToken
-    // console.log('hashedToken', hashedToken)
-
     const userId = await redis.get(`reset_token:${hashedToken}`)
 
     if (!userId) {
       return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' })
     }
-    // ✅ Tìm user theo userId lấy từ Redis
+    // Tìm user theo userId lấy từ Redis
     const user = await User.findById(userId)
 
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -237,7 +225,7 @@ export const resetPassword = async (req, res) => {
       { $set: { password_hash: hashedPassword, updated_at: new Date() } }
     )
 
-    // 🧹 Xóa token khỏi Redis
+    // Xóa token khỏi Redis
     await redis.del(`reset_token:${hashedToken}`)
 
     const { accessToken, refreshToken } = generateTokens(user._id)
@@ -270,7 +258,7 @@ const changePassword = async (req, res) => {
     if (oldPassword === newPassword) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: 'New password must be different from old password' })
     }
-    await Auth.changePasswordService(req.user._id, oldPassword, newPassword)
+    await authService.changePasswordService(req.user._id, oldPassword, newPassword)
 
     res.json({ message: 'Password changed successfully' })
   } catch (error) {
@@ -290,13 +278,11 @@ const getProfile = async (req, res) => {
 }
 
 // 10. Edit Profile - not implemented yet
-export const editProfile = async (req, res) => {
+const editProfile = async (req, res) => {
   try {
     // const { username, email, calorieLimit, avatarUrl, gender, dob, height, weight } = req.body
     const profileData = req.body
-    // console.log('Profile data:', profileData)
     const userId = req.user._id // req.user là user đã được xác thực từ middleware
-    // console.log('User ID:', userId)
     await userService.editProfileService(userId, profileData)
 
     res.json({ message: 'Profile updated successfully' })
@@ -307,7 +293,7 @@ export const editProfile = async (req, res) => {
 }
 
 // 11. Login with Google - not implemented yet
-export const loginWithGoogle = async (req, res) => {
+const loginWithGoogle = async (req, res) => {
   try {
     const { credential } = req.body
 
@@ -375,6 +361,35 @@ export const loginWithGoogle = async (req, res) => {
   }
 }
 
+// 12. Forgot password with OTP
+const forgotPasswordOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
+    }
+    await authService.forgotPasswordOtp(user)
+    return res.status(200).json({ message: 'If the email exists, an OTP has been sent' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+// 13. Reset password with OTP
+export const resetPasswordOtp = async (req, res, next) => {
+  try {
+    const { otp, email, newPassword } = req.body
+    if (!email || !otp || !newPassword)
+      return res.status(400).json({ message: 'Email, otp and newPassword are required' })
+
+    await authService.verifyOtpAndResetPassword(otp, email, newPassword)
+    return res.status(StatusCodes.OK).json({ message: 'Password reset successful' })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const authController = {
   login,
   refreshToken,
@@ -385,5 +400,7 @@ export const authController = {
   changePassword,
   getProfile,
   editProfile,
-  loginWithGoogle
+  loginWithGoogle,
+  forgotPasswordOtp,
+  resetPasswordOtp
 }
