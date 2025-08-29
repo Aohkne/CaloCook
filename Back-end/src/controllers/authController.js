@@ -3,7 +3,7 @@ import { env } from '@/config/environment'
 import { redis } from '@/config/redis.js'
 import { ObjectId } from 'mongodb'
 import { userModel as User } from '@/models/userModel.js'
-import { authService as Auth } from '@/services/authService.js'
+import { authService } from '@/services/authService.js'
 import { userService } from '@/services/userService.js'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
@@ -258,7 +258,7 @@ const changePassword = async (req, res) => {
     if (oldPassword === newPassword) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: 'New password must be different from old password' })
     }
-    await Auth.changePasswordService(req.user._id, oldPassword, newPassword)
+    await authService.changePasswordService(req.user._id, oldPassword, newPassword)
 
     res.json({ message: 'Password changed successfully' })
   } catch (error) {
@@ -278,7 +278,7 @@ const getProfile = async (req, res) => {
 }
 
 // 10. Edit Profile - not implemented yet
-export const editProfile = async (req, res) => {
+const editProfile = async (req, res) => {
   try {
     // const { username, email, calorieLimit, avatarUrl, gender, dob, height, weight } = req.body
     const profileData = req.body
@@ -293,7 +293,7 @@ export const editProfile = async (req, res) => {
 }
 
 // 11. Login with Google - not implemented yet
-export const loginWithGoogle = async (req, res) => {
+const loginWithGoogle = async (req, res) => {
   try {
     const { credential } = req.body
 
@@ -361,6 +361,35 @@ export const loginWithGoogle = async (req, res) => {
   }
 }
 
+// 12. Forgot password with OTP
+const forgotPasswordOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
+    }
+    await authService.forgotPasswordOtp(user)
+    return res.status(200).json({ message: 'If the email exists, an OTP has been sent' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+// 13. Reset password with OTP
+export const resetPasswordOtp = async (req, res, next) => {
+  try {
+    const { otp, email, newPassword } = req.body
+    if (!email || !otp || !newPassword)
+      return res.status(400).json({ message: 'Email, otp and newPassword are required' })
+
+    await authService.verifyOtpAndResetPassword(otp, email, newPassword)
+    return res.status(StatusCodes.OK).json({ message: 'Password reset successful' })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const authController = {
   login,
   refreshToken,
@@ -371,5 +400,7 @@ export const authController = {
   changePassword,
   getProfile,
   editProfile,
-  loginWithGoogle
+  loginWithGoogle,
+  forgotPasswordOtp,
+  resetPasswordOtp
 }
