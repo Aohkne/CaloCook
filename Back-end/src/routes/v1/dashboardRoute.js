@@ -59,6 +59,8 @@ const Router = expesss.Router()
  *                 data:
  *                   type: number
  *                   example: 10
+ * 
+ * 
  * /api/v1/dashboard/top-favorites:
  *   get:
  *     summary: Get top 10 most favorited dishes
@@ -193,6 +195,7 @@ Router.route('/dish-count').get(
   authMiddleware.authorizeRole(['admin']),
   dishController.getDishCount
 )
+
 Router.route('/top-favorites').get(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['admin']),
