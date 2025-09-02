@@ -34,9 +34,11 @@ html ::-webkit-scrollbar-track {
   // Primary colors
   --primary: #9af10c;
   --secondary: #006955;
+  --tertiary: #c6debe;
 
   // Text
   --title: #080e2d;
+  --titleWithBg: #ffffff;
   --description: #888888;
 
   --background: #fcfaf3;
@@ -55,6 +57,8 @@ html ::-webkit-scrollbar-track {
   --input-placeholder: rgba(8, 14, 45, 0.6);
 
   // Other colors
+  --white: #ffffff;
+  --black: #1e1e1e;
   --red: #dc2e60;
   --yellow: #eec756;
 }
