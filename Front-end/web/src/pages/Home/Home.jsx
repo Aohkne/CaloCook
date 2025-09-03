@@ -4,6 +4,7 @@ import Hero from '@/components/sections/Hero/Hero';
 
 import styles from './Home.module.scss';
 import classNames from 'classnames/bind';
+import Features from '@/components/sections/Features/Features';
 
 const cx = classNames.bind(styles);
 
@@ -12,6 +13,7 @@ function Home() {
     <div className={cx('wrapper')}>
       <Navbar />
       <Hero />
+      <Features />
     </div>
   );
 }

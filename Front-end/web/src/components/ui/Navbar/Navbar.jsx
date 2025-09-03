@@ -13,8 +13,6 @@ const cx = classNames.bind(styles);
 function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
-  console.log(toggleTheme);
-
   return (
     <div className={cx('wrapper')}>
       <div className={cx('logo-container')}>

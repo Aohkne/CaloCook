@@ -8,6 +8,7 @@
       "@components/*": ["components/*"],
       "@constants/*": ["constants/*"],
       "@contexts/*": ["contexts/*"],
+      "@data/*": ["data/*"],
       "@hooks/*": ["hooks/*"],
       "@pages/*": ["pages/*"],
       "@routes/*": ["routes/*"],
