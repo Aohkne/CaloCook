@@ -152,7 +152,11 @@ function FAQ() {
           <div className={cx('cta-content')}>
             <h3 className={cx('cta-title')}>Still have questions?</h3>
             <p className={cx('cta-description')}>Contact us via the CaloCook fanpage to get quick support!</p>
-            <Link to={'mailto:aohkne@gmail.com'} target='_blank' className={cx('cta-button')}>
+            <Link
+              to={'https://mail.google.com/mail/?view=cm&fs=1&to=contact.aohkne@gmail.com'}
+              target='_blank'
+              className={cx('cta-button')}
+            >
               Contact Now
             </Link>
           </div>

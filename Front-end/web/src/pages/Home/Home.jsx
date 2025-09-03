@@ -4,6 +4,7 @@ import Hero from '@/components/sections/Hero/Hero';
 import Features from '@/components/sections/Features/Features';
 import Guide from '@/components/sections/Guide/Guide';
 import FAQ from '@/components/sections/FAQ/FAQ';
+import Footer from '@/components/sections/Footer/Footer';
 
 import styles from './Home.module.scss';
 import classNames from 'classnames/bind';
@@ -18,6 +19,7 @@ function Home() {
       <Features />
       <Guide />
       <FAQ />
+      <Footer />
     </div>
   );
 }
