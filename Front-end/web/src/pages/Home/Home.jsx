@@ -1,10 +1,12 @@
 import Navbar from '@/components/ui/Navbar/Navbar';
 
 import Hero from '@/components/sections/Hero/Hero';
+import Features from '@/components/sections/Features/Features';
+import Guide from '@/components/sections/Guide/Guide';
+import FAQ from '@/components/sections/FAQ/FAQ';
 
 import styles from './Home.module.scss';
 import classNames from 'classnames/bind';
-import Features from '@/components/sections/Features/Features';
 
 const cx = classNames.bind(styles);
 
@@ -14,6 +16,8 @@ function Home() {
       <Navbar />
       <Hero />
       <Features />
+      <Guide />
+      <FAQ />
     </div>
   );
 }

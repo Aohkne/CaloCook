@@ -1,0 +1,39 @@
+@use '@styles/mixin' as *;
+
+.wrapper {
+  .title {
+    margin: 15px 0;
+    font-size: 5rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--secondary);
+  }
+
+  .video-container {
+    margin: 20px auto;
+    min-width: 60%;
+    max-width: 60%;
+    height: 500px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  @include respond-above(md) {
+    .video-container {
+      min-width: 90%;
+      max-width: 90%;
+      height: 450px;
+    }
+
+    @include respond-above(xs) {
+      .title {
+        margin: 15px 0;
+        font-size: 3.5rem;
+      }
+      .video-container {
+        height: 350px;
+      }
+    }
+  }
+}
