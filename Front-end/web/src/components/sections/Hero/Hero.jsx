@@ -1,4 +1,6 @@
-import Navbar from '@/components/ui/Navbar/Navbar';
+import { Link } from 'react-router-dom';
+
+import { ROUTES } from '@/constants/routes';
 
 import styles from './Hero.module.scss';
 import classNames from 'classnames/bind';
@@ -11,7 +13,10 @@ function Hero() {
       <div className={cx('content')}>
         <div className={cx('title')}>Hungry? Swipe left!</div>
         <div className={cx('description')}>Eat what you love, track what you need</div>
-        <button className={cx('action')}>Create account</button>
+
+        <Link to={ROUTES.REGISTER} className={cx('action')}>
+          Create account
+        </Link>
       </div>
     </div>
   );

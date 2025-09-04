@@ -1,5 +1,10 @@
 export const ROUTES = {
+  // LANDING PAGE
   HOME: '/',
   SUPPORT: '/support',
-  DOWNLOAD: '/download'
+  DOWNLOAD: '/download',
+
+  // AUTH
+  LOGIN: '/login',
+  REGISTER: '/register'
 };
