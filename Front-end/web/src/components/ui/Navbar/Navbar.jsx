@@ -44,7 +44,9 @@ function Navbar() {
           )}
         </button>
 
-        <button className={cx('btn-login')}>Login</button>
+        <Link to={ROUTES.LOGIN} className={cx('btn-login')}>
+          Login
+        </Link>
       </div>
     </div>
   );

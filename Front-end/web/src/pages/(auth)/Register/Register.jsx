@@ -94,7 +94,7 @@ function Register() {
           </Link>
         </div>
 
-        <div className={cx('action')}>
+        <div className={cx('theme')}>
           <button className={cx('btn')} onClick={toggleTheme}>
             {theme === 'light' ? (
               <Icon icon='mdi:weather-night' width='20' height='20' color='#62a5f7' />
@@ -216,6 +216,10 @@ function Register() {
               GOOGLE
               <Icon icon='flat-color-icons:google' width='20' height='20' />
             </button>
+
+            <div className={cx('navigate')}>
+              Already have an account? <Link to={ROUTES.LOGIN}>Sign in here</Link>
+            </div>
           </div>
         </div>
       </div>

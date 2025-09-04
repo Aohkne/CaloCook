@@ -39,10 +39,12 @@
     display: flex;
     gap: 15px;
 
+    a,
     button {
       font-size: 1.8rem;
       font-weight: 600;
       color: var(--white);
+      text-decoration: none;
       text-transform: uppercase;
       background-color: transparent;
       transition: 0.3s linear;
@@ -66,7 +68,7 @@
     }
 
     .btn-login {
-      padding: 10px 30px;
+      padding: 8px 30px;
       border-radius: 10px;
       border: 2px solid var(--white);
       filter: drop-shadow(1px 1px 2px var(--black));

@@ -6,5 +6,6 @@ export const ROUTES = {
 
   // AUTH
   LOGIN: '/login',
-  REGISTER: '/register'
+  REGISTER: '/register',
+  FORGET_PASSWORD: '/forget-password'
 };
