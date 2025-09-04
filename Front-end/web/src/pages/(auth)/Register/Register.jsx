@@ -1,20 +1,27 @@
 import { Icon } from '@iconify/react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 
 import { useTheme } from '@hooks/useTheme';
 
+import { REGEX } from '@/constants/regex';
 import { ROUTES } from '@/constants/routes';
 
 import { randomMessages } from '@/data/randomMessages';
 
 import styles from './Register.module.scss';
 import classNames from 'classnames/bind';
+import { register } from '@/api/auth';
 
 const cx = classNames.bind(styles);
 
 function Register() {
   const { theme, toggleTheme } = useTheme();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const [currentMessage, setCurrentMessage] = useState(null);
   const [showMessage, setShowMessage] = useState(false);
@@ -84,6 +91,42 @@ function Register() {
     };
   }, []);
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    if (!email || !username || !password || !confirmPassword) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (!REGEX.EMAIL.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Password does not match');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await register(username, email, password);
+
+      setSuccess('Registration successful! Redirecting to login...');
+
+      setTimeout(() => {
+        navigate(ROUTES.LOGIN);
+      }, 2000);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Register failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={cx('wrapper')}>
       {/* Header */}
@@ -107,6 +150,10 @@ function Register() {
 
       {/* Container */}
       <div className={cx('container')}>
+        {/* MSG */}
+        {error && <div className={cx('error-message')}>{error}</div>}
+        {success && <div className={cx('success-message')}>{success}</div>}
+
         {/* Left */}
         <div className={cx('image-container')}>
           <div className={cx('title')}>Start Your Healthy Journey</div>
@@ -155,7 +202,16 @@ function Register() {
           <div className={cx('form-content')}>
             {/* Email */}
             <div className={cx('input-form')}>
-              <input type='email' value={email} placeholder='Email' onChange={(e) => setEmail(e.target.value)} />
+              <input
+                type='email'
+                value={email}
+                placeholder='Email'
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError('');
+                  setSuccess('');
+                }}
+              />
             </div>
 
             {/* Username */}
@@ -164,7 +220,11 @@ function Register() {
                 type='text'
                 value={username}
                 placeholder='Username'
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  setError('');
+                  setSuccess('');
+                }}
               />
             </div>
 
@@ -176,7 +236,13 @@ function Register() {
                 placeholder='Password'
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <span onClick={() => setShowPassword(!showPassword)}>
+              <span
+                onClick={() => {
+                  setShowPassword(!showPassword);
+                  setError('');
+                  setSuccess('');
+                }}
+              >
                 <Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} width='20' height='20' />
               </span>
             </div>
@@ -187,7 +253,11 @@ function Register() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 placeholder='Confirm Password'
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setError('');
+                  setSuccess('');
+                }}
               />
 
               <div className={cx('action')}>
@@ -204,7 +274,9 @@ function Register() {
               </div>
             </div>
 
-            <button className={cx('btn-form')}>REGISTER</button>
+            <button className={cx('btn-form')} onClick={handleRegister} disabled={isLoading}>
+              {isLoading ? 'REGISTERING...' : 'REGISTER'}
+            </button>
 
             <div className={cx('divider')}>
               <span className={cx('divider-line')}></span>

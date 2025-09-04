@@ -18,7 +18,9 @@ const cx = classNames.bind(styles);
 function Login() {
   const { theme, toggleTheme } = useTheme();
   const { login: authLogin } = useAuth();
+
   const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -103,7 +105,11 @@ function Login() {
 
       authLogin(response.accessToken);
 
-      navigate(ROUTES.HOME);
+      setSuccess('Login successful!');
+
+      setTimeout(() => {
+        navigate(ROUTES.HOME);
+      }, 2000);
     } catch (error) {
       setError(error.response?.data?.message || 'Login failed. Please try again.');
     } finally {
@@ -134,8 +140,9 @@ function Login() {
 
       {/* Container */}
       <div className={cx('container')}>
-        {/* Error */}
+        {/* MSG */}
         {error && <div className={cx('error-message')}>{error}</div>}
+        {success && <div className={cx('success-message')}>{success}</div>}
 
         {/* Left */}
         <div className={cx('form-container')}>
@@ -148,7 +155,11 @@ function Login() {
                 type='text'
                 value={usernameOrEmail}
                 placeholder='Email/Username'
-                onChange={(e) => setUsernameOrEmail(e.target.value)}
+                onChange={(e) => {
+                  setUsernameOrEmail(e.target.value);
+                  setError('');
+                  setSuccess('');
+                }}
               />
             </div>
 
@@ -158,7 +169,11 @@ function Login() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 placeholder='Password'
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError('');
+                  setSuccess('');
+                }}
               />
               <span onClick={() => setShowPassword(!showPassword)}>
                 <Icon icon={showPassword ? 'mdi:eye-off' : 'mdi:eye'} width='20' height='20' />
