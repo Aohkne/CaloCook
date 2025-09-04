@@ -1,8 +1,9 @@
 import { Icon } from '@iconify/react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 
 import { useTheme } from '@hooks/useTheme';
+import { useAuth } from '@/hooks/useAuth';
 
 import { ROUTES } from '@/constants/routes';
 
@@ -10,11 +11,16 @@ import { randomMessages } from '@/data/randomMessages';
 
 import styles from './Login.module.scss';
 import classNames from 'classnames/bind';
+import { login } from '@/api/auth';
 
 const cx = classNames.bind(styles);
 
 function Login() {
   const { theme, toggleTheme } = useTheme();
+  const { login: authLogin } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const [currentMessage, setCurrentMessage] = useState(null);
   const [showMessage, setShowMessage] = useState(false);
@@ -23,10 +29,8 @@ function Login() {
 
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -83,6 +87,30 @@ function Login() {
     };
   }, []);
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    if (!usernameOrEmail || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await login(usernameOrEmail, password);
+
+      authLogin(response.accessToken);
+
+      navigate(ROUTES.HOME);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={cx('wrapper')}>
       {/* Header */}
@@ -106,9 +134,13 @@ function Login() {
 
       {/* Container */}
       <div className={cx('container')}>
+        {/* Error */}
+        {error && <div className={cx('error-message')}>{error}</div>}
+
         {/* Left */}
         <div className={cx('form-container')}>
           <div className={cx('title')}>SIGN IN</div>
+
           <div className={cx('form-content')}>
             {/* Username */}
             <div className={cx('input-form')}>
@@ -137,7 +169,9 @@ function Login() {
               <Link to={ROUTES.FORGET_PASSWORD}>Forget password ?</Link>
             </div>
 
-            <button className={cx('btn-form')}>LOGIN</button>
+            <button className={cx('btn-form')} onClick={handleLogin} disabled={isLoading}>
+              {isLoading ? 'LOGGING IN...' : 'LOGIN'}
+            </button>
 
             <div className={cx('divider')}>
               <span className={cx('divider-line')}></span>
