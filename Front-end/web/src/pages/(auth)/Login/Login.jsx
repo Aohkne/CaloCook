@@ -26,7 +26,6 @@ function Login() {
 
   const [currentMessage, setCurrentMessage] = useState(null);
   const [showMessage, setShowMessage] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [animationPhase, setAnimationPhase] = useState(''); // 'user', 'bot', 'complete'
 
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
@@ -44,7 +43,6 @@ function Login() {
         const selectedMessage = randomMessages[randomIndex];
 
         setCurrentMessage(selectedMessage);
-        setIsAnimating(true);
         setShowMessage(true);
 
         // Start with user animation
@@ -67,7 +65,6 @@ function Login() {
 
           // Clean up
           setTimeout(() => {
-            setIsAnimating(false);
             setCurrentMessage(null);
           }, 300);
         }, 8000);
