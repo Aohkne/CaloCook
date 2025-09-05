@@ -130,7 +130,7 @@ function Register() {
       <div className={cx('header')}>
         <div className={cx('logo-container')}>
           <Link to={ROUTES.HOME}>
-            <img src='/img/logo_word.png' alt='logo' />
+            <img src='/images/logo_word.png' alt='logo' />
           </Link>
         </div>
 
@@ -180,7 +180,7 @@ function Register() {
                     animationPhase === 'complete' && 'bot-complete'
                   )}
                 >
-                  <img src='/img/icon_Bot.png' alt='bot' />
+                  <img src='/images/icon_Bot.png' alt='bot' />
                   <div className={cx('message-content')}>{currentMessage.bot}</div>
                 </div>
               </div>

@@ -12,7 +12,7 @@ function Footer() {
   return (
     <section className={cx('wrapper')}>
       <footer>
-        <img src={'/img/logo-footer.png'} alt='logo' width={1048} height={220} />
+        <img src={'/images/logo-footer.png'} alt='logo' width={1048} height={220} />
 
         <div className={cx('divider')} />
 

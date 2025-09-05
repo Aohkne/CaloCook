@@ -58,7 +58,7 @@ function ForgetPassword() {
       <div className={cx('header')}>
         <div className={cx('logo-container')}>
           <Link to={ROUTES.HOME}>
-            <img src='/img/logo_word.png' alt='logo' />
+            <img src='/images/logo_word.png' alt='logo' />
           </Link>
         </div>
 

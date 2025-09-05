@@ -1,27 +1,35 @@
 'use client';
 
-import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-
 import { Icon } from '@iconify/react';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useTheme } from '@/hooks/useTheme';
 
 import { ROUTES } from '@/constants/routes';
 
+import { logout } from '@/api/auth';
+
 import styles from './Sidebar.module.scss';
 import classNames from 'classnames/bind';
-import { logout } from '@/api/auth';
 
 const cx = classNames.bind(styles);
 
 function Sidebar() {
-  const [isLocked, setIsLocked] = useState(localStorage.getItem('sidebarLock'));
-  const [isVisible, setIsVisible] = useState(localStorage.getItem('sidebarLock'));
+  const [isLocked, setIsLocked] = useState(() => {
+    const stored = localStorage.getItem('sidebarLock');
+    return stored !== null ? stored === 'true' : true;
+  });
+
+  const [isVisible, setIsVisible] = useState(() => {
+    const stored = localStorage.getItem('sidebarLock');
+    return stored !== null ? stored === 'true' : true;
+  });
+
   let timeoutId = null;
 
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const sidebarLock = localStorage.getItem('sidebarLock');
@@ -92,7 +100,7 @@ function Sidebar() {
       onMouseMove={resetTimeout}
     >
       <div className={cx('content')}>
-        <img src='/img/logo_word.png' alt='logo' />
+        <img src='/images/logo_word.png' alt='logo' />
 
         {/* List */}
         <div className={cx('title')}>Menu</div>
@@ -133,7 +141,7 @@ function Sidebar() {
           <div className={cx('item')}>
             Lock
             <label className={cx('toggle-switch')}>
-              <input type='checkbox' checked={isLocked || false} onChange={() => setIsLocked((prev) => !prev)} />
+              <input type='checkbox' checked={Boolean(isLocked)} onChange={() => setIsLocked((prev) => !prev)} />
               <span className={cx('slider')}></span>
             </label>
           </div>

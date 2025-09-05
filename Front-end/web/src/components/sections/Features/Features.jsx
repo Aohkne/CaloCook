@@ -30,11 +30,11 @@ function Features() {
             Access CaloCook anytime, anywhere – whether on your laptop or your smartphone.
           </div>
           <Link to={''} className={cx('action')}>
-            <img src='/img/google-play.png' alt='google-play' />
+            <img src='/images/google-play.png' alt='google-play' />
           </Link>
         </div>
         <div className={cx('download-image')}>
-          <img src='/img/download-sample.png' alt='download' />
+          <img src='/images/download-sample.png' alt='download' />
         </div>
       </div>
     </div>
