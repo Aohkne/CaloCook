@@ -109,13 +109,55 @@ const getAverageRating = async (dishId) => {
   }
 }
 
-const getTopRatings = async (limit) => {
+const getTopRatings = async (limit = 10) => {
   try {
     const ratings = await GET_DB()
       .collection(_COLLECTION_NAME)
-      .find()
-      .sort({ star: -1, createdAt: -1 })
-      .limit(limit)
+      .aggregate([
+        {
+          $group: {
+            _id: '$dishId',
+            averageRating: { $avg: '$star' },
+            totalRatings: { $sum: 1 }
+          }
+        },
+        {
+          $sort: {
+            averageRating: -1,
+            totalRatings: -1
+          }
+        },
+        {
+          $limit: limit
+        },
+        {
+          $lookup: {
+            from: 'dish',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'dish'
+          }
+        },
+        { $unwind: '$dish' },
+        {
+          $project: {
+            dishId: { $toString: '$_id' },
+            averageRating: { $round: ['$averageRating', 2] },
+            totalRatings: 1,
+            dish: {
+              name: '$dish.name',
+              cookingTime: '$dish.cookingTime',
+              calorie: '$dish.calorie',
+              difficulty: '$dish.difficulty',
+              description: '$dish.description',
+              imageUrl: '$dish.imageUrl',
+              isActive: '$dish.isActive',
+              createdAt: { $toString: '$dish.createdAt' },
+              updatedAt: { $toString: '$dish.updatedAt' }
+            }
+          }
+        }
+      ])
       .toArray()
     return ratings
   } catch (error) {
