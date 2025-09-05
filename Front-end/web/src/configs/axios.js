@@ -1,11 +1,10 @@
 import axios from 'axios';
-import { getCookie, deleteCookie } from '@/utils/cookies';
+import { getCookie, deleteCookie, setCookie } from '@/utils/cookies';
 
 const apiURL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   baseURL: apiURL,
-  // withCredentials: true,
   credentials: true,
   headers: {
     'Content-Type': 'application/json'
@@ -25,11 +24,46 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401) {
-      // Clear access token cookie and redirect to login
-      deleteCookie('accessToken');
-      window.location.href = '/login';
+    const originalRequest = error.config;
+
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      const refreshToken = getCookie('refreshToken');
+
+      if (refreshToken) {
+        try {
+          // Gọi API refresh token
+          const response = await axios.post(`${apiURL}/api/v1/auth/refresh-token`, {
+            refreshToken: refreshToken
+          });
+
+          const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+          // Lưu token mới
+          setCookie('accessToken', accessToken, 7);
+          if (newRefreshToken) {
+            setCookie('refreshToken', newRefreshToken, 30);
+          }
+
+          // Retry request với token mới
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return api(originalRequest);
+        } catch (refreshError) {
+          // Refresh token hết hạn, clear tất cả và redirect login
+          deleteCookie('accessToken');
+          deleteCookie('refreshToken');
+          deleteCookie('userRole');
+          window.location.href = '/login';
+        }
+      } else {
+        // Không có refresh token, clear và redirect
+        deleteCookie('accessToken');
+        deleteCookie('userRole');
+        window.location.href = '/login';
+      }
     }
+
     return Promise.reject(error);
   }
 );

@@ -12,5 +12,9 @@ export const ROUTES = {
   //ADMIN
   DASHBOARD: '/dashboard',
   USER_MANAGEMENT: '/user-management',
-  DISH_MANAGEMENT: '/dish-management'
+  DISH_MANAGEMENT: '/dish-management',
+  PROFILE_ADMIN: '/admin/profile',
+
+  // ERROR
+  UNAUTHORIZED: '/unauthorized'
 };

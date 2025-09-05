@@ -5,13 +5,15 @@ import { useEffect, useState, useRef } from 'react';
 import { useTheme } from '@hooks/useTheme';
 import { useAuth } from '@/hooks/useAuth';
 
+import { ROLE } from '@/constants/role';
 import { ROUTES } from '@/constants/routes';
 
 import { randomMessages } from '@/data/randomMessages';
 
+import { login } from '@/api/auth';
+
 import styles from './Login.module.scss';
 import classNames from 'classnames/bind';
-import { login } from '@/api/auth';
 
 const cx = classNames.bind(styles);
 
@@ -100,12 +102,16 @@ function Login() {
     try {
       const response = await login(usernameOrEmail, password);
 
-      authLogin(response.accessToken);
+      authLogin(response.accessToken, response.refreshToken, response.role);
 
       setSuccess('Login successful!');
 
       setTimeout(() => {
-        navigate(ROUTES.HOME);
+        if (response.role === ROLE.ADMIN) {
+          navigate(ROUTES.DASHBOARD);
+        } else {
+          navigate(ROUTES.HOME);
+        }
       }, 2000);
     } catch (error) {
       setError(error.response?.data?.message || 'Login failed. Please try again.');

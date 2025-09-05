@@ -11,6 +11,7 @@ import { ROUTES } from '@/constants/routes';
 
 import styles from './Sidebar.module.scss';
 import classNames from 'classnames/bind';
+import { logout } from '@/api/auth';
 
 const cx = classNames.bind(styles);
 
@@ -69,8 +70,19 @@ function Sidebar() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  const handleLogout = () => {
-    navigate(ROUTES.HOME);
+  const handleLogout = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await logout();
+      console.log(response || 'Logout successfully.');
+
+      setTimeout(() => {
+        navigate(ROUTES.LOGIN);
+      }, 2000);
+    } catch (error) {
+      console.error(error.response?.data?.message || 'Logout fail. Please try again.');
+    }
   };
 
   return (
@@ -106,6 +118,13 @@ function Sidebar() {
               <span>Dishs</span>
             </Link>
           </div>
+
+          <div className={cx('item')}>
+            <Link to={ROUTES.PROFILE_ADMIN}>
+              <Icon icon='mingcute:user-edit-fill' width='20' height='20' />
+              <span>Profile</span>
+            </Link>
+          </div>
         </div>
 
         {/* Setting */}
@@ -131,7 +150,7 @@ function Sidebar() {
 
       <div className={cx('action')}>
         <button className={cx('logout-btn')} onClick={handleLogout}>
-          {/* <LogOut /> */}
+          <Icon icon='material-symbols:logout-rounded' width='20' height='20' />
           <span>LOGOUT</span>
         </button>
       </div>

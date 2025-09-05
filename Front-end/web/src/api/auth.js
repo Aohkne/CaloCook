@@ -16,3 +16,15 @@ export const register = async (username, email, password) => {
   });
   return response.data;
 };
+
+export const logout = async (refreshToken) => {
+  try {
+    const response = await api.post('/auth/logout', {
+      refreshToken: refreshToken
+    });
+    return response.data;
+  } catch (error) {
+    console.warn('Logout API failed, clearing client tokens anyway:', error);
+    throw error;
+  }
+};
