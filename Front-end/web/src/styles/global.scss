@@ -43,6 +43,8 @@ html ::-webkit-scrollbar-track {
   --description: #888888;
 
   --background: #fcfaf3;
+  --background-side: #fcfaf3a8;
+  --background-subside: #ffffff99;
 
   --card-bg: #ffffff;
   --btn-bg: #ffffff;
@@ -78,6 +80,8 @@ body.dark {
   --description: #aaaaaa;
 
   --background: #0e0f1a;
+  --background-side: #0e0f1aa8;
+  --background-subside: #080e2d99;
 
   --card-bg: #1b1c1d;
   --btn-bg: #1b1c1d;

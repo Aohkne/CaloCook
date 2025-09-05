@@ -8,6 +8,8 @@ import ForgetPassword from '@/pages/(auth)/ForgetPassword/ForgetPassword';
 
 import Home from '@/pages/Home/Home';
 
+import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
+
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -20,6 +22,9 @@ function AppRoutes() {
 
         {/* LANDING PAGE */}
         <Route path={ROUTES.HOME} element={<Home />} />
+
+        {/* ADMIN */}
+        <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   );

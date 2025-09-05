@@ -7,5 +7,10 @@ export const ROUTES = {
   // AUTH
   LOGIN: '/login',
   REGISTER: '/register',
-  FORGET_PASSWORD: '/forget-password'
+  FORGET_PASSWORD: '/forget-password',
+
+  //ADMIN
+  DASHBOARD: '/dashboard',
+  USER_MANAGEMENT: '/user-management',
+  DISH_MANAGEMENT: '/dish-management'
 };
