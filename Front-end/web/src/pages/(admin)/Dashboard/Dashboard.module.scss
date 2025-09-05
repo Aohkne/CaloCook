@@ -1,3 +1,5 @@
+@use '@styles/mixin' as *;
+
 .wrapper {
   padding: 20px 15px;
 
@@ -5,5 +7,21 @@
     font-size: 3rem;
     font-weight: 600;
     color: var(--title);
+  }
+
+  .content {
+    display: grid;
+    margin: 15px 0;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+
+    @include respond-above(lg) {
+      margin: 10px 0;
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include respond-above(md) {
+      grid-template-columns: repeat(1, 1fr);
+    }
   }
 }

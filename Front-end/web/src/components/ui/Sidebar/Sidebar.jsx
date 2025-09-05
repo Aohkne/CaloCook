@@ -96,14 +96,14 @@ function Sidebar() {
           <div className={cx('item')}>
             <Link to={ROUTES.USER_MANAGEMENT}>
               <Icon icon='mdi:user-group' width='20' height='20' />
-              <span>User</span>
+              <span>Users</span>
             </Link>
           </div>
 
           <div className={cx('item')}>
             <Link to={ROUTES.DISH_MANAGEMENT}>
               <Icon icon='bxs:dish' width='20' height='20' />
-              <span>Dish</span>
+              <span>Dishs</span>
             </Link>
           </div>
         </div>

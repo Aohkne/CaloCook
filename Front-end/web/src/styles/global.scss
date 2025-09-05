@@ -62,7 +62,17 @@ html ::-webkit-scrollbar-track {
   // Other colors
   --white: #ffffff;
   --black: #1e1e1e;
+
+  --light-blue: #cee3ff;
+  --blue: #3e91ff;
+
+  --light-green: #e4f9f2;
+  --green: #3df7b9;
+
+  --light-red: #ecb8be;
   --red: #dc2e60;
+
+  --light-yellow: #fee9ad;
   --yellow: #eec756;
 }
 
@@ -88,7 +98,7 @@ body.dark {
 
   // Borders & shadows
   --border: #444444;
-  --shadow: rgba(0, 0, 0, 0.6);
+  --shadow: rgba(255, 255, 255, 0.5);
 
   // Input
   --input-bg: rgba(255, 255, 255, 0.05);
@@ -99,6 +109,22 @@ body.dark {
   // Other colors
   --white: #ffffff;
   --black: #000000;
+
+  --light-blue: #3e91ff33;
+  --blue: #4da6ff;
+  --cyan: #00e5ff;
+
+  --light-green: #3df7b933;
+  --green: #3df7b9;
+  --teal: #20e3d2;
+
+  --light-red: #ff4d6d33;
   --red: #ff4d6d;
+  --pink: #ff77a9;
+
+  --light-yellow: #ffd85f33;
   --yellow: #ffd85f;
+  --orange: #ff9f45;
+
+  --purple: #a26bfa;
 }
