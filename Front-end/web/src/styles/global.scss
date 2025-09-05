@@ -15,16 +15,17 @@ body {
 //Scrollbar
 html ::-webkit-scrollbar {
   border-radius: 0;
-  width: 8px;
+  width: 5px;
+  height: 5px;
 }
 
 html ::-webkit-scrollbar-thumb {
-  background-color: #00000026;
+  background-color: var(--secondary);
   border-radius: 4px;
 }
 
 html ::-webkit-scrollbar-track {
-  background-color: #0000;
+  background-color: transparent;
   border-radius: 0;
 }
 
@@ -34,12 +35,16 @@ html ::-webkit-scrollbar-track {
   // Primary colors
   --primary: #9af10c;
   --secondary: #006955;
+  --tertiary: #c6debe;
 
   // Text
   --title: #080e2d;
+  --titleWithBg: #ffffff;
   --description: #888888;
 
   --background: #fcfaf3;
+  --background-side: #fcfaf3a8;
+  --background-subside: #ffffff99;
 
   --card-bg: #ffffff;
   --btn-bg: #ffffff;
@@ -55,7 +60,19 @@ html ::-webkit-scrollbar-track {
   --input-placeholder: rgba(8, 14, 45, 0.6);
 
   // Other colors
+  --white: #ffffff;
+  --black: #1e1e1e;
+
+  --light-blue: #cee3ff;
+  --blue: #3e91ff;
+
+  --light-green: #e4f9f2;
+  --green: #3df7b9;
+
+  --light-red: #ecb8be;
   --red: #dc2e60;
+
+  --light-yellow: #fee9ad;
   --yellow: #eec756;
 }
 
@@ -65,27 +82,49 @@ body.dark {
   // Primary colors
   --primary: #9af10c;
   --secondary: #1db59e;
+  --tertiary: #2b3a32;
 
   // Text
   --title: #fcfaf3;
+  --titleWithBg: #0e0f1a;
   --description: #aaaaaa;
 
   --background: #0e0f1a;
+  --background-side: #0e0f1aa8;
+  --background-subside: #080e2d99;
 
   --card-bg: #1b1c1d;
   --btn-bg: #1b1c1d;
 
   // Borders & shadows
-  --border: #fcfaf3;
-  --shadow: #fcfaf3;
+  --border: #444444;
+  --shadow: rgba(255, 255, 255, 0.5);
 
   // Input
   --input-bg: rgba(255, 255, 255, 0.05);
   --input-border: rgba(255, 255, 255, 0.2);
   --input-text: #ffffff;
-  --input-placeholder: #bbbbbb;
+  --input-placeholder: rgba(255, 255, 255, 0.6);
 
   // Other colors
+  --white: #ffffff;
+  --black: #000000;
+
+  --light-blue: #3e91ff33;
+  --blue: #4da6ff;
+  --cyan: #00e5ff;
+
+  --light-green: #3df7b933;
+  --green: #3df7b9;
+  --teal: #20e3d2;
+
+  --light-red: #ff4d6d33;
   --red: #ff4d6d;
+  --pink: #ff77a9;
+
+  --light-yellow: #ffd85f33;
   --yellow: #ffd85f;
+  --orange: #ff9f45;
+
+  --purple: #a26bfa;
 }

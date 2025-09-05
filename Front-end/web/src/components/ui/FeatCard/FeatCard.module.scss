@@ -1,0 +1,40 @@
+.wrapper {
+  padding: 15px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--shadow);
+  box-shadow: 3px 3px 1px var(--shadow);
+  background-color: var(--background);
+  transition: all 0.2s ease-in;
+
+  &:hover {
+    cursor: pointer;
+    transform: translateY(3px);
+    box-shadow: 0px 0px 0px var(--shadow);
+    border-color: transparent;
+  }
+
+  .icon-container {
+    display: inline-block;
+    padding: 10px;
+    border-radius: 8px;
+    color: var(--secondary);
+    background: var(--tertiary);
+
+    svg {
+      margin: auto;
+    }
+  }
+
+  .title {
+    margin: 10px 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--secondary);
+  }
+
+  .description {
+    // flex: 1;
+    font-size: 1.5rem;
+    color: var(--secondary);
+  }
+}

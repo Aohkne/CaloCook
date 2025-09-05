@@ -1,0 +1,301 @@
+@use '@styles/mixin' as *;
+
+.table-container {
+  margin-top: 20px;
+  border-radius: 12px;
+  border: 3px solid var(--shadow);
+  background: var(--background);
+  box-shadow: 4px 4px 1px var(--shadow);
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 24px;
+
+  @include respond-above(md) {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  &.favorite {
+    background-color: var(--red);
+  }
+}
+
+.table-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--titleWithBg);
+  margin: 0;
+}
+
+.search-container {
+  position: relative;
+  max-width: 300px;
+
+  @include respond-above(md) {
+    max-width: 100%;
+  }
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  font-size: 1.8rem;
+  color: var(--title);
+  transform: translateY(-50%);
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  font-size: 1.5rem;
+  color: var(--title);
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 2px 2px 2px 0px var(--shadow);
+  }
+
+  &::placeholder {
+    color: var(--input-placeholder);
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-header-cell {
+  padding: 5px 24px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--titleWithBg);
+  background-color: var(--secondary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+
+  &.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+  }
+
+  &.favorite {
+    background-color: var(--red);
+
+    &:hover {
+      color: var(--title);
+      background: var(--light-red);
+    }
+  }
+
+  @include respond-above(md) {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+.header-content {
+  font-size: 1.8rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sort-icon {
+  color: var(--titleWithBg);
+
+  font-size: 3rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+
+  .sortable:hover & {
+    color: var(--title);
+    opacity: 1;
+  }
+}
+
+.table-row {
+  transition: background-color 0.2s ease;
+
+  &.favorite {
+    &:nth-child(even) {
+      color: var(--title);
+      background: var(--light-red);
+    }
+    &:hover {
+      color: var(--white);
+      background: var(--light-red);
+    }
+  }
+}
+
+.table-cell {
+  font-size: 2.5rem;
+  padding: 15px 24px;
+  color: var(--title);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+
+  @include respond-above(md) {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  &.favorite:last-child {
+    color: var(--red);
+  }
+}
+
+.no-data {
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--title);
+}
+
+.no-data-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.no-data-icon {
+  font-size: 4rem;
+  color: var(--titleWithBg);
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 24px;
+  border-top: 2px solid var(--border);
+  background: var(--background);
+
+  @include respond-above(md) {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.pagination-info {
+  color: var(--title);
+  font-size: 1.5rem;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// STILL NEED TO FIXXXXXXXXXXX
+.pagination-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  color: var(--black);
+  background-color: var(--description);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.favorite {
+    color: white;
+    background-color: var(--red);
+
+    &:hover:not(:disabled) {
+      border-color: var(--white);
+      background: var(--description);
+      box-shadow: 2px 2px 1px var(--shadow);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      border-color: transparent;
+      background: var(--description);
+      cursor: not-allowed;
+    }
+  }
+}
+
+.page-numbers {
+  display: flex;
+  font-size: 2rem;
+  gap: 4px;
+}
+
+.page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--shadow);
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.favorite {
+    color: white;
+    background-color: var(--red);
+
+    &.active {
+      color: white;
+      background: var(--red);
+      border-color: var(--shadow);
+    }
+
+    &:hover {
+      color: white;
+      background-color: var(--red);
+      border-color: var(--shadow);
+    }
+  }
+}
+
+// Custom scrollbar for table
+.table-wrapper {
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--text-secondary);
+    }
+  }
+}

@@ -1,0 +1,80 @@
+@use '@styles/mixin' as *;
+@use 'sass:list';
+
+$types: (
+  'user': (
+    var(--light-blue),
+    var(--blue)
+  ),
+  'dish': (
+    var(--light-green),
+    var(--green)
+  ),
+  'favorite': (
+    var(--light-red),
+    var(--red)
+  ),
+  'rating': (
+    var(--light-yellow),
+    var(--yellow)
+  )
+);
+
+.wrapper {
+  padding: 15px 30px;
+  border-radius: 8px;
+  border: 3px solid var(--shadow);
+  box-shadow: 4px 4px 1px var(--shadow);
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  @each $type, $colors in $types {
+    &.#{$type} {
+      background-color: list.nth($colors, 1);
+
+      .content {
+        color: list.nth($colors, 2);
+      }
+    }
+  }
+
+  &:hover {
+    border-color: transparent;
+    box-shadow: 0px 0px 0px var(--shadow);
+    transform: translateY(5px);
+  }
+
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .content {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+
+      .icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background-color: var(--title);
+      }
+
+      .title {
+        margin-top: 5px;
+        font-size: 2rem;
+        font-weight: 500;
+      }
+    }
+
+    .total {
+      font-size: 3rem;
+      font-weight: 500;
+      color: var(--title);
+    }
+  }
+}
