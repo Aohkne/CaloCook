@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Icon } from '@iconify/react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useTheme } from '@hooks/useTheme';
 
 import { REGEX } from '@/constants/regex';
 import { ROUTES } from '@/constants/routes';
+
+import { forgotPassword } from '@/api/auth';
 
 import styles from './ForgetPassword.module.scss';
 import classNames from 'classnames/bind';
@@ -14,6 +16,7 @@ const cx = classNames.bind(styles);
 
 function ForgetPassword() {
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -38,12 +41,12 @@ function ForgetPassword() {
     setError('');
 
     try {
-      // const response = await login(usernameOrEmail, password);
+      await forgotPassword(email);
 
-      setSuccess('Your password reset link has been sent!');
+      setSuccess('Your OTP has been sent!');
 
       setTimeout(() => {
-        // Navigate(ROUTES.HOME);
+        navigate(ROUTES.RESET_PASSWORD, { state: { email } });
       }, 2000);
     } catch (error) {
       setError(error.response?.data?.message || 'Reset password failed. Please try again.');
@@ -98,9 +101,9 @@ function ForgetPassword() {
           />
         </div>
 
-        <Link to={'/'} className={cx('btn-form')} onClick={handleForgetPass} disabled={isLoading}>
+        <button className={cx('btn-form')} onClick={handleForgetPass} disabled={isLoading}>
           {isLoading ? 'PROGRESSING...' : 'RESET PASSWORD'}
-        </Link>
+        </button>
 
         <div className={cx('navigate')}>
           Don’t have access anymore? <Link to={ROUTES.REGISTER}>Try another method</Link>

@@ -28,3 +28,15 @@ export const logout = async (refreshToken) => {
     throw error;
   }
 };
+
+export const forgotPassword = async (email) => {
+  try {
+    const response = await api.post('/auth/forgot-password-otp', {
+      email
+    });
+    return response.data;
+  } catch (error) {
+    console.warn('forgot password API failed: ', error);
+    throw error;
+  }
+};

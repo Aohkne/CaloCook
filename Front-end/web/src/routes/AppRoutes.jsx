@@ -2,11 +2,13 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import { ROLE } from '@constants/role';
 import { ROUTES } from '@constants/routes';
+
 import { ProtectedRoute, PublicRoute } from '@/middlewares';
 
 import Login from '@/pages/(auth)/Login/Login';
 import Register from '@/pages/(auth)/Register/Register';
 import ForgetPassword from '@/pages/(auth)/ForgetPassword/ForgetPassword';
+import ResetPassword from '@/pages/(auth)/ResetPassword/ResetPassword';
 import Unauthorized from '@/pages/(auth)/Unauthorized/Unauthorized';
 
 import Home from '@/pages/Home/Home';
@@ -48,6 +50,7 @@ function AppRoutes() {
             </PublicRoute>
           }
         />
+
         <Route
           path={ROUTES.REGISTER}
           element={
@@ -56,11 +59,21 @@ function AppRoutes() {
             </PublicRoute>
           }
         />
+
         <Route
           path={ROUTES.FORGET_PASSWORD}
           element={
             <PublicRoute restricted={true}>
               <ForgetPassword />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.RESET_PASSWORD}
+          element={
+            <PublicRoute restricted={true}>
+              <ResetPassword />
             </PublicRoute>
           }
         />
