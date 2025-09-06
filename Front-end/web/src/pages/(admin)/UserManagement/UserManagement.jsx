@@ -150,7 +150,11 @@ function UserManagement() {
       {
         accessorKey: 'isActive',
         header: 'Status',
-        cell: ({ row }) => <span className={cx('status-cell')}>{row.original.isActive ? 'Active' : 'Inactive'}</span>
+        cell: ({ row }) => (
+          <span className={cx('status-cell', row.original.isActive ? 'active' : 'inActive')}>
+            {row.original.isActive ? 'Active' : 'Blocked'}
+          </span>
+        )
       },
       {
         accessorKey: 'Action',
