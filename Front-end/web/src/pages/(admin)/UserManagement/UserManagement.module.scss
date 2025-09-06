@@ -3,6 +3,34 @@
 .wrapper {
   padding: 20px 15px;
 
+  // MSG
+  .success-message {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    padding: 10px 15px;
+    margin: 10px 0;
+    font-size: 1.4rem;
+    color: var(--secondary);
+    background-color: rgba(0, 105, 85, 0.1);
+    border: 1px solid var(--secondary);
+    border-radius: 8px;
+    text-align: center;
+  }
+  .error-message {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    padding: 10px 15px;
+    margin: 10px 0;
+    font-size: 1.4rem;
+    color: var(--red);
+    background-color: rgba(220, 46, 96, 0.1);
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    text-align: center;
+  }
+
   .title {
     font-size: 3rem;
     font-weight: 600;
@@ -26,22 +54,40 @@
   }
 
   .table {
+    // USER
+
+    .user-cell {
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+      border: 2px solid var(--shadow);
+      background-color: var(--background);
+      box-shadow: 2px 2px 1px var(--shadow);
+      transition: 0.3s all ease;
+      cursor: pointer;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        opacity: 0.8;
+        border-color: transparent;
+        box-shadow: 0px 0px 0px var(--shadow);
+      }
+
+      .block-icon {
+        color: var(--red);
+      }
+
+      .unblock-icon {
+        color: var(--green);
+      }
+    }
+
     .user-name {
       font-size: 2.5rem;
       font-family: 500;
-    }
-
-    // USER
-    .user-cell {
-      color: var(--title);
-      display: flex;
-      align-items: center;
-      font-size: 2rem;
-
-      svg {
-        margin-left: 5px;
-        font-size: 2rem;
-      }
     }
 
     .user-image {

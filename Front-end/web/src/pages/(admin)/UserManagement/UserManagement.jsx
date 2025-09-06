@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import Panel from '@/components/ui/Panel/Panel';
 import Sidebar from '@/components/ui/Sidebar/Sidebar';
@@ -11,7 +11,7 @@ import { ROUTES } from '@/constants/routes';
 import { getWebImagePath } from '@/utils/imageHelper';
 
 import { getTotalUser } from '@/api/dashboard';
-import { getUsers } from '@/api/user';
+import { activateUser, deactivateUser, getUsers } from '@/api/user';
 
 import styles from './UserManagement.module.scss';
 import classNames from 'classnames/bind';
@@ -20,6 +20,8 @@ const cx = classNames.bind(styles);
 
 function UserManagement() {
   const navigate = useNavigate();
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
   const [totalUser, setTotalUser] = useState(0);
   const [users, setUsers] = useState([]);
@@ -38,22 +40,6 @@ function UserManagement() {
     email: '',
     isActive: ''
   });
-
-  useEffect(() => {
-    //TOTAL USERS
-    handleTotalUser();
-
-    //USERS
-    handleUsers();
-  }, [totalUser]);
-
-  useEffect(() => {
-    const delayedSearch = setTimeout(() => {
-      handleUsers(filters, 1); // Reset to page 1 when filtering
-    }, 500); // 500ms delay
-
-    return () => clearTimeout(delayedSearch);
-  }, [filters]);
 
   // Handle FILTER changes
   const handleFilterChange = (key, value) => {
@@ -78,18 +64,44 @@ function UserManagement() {
     }
   };
 
-  const handleUsers = async (filterParams = filters, currentPage = 1) => {
-    try {
-      const response = await getUsers({
-        ...filterParams,
-        page: currentPage,
-        limit: 10
-      });
+  //API
+  const handleUsers = useCallback(
+    async (filterParams = filters, currentPage = 1) => {
+      try {
+        const response = await getUsers({
+          ...filterParams,
+          page: currentPage,
+          limit: 10
+        });
 
-      setUsers(response.data);
-      setPagination(response.pagination);
+        setUsers(response.data);
+        setPagination(response.pagination);
+      } catch (error) {
+        console.error(error.response?.data?.message || 'Get users failed.');
+      }
+    },
+    [filters]
+  );
+
+  const handleDeactiveUsers = async (userId) => {
+    try {
+      const response = await deactivateUser(userId);
+
+      setSuccess(response.message);
     } catch (error) {
-      console.error(error.response?.data?.message || 'Get users failed.');
+      setError(error.response?.data?.message || 'Deactive user failed.');
+      console.error(error.response?.data?.message || 'Deactive user failed.');
+    }
+  };
+
+  const handleActiveUsers = async (userId) => {
+    try {
+      const response = await activateUser(userId);
+
+      setSuccess(response.message);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Active user failed.');
+      console.error(error.response?.data?.message || 'Active user failed.');
     }
   };
 
@@ -138,15 +150,73 @@ function UserManagement() {
       {
         accessorKey: 'isActive',
         header: 'Status',
-        cell: ({ row }) => <div className={cx('status-cell')}>{row.original.isActive ? 'Active' : 'Inactive'}</div>
+        cell: ({ row }) => <span className={cx('status-cell')}>{row.original.isActive ? 'Active' : 'Inactive'}</span>
+      },
+      {
+        accessorKey: 'Action',
+        header: 'Action',
+        cell: ({ row }) => (
+          <div className={cx('user-cell')}>
+            {row.original.isActive ? (
+              <Icon
+                icon='ic:outline-block'
+                width='24'
+                height='24'
+                className={cx('block-icon')}
+                onClick={() => handleDeactiveUsers(row.original._id)}
+              />
+            ) : (
+              <Icon
+                icon='gg:unblock'
+                width='28'
+                height='28'
+                className={cx('unblock-icon')}
+                onClick={() => handleActiveUsers(row.original._id)}
+              />
+            )}
+          </div>
+        )
       }
     ],
     []
   );
 
+  useEffect(() => {
+    setError('');
+    setSuccess('');
+
+    //TOTAL USERS
+    handleTotalUser();
+
+    //USERS
+    handleUsers();
+  }, [totalUser, handleUsers]);
+
+  useEffect(() => {
+    setError('');
+    setSuccess('');
+
+    const delayedSearch = setTimeout(() => {
+      handleUsers(filters, 1); // Reset to page 1 when filtering
+    }, 500);
+
+    return () => clearTimeout(delayedSearch);
+  }, [filters, handleUsers]);
+
+  useEffect(() => {
+    if (success) {
+      handleUsers(filters, pagination.currentPage);
+      handleTotalUser();
+    }
+  }, [success, handleUsers, filters, pagination.currentPage]);
+
   return (
     <div className={cx('wrapper')}>
       <Sidebar />
+
+      {/* MSG */}
+      {error && <div className={cx('error-message')}>{error}</div>}
+      {success && <div className={cx('success-message')}>{success}</div>}
 
       <div className={cx('title')}>User Management</div>
 

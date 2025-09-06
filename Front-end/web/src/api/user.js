@@ -13,3 +13,13 @@ export const getUsers = async (params = {}) => {
   const response = await api.get('/user', { params: queryParams });
   return response.data;
 };
+
+export const activateUser = async (userId) => {
+  const response = await api.patch(`/user/${userId}/activate`);
+  return response.data;
+};
+
+export const deactivateUser = async (userId) => {
+  const response = await api.patch(`/user/${userId}/deactivate`);
+  return response.data;
+};

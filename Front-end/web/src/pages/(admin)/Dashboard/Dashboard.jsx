@@ -52,7 +52,6 @@ function Dashboard() {
   const handleTotalDish = async () => {
     try {
       const response = await getTotalDish();
-
       setTotalDish(response.data);
     } catch (error) {
       console.error(error.response?.data?.message || 'Get total dish failed.');
@@ -65,7 +64,6 @@ function Dashboard() {
     try {
       const response = await getTopFavorites();
       setTopFavorites(response.data);
-      console.log(response.data);
     } catch (error) {
       console.error(error.response?.data?.message || 'Get top favorites failed.');
     }
@@ -148,7 +146,7 @@ function Dashboard() {
         cell: ({ row }) => (
           <div className={cx('favorite-cell')}>
             {row.original.favoriteCount}
-            <Icon icon='line-md:heart-filled' className={cx('heart-icon')} />
+            <Icon icon='line-md:heart-filled' width='24' height='24' className={cx('heart-icon')} />
           </div>
         )
       }
@@ -221,7 +219,7 @@ function Dashboard() {
         header: 'Rating',
         cell: ({ row }) => (
           <div className={cx('rating-cell')}>
-            <Icon icon='line-md:star-filled' className={cx('start-icon')} />
+            <Icon icon='line-md:star-filled' width='24' height='24' className={cx('start-icon')} />
             {row.original.averageRating}
           </div>
         )
