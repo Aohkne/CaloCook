@@ -32,10 +32,14 @@
       font-family: 500;
     }
 
+    .rating-cell,
     .favorite-cell {
+      display: flex;
+      align-items: center;
       font-size: 2rem;
 
       svg {
+        margin-left: 5px;
         font-size: 2rem;
       }
     }

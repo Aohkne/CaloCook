@@ -68,7 +68,7 @@ function DataTable({
       </div>
 
       {/* Table */}
-      <div className={cx('table-wrapper')}>
+      <div className={cx('table-wrapper', type)}>
         <table className={cx('table')}>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
