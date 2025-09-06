@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import Panel from '@/components/ui/Panel/Panel';
 import Sidebar from '@/components/ui/Sidebar/Sidebar';
-import DataTable from '@/components/ui/DataTable/DataTable';
+import TopTable from '@/components/ui/TopTable/TopTable';
 
 import { ROUTES } from '@/constants/routes';
 
@@ -29,10 +29,10 @@ function Dashboard() {
   const [isShowRating, setIsShowRating] = useState(false);
 
   useEffect(() => {
-    //USERS
+    //TOTAL USERS
     handleTotalUser();
 
-    //DISHS
+    //TOTAL DISHS
     handleTotalDish();
 
     //TOP FAVORITES
@@ -65,6 +65,7 @@ function Dashboard() {
     try {
       const response = await getTopFavorites();
       setTopFavorites(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error(error.response?.data?.message || 'Get top favorites failed.');
     }
@@ -269,7 +270,7 @@ function Dashboard() {
       <div className={cx('table')}>
         {/* FAVORITE */}
         {isShowFavorite && (
-          <DataTable
+          <TopTable
             data={topFavorites}
             columns={favoriteColumns}
             title='Top Favorite Dishes'
@@ -280,7 +281,7 @@ function Dashboard() {
 
         {/* RATING */}
         {isShowRating && (
-          <DataTable data={topRatings} columns={ratingColumns} title='Top Rating Dishes' pageSize={10} type='rating' />
+          <TopTable data={topRatings} columns={ratingColumns} title='Top Rating Dishes' pageSize={10} type='rating' />
         )}
       </div>
     </div>

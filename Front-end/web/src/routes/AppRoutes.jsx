@@ -18,6 +18,7 @@ import Home from '@/pages/Home/Home';
 
 //ADMIN
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
+import UserManagement from '@/pages/(admin)/UserManagement/UserManagement';
 
 function AppRoutes() {
   return (
@@ -97,6 +98,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute requiredRole={ROLE.ADMIN}>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.USER_MANAGEMENT}
+          element={
+            <ProtectedRoute requiredRole={ROLE.ADMIN}>
+              <UserManagement />
             </ProtectedRoute>
           }
         />
