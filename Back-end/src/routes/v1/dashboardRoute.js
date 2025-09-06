@@ -202,8 +202,8 @@ Router.route('/top-favorites').get(
   favoriteController.getTopFavorites
 )
 Router.route('/top-ratings').get(
-  
-  
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
   ratingController.getTopRatings
 )
 export const dashboardRoute = Router
