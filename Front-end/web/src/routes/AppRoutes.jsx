@@ -5,14 +5,18 @@ import { ROUTES } from '@constants/routes';
 
 import { ProtectedRoute, PublicRoute } from '@/middlewares';
 
+//AUTH
 import Login from '@/pages/(auth)/Login/Login';
 import Register from '@/pages/(auth)/Register/Register';
 import ForgetPassword from '@/pages/(auth)/ForgetPassword/ForgetPassword';
 import ResetPassword from '@/pages/(auth)/ResetPassword/ResetPassword';
+import NewPassword from '@/pages/(auth)/NewPassword/NewPassword';
 import Unauthorized from '@/pages/(auth)/Unauthorized/Unauthorized';
 
+//LANDING PAGE
 import Home from '@/pages/Home/Home';
 
+//ADMIN
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
 
 function AppRoutes() {
@@ -74,6 +78,15 @@ function AppRoutes() {
           element={
             <PublicRoute restricted={true}>
               <ResetPassword />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.NEW_PASSWORD}
+          element={
+            <PublicRoute restricted={true}>
+              <NewPassword />
             </PublicRoute>
           }
         />

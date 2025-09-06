@@ -40,3 +40,17 @@ export const forgotPassword = async (email) => {
     throw error;
   }
 };
+
+export const resetPassword = async (otp, email, newPassword) => {
+  try {
+    const response = await api.post('/auth/reset-password-otp', {
+      otp,
+      email,
+      newPassword
+    });
+    return response.data;
+  } catch (error) {
+    console.warn('reset password API failed: ', error);
+    throw error;
+  }
+};

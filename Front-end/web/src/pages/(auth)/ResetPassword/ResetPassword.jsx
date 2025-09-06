@@ -16,6 +16,7 @@ function ResetPassword() {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
+
   const email = location.state?.email || '';
 
   // State OTP
@@ -88,7 +89,18 @@ function ResetPassword() {
   };
 
   // HANDLE SEND OTP
-  const handleVerifyOTP = async () => {};
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+
+    setIsLoading(true);
+    setError('');
+
+    setSuccess('Navigate to add new Password!');
+
+    setTimeout(() => {
+      navigate(ROUTES.NEW_PASSWORD, { state: { email, otp } });
+    }, 2000);
+  };
 
   const handleResendOTP = async (e) => {
     e.preventDefault();
@@ -97,15 +109,18 @@ function ResetPassword() {
     setError('');
 
     try {
-      await forgotPassword(email);
+      const response = await forgotPassword(email);
 
-      setSuccess('Your OTP has been sent!');
+      if (response) {
+        setSuccess('New OTP has been resent!');
+        setCountdown(60); // COUNT: 60 giây
+        setOtp(['', '', '', '', '', '']); // RESET OTP
+        inputRefs.current[0]?.focus();
 
-      setTimeout(() => {
-        navigate(ROUTES.RESET_PASSWORD, { state: { email } });
-      }, 2000);
+        setTimeout(() => setSuccess(''), 3000);
+      }
     } catch (error) {
-      setError(error.response?.data?.message || 'Reset password failed. Please try again.');
+      setError(error.response?.data?.message || 'Can not send OTP. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -182,7 +197,7 @@ function ResetPassword() {
         <div className={cx('navigate')}>
           Didn't get a code?{' '}
           {countdown > 0 ? (
-            <span style={{ color: 'var(--description)' }}>Resend in {countdown}s</span>
+            <span>Resend in {countdown}s</span>
           ) : (
             <Link onClick={handleResendOTP} style={{ cursor: 'pointer' }}>
               Click to resend

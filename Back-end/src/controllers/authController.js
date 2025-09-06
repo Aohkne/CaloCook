@@ -27,7 +27,7 @@ const generateTokens = (userId) => {
 const storeRefreshToken = async (userId, refreshToken) => {
   const key = `refresh_token:${userId}`
   const expiresInSeconds = 365 * 24 * 60 * 60
-  // await redis.set(key, refreshToken, 'EX', expiresInSeconds)
+  await redis.set(key, refreshToken, 'EX', expiresInSeconds)
 }
 const signup = async (req, res) => {
   const { username, email, password } = req.body

@@ -102,7 +102,7 @@ function ForgetPassword() {
         </div>
 
         <button className={cx('btn-form')} onClick={handleForgetPass} disabled={isLoading}>
-          {isLoading ? 'PROGRESSING...' : 'RESET PASSWORD'}
+          {isLoading ? 'CONTINUING...' : 'CONTINUE'}
         </button>
 
         <div className={cx('navigate')}>
