@@ -2,6 +2,7 @@ import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 
 import { useTheme } from '@hooks/useTheme';
+import { useAuth } from '@/hooks/useAuth';
 
 import { ROUTES } from '@/constants/routes';
 
@@ -12,7 +13,9 @@ const cx = classNames.bind(styles);
 
 function Header() {
   const { theme, toggleTheme } = useTheme();
+  const { isAuthenticated, userRole } = useAuth();
 
+  console.log(userRole);
   return (
     <div className={cx('wrapper')}>
       <div className={cx('logo-container')}>
@@ -43,10 +46,15 @@ function Header() {
             <Icon icon='mdi:weather-sunny' width='20' height='20' color='#f5c658ff' />
           )}
         </button>
-
-        <Link to={ROUTES.LOGIN} className={cx('btn-login')}>
-          Login
-        </Link>
+        {!isAuthenticated() ? (
+          <Link to={ROUTES.LOGIN} className={cx('btn-login')}>
+            Login
+          </Link>
+        ) : (
+          <Link to={userRole === 'user' ? ROUTES.DISH : ROUTES.DASHBOARD} className={cx('btn-login')}>
+            Explore
+          </Link>
+        )}
       </div>
     </div>
   );

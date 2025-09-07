@@ -24,6 +24,10 @@
   &.user {
     background-color: var(--blue);
   }
+
+  &.dish {
+    background-color: var(--green);
+  }
 }
 
 .table-title {
@@ -33,6 +37,7 @@
   margin: 0;
 }
 
+// FILTER
 .filters-container {
   display: flex;
   gap: 12px;
@@ -40,12 +45,13 @@
   flex-wrap: wrap;
 
   @include respond-above(md) {
+    gap: 8px;
     flex-direction: column;
-    width: 100%;
-    gap: 12px;
+    align-items: stretch;
   }
 }
 
+// SEARCH
 .search-container {
   position: relative;
   min-width: 200px;
@@ -77,34 +83,72 @@
 
   &:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 2px 2px 2px 0px var(--shadow);
+    box-shadow: 2px 2px 1px var(--shadow);
   }
 
   &::placeholder {
     color: var(--input-placeholder);
   }
 }
+//FILTER item
 
-.filter-container {
-  position: relative;
+.range-filter-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-.status-filter {
-  padding: 10px 12px;
-  font-size: 1.5rem;
-  color: var(--title);
-  border-radius: 5px;
+.range-input {
+  padding: 8px 12px;
   border: 1px solid var(--border);
-  background: var(--background);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 150px;
+  border-radius: 6px;
+  font-size: 1.4rem;
+  width: 120px;
+  background-color: var(--background);
+  color: var(--title);
+  transition: border-color 0.3s ease;
 
   &:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 2px 2px 2px 0px var(--shadow);
+    box-shadow: 2px 2px 1px var(--shadow);
+  }
+
+  &::placeholder {
+    color: var(--title);
+    font-size: 1.3rem;
+  }
+
+  @include respond-above(md) {
+    width: 50%;
+    padding: 6px 8px;
+    font-size: 1.3rem;
+  }
+}
+
+.filter-container {
+  display: flex;
+  align-items: center;
+
+  .status-filter {
+    min-width: 140px;
+    padding: 8px 12px;
+    color: var(--title);
+    font-size: 1.4rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background-color: var(--background);
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      outline: none;
+      box-shadow: 2px 2px 1px var(--shadow);
+    }
+
+    @include respond-above(md) {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 1.3rem;
+    }
   }
 }
 
@@ -138,6 +182,15 @@
     &:hover {
       color: var(--title);
       background: var(--light-blue);
+    }
+  }
+
+  &.dish {
+    background-color: var(--green);
+
+    &:hover {
+      color: var(--title);
+      background: var(--light-green);
     }
   }
 
@@ -182,6 +235,17 @@
       background: var(--light-blue);
     }
   }
+
+  &.dish {
+    &:nth-child(even) {
+      color: var(--title);
+      background: var(--light-green);
+    }
+    &:hover {
+      color: var(--white);
+      background: var(--light-green);
+    }
+  }
 }
 
 .table-cell {
@@ -198,6 +262,10 @@
 
   &.user:last-child {
     color: var(--blue);
+  }
+
+  &.dish:last-child {
+    color: var(--green);
   }
 }
 
@@ -275,6 +343,19 @@
       box-shadow: 0px 0px 0px var(--shadow);
     }
   }
+
+  &.dish {
+    color: white;
+    background: var(--green);
+    border-color: var(--shadow);
+    box-shadow: 2px 2px 1px var(--shadow);
+
+    &:hover:not(:disabled) {
+      border-color: transparent;
+      box-shadow: 0px 0px 0px var(--shadow);
+    }
+  }
+
   &:disabled {
     opacity: 0.5;
     border-color: transparent;
@@ -341,6 +422,31 @@
       }
     }
   }
+
+  &.dish {
+    color: var(--titleWithBg);
+    background: var(--green);
+    border-color: var(--shadow);
+    box-shadow: 2px 2px 1px var(--shadow);
+
+    &:hover {
+      background: var(--green);
+      border-color: transparent;
+      box-shadow: 0px 0px 0px var(--shadow);
+    }
+
+    &.active {
+      color: var(--title);
+      border-color: transparent;
+      background-color: var(--light-green);
+      box-shadow: 0px 0px 0px var(--shadow);
+
+      &:hover {
+        border-color: transparent;
+        box-shadow: 0px 0px 0px var(--shadow);
+      }
+    }
+  }
 }
 
 // Scrollbar for table
@@ -365,6 +471,17 @@
   &.user {
     &::-webkit-scrollbar-thumb {
       background: var(--light-blue);
+      border-radius: 4px;
+
+      &:hover {
+        background: var(--blue);
+      }
+    }
+  }
+
+  &.dish {
+    &::-webkit-scrollbar-thumb {
+      background: var(--light-green);
       border-radius: 4px;
 
       &:hover {

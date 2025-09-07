@@ -162,21 +162,13 @@ function UserManagement() {
         cell: ({ row }) => (
           <div className={cx('user-cell')}>
             {row.original.isActive ? (
-              <Icon
-                icon='ic:outline-block'
-                width='24'
-                height='24'
-                className={cx('block-icon')}
-                onClick={() => handleDeactiveUsers(row.original._id)}
-              />
+              <button onClick={() => handleDeactiveUsers(row.original._id)}>
+                <Icon icon='ic:outline-block' width='24' height='24' className={cx('block-icon')} />
+              </button>
             ) : (
-              <Icon
-                icon='gg:unblock'
-                width='28'
-                height='28'
-                className={cx('unblock-icon')}
-                onClick={() => handleActiveUsers(row.original._id)}
-              />
+              <button onClick={() => handleActiveUsers(row.original._id)}>
+                <Icon icon='gg:unblock' width='28' height='28' className={cx('unblock-icon')} />
+              </button>
             )}
           </div>
         )
@@ -245,12 +237,14 @@ function UserManagement() {
           type='user'
           useServerPagination={true}
           serverPagination={pagination}
+          // Search
           onServerPageChange={handlePageChange}
           showServerSearch={true}
           serverSearchFields={[
             { key: 'username', placeholder: 'Search by username...' },
             { key: 'email', placeholder: 'Search by email...' }
           ]}
+          // Status
           onServerSearch={handleFilterChange}
           showStatusFilter={true}
           statusFilter={filters.isActive}

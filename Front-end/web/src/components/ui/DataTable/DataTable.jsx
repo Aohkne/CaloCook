@@ -17,18 +17,31 @@ const cx = classNames.bind(styles);
 function DataTable({
   data = [],
   columns = [],
-  title = 'Top Table',
+  title = 'Management Table',
   type,
   pageSize = 10,
   showSearch = true,
   showPagination = true,
   // Server-side props
+
+  // Search
   showServerSearch = false,
   serverSearchFields = [],
   onServerSearch,
+
+  // Status
   showStatusFilter = false,
   statusFilter = '',
   onStatusFilterChange,
+
+  // Difficulty
+  showDifficultyFilter = false,
+  difficultyFilter = '',
+
+  // Range: min/max cooking time/calories
+  showRangeFilters = false,
+  rangeFilters = {},
+  onRangeFilterChange,
   // Server-side pagination props
   useServerPagination = false,
   serverPagination = {},
@@ -137,6 +150,60 @@ function DataTable({
                 <option value='false'>Inactive</option>
               </select>
             </div>
+          )}
+
+          {/* Difficulty filter */}
+          {showDifficultyFilter && (
+            <div className={cx('filter-container')}>
+              <select
+                value={difficultyFilter}
+                onChange={(e) => onStatusFilterChange('difficulty', e.target.value)}
+                className={cx('status-filter')}
+              >
+                <option value=''>All Difficulty</option>
+                <option value='easy'>Easy</option>
+                <option value='medium'>Medium</option>
+                <option value='hard'>Hard</option>
+              </select>
+            </div>
+          )}
+
+          {/* Range filters for cooking time and calorie */}
+          {showRangeFilters && (
+            <>
+              <div className={cx('range-filter-group')}>
+                <input
+                  type='number'
+                  placeholder='Min time (min)'
+                  value={rangeFilters.minCookingTime || ''}
+                  onChange={(e) => onRangeFilterChange('minCookingTime', e.target.value)}
+                  className={cx('range-input')}
+                />
+                <input
+                  type='number'
+                  placeholder='Max time (min)'
+                  value={rangeFilters.maxCookingTime || ''}
+                  onChange={(e) => onRangeFilterChange('maxCookingTime', e.target.value)}
+                  className={cx('range-input')}
+                />
+              </div>
+              <div className={cx('range-filter-group')}>
+                <input
+                  type='number'
+                  placeholder='Min calorie'
+                  value={rangeFilters.minCalorie || ''}
+                  onChange={(e) => onRangeFilterChange('minCalorie', e.target.value)}
+                  className={cx('range-input')}
+                />
+                <input
+                  type='number'
+                  placeholder='Max calorie'
+                  value={rangeFilters.maxCalorie || ''}
+                  onChange={(e) => onRangeFilterChange('maxCalorie', e.target.value)}
+                  className={cx('range-input')}
+                />
+              </div>
+            </>
           )}
         </div>
       </div>

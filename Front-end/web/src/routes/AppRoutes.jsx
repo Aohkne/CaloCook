@@ -19,6 +19,7 @@ import Home from '@/pages/Home/Home';
 //ADMIN
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
 import UserManagement from '@/pages/(admin)/UserManagement/UserManagement';
+import DishManagement from '@/pages/(admin)/DishManagement/DishManagement';
 
 //USER
 import ChatAI from '@/pages/(user)/ChatAI/ChatAI';
@@ -102,11 +103,21 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path={ROUTES.USER_MANAGEMENT}
           element={
             <ProtectedRoute requiredRole={ROLE.ADMIN}>
               <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.DISH_MANAGEMENT}
+          element={
+            <ProtectedRoute requiredRole={ROLE.ADMIN}>
+              <DishManagement />
             </ProtectedRoute>
           }
         />
