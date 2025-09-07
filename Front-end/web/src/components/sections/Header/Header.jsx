@@ -5,12 +5,12 @@ import { useTheme } from '@hooks/useTheme';
 
 import { ROUTES } from '@/constants/routes';
 
-import styles from './Navbar.module.scss';
+import styles from './Header.module.scss';
 import classNames from 'classnames/bind';
 
 const cx = classNames.bind(styles);
 
-function Navbar() {
+function Header() {
   const { theme, toggleTheme } = useTheme();
 
   return (
@@ -21,16 +21,16 @@ function Navbar() {
         </Link>
 
         <div className={cx('nav-list')}>
-          <Link to={ROUTES.DISH} className={cx('nav-item')}>
-            Dish
+          <Link to={ROUTES.HOME} className={cx('nav-item')}>
+            Home
           </Link>
 
-          <Link to={ROUTES.FAVORITE} className={cx('nav-item')}>
-            Favorite
+          <Link to={ROUTES.SUPPORT} className={cx('nav-item')}>
+            Support
           </Link>
 
-          <Link to={ROUTES.CHAT_AI} className={cx('nav-item')}>
-            AI
+          <Link to={ROUTES.DOWNLOAD} className={cx('nav-item')}>
+            Download
           </Link>
         </div>
       </div>
@@ -52,4 +52,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default Header;

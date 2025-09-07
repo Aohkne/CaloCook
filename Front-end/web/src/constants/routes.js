@@ -17,6 +17,12 @@ export const ROUTES = {
   DISH_MANAGEMENT: '/dish-management',
   PROFILE_ADMIN: '/admin/profile',
 
+  //USER
+  DISH: '/dish',
+  FAVORITE: '/favorite',
+  CHAT_AI: '/calobot',
+  PROFILE_USER: '/user/profile',
+
   // ERROR
   UNAUTHORIZED: '/unauthorized'
 };

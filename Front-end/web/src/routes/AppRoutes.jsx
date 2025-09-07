@@ -20,11 +20,12 @@ import Home from '@/pages/Home/Home';
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
 import UserManagement from '@/pages/(admin)/UserManagement/UserManagement';
 
+//USER
+import ChatAI from '@/pages/(user)/ChatAI/ChatAI';
+
 function AppRoutes() {
   return (
     <BrowserRouter>
-      {/* <Navbar /> */}
-
       <Routes>
         {/* PUBLIC ROUTES */}
         <Route
@@ -106,6 +107,16 @@ function AppRoutes() {
           element={
             <ProtectedRoute requiredRole={ROLE.ADMIN}>
               <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* USER ROUTES */}
+        <Route
+          path={ROUTES.CHAT_AI}
+          element={
+            <ProtectedRoute requiredRole={ROLE.USER}>
+              <ChatAI />
             </ProtectedRoute>
           }
         />

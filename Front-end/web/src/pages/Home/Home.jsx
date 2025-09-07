@@ -1,5 +1,4 @@
-import Navbar from '@/components/ui/Navbar/Navbar';
-
+import Header from '@/components/sections/Header/Header';
 import Hero from '@/components/sections/Hero/Hero';
 import Features from '@/components/sections/Features/Features';
 import Guide from '@/components/sections/Guide/Guide';
@@ -14,7 +13,7 @@ const cx = classNames.bind(styles);
 function Home() {
   return (
     <div className={cx('wrapper')}>
-      <Navbar />
+      <Header />
       <Hero />
       <Features />
       <Guide />
