@@ -14,3 +14,8 @@ export const getTopFavorites = async (limit = 10) => {
   const response = await api.get(`/dashboard/top-favorites?limit=${limit}`);
   return response.data;
 };
+
+export const getTopRatings = async (limit = 10) => {
+  const response = await api.get(`/dashboard/top-ratings?limit=${limit}`);
+  return response.data;
+};

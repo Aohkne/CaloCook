@@ -21,12 +21,12 @@
     align-items: stretch;
   }
 
-  &.user {
-    background-color: var(--blue);
+  &.favorite {
+    background-color: var(--red);
   }
 
-  &.dish {
-    background-color: var(--green);
+  &.rating {
+    background-color: var(--yellow);
   }
 }
 
@@ -37,28 +37,12 @@
   margin: 0;
 }
 
-// FILTER
-.filters-container {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-
-  @include respond-above(md) {
-    gap: 8px;
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-// SEARCH
 .search-container {
   position: relative;
-  min-width: 200px;
+  max-width: 300px;
 
   @include respond-above(md) {
-    width: 100%;
-    min-width: auto;
+    max-width: 100%;
   }
 }
 
@@ -83,72 +67,12 @@
 
   &:focus {
     outline: none;
-    box-shadow: 2px 2px 1px var(--shadow);
+    border-color: var(--primary-color);
+    box-shadow: 2px 2px 2px 0px var(--shadow);
   }
 
   &::placeholder {
     color: var(--input-placeholder);
-  }
-}
-//FILTER item
-
-.range-filter-group {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.range-input {
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 1.4rem;
-  width: 120px;
-  background-color: var(--background);
-  color: var(--title);
-  transition: border-color 0.3s ease;
-
-  &:focus {
-    outline: none;
-    box-shadow: 2px 2px 1px var(--shadow);
-  }
-
-  &::placeholder {
-    color: var(--title);
-    font-size: 1.3rem;
-  }
-
-  @include respond-above(md) {
-    width: 50%;
-    padding: 6px 8px;
-    font-size: 1.3rem;
-  }
-}
-
-.filter-container {
-  display: flex;
-  align-items: center;
-
-  .status-filter {
-    min-width: 140px;
-    padding: 8px 12px;
-    color: var(--title);
-    font-size: 1.4rem;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background-color: var(--background);
-    transition: border-color 0.3s ease;
-
-    &:focus {
-      outline: none;
-      box-shadow: 2px 2px 1px var(--shadow);
-    }
-
-    @include respond-above(md) {
-      width: 100%;
-      padding: 6px 8px;
-      font-size: 1.3rem;
-    }
   }
 }
 
@@ -176,21 +100,21 @@
     transition: background-color 0.2s ease;
   }
 
-  &.user {
-    background-color: var(--blue);
+  &.favorite {
+    background-color: var(--red);
 
     &:hover {
       color: var(--title);
-      background: var(--light-blue);
+      background: var(--light-red);
     }
   }
 
-  &.dish {
-    background-color: var(--green);
+  &.rating {
+    background-color: var(--yellow);
 
     &:hover {
       color: var(--title);
-      background: var(--light-green);
+      background: var(--light-yellow);
     }
   }
 
@@ -225,25 +149,25 @@
 .table-row {
   transition: background-color 0.2s ease;
 
-  &.user {
+  &.favorite {
     &:nth-child(even) {
       color: var(--title);
-      background: var(--light-blue);
+      background: var(--light-red);
     }
     &:hover {
       color: var(--white);
-      background: var(--light-blue);
+      background: var(--light-red);
     }
   }
 
-  &.dish {
+  &.rating {
     &:nth-child(even) {
       color: var(--title);
-      background: var(--light-green);
+      background: var(--light-yellow);
     }
     &:hover {
       color: var(--white);
-      background: var(--light-green);
+      background: var(--light-yellow);
     }
   }
 }
@@ -260,12 +184,12 @@
     font-size: 14px;
   }
 
-  &.user:last-child {
-    color: var(--blue);
+  &.favorite:last-child {
+    color: var(--red);
   }
 
-  &.dish:last-child {
-    color: var(--green);
+  &.rating:last-child {
+    color: var(--yellow);
   }
 }
 
@@ -313,12 +237,13 @@
   gap: 8px;
 }
 
+// STILL NEED TO FIXXXXXXXXXXX
 .pagination-btn {
   width: 36px;
   height: 36px;
   border-radius: 6px;
   color: var(--black);
-  background-color: var(--secondary);
+  background-color: var(--description);
   border: 2px solid transparent;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -332,9 +257,9 @@
     box-shadow: 2px 2px 1px var(--shadow);
   }
 
-  &.user {
+  &.favorite {
     color: white;
-    background: var(--blue);
+    background: var(--red);
     border-color: var(--shadow);
     box-shadow: 2px 2px 1px var(--shadow);
 
@@ -344,9 +269,9 @@
     }
   }
 
-  &.dish {
+  &.rating {
     color: white;
-    background: var(--green);
+    background: var(--yellow);
     border-color: var(--shadow);
     box-shadow: 2px 2px 1px var(--shadow);
 
@@ -380,9 +305,6 @@
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s ease;
-  color: var(--title);
-  border-color: var(--shadow);
-  background-color: var(--secondary);
 
   display: flex;
   align-items: center;
@@ -398,14 +320,14 @@
     border-color: var(--primary);
   }
 
-  &.user {
+  &.favorite {
     color: var(--titleWithBg);
-    background: var(--blue);
+    background: var(--red);
     border-color: var(--shadow);
     box-shadow: 2px 2px 1px var(--shadow);
 
     &:hover {
-      background: var(--blue);
+      background: var(--red);
       border-color: transparent;
       box-shadow: 0px 0px 0px var(--shadow);
     }
@@ -413,7 +335,7 @@
     &.active {
       color: var(--title);
       border-color: transparent;
-      background-color: var(--light-blue);
+      background-color: var(--light-red);
       box-shadow: 0px 0px 0px var(--shadow);
 
       &:hover {
@@ -423,14 +345,14 @@
     }
   }
 
-  &.dish {
+  &.rating {
     color: var(--titleWithBg);
-    background: var(--green);
+    background: var(--yellow);
     border-color: var(--shadow);
     box-shadow: 2px 2px 1px var(--shadow);
 
     &:hover {
-      background: var(--green);
+      background: var(--yellow);
       border-color: transparent;
       box-shadow: 0px 0px 0px var(--shadow);
     }
@@ -438,7 +360,7 @@
     &.active {
       color: var(--title);
       border-color: transparent;
-      background-color: var(--light-green);
+      background-color: var(--light-yellow);
       box-shadow: 0px 0px 0px var(--shadow);
 
       &:hover {
@@ -468,24 +390,24 @@
     }
   }
 
-  &.user {
+  &.favorite {
     &::-webkit-scrollbar-thumb {
-      background: var(--light-blue);
+      background: var(--light-red);
       border-radius: 4px;
 
       &:hover {
-        background: var(--blue);
+        background: var(--red);
       }
     }
   }
 
-  &.dish {
+  &.rating {
     &::-webkit-scrollbar-thumb {
-      background: var(--light-green);
+      background: var(--light-yellow);
       border-radius: 4px;
 
       &:hover {
-        background: var(--blue);
+        background: var(--yellow);
       }
     }
   }

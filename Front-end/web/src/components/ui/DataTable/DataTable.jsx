@@ -17,11 +17,35 @@ const cx = classNames.bind(styles);
 function DataTable({
   data = [],
   columns = [],
-  title = 'Data Table',
+  title = 'Management Table',
+  type,
   pageSize = 10,
   showSearch = true,
   showPagination = true,
-  type
+  // Server-side props
+
+  // Search
+  showServerSearch = false,
+  serverSearchFields = [],
+  onServerSearch,
+
+  // Status
+  showStatusFilter = false,
+  statusFilter = '',
+  onStatusFilterChange,
+
+  // Difficulty
+  showDifficultyFilter = false,
+  difficultyFilter = '',
+
+  // Range: min/max cooking time/calories
+  showRangeFilters = false,
+  rangeFilters = {},
+  onRangeFilterChange,
+  // Server-side pagination props
+  useServerPagination = false,
+  serverPagination = {},
+  onServerPageChange
 }) {
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -29,22 +53,52 @@ function DataTable({
     pageIndex: 0,
     pageSize: pageSize
   });
+  const [searchValues, setSearchValues] = useState({});
 
+  // Handle search input changes with debounce
+  const handleSearchChange = (field, value) => {
+    const newSearchValues = { ...searchValues, [field]: value };
+    setSearchValues(newSearchValues);
+
+    if (onServerSearch) {
+      onServerSearch(field, value);
+    }
+  };
+
+  // Configure table for client-side or server-side
   const table = useReactTable({
     data,
     columns,
-    state: {
-      sorting,
-      globalFilter,
-      pagination
-    },
-    onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
-    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel()
+    ...(useServerPagination
+      ? {
+          // Server-side pagination config
+          manualPagination: true,
+          pageCount: serverPagination.totalPages || -1,
+          state: {
+            sorting,
+            pagination: {
+              pageIndex: serverPagination.currentPage - 1 || 0,
+              pageSize: serverPagination.itemsPerPage || 10
+            }
+          },
+          onSortingChange: setSorting,
+          getSortedRowModel: getSortedRowModel()
+        }
+      : {
+          // Client-side pagination config
+          state: {
+            sorting,
+            globalFilter,
+            pagination
+          },
+          onSortingChange: setSorting,
+          onGlobalFilterChange: setGlobalFilter,
+          onPaginationChange: setPagination,
+          getFilteredRowModel: getFilteredRowModel(),
+          getPaginationRowModel: getPaginationRowModel(),
+          getSortedRowModel: getSortedRowModel()
+        })
   });
 
   return (
@@ -53,22 +107,109 @@ function DataTable({
       <div className={cx('table-header', type)}>
         <h3 className={cx('table-title')}>{title}</h3>
 
-        {showSearch && (
-          <div className={cx('search-container')}>
-            <Icon icon='mingcute:search-line' className={cx('search-icon')} />
-            <input
-              type='text'
-              placeholder='Search...'
-              value={globalFilter ?? ''}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className={cx('search-input')}
-            />
-          </div>
-        )}
+        <div className={cx('filters-container')}>
+          {/* Server-side search fields */}
+          {showServerSearch &&
+            serverSearchFields.map((field) => (
+              <div key={field.key} className={cx('search-container')}>
+                <Icon icon='mingcute:search-line' className={cx('search-icon')} />
+                <input
+                  type='text'
+                  placeholder={field.placeholder}
+                  value={searchValues[field.key] || ''}
+                  onChange={(e) => handleSearchChange(field.key, e.target.value)}
+                  className={cx('search-input')}
+                />
+              </div>
+            ))}
+
+          {/* Client-side global search */}
+          {showSearch && !showServerSearch && (
+            <div className={cx('search-container')}>
+              <Icon icon='mingcute:search-line' className={cx('search-icon')} />
+              <input
+                type='text'
+                placeholder='Search...'
+                value={globalFilter ?? ''}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className={cx('search-input')}
+              />
+            </div>
+          )}
+
+          {/* Status filter */}
+          {showStatusFilter && (
+            <div className={cx('filter-container')}>
+              <select
+                value={statusFilter}
+                onChange={(e) => onStatusFilterChange('isActive', e.target.value)}
+                className={cx('status-filter')}
+              >
+                <option value=''>All Status</option>
+                <option value='true'>Active</option>
+                <option value='false'>Inactive</option>
+              </select>
+            </div>
+          )}
+
+          {/* Difficulty filter */}
+          {showDifficultyFilter && (
+            <div className={cx('filter-container')}>
+              <select
+                value={difficultyFilter}
+                onChange={(e) => onStatusFilterChange('difficulty', e.target.value)}
+                className={cx('status-filter')}
+              >
+                <option value=''>All Difficulty</option>
+                <option value='easy'>Easy</option>
+                <option value='medium'>Medium</option>
+                <option value='hard'>Hard</option>
+              </select>
+            </div>
+          )}
+
+          {/* Range filters for cooking time and calorie */}
+          {showRangeFilters && (
+            <>
+              <div className={cx('range-filter-group')}>
+                <input
+                  type='number'
+                  placeholder='Min time (min)'
+                  value={rangeFilters.minCookingTime || ''}
+                  onChange={(e) => onRangeFilterChange('minCookingTime', e.target.value)}
+                  className={cx('range-input')}
+                />
+                <input
+                  type='number'
+                  placeholder='Max time (min)'
+                  value={rangeFilters.maxCookingTime || ''}
+                  onChange={(e) => onRangeFilterChange('maxCookingTime', e.target.value)}
+                  className={cx('range-input')}
+                />
+              </div>
+              <div className={cx('range-filter-group')}>
+                <input
+                  type='number'
+                  placeholder='Min calorie'
+                  value={rangeFilters.minCalorie || ''}
+                  onChange={(e) => onRangeFilterChange('minCalorie', e.target.value)}
+                  className={cx('range-input')}
+                />
+                <input
+                  type='number'
+                  placeholder='Max calorie'
+                  value={rangeFilters.maxCalorie || ''}
+                  onChange={(e) => onRangeFilterChange('maxCalorie', e.target.value)}
+                  className={cx('range-input')}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Table */}
-      <div className={cx('table-wrapper')}>
+      <div className={cx('table-wrapper', type)}>
         <table className={cx('table')}>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -123,8 +264,74 @@ function DataTable({
         </table>
       </div>
 
-      {/* Pagination */}
-      {showPagination && (
+      {/* Server-side Pagination */}
+      {useServerPagination && showPagination && (
+        <div className={cx('pagination-container')}>
+          <div className={cx('pagination-info')}>
+            Showing {(serverPagination.currentPage - 1) * serverPagination.itemsPerPage + 1} to{' '}
+            {Math.min(serverPagination.currentPage * serverPagination.itemsPerPage, serverPagination.totalItems)} of{' '}
+            {serverPagination.totalItems} entries
+          </div>
+
+          <div className={cx('pagination-controls')}>
+            <button
+              onClick={() => onServerPageChange(1)}
+              disabled={!serverPagination.hasPrevPage}
+              className={cx('pagination-btn', type)}
+            >
+              <Icon icon='mingcute:left-line' />
+              <Icon icon='mingcute:left-line' />
+            </button>
+
+            <button
+              onClick={() => onServerPageChange(serverPagination.prevPage)}
+              disabled={!serverPagination.hasPrevPage}
+              className={cx('pagination-btn', type)}
+            >
+              <Icon icon='mingcute:left-line' />
+            </button>
+
+            <div className={cx('page-numbers')}>
+              {Array.from({ length: Math.min(5, serverPagination.totalPages) }, (_, i) => {
+                const pageIndex = Math.max(1, serverPagination.currentPage - 2) + i;
+                if (pageIndex > serverPagination.totalPages) return null;
+
+                return (
+                  <button
+                    key={pageIndex}
+                    onClick={() => onServerPageChange(pageIndex)}
+                    className={cx('page-btn', type, {
+                      active: pageIndex === serverPagination.currentPage
+                    })}
+                  >
+                    {pageIndex}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => onServerPageChange(serverPagination.nextPage)}
+              disabled={!serverPagination.hasNextPage}
+              className={cx('pagination-btn', type)}
+            >
+              <Icon icon='mingcute:right-line' />
+            </button>
+
+            <button
+              onClick={() => onServerPageChange(serverPagination.totalPages)}
+              disabled={!serverPagination.hasNextPage}
+              className={cx('pagination-btn', type)}
+            >
+              <Icon icon='mingcute:right-line' />
+              <Icon icon='mingcute:right-line' />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Client-side Pagination */}
+      {showPagination && !useServerPagination && (
         <div className={cx('pagination-container')}>
           <div className={cx('pagination-info')}>
             Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
@@ -139,7 +346,7 @@ function DataTable({
             <button
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
-              className={cx('pagination-btn')}
+              className={cx('pagination-btn', type)}
             >
               <Icon icon='mingcute:left-line' />
               <Icon icon='mingcute:left-line' />
@@ -175,7 +382,7 @@ function DataTable({
             <button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className={cx('pagination-btn')}
+              className={cx('pagination-btn', type)}
             >
               <Icon icon='mingcute:right-line' />
             </button>
@@ -183,7 +390,7 @@ function DataTable({
             <button
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
-              className={cx('pagination-btn')}
+              className={cx('pagination-btn', type)}
             >
               <Icon icon='mingcute:right-line' />
               <Icon icon='mingcute:right-line' />

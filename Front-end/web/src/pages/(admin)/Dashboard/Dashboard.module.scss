@@ -26,18 +26,48 @@
   }
 
   .table {
+    .rating-cell,
+    .favorite-cell {
+      display: flex;
+      align-items: center;
+
+      svg {
+        margin-left: 5px;
+      }
+    }
+
+    .difficulty-cell {
+      width: 80px;
+      padding: 4px 8px;
+      display: block;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: 500;
+      text-transform: capitalize;
+
+      &.easy {
+        color: var(--green);
+        background-color: var(--light-green);
+        border: 1px solid var(--green);
+      }
+
+      &.medium {
+        color: var(--yellow);
+        background-color: var(--light-yellow);
+        border: 1px solid var(--yellow);
+      }
+
+      &.hard {
+        color: var(--red);
+        background-color: var(--light-red);
+        border: 1px solid var(--red);
+      }
+    }
+
     // FAVORITE
     .dish-name {
       font-size: 2rem;
       font-family: 500;
-    }
-
-    .favorite-cell {
-      font-size: 2rem;
-
-      svg {
-        font-size: 2rem;
-      }
     }
 
     .dish-image {

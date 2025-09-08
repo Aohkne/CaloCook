@@ -8,12 +8,20 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   FORGET_PASSWORD: '/forget-password',
+  RESET_PASSWORD: '/reset-password',
+  NEW_PASSWORD: '/new-password',
 
   //ADMIN
   DASHBOARD: '/dashboard',
   USER_MANAGEMENT: '/user-management',
   DISH_MANAGEMENT: '/dish-management',
   PROFILE_ADMIN: '/admin/profile',
+
+  //USER
+  DISH: '/dish',
+  FAVORITE: '/favorite',
+  CHAT_AI: '/calobot',
+  PROFILE_USER: '/user/profile',
 
   // ERROR
   UNAUTHORIZED: '/unauthorized'

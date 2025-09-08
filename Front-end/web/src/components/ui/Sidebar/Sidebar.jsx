@@ -100,7 +100,9 @@ function Sidebar() {
       onMouseMove={resetTimeout}
     >
       <div className={cx('content')}>
-        <img src='/images/logo_word.png' alt='logo' />
+        <Link to={ROUTES.HOME}>
+          <img src='/images/logo_word.png' alt='logo' />
+        </Link>
 
         {/* List */}
         <div className={cx('title')}>Menu</div>

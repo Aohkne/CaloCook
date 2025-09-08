@@ -11,9 +11,9 @@ const formatNumber = (num) => {
   return num?.toString();
 };
 
-function Panel({ type, title, icon, total }) {
+function Panel({ type, title, icon, total, onClick }) {
   return (
-    <div className={cx('wrapper', type)}>
+    <div className={cx('wrapper', type)} onClick={onClick}>
       <div className={cx('container')}>
         <div className={cx('content')}>
           <div className={cx('icon')}>
