@@ -138,7 +138,11 @@ function Dashboard() {
       {
         accessorKey: 'dish.difficulty',
         header: 'Difficulty',
-        cell: ({ row }) => <span className={cx('difficulty')}>{row.original.dish?.difficulty || 'N/A'}</span>
+        cell: ({ row }) => (
+          <span className={cx('difficulty-cell', row.original.dish?.difficulty)}>
+            {row.original.dish?.difficulty || 'N/A'}
+          </span>
+        )
       },
       {
         accessorKey: 'favoriteCount',
@@ -212,7 +216,11 @@ function Dashboard() {
       {
         accessorKey: 'dish.difficulty',
         header: 'Difficulty',
-        cell: ({ row }) => <span className={cx('difficulty')}>{row.original.dish?.difficulty || 'N/A'}</span>
+        cell: ({ row }) => (
+          <span className={cx('difficulty-cell', row.original.dish?.difficulty)}>
+            {row.original.dish?.difficulty || 'N/A'}
+          </span>
+        )
       },
       {
         accessorKey: 'averageRating',

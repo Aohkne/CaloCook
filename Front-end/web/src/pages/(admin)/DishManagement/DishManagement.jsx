@@ -147,11 +147,15 @@ function DishManagement() {
         )
       },
       {
-        accessorKey: 'cookingTime',
-        header: 'Cooking Time',
+        accessorKey: 'description',
+        header: 'Description',
         cell: ({ row }) => (
-          <span className={cx('cooking-time')}>
-            {row.original.cookingTime ? `${row.original.cookingTime} min` : 'N/A'}
+          <span className={cx('description')}>
+            {row.original.description
+              ? row.original.description.length > 50
+                ? `${row.original.description.substring(0, 50)}...`
+                : row.original.description
+              : 'No description'}
           </span>
         )
       },
@@ -160,6 +164,15 @@ function DishManagement() {
         header: 'Calorie',
         cell: ({ row }) => (
           <span className={cx('calorie')}>{row.original.calorie ? `${row.original.calorie} cal` : 'N/A'}</span>
+        )
+      },
+      {
+        accessorKey: 'cookingTime',
+        header: 'Cooking Time',
+        cell: ({ row }) => (
+          <span className={cx('cooking-time')}>
+            {row.original.cookingTime ? `${row.original.cookingTime} min` : 'N/A'}
+          </span>
         )
       },
       {
