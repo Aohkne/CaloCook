@@ -19,7 +19,7 @@ import { APIs_V1 } from '@/routes/v1'
 
 const START_SERVER = () => {
   const app = express()
-  const server = createServer(app)
+  const server = createServer(app) // CREATE HTTP server
   const swaggerSpec = swaggerJSDoc(swaggerOptions)
 
   // Socket.IO
@@ -27,6 +27,31 @@ const START_SERVER = () => {
 
   // Middleware -  Socket.IO
   io.use(socketAuthMiddleware)
+
+  // Handling: Socket.IO connection
+  io.on('connection', (socket) => {
+    console.log(`User ${socket.user.username} connected with socket ID: ${socket.id}`)
+
+    // Join user to their own room for private messaging
+    socket.join(`user_${socket.user._id}`)
+
+    // Disconnection
+    socket.on('disconnect', () => {
+      console.log(`User ${socket.user.username} disconnected`)
+    })
+
+    // Optional: Handle typing indicators
+    socket.on('typing', (data) => {
+      socket.broadcast.to(`conversation_${data.conversationId}`).emit('user_typing', {
+        userId: socket.user._id,
+        username: socket.user.username,
+        isTyping: data.isTyping
+      })
+    })
+  })
+
+  // Make io available globally for controllers
+  app.set('socketio', io)
 
   // CORS
   app.use(cors())
@@ -55,14 +80,14 @@ const START_SERVER = () => {
   if (env.NODE_ENV === 'production') {
     // PRODUCTION
     const port = process.env.PORT || env.PORT || 8080
-    app.listen(port, () => {
+    server.listen(port, () => {
       console.log(`Hello ${env.AUTHOR}, Server is running at: https://calocook.onrender.com`)
       console.log(`Swagger is running at https://calocook.onrender.com/api-docs`)
       console.log(`Socket status at https://calocook.onrender.com/socket-status`)
     })
   } else {
     // LOCAL
-    app.listen(env.PORT, env.HOST, () => {
+    server.listen(env.PORT, env.HOST, () => {
       console.log(`Hello ${env.AUTHOR}, Server is running at http://${env.DISPLAY_HOST}:${env.PORT}/`)
       console.log(`Swagger is running at http://${env.DISPLAY_HOST}:${env.PORT}/api-docs`)
       console.log(`Socket status at http://${env.DISPLAY_HOST}:${env.PORT}/socket-status`)

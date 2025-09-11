@@ -15,7 +15,6 @@ function Header() {
   const { theme, toggleTheme } = useTheme();
   const { isAuthenticated, userRole } = useAuth();
 
-  console.log(userRole);
   return (
     <div className={cx('wrapper')}>
       <div className={cx('logo-container')}>

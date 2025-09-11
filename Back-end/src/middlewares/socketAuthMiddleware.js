@@ -1,4 +1,3 @@
-// middlewares/socketAuthMiddleware.js
 import jwt from 'jsonwebtoken'
 import { env } from '@/config/environment'
 import { GET_DB } from '@/config/mongodb'
@@ -13,13 +12,19 @@ export const socketAuthMiddleware = async (socket, next) => {
       return next(new Error('Authentication error: No token provided'))
     }
 
+    // CHECK ACCESS TOKEN
+    if (!env.ACCESS_TOKEN_SECRET) {
+      console.error('ACCESS_TOKEN_SECRET is not defined in environment')
+      return next(new Error('Authentication error: Server configuration error'))
+    }
+
     // Verify token
-    const decoded = jwt.verify(token, env.JWT_SECRET_KEY)
+    const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET)
 
     // Lấy user info từ database
     const user = await GET_DB()
       .collection('user')
-      .findOne({ _id: new ObjectId(decoded._id) }, { projection: { password: 0 } })
+      .findOne({ _id: new ObjectId(decoded.userId) }, { projection: { password: 0 } })
 
     if (!user) {
       return next(new Error('Authentication error: User not found'))

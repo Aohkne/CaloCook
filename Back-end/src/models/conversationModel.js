@@ -89,7 +89,7 @@ const getUserConversation = async (conversationId, currentUserId = null) => {
           $unwind: { path: '$lastMessage', preserveNullAndEmptyArrays: true }
         },
         {
-          $sort: { updatedAt: -1 }
+          $sort: { createdAt: -1 }
         },
         {
           $project: {
@@ -105,6 +105,7 @@ const getUserConversation = async (conversationId, currentUserId = null) => {
             'message.status': 1,
             'message.isUpdated': 1,
             'message.isActive': 1,
+            'message.createdAt': 1,
             'message.updatedAt': 1
           }
         }

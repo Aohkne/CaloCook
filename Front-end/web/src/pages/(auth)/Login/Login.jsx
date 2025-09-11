@@ -110,7 +110,7 @@ function Login() {
         if (response.role === ROLE.ADMIN) {
           navigate(ROUTES.DASHBOARD);
         } else {
-          navigate(ROUTES.HOME);
+          navigate(ROUTES.DISH);
         }
       }, 2000);
     } catch (error) {
