@@ -39,12 +39,16 @@ const getUserConversation = async (userId, isRead = true) => {
     const result = await conversationModel.getUserConversation(conversation._id, userId)
 
     if (result) {
-      // 1. Update read conversation
-      await conversationModel.update(conversation._id, isRead)
-
-      // 2. Update seen message
       if (conversation.lastMessageId) {
-        await messageModel.updateMessage(new ObjectId(conversation.lastMessageId), 'seen')
+        // 1. Update read conversation
+        await conversationModel.update(conversation._id, isRead)
+
+        // 2. Update seen message
+        const lastMessage = await messageModel.getDetails(conversation.lastMessageId)
+
+        if (lastMessage.senderId.toString() !== userId.toString()) {
+          await messageModel.updateMessage(new ObjectId(conversation.lastMessageId), 'seen')
+        }
       }
     }
 
@@ -65,7 +69,15 @@ const getDetailsConversation = async (conversationId, currentUserId, isRead = tr
     }
 
     if (conversation.lastMessageId) {
-      await messageModel.updateMessage(new ObjectId(conversation.lastMessageId), 'seen')
+      // 1. Update read conversation
+      await conversationModel.update(conversation._id, isRead)
+
+      const lastMessage = await messageModel.getDetails(conversation.lastMessageId)
+
+      // 2. Update seen message
+      if (lastMessage.senderId.toString() !== currentUserId.toString()) {
+        await messageModel.updateMessage(new ObjectId(conversation.lastMessageId), 'seen')
+      }
     }
 
     return conversation
@@ -113,6 +125,7 @@ const sendMessage = async (readerId, senderId, content) => {
 
     // 5. Update status
     await messageModel.updateMessage(new ObjectId(mess.insertedId), 'delivered')
+    messageData.status = 'delivered'
 
     return {
       conversationId: new ObjectId(conversation._id),

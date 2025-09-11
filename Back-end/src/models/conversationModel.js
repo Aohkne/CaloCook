@@ -159,6 +159,8 @@ const getDetails = async (conversationId, currentUserId = null) => {
           $project: {
             _id: 1,
             isRead: 1,
+            lastMessageId: 1,
+            createdAt: 1,
             updatedAt: 1,
             'user._id': 1,
             'user.username': 1,
@@ -179,36 +181,7 @@ const getDetails = async (conversationId, currentUserId = null) => {
       return null
     }
 
-    let userInfo = null
-    if (conversation.userId && conversation.userId !== currentUserId) {
-      userInfo = await GET_DB()
-        .collection('user')
-        .findOne({ _id: new ObjectId(conversation.userId) }, { projection: { username: 1, avatarUrl: 1 } })
-    }
-
-    const messages = await GET_DB()
-      .collection('message')
-      .find({
-        conversationId: conversationId.toString(),
-        isActive: true
-      })
-      .sort({ createdAt: 1 })
-      .project({
-        senderId: 1,
-        content: 1,
-        status: 1,
-        isUpdated: 1,
-        isActive: 1,
-        updatedAt: 1,
-        createdAt: 1
-      })
-      .toArray()
-
-    return {
-      ...conversation,
-      user: userInfo,
-      messages: messages
-    }
+    return conversation[0]
   } catch (error) {
     throw new Error(error)
   }

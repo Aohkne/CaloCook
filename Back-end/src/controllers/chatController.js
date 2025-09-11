@@ -5,6 +5,18 @@ const getAllConversation = async (req, res, next) => {
   try {
     const result = await chatService.getAllConversation()
 
+    // Socket.IO instance
+    const io = req.app.get('socketio')
+
+    // Emit to admin room for real-time conversation list updates
+    if (io) {
+      io.to('admin_room').emit('conversations_fetched', {
+        type: 'all_conversations',
+        count: result.length,
+        timestamp: new Date()
+      })
+    }
+
     res.status(StatusCodes.OK).json({
       code: StatusCodes.OK,
       message: 'Get conversations successfully',
@@ -37,6 +49,27 @@ const getDetailsConversation = async (req, res, next) => {
     const currentUserId = req.user._id
 
     const result = await chatService.getDetailsConversation(conversationId, currentUserId)
+
+    // Socket.IO instance
+    const io = req.app.get('socketio')
+
+    // Emit user activity and conversation access
+    if (io && result) {
+      const seenData = {
+        messageId: result.lastMessageId,
+        status: 'seen',
+        updatedAt: new Date()
+      }
+
+      // Emit to conversation participants
+      if (result._id) {
+        io.to(`conversation_${result._id}`).emit('messages_seen', seenData)
+      }
+
+      // Also emit to admin room and user room
+      io.to('admin_room').emit('messages_seen', seenData)
+      io.to(`user_${result?.user._id}`).emit('messages_seen', seenData)
+    }
 
     res.status(StatusCodes.OK).json({
       code: StatusCodes.OK,

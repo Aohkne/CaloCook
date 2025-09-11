@@ -113,6 +113,12 @@ function ChatBox({ isChatOpen, toggleChat }) {
       );
     });
 
+    // SEEN
+    newSocket.on('messages_seen', (seenMessage) => {
+      // Update seen status for messages
+      setMessages((prev) => prev.map((msg) => (msg._id === seenMessage.messageId ? { ...msg, status: 'seen' } : msg)));
+    });
+
     return () => {
       newSocket.close();
     };
