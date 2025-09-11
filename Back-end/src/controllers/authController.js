@@ -365,6 +365,7 @@ const loginWithGoogle = async (req, res) => {
 const forgotPasswordOtp = async (req, res, next) => {
   try {
     const { email } = req.body
+    if (!email) return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Email is required' })
     const user = await User.findOne({ email })
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
