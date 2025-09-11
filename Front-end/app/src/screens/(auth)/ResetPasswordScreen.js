@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,43 +9,62 @@ import {
   SafeAreaView,
   ActivityIndicator
 } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { resetPassword, clearError, clearMessage } from '@/redux/slices/authSlice';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { changePassword } from '@/services/auth'; // ✅ Adjust path as needed
 import { useTheme } from '@/contexts/ThemeProvider';
 
 export default function ResetPasswordScreen() {
+  const dispatch = useDispatch();
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const navigation = useNavigation();
   const route = useRoute();
-  const { token } = route.params; // Token passed via navigation params
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { isLoading, error, message } = useSelector((state) => state.auth);
+  const email = route.params?.email || '';
+  const [otp, setOtp] = useState('');
 
   const handleReset = async () => {
     if (!password || password.length < 6) {
       return Alert.alert('Validation Error', 'Password must be at least 6 characters.');
     }
-
     try {
-      setLoading(true);
-      await changePassword({ token, password });
+      const payloadPassword = password.trim();
+      const result = await dispatch(resetPassword({ otp, email, password: payloadPassword })).unwrap();
       Alert.alert('Success', 'Password reset successful. Please login.', [
         { text: 'OK', onPress: () => navigation.navigate('Login') }
       ]);
     } catch (error) {
-      console.error('Reset password error:', error);
       Alert.alert('Error', error?.response?.data?.message || 'Failed to reset password.');
-    } finally {
-      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (message) {
+      dispatch(clearMessage());
+    }
+    if (error) {
+      Alert.alert('Error', error);
+      dispatch(clearError());
+    }
+  }, [message, error]);
+
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity style={styles.homeButton} onPress={() => navigation.navigate('Login')} disabled={isLoading}>
+        <Text style={styles.homeIcon}>🏠</Text>
+      </TouchableOpacity>
       <View style={styles.box}>
         <Text style={styles.title}>Enter New Password</Text>
 
+        <TextInput
+          placeholder='OTP'
+          value={otp}
+          onChangeText={(text) => setOtp(text.replace(/\D/g, '').slice(0, 6))}
+          keyboardType='numeric'
+          style={styles.input}
+        />
         <TextInput
           placeholder='New Password'
           value={password}
@@ -54,8 +73,12 @@ export default function ResetPasswordScreen() {
           style={styles.input}
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleReset} disabled={loading}>
-          {loading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Reset Password</Text>}
+        <TouchableOpacity style={styles.button} onPress={handleReset} disabled={isLoading}>
+          {isLoading ? (
+            <ActivityIndicator color={colors.white} />
+          ) : (
+            <Text style={styles.buttonText}>Reset Password</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -71,8 +94,8 @@ const createStyles = (colors) =>
       alignItems: 'center'
     },
     box: {
-      width: 343,
-      padding: 32,
+      width: 355,
+      padding: 35,
       borderRadius: 16,
       backgroundColor: colors.white,
       alignItems: 'center',
@@ -89,7 +112,7 @@ const createStyles = (colors) =>
       textAlign: 'center'
     },
     input: {
-      width: 343,
+      width: 325,
       height: 51,
       borderRadius: 16,
       backgroundColor: '#F2F1EB',
@@ -99,7 +122,7 @@ const createStyles = (colors) =>
     },
     button: {
       backgroundColor: colors.secondary,
-      width: 343,
+      width: 325,
       height: 51,
       borderRadius: 76,
       justifyContent: 'center',
@@ -109,5 +132,28 @@ const createStyles = (colors) =>
       color: colors.white,
       fontWeight: '600',
       fontSize: 16
+    },
+    buttonText: {
+      color: colors.white,
+      fontWeight: '600',
+      fontSize: 16
+    },
+    // new home button (rounded with icon)
+    homeButton: {
+      position: 'absolute',
+      top: 240,
+      width: 55,
+      height: 55,
+      borderRadius: 27.5,
+      backgroundColor: colors.secondary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 20
+    },
+    homeIcon: {
+      color: colors.white,
+      fontSize: 30,
+      lineHeight: 30,
+      textAlign: 'center'
     }
   });

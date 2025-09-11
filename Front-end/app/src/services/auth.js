@@ -39,7 +39,7 @@ export const registerService = async (userData) => {
 // FORGOT
 export const forgotPasswordService = async (email) => {
   try {
-    const response = await api.post('/auth/forgot-password', { email });
+    const response = await api.post('/auth/forgot-password-otp', { email });
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Forgot password failed' };
@@ -47,9 +47,9 @@ export const forgotPasswordService = async (email) => {
 };
 
 // RESET
-export const resetPasswordService = async (token, newPassword) => {
+export const resetPasswordService = async (otp, email, newPassword) => {
   try {
-    const response = await api.post('/auth/reset-password', { token, newPassword });
+    const response = await api.post('/auth/reset-password-otp', { otp, email, newPassword });
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Reset password failed' };

@@ -11,8 +11,8 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { forgotPassword, clearError, clearMessage } from '@/redux/slices/authSlice'; // ✅ path may vary
-import logoFull from '@/assets/logo.png'; // ✅ adjust this path as needed
+import { forgotPassword, clearError, clearMessage } from '@/redux/slices/authSlice'; 
+import logoFull from '@/assets/logo.png'; 
 import { ChevronLeft, Moon, Sun } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@/contexts/ThemeProvider';
@@ -35,7 +35,12 @@ export default function ForgotPasswordScreen() {
     if (!emailRegex.test(email)) {
       return Alert.alert('Validation Error', 'Please enter a valid email.');
     }
-    await dispatch(forgotPassword(email));
+    try {
+      const result = await dispatch(forgotPassword(email)).unwrap();
+      navigation.navigate('ResetPassword', { email });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+    }
   };
 
   useEffect(() => {
