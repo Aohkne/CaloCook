@@ -1,0 +1,187 @@
+.chat-wrapper {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 10;
+
+  .chat-box {
+    // display: none;
+    position: relative;
+    margin-top: 10px;
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    border: 2px solid var(--shadow);
+    box-shadow: 2px 2px 1px var(--shadow);
+    background-image: linear-gradient(200.39deg, rgba(0, 105, 85, 0.8) 54.61%, rgba(198, 222, 190, 0.8) 86.63%);
+
+    animation: slideUp 0.3s ease-in-out;
+
+    .toggle-btn {
+      position: absolute;
+      top: -11px;
+      right: 10px;
+      padding: 5px;
+      width: 25px;
+      height: 25px;
+      color: var(--secondary);
+      border: 1px solid var(--shadow);
+      background-color: var(--tertiary);
+      box-shadow: 2px 2px 1px var(--shadow);
+
+      border-radius: 50%;
+
+      transition: all 0.3s ease-in;
+      cursor: pointer;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      z-index: 10;
+
+      &:hover {
+        transform: translateY(2px);
+        box-shadow: 0px 0px 0px var(--shadow);
+      }
+    }
+  }
+
+  .chat-container {
+    width: 350px;
+    height: 350px;
+    border-radius: 10px;
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    // Message
+    .messages {
+      flex: 1;
+      // max-height: 100%;
+      padding: 20px 15px;
+      // overflow-y: scroll;
+      overflow-y: auto;
+
+      display: flex;
+      flex-direction: column;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .messages-item {
+        .messages-time {
+          text-align: center;
+          color: var(--title);
+          font-size: 1rem;
+        }
+
+        .messages-container {
+          margin: 10px 0;
+
+          display: flex;
+          align-items: center;
+
+          .messages-content {
+            max-width: 80%;
+            padding: 5px 10px;
+            font-size: 1.5rem;
+            color: var(--tertiary);
+            border-radius: 8px;
+            word-wrap: break-word;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &.recall {
+              color: var(--title);
+              border: 1px dashed var(--shadow);
+              background-color: transparent;
+            }
+          }
+
+          .action {
+            position: relative;
+
+            .action-item {
+              display: none;
+              position: absolute;
+              padding: 5px 8px;
+              right: -120%;
+
+              color: var(--title);
+              border-radius: 2px;
+              background-color: var(--background-subside);
+              z-index: 10;
+            }
+          }
+        }
+
+        &.admin {
+          .messages-container {
+            .messages-content {
+              filter: drop-shadow(0px 0px 2px var(--title));
+            }
+          }
+        }
+        &.user {
+          .messages-container {
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+
+            .messages-content {
+              color: var(--secondary);
+              background-color: var(--tertiary);
+
+              &.recall {
+                color: var(--title);
+                border: 1px dashed var(--shadow);
+                background-color: transparent;
+              }
+            }
+
+            .action {
+              .action-item {
+                padding: 5px 8px;
+                right: 50%;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    //Input
+
+    .input-box {
+      padding: 8px;
+      border-top: 1px solid var(--shadow);
+      background-color: var(--tertiary);
+
+      display: flex;
+
+      input {
+        flex: 1;
+        padding: 8px 5px;
+        font-size: 1.6rem;
+        border: none;
+        color: var(--input-text);
+        background-color: transparent;
+        outline: none;
+
+        &::placeholder {
+          color: var(--secondary);
+        }
+      }
+
+      button {
+        background: none;
+        border: none;
+        margin-left: 6px;
+        cursor: pointer;
+        color: var(--secondary);
+      }
+    }
+  }
+}

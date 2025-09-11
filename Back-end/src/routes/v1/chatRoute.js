@@ -44,7 +44,7 @@ Router.route('/conversations').get(
 Router.route('/user-conversations').get(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['user']),
-  chatController.getAllConversation
+  chatController.getUserConversation
 )
 
 /**

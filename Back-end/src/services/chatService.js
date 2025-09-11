@@ -18,13 +18,26 @@ const getAllConversation = async () => {
   }
 }
 
-const getUserConversation = async (userId) => {
+const getUserConversation = async (userId, isRead = true) => {
   try {
-    const result = await conversationModel.getUserConversation(userId)
+    const conversation = await conversationModel.getDetailsByUserId(userId)
 
-    if (!result || result.length === 0) {
+    if (!conversation || conversation.length === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Conversation not found!')
     }
+
+    const result = await conversationModel.getUserConversation(conversation._id, userId)
+
+    if (result) {
+      // 1. Update read conversation
+      await conversationModel.update(conversation._id, isRead)
+
+      // 2. Update seen message
+      if (conversation.lastMessageId) {
+        await messageModel.updateMessage(new ObjectId(conversation.lastMessageId), 'seen')
+      }
+    }
+
     return result
   } catch (error) {
     throw error

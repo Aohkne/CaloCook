@@ -27,9 +27,6 @@ const getAll = async () => {
           }
         },
         {
-          $unwind: { path: '$lastMessage', preserveNullAndEmptyArrays: true }
-        },
-        {
           $lookup: {
             from: 'user',
             localField: 'userId',
@@ -61,24 +58,13 @@ const getAll = async () => {
   }
 }
 
-const getUserConversation = async (userId) => {
+const getUserConversation = async (conversationId, currentUserId = null) => {
   try {
-    return await GET_DB()
+    const conversation = await GET_DB()
       .collection(_COLLECTION_NAME)
       .aggregate([
         {
-          $match: { userId: new ObjectId(userId) }
-        },
-        {
-          $lookup: {
-            from: 'message',
-            localField: 'lastMessageId',
-            foreignField: '_id',
-            as: 'lastMessage'
-          }
-        },
-        {
-          $unwind: { path: '$lastMessage', preserveNullAndEmptyArrays: true }
+          $match: { _id: new ObjectId(conversationId) }
         },
         {
           $lookup: {
@@ -92,21 +78,44 @@ const getUserConversation = async (userId) => {
           $unwind: { path: '$user', preserveNullAndEmptyArrays: true }
         },
         {
+          $lookup: {
+            from: 'message',
+            localField: '_id',
+            foreignField: 'conversationId',
+            as: 'message'
+          }
+        },
+        {
+          $unwind: { path: '$lastMessage', preserveNullAndEmptyArrays: true }
+        },
+        {
           $sort: { updatedAt: -1 }
         },
         {
           $project: {
             _id: 1,
-            userId: 1,
+            isRead: 1,
             updatedAt: 1,
+            'user._id': 1,
             'user.username': 1,
             'user.avatarUrl': 1,
-            'lastMessage._id': 1,
-            'lastMessage.content': 1
+            'message._id': 1,
+            'message.senderId': 1,
+            'message.content': 1,
+            'message.status': 1,
+            'message.isUpdated': 1,
+            'message.isActive': 1,
+            'message.updatedAt': 1
           }
         }
       ])
       .toArray()
+
+    if (!conversation) {
+      return null
+    }
+
+    return conversation[0]
   } catch (error) {
     throw new Error(error)
   }

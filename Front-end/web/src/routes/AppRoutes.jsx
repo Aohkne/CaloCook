@@ -22,6 +22,7 @@ import UserManagement from '@/pages/(admin)/UserManagement/UserManagement';
 import DishManagement from '@/pages/(admin)/DishManagement/DishManagement';
 
 //USER
+import Dish from '@/pages/(user)/Dish/Dish';
 import ChatAI from '@/pages/(user)/ChatAI/ChatAI';
 
 function AppRoutes() {
@@ -123,6 +124,14 @@ function AppRoutes() {
         />
 
         {/* USER ROUTES */}
+        <Route
+          path={ROUTES.DISH}
+          element={
+            <ProtectedRoute requiredRole={ROLE.USER}>
+              <Dish />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path={ROUTES.CHAT_AI}
           element={

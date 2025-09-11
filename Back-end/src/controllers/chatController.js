@@ -19,7 +19,7 @@ const getUserConversation = async (req, res, next) => {
   try {
     const userId = req.user._id
 
-    const result = await chatService.getAllConversation(userId)
+    const result = await chatService.getUserConversation(userId)
 
     res.status(StatusCodes.OK).json({
       code: StatusCodes.OK,
