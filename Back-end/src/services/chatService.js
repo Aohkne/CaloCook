@@ -130,6 +130,7 @@ const sendMessage = async (readerId, senderId, content) => {
     return {
       conversationId: new ObjectId(conversation._id),
       messageId: mess.insertedId,
+      userId: userId,
       ...messageData
     }
   } catch (error) {
@@ -143,8 +144,12 @@ const updateMessage = async (messageId, content, isUpdate = true) => {
 
     const messageData = await messageModel.getDetails(mess._id)
 
+    //Get user id to emit room
+    const conversation = await conversationModel.getDetails(messageData.conversationId)
+
     return {
-      ...messageData
+      ...messageData,
+      userId: conversation.user._id
     }
   } catch (error) {
     throw error
@@ -154,10 +159,18 @@ const updateMessage = async (messageId, content, isUpdate = true) => {
 const deleteMessage = async (messageId) => {
   try {
     const result = await messageModel.updateIsActive(messageId, false)
+
+    //Get user id to emit room
+    const conversation = await conversationModel.getDetails(result.conversationId)
+
     if (!result) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Message not found!')
     }
-    return result
+
+    return {
+      result,
+      userId: conversation.user._id
+    }
   } catch (error) {
     throw error
   }

@@ -15,7 +15,6 @@ const cx = classNames.bind(styles);
 
 function ChatBox({ isChatOpen, toggleChat }) {
   const NODE_ENV = import.meta.env.NODE_ENV;
-  const [socket, setSocket] = useState(null);
 
   const [userId, setUserId] = useState();
   const [messages, setMessages] = useState([]);
@@ -24,7 +23,6 @@ function ChatBox({ isChatOpen, toggleChat }) {
   const [editingContent, setEditingContent] = useState('');
 
   const messagesEndRef = useRef(null);
-  const typingTimeoutRef = useRef(null);
 
   // Auto scroll to bottom:  new messages arrive
   const scrollToBottom = () => {
@@ -37,8 +35,6 @@ function ChatBox({ isChatOpen, toggleChat }) {
 
   // SOCKET CONNECT
   useEffect(() => {
-    // console.log(getCookie('accessToken'));
-
     const token = getCookie('accessToken');
 
     if (!token) {
@@ -61,7 +57,6 @@ function ChatBox({ isChatOpen, toggleChat }) {
     newSocket.on('connect', () => {
       console.log('Socket connected');
       // console.log('Socket connected:', newSocket.id);
-      setSocket(newSocket);
     });
 
     newSocket.on('disconnect', (reason) => {
@@ -73,6 +68,7 @@ function ChatBox({ isChatOpen, toggleChat }) {
     });
 
     // MESSAGE EVENT: Real-time
+    // NEW MESSAGE
     newSocket.on('new_message', (messageData) => {
       // console.log('New message received:', messageData);
       setMessages((prev) => [...prev, messageData]);
@@ -81,7 +77,6 @@ function ChatBox({ isChatOpen, toggleChat }) {
     // SENT
     newSocket.on('message_sent', (messageData) => {
       // console.log('Message sent confirmation:', messageData);
-      // Update local state to show the sent message
       setMessages((prev) => {
         const exists = prev.find((msg) => msg._id === messageData._id);
         if (exists) {
@@ -129,6 +124,7 @@ function ChatBox({ isChatOpen, toggleChat }) {
     handleGetUserConversation();
   }, []);
 
+  // HANDLE USER CONVERSATION
   const handleGetUserConversation = async () => {
     try {
       const response = await getUserConversation();
@@ -163,7 +159,7 @@ function ChatBox({ isChatOpen, toggleChat }) {
     setInput('');
 
     try {
-      // API Send
+      // API SEND
       await sentMessage(messageContent);
 
       // Remove temporary message since real message will come via socket
@@ -219,27 +215,6 @@ function ChatBox({ isChatOpen, toggleChat }) {
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
-
-    // Handle typing indicator
-    if (socket && userId) {
-      socket.emit('typing', {
-        conversationId: 'current_conversation',
-        isTyping: true
-      });
-
-      // Clear previous timeout
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-
-      // Stop typing after 1 second of inactivity
-      typingTimeoutRef.current = setTimeout(() => {
-        socket.emit('typing', {
-          conversationId: 'current_conversation',
-          isTyping: false
-        });
-      }, 1000);
-    }
   };
 
   // SENT: ENTER
@@ -315,7 +290,7 @@ function ChatBox({ isChatOpen, toggleChat }) {
                             temporary: message.isTemporary
                           })}
                         >
-                          {!message.isActive ? 'Tin nhắn đã được thu hồi' : message.content}
+                          {!message.isActive ? 'This message has been taken off the menu' : message.content}
                         </div>
 
                         {message.isActive && editingMessageId !== message._id && messageType === 'user' && (

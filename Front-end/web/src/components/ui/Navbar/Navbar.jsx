@@ -7,11 +7,13 @@ import { ROUTES } from '@/constants/routes';
 
 import styles from './Navbar.module.scss';
 import classNames from 'classnames/bind';
+import { useAuth } from '@/hooks/useAuth';
 
 const cx = classNames.bind(styles);
 
 function Navbar() {
   const { theme, toggleTheme } = useTheme();
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className={cx('wrapper')}>
@@ -44,9 +46,15 @@ function Navbar() {
           )}
         </button>
 
-        <Link to={ROUTES.LOGIN} className={cx('btn-login')}>
-          Login
-        </Link>
+        {!isAuthenticated() ? (
+          <Link to={ROUTES.LOGIN} className={cx('btn-login')}>
+            Login
+          </Link>
+        ) : (
+          <Link to={'/'} className={cx('user-profile')}>
+            <Icon icon='qlementine-icons:user-16' width='35' height='35' />
+          </Link>
+        )}
       </div>
     </div>
   );

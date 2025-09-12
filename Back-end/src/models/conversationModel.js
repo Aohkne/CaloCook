@@ -45,10 +45,10 @@ const getAll = async () => {
             _id: 1,
             userId: 1,
             updatedAt: 1,
+            isRead: 1,
             'user.username': 1,
-            'user.avatarUrl': 1,
-            'lastMessage._id': 1,
-            'lastMessage.content': 1
+            'user.avatar_url': 1,
+            lastMessage: { $arrayElemAt: ['$lastMessage', 0] }
           }
         }
       ])
@@ -98,7 +98,7 @@ const getUserConversation = async (conversationId, currentUserId = null) => {
             updatedAt: 1,
             'user._id': 1,
             'user.username': 1,
-            'user.avatarUrl': 1,
+            'user.avatar_url': 1,
             'message._id': 1,
             'message.senderId': 1,
             'message.content': 1,
@@ -164,14 +164,15 @@ const getDetails = async (conversationId, currentUserId = null) => {
             updatedAt: 1,
             'user._id': 1,
             'user.username': 1,
-            'user.avatarUrl': 1,
+            'user.avatar_url': 1,
             'message._id': 1,
             'message.senderId': 1,
             'message.content': 1,
             'message.status': 1,
             'message.isUpdated': 1,
             'message.isActive': 1,
-            'message.updatedAt': 1
+            'message.updatedAt': 1,
+            'message.createdAt': 1
           }
         }
       ])

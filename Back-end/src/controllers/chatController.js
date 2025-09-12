@@ -1,21 +1,14 @@
 import { StatusCodes } from 'http-status-codes'
 import { chatService } from '@/services/chatService'
+import { socketHelper } from '@/utils/socketHelper'
 
 const getAllConversation = async (req, res, next) => {
   try {
     const result = await chatService.getAllConversation()
 
-    // Socket.IO instance
-    const io = req.app.get('socketio')
-
-    // Emit to admin room for real-time conversation list updates
-    if (io) {
-      io.to('admin_room').emit('conversations_fetched', {
-        type: 'all_conversations',
-        count: result.length,
-        timestamp: new Date()
-      })
-    }
+    // SOCKET
+    // EMIT: conversation updates to admin
+    socketHelper.chat.emitConversationUpdate(result)
 
     res.status(StatusCodes.OK).json({
       code: StatusCodes.OK,
@@ -50,25 +43,15 @@ const getDetailsConversation = async (req, res, next) => {
 
     const result = await chatService.getDetailsConversation(conversationId, currentUserId)
 
-    // Socket.IO instance
-    const io = req.app.get('socketio')
-
-    // Emit user activity and conversation access
-    if (io && result) {
+    // SOCKET
+    if (result) {
       const seenData = {
         messageId: result.lastMessageId,
         status: 'seen',
         updatedAt: new Date()
       }
-
-      // Emit to conversation participants
-      if (result._id) {
-        io.to(`conversation_${result._id}`).emit('messages_seen', seenData)
-      }
-
-      // Also emit to admin room and user room
-      io.to('admin_room').emit('messages_seen', seenData)
-      io.to(`user_${result?.user._id}`).emit('messages_seen', seenData)
+      // EMIT: messages seen status
+      socketHelper.chat.emitMessagesSeen(seenData, result._id, result?.user._id)
     }
 
     res.status(StatusCodes.OK).json({
@@ -87,38 +70,32 @@ const sendMessage = async (req, res, next) => {
 
     const senderId = req.user._id
 
-    // Socket.IO instance
-    const io = req.app.get('socketio')
-
     const result = await chatService.sendMessage(readerId, senderId, content)
 
-    // Socket handle
-    if (io) {
-      // Determine who should receive the message
-      const receiverId = readerId || (result.conversation?.userId !== senderId ? result.conversation?.userId : null)
+    // SOCKET
+    const receiverId = readerId || (result?.userId !== senderId ? result?.userId.toString() : null)
 
-      // Message data: for real-time emission
-      const messageData = {
-        _id: result.messageId,
-        conversationId: result.conversationId,
-        senderId: senderId,
-        content: content,
-        status: result.status || 'delivered',
-        isUpdated: false,
-        isActive: true,
-        createdAt: result.createdAt,
-        updatedAt: result.updatedAt
-      }
-      // Send to specific user if readerId exists (admin -> user)
-      if (receiverId) {
-        io.to(`user_${receiverId}`).emit('new_message', messageData)
-      }
+    const messageData = {
+      _id: result.messageId,
+      conversationId: result.conversationId,
+      senderId: senderId,
+      content: content,
+      status: result.status || 'delivered',
+      isUpdated: false,
+      isActive: true,
+      createdAt: result.createdAt,
+      updatedAt: result.updatedAt
+    }
 
-      // Send to admin room (assuming admin role monitoring)
-      io.to('admin_room').emit('new_message', messageData)
+    // EMIT: new message to relevant rooms
+    socketHelper.chat.emitNewMessage(messageData, receiverId)
 
-      // Send back to sender for confirmation
-      io.to(`user_${senderId}`).emit('message_sent', messageData)
+    // Update admin conversations
+    if (result) {
+      const updatedConversations = await chatService.getAllConversation()
+
+      // EMIT: conversations list update to admin
+      socketHelper.chat.emitConversationsUpdate(updatedConversations)
     }
 
     res.status(StatusCodes.CREATED).json({
@@ -136,26 +113,28 @@ const updateMessage = async (req, res, next) => {
     const { messageId } = req.params
     const { content } = req.body
 
-    const currentUserId = req.user._id
-
-    // Socket.IO instance
-    const io = req.app.get('socketio')
+    // const currentUserId = req.user._id
 
     const result = await chatService.updateMessage(messageId, content)
 
-    // Emit message update in real-time
-    if (io && result) {
+    // SOCKET
+    if (result) {
       const updateData = {
         messageId: messageId,
         content: content,
         isUpdated: true,
         updatedAt: result.updatedAt
       }
+      // EMIT: message update
+      socketHelper.chat.emitMessageUpdate(updateData, result?.userId.toString())
 
-      io.to(`user_${currentUserId}`).emit('message_updated', updateData)
+      // Update admin conversations
+      if (result) {
+        const updatedConversations = await chatService.getAllConversation()
 
-      // Also emit to admin room and user room
-      io.to('admin_room').emit('message_updated', updateData)
+        // EMIT: conversations list update to admin
+        socketHelper.chat.emitConversationsUpdate(updatedConversations)
+      }
     }
 
     res.status(StatusCodes.OK).json({
@@ -172,27 +151,25 @@ const deleteMessage = async (req, res, next) => {
   try {
     const { messageId } = req.params
 
-    // Socket.IO instance
-    const io = req.app.get('socketio')
-
     const result = await chatService.deleteMessage(messageId)
 
-    // Emit message deletion in real-time
-    if (io && result) {
+    // SOCKET
+    if (result) {
       const deleteData = {
         messageId: messageId,
         isActive: false,
         updatedAt: new Date()
       }
+      // EMIT: message deletion
+      socketHelper.chat.emitMessageDelete(deleteData, result.conversationId, result?.userId.toString())
 
-      // Emit to conversation participants
-      if (result.conversationId) {
-        io.to(`conversation_${result.conversationId}`).emit('message_deleted', deleteData)
+      // Update admin conversations
+      if (result) {
+        const updatedConversations = await chatService.getAllConversation()
+
+        // EMIT: conversations list update to admin
+        socketHelper.chat.emitConversationsUpdate(updatedConversations)
       }
-
-      // Also emit to admin room and user room
-      io.to('admin_room').emit('message_deleted', deleteData)
-      io.to(`user_${result.senderId}`).emit('message_deleted', deleteData)
     }
 
     res.status(StatusCodes.OK).json({

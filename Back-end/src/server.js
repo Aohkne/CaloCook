@@ -5,16 +5,19 @@ import cors from 'cors'
 import exitHook from 'async-exit-hook'
 import { createServer } from 'http'
 
+import { swaggerOptions } from '@/config/swagger'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
-import { swaggerOptions } from '@/config/swagger'
 
 import { initSocketIO } from '@/config/socket'
+import { socketAuthMiddleware } from '@/middlewares/socketAuthMiddleware'
+import { handleSocketConnection } from '@/utils/socketHandler'
+
 import { CONNECT_DB, CLOSE_DB } from '@/config/mongodb'
 import { env } from '@/config/environment'
 
-import { socketAuthMiddleware } from '@/middlewares/socketAuthMiddleware'
 import { errorHandlingMiddleware } from '@/middlewares/errorHandlingMiddleware'
+
 import { APIs_V1 } from '@/routes/v1'
 
 const START_SERVER = () => {
@@ -29,26 +32,7 @@ const START_SERVER = () => {
   io.use(socketAuthMiddleware)
 
   // Handling: Socket.IO connection
-  io.on('connection', (socket) => {
-    console.log(`User ${socket.user.username} connected with socket ID: ${socket.id}`)
-
-    // Join user to their own room for private messaging
-    socket.join(`user_${socket.user._id}`)
-
-    // Disconnection
-    socket.on('disconnect', () => {
-      console.log(`User ${socket.user.username} disconnected`)
-    })
-
-    // Optional: Handle typing indicators
-    socket.on('typing', (data) => {
-      socket.broadcast.to(`conversation_${data.conversationId}`).emit('user_typing', {
-        userId: socket.user._id,
-        username: socket.user.username,
-        isTyping: data.isTyping
-      })
-    })
-  })
+  handleSocketConnection(io)
 
   // Make io available globally for controllers
   app.set('socketio', io)
@@ -69,7 +53,8 @@ const START_SERVER = () => {
   app.get('/socket-status', (req, res) => {
     res.json({
       status: 'Socket.IO is running',
-      connectedClients: io.engine.clientsCount,
+      connectedClients: socketHelper.utils.getConnectedClientsCount(),
+      isConnected: socketHelper.utils.isConnected(),
       timestamp: new Date()
     })
   })

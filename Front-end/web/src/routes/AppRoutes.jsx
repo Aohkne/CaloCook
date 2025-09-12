@@ -20,6 +20,7 @@ import Home from '@/pages/Home/Home';
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
 import UserManagement from '@/pages/(admin)/UserManagement/UserManagement';
 import DishManagement from '@/pages/(admin)/DishManagement/DishManagement';
+import Chat from '@/pages/(admin)/Chat/Chat';
 
 //USER
 import Dish from '@/pages/(user)/Dish/Dish';
@@ -119,6 +120,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute requiredRole={ROLE.ADMIN}>
               <DishManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.CHAT}
+          element={
+            <ProtectedRoute requiredRole={ROLE.ADMIN}>
+              <Chat />
             </ProtectedRoute>
           }
         />
