@@ -20,8 +20,10 @@ import Home from '@/pages/Home/Home';
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
 import UserManagement from '@/pages/(admin)/UserManagement/UserManagement';
 import DishManagement from '@/pages/(admin)/DishManagement/DishManagement';
+import Chat from '@/pages/(admin)/Chat/Chat';
 
 //USER
+import Dish from '@/pages/(user)/Dish/Dish';
 import ChatAI from '@/pages/(user)/ChatAI/ChatAI';
 
 function AppRoutes() {
@@ -122,7 +124,24 @@ function AppRoutes() {
           }
         />
 
+        <Route
+          path={ROUTES.CHAT}
+          element={
+            <ProtectedRoute requiredRole={ROLE.ADMIN}>
+              <Chat />
+            </ProtectedRoute>
+          }
+        />
+
         {/* USER ROUTES */}
+        <Route
+          path={ROUTES.DISH}
+          element={
+            <ProtectedRoute requiredRole={ROLE.USER}>
+              <Dish />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path={ROUTES.CHAT_AI}
           element={

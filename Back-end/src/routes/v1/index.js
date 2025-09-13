@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 
 import { userRoute } from '@/routes/v1/userRoute'
 import { authRoute } from '@/routes/v1/authRoute'
+import { chatRoute } from '@/routes/v1/chatRoute'
 import { dishRoute } from '@/routes/v1/dishRoute'
 import { ingredientRoute } from '@/routes/v1/ingredientRoute'
 import { stepRoute } from '@/routes/v1/stepRoute'
@@ -22,6 +23,7 @@ Router.get('/status', (req, res) => {
 /* API - Đường dẫn */
 Router.use('/user', userRoute)
 Router.use('/auth', authRoute)
+Router.use('/chat', chatRoute)
 Router.use('/dish', dishRoute)
 Router.use('/ingredient', ingredientRoute)
 Router.use('/step', stepRoute)

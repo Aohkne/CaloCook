@@ -10,7 +10,7 @@ import Navbar from '@/components/ui/Navbar/Navbar';
 import styles from './ChatAI.module.scss';
 import classNames from 'classnames/bind';
 
-// Cấu hình API - thay thế bằng API key thực tế
+// API
 const API_KEY = import.meta.env.VITE_API_KEY;
 const MODEL = import.meta.env.VITE_MODEL || '';
 const PROMPT = import.meta.env.VITE_PROMPT || '';
@@ -278,7 +278,7 @@ function ChatAI() {
                   <Icon icon='tabler:copy' width='20' height='20' />
                 </div>
                 {msg.from === 'bot' && (
-                  <div className={cx('item')} onClick={() => speakText(msg.text)} title='Read aloud'>
+                  <div className={cx('item')} onClick={() => speakText(msg.text)} title='Read'>
                     <Icon icon='proicons:volume' width='24' height='24' />
                   </div>
                 )}

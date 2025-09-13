@@ -130,6 +130,13 @@ function Sidebar() {
           </div>
 
           <div className={cx('item')}>
+            <Link to={ROUTES.CHAT}>
+              <Icon icon='mdi:chat' width='20' height='20' />
+              <span>Chat</span>
+            </Link>
+          </div>
+
+          <div className={cx('item')}>
             <Link to={ROUTES.PROFILE_ADMIN}>
               <Icon icon='mingcute:user-edit-fill' width='20' height='20' />
               <span>Profile</span>
