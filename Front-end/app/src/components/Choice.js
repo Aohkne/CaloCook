@@ -20,7 +20,8 @@ const createStyles = (colors) =>
     container: {
       borderWidth: 2,
       borderRadius: 10,
-      backgroundColor: 'rgba(252,252,252,0.5)'
+      backgroundColor: 'rgba(252,252,252,0.5)',
+      overflow: 'hidden'
     },
     text: {
       fontSize: 30,
@@ -30,11 +31,13 @@ const createStyles = (colors) =>
       letterSpacing: 4
     },
     like: {
-      color: colors.primary,
-      borderColor: colors.primary
+      color: colors.green,
+      backgroundColor: colors.lightGreen,
+      borderColor: colors.green
     },
     nope: {
       color: colors.red,
+      backgroundColor: colors.lightRed,
       borderColor: colors.red
     }
   });
