@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 62.5%;
+}
+
+body {
+  background-color: var(--background);
+  font-family: 'Poppins', sans-serif;
+}
+
+//Scrollbar
+html ::-webkit-scrollbar {
+  border-radius: 0;
+  width: 8px;
+}
+
+html ::-webkit-scrollbar-thumb {
+  background-color: #00000026;
+  border-radius: 4px;
+}
+
+html ::-webkit-scrollbar-track {
+  background-color: #0000;
+  border-radius: 0;
+}
+
+/* Light theme */
+:root {
+  //Color
+  // Primary colors
+  --primary: #9af10c;
+  --secondary: #006955;
+
+  // Text
+  --title: #080e2d;
+  --description: #888888;
+
+  --background: #fcfaf3;
+
+  --card-bg: #ffffff;
+  --btn-bg: #ffffff;
+
+  // Borders & shadows
+  --border: #1b1c1d;
+  --shadow: #1b1c1d;
+
+  // Input
+  --input-bg: rgba(8, 14, 45, 0.04);
+  --input-border: rgba(8, 14, 45, 0.06);
+  --input-text: #000000;
+  --input-placeholder: rgba(8, 14, 45, 0.6);
+
+  // Other colors
+  --red: #dc2e60;
+  --yellow: #eec756;
+}
+
+/* Dark theme */
+body.dark {
+  //Color
+  // Primary colors
+  --primary: #9af10c;
+  --secondary: #1db59e;
+
+  // Text
+  --title: #fcfaf3;
+  --description: #aaaaaa;
+
+  --background: #0e0f1a;
+
+  --card-bg: #1b1c1d;
+  --btn-bg: #1b1c1d;
+
+  // Borders & shadows
+  --border: #fcfaf3;
+  --shadow: #fcfaf3;
+
+  // Input
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.2);
+  --input-text: #ffffff;
+  --input-placeholder: #bbbbbb;
+
+  // Other colors
+  --red: #ff4d6d;
+  --yellow: #ffd85f;
+}
