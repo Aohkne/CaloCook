@@ -1,0 +1,281 @@
+@use '@styles/global' as *;
+@use '@styles/mixin' as *;
+
+.wrapper {
+  padding: 50px 0;
+  background-color: var(--tertiary);
+  border-top: 2px solid var(--border);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  @include respond-above(lg) {
+    padding: 40px 20px;
+  }
+
+  @include respond-above(md) {
+    padding: 30px 15px;
+  }
+
+  @include respond-above(xs) {
+    padding: 20px 10px;
+  }
+
+  img {
+    height: auto;
+    max-width: 100%;
+  }
+
+  .divider {
+    margin: 30px 0;
+    height: 1px;
+    background-color: var(--border);
+    width: 100%;
+    max-width: 1048px;
+
+    @include respond-above(lg) {
+      margin: 25px 0;
+      max-width: 800px;
+    }
+
+    @include respond-above(md) {
+      margin: 20px 0;
+      max-width: 600px;
+    }
+
+    @include respond-above(xs) {
+      margin: 15px 0;
+      max-width: 400px;
+    }
+  }
+
+  .footer-container {
+    display: flex;
+    align-self: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1048px;
+
+    @include respond-above(lg) {
+      max-width: 800px;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    @include respond-above(md) {
+      flex-direction: column;
+      gap: 25px;
+      max-width: 600px;
+    }
+
+    @include respond-above(xs) {
+      gap: 20px;
+      max-width: 400px;
+    }
+
+    .footer-info {
+      @include respond-above(lg) {
+        order: 2;
+        text-align: center;
+      }
+
+      @include respond-above(md) {
+        order: 2;
+        text-align: center;
+      }
+
+      .footer-description {
+        font-size: 2rem;
+        margin: 15px 0;
+        font-weight: 300;
+        color: var(--title);
+
+        @include respond-above(lg) {
+          font-size: 1.8rem;
+          margin: 12px 0;
+        }
+
+        @include respond-above(md) {
+          font-size: 1.6rem;
+          margin: 10px 0;
+          line-height: 1.4;
+        }
+
+        @include respond-above(xs) {
+          font-size: 1.4rem;
+          margin: 8px 0;
+          line-height: 1.3;
+        }
+      }
+
+      .footer-social {
+        display: flex;
+        align-items: center;
+
+        @include respond-above(lg) {
+          justify-content: center;
+        }
+
+        @include respond-above(md) {
+          justify-content: center;
+        }
+
+        a {
+          margin: 10px 0;
+          color: var(--title);
+          transition: all 0.3s ease-in-out;
+
+          @include respond-above(md) {
+            margin: 8px 0;
+          }
+
+          @include respond-above(xs) {
+            margin: 5px 0;
+          }
+
+          & + a {
+            margin-left: 20px;
+
+            @include respond-above(md) {
+              margin-left: 15px;
+            }
+
+            @include respond-above(xs) {
+              margin-left: 12px;
+            }
+          }
+
+          &:hover {
+            color: var(--secondary);
+          }
+
+          @include respond-above(xs) {
+            svg {
+              width: 20px;
+              height: 20px;
+            }
+          }
+        }
+      }
+    }
+
+    .footer-content {
+      display: flex;
+
+      @include respond-above(lg) {
+        order: 1;
+        justify-content: center;
+      }
+
+      @include respond-above(md) {
+        order: 1;
+        justify-content: center;
+      }
+
+      .footer-navi {
+        margin: 0px 30px;
+
+        @include respond-above(lg) {
+          margin: 0;
+          text-align: center;
+        }
+
+        @include respond-above(md) {
+          margin: 0;
+          text-align: center;
+        }
+
+        @include respond-above(xs) {
+          margin: 0;
+        }
+
+        .navi-title {
+          font-size: 2rem;
+          letter-spacing: 2px;
+          margin: 15px 0;
+          color: var(--title);
+
+          @include respond-above(lg) {
+            font-size: 1.8rem;
+            margin: 12px 0;
+          }
+
+          @include respond-above(md) {
+            font-size: 1.7rem;
+            margin: 10px 0;
+            letter-spacing: 1.5px;
+          }
+
+          @include respond-above(xs) {
+            font-size: 1.5rem;
+            margin: 8px 0;
+            letter-spacing: 1px;
+          }
+        }
+
+        .navi-list {
+          display: flex;
+          flex-direction: column;
+
+          @include respond-above(lg) {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+          }
+
+          .navi-item {
+            position: relative;
+            margin: 10px 0;
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--title);
+            width: fit-content;
+            display: inline-block;
+            text-decoration: none;
+
+            @include respond-above(lg) {
+              font-size: 1.8rem;
+              margin: 8px 0;
+            }
+
+            @include respond-above(md) {
+              font-size: 1.6rem;
+              margin: 0;
+            }
+
+            @include respond-above(xs) {
+              font-size: 1.4rem;
+              margin: 5px 0;
+            }
+
+            &::after {
+              content: '';
+              position: absolute;
+              left: 0;
+              bottom: 0;
+              width: 0;
+              height: 2px;
+              background-color: var(--secondary);
+              transition: width 0.3s ease-in;
+
+              @include respond-above(xs) {
+                height: 1px;
+              }
+            }
+
+            &:hover {
+              color: var(--secondary);
+            }
+
+            &:hover::after {
+              width: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+}
