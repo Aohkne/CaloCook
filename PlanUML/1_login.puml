@@ -1,7 +1,7 @@
 @startuml Login
 
-actor User as "User/Admin"
-boundary "LoginPage" as View #lightblue
+actor User as "User"
+boundary "Login Page" as View #lightblue
 participant ":authRoute" as Routes_FE #lightblue
 control "authController" as Controller #lightblue
 participant ":authService" as Service #lightblue
@@ -11,6 +11,7 @@ database "MongoDB" as MongoDB #yellow
 group Login
 User -> View: 1.Enter login\n {email/username, password}
 activate View
+activate User
 
 View -> View: 2.Validate input
 View -> Routes_FE: 3.POST /api/v1/auth/login
@@ -35,32 +36,38 @@ deactivate Model
 
 alt Login Success
     Service -> Service: 10.Verify password & generate token
-    Service --> Controller: 10.1. Return success
-    deactivate Service
-    
+    Service --> Controller: 10.1.Return success
+
     Controller --> Routes_FE: 10.1.1.Return success {token}
-    deactivate Controller
-    
+
     Routes_FE --> View: 10.1.2.Success response
-    deactivate Routes_FE
-    
+
     View -> View: 10.1.3.Save token
     View --> User: 10.1.4.Redirect to dashboard
-    
-else Login Failed
-    Service --> Controller: 10.2.Return success
-    deactivate Service
-    
-    Controller --> Routes_FE: 10.2.1. Unauthorized
-    deactivate Controller
-    
-    Routes_FE --> View: 10.2.2.Error response
-    deactivate Routes_FE
-    
-    View --> User: 10.2.3.Show error message
-end
 
-deactivate View
+else Incorrect login information
+    Service --> Controller: 11.Return fail "Incorrect username or password"
+
+    Controller --> Routes_FE: 11.1.Unauthorized
+
+    Routes_FE --> View: 11.2.Error response
+
+    View --> User: 11.3.Display "Incorrect username or password"
+
+else Account locked
+    Service --> Controller: 12.Return fail "Account locked"
+    deactivate Service
+
+    Controller --> Routes_FE: 12.1.Forbidden
+    deactivate Controller
+
+    Routes_FE --> View: 12.2.Error response
+    deactivate Routes_FE
+
+    View --> User: 12.3.Display "Account locked, contact administrator"
+    deactivate View
+    deactivate User
+end
 end
 
 @enduml

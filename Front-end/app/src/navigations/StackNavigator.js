@@ -17,6 +17,7 @@ import ChangePasswordScreen from '@screens/ChangePasswordScreen';
 import HistoryScreen from '@screens/HistoryScreen';
 import Detail from '@screens/Detail';
 import ResetPasswordScreen from '@/screens/(auth)/ResetPasswordScreen';
+import OnboardingScreen from '@/screens/OnboardingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +40,7 @@ export default function StackNavigator() {
         </>
       ) : (
         <>
+          <Stack.Screen name='Onboarding' component={OnboardingScreen} />
           <Stack.Screen name='Login' component={LoginScreen} />
           <Stack.Screen name='SignUp' component={SignUpScreen} />
           <Stack.Screen name='ForgotPassword' component={ForgotPasswordScreen} />
