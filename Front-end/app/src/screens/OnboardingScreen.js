@@ -1,16 +1,21 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+
+import { useTheme } from '@contexts/ThemeProvider';
+import { useAuth } from '@/contexts/AuthContext';
+
 import * as Animatable from 'react-native-animatable';
-import { useTheme } from '@contexts/ThemeProvider'
 
 const { height } = Dimensions.get('window');
 
 const OnboardingScreen = () => {
   const { colors } = useTheme();
   const styles = createStyles(colors);
-  const navigation = useNavigation();
+
   const [index, setIndex] = React.useState(0);
+  const { setOnboardingCompleted } = useAuth();
+  const navigation = useNavigation();
 
   const content = [
     {
@@ -35,6 +40,7 @@ const OnboardingScreen = () => {
     if (index < content.length - 1) {
       setIndex((i) => i + 1);
     } else {
+      setOnboardingCompleted();
       navigation.navigate('Login');
     }
   };
