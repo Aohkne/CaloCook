@@ -1,0 +1,115 @@
+.wrapper {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+
+  .left-container {
+    padding-top: 100px;
+    padding-left: 100px;
+    display: flex;
+    flex-direction: column;
+  }
+  .right-container {
+    position: relative;
+  }
+  .main-text {
+    font-size: 48px;
+    color: var(--secondary)
+  }
+  .secondary-text {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--tertiary)
+  }
+  .download-button {
+    background-color: var(--tertiary);
+    border-radius: 20px;
+    width: 384px;
+    height: 73px;
+    font-size: 24px;
+    font-weight: 600;
+    border: none;
+    margin-top: 20px;
+  }
+  .phone {
+    width: 290px;
+    height: 550px;
+    position: absolute;
+    right: 150px;
+    top: 50px;
+  }
+  .ring {
+    position: absolute;
+    right: 70px;
+    top: 100px;
+    z-index: -1;
+    --size: 450px;       /* outer diameter */
+    --thickness: 30px;   /* ring thickness */
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    border: var(--thickness) solid #006955; /* ring color */
+    background: transparent; /* hollow center */
+    box-sizing: border-box;
+  }
+  .feature-1 { 
+    position: absolute;
+    top: 100px;
+    right: 460px;
+    display: flex;
+    width: 300px;
+    text-align: end;
+    gap: 10px;
+  }
+  .feature-2 { 
+    position: absolute;
+    top: 300px;
+    right: 540px;
+    display: flex;
+    width: 300px;
+    text-align: end;
+    gap: 10px;
+  }
+  .feature-3 { 
+    position: absolute;
+    top: 500px;
+    right: 460px;
+    display: flex;
+    width: 300px;
+    text-align: end;
+    gap: 10px;
+  }
+  .icon {
+    width: 50px;
+    height: 50px;
+    background-color: #006955;
+    border-radius: 100%;
+    box-shadow: 2px 2px 1px rgba(0, 0, 0, 1);
+    flex-shrink: 0;
+  }
+  .tertiary-text {
+    font-size: 24px;
+    font-weight: 500;
+  }
+  .short-description-text {
+    font-size: 16px;
+    font-weight: lighter;
+  }
+  .bottom-container {
+    grid-column: 1 / span 2;
+    margin-top: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-left: 200px;
+  }
+  .footer-container {
+    grid-column: 1 / span 2;
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+}

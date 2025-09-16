@@ -25,6 +25,7 @@ import Chat from '@/pages/(admin)/Chat/Chat';
 //USER
 import Dish from '@/pages/(user)/Dish/Dish';
 import ChatAI from '@/pages/(user)/ChatAI/ChatAI';
+import Download from '@/pages/(user)/Download/Download';
 
 function AppRoutes() {
   return (
@@ -39,7 +40,14 @@ function AppRoutes() {
             </PublicRoute>
           }
         />
-
+        <Route
+          path={ROUTES.DOWNLOAD}
+          element={
+            <PublicRoute>
+              <Download />
+            </PublicRoute>
+          }
+        />
         {/* ERROR ROUTES */}
         <Route
           path={ROUTES.UNAUTHORIZED}
