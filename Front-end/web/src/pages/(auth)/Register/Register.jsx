@@ -208,6 +208,12 @@ function Register() {
                   setError('');
                   setSuccess('');
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleRegister(e);
+                  }
+                }}
               />
             </div>
 
@@ -221,6 +227,12 @@ function Register() {
                   setUsername(e.target.value);
                   setError('');
                   setSuccess('');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleRegister(e);
+                  }
                 }}
               />
             </div>
@@ -254,6 +266,12 @@ function Register() {
                   setConfirmPassword(e.target.value);
                   setError('');
                   setSuccess('');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleRegister(e);
+                  }
                 }}
               />
 
