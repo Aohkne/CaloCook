@@ -13,8 +13,10 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { X, SendHorizonal } from 'lucide-react-native';
+import { Paperclip, X, SendHorizonal } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
+
+import * as ImagePicker from 'expo-image-picker';
 
 import { REACT_NATIVE_APP_API_KEY, REACT_NATIVE_APP_MODEL, REACT_NATIVE_APP_PROMPT } from '@env';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -28,6 +30,11 @@ export default function ChatBotModal({ visible, onClose }) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
+  // IMAGE
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  //MESSAGE
   const [messages, setMessages] = useState([{ from: 'bot', text: "Hi, I'm Calo bot. How can I help you?" }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,12 +45,42 @@ export default function ChatBotModal({ visible, onClose }) {
   const scrollViewRef = useRef(null);
   const typingSpeed = 15;
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  // IMAGE
+  const handleImagePicker = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+      base64: true
+    });
 
-    const userMessage = { from: 'user', text: input };
+    if (!result.canceled) {
+      const imageUri = result.assets[0].uri;
+      const imageBase64 = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      setSelectedImage(imageBase64);
+      setImagePreview(imageUri);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+
+  // MESSAGE
+  const handleSend = async () => {
+    if (!input.trim() && !selectedImage) return;
+
+    const userMessage = {
+      from: 'user',
+      text: input,
+      image: imagePreview
+    };
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
+    setSelectedImage(null);
+    setImagePreview(null);
     setLoading(true);
 
     try {
@@ -51,7 +88,22 @@ export default function ChatBotModal({ visible, onClose }) {
         model: REACT_NATIVE_APP_MODEL
       });
 
-      const result = await model.generateContent(prompt + input);
+      let content;
+      if (selectedImage) {
+        content = [
+          prompt + input,
+          {
+            inlineData: {
+              data: selectedImage.split(',')[1],
+              mimeType: 'image/jpeg'
+            }
+          }
+        ];
+      } else {
+        content = prompt + input;
+      }
+
+      const result = await model.generateContent(content);
       const response = await result.response;
       const text = await response.text();
 
@@ -94,7 +146,7 @@ export default function ChatBotModal({ visible, onClose }) {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
-  }, [messages, typing, displayedText]);
+  }, [messages, typing, displayedText, imagePreview]);
 
   return (
     <Modal visible={visible} animationType='slide' transparent={true} onRequestClose={onClose}>
@@ -125,7 +177,10 @@ export default function ChatBotModal({ visible, onClose }) {
                   {msg.from === 'bot' && (
                     <Image source={require('@assets/chat/icon_Bot.png')} style={styles.botImage} />
                   )}
-                  <Text style={msg.from === 'user' ? styles.userText : styles.botText}>{msg.text}</Text>
+                  <View style={styles.messageContent}>
+                    {msg.image && <Image source={{ uri: msg.image }} style={styles.messageImage} />}
+                    <Text style={msg.from === 'user' ? styles.userText : styles.botText}>{msg.text}</Text>
+                  </View>
                 </View>
               ))}
 
@@ -145,8 +200,23 @@ export default function ChatBotModal({ visible, onClose }) {
               </View>
             )}
 
+            {/* IMAGE PREVIEW */}
+            {imagePreview && (
+              <View style={styles.imagePreviewContainer}>
+                <View style={styles.imagePreview}>
+                  <Image source={{ uri: imagePreview }} style={styles.previewImage} />
+                  <TouchableOpacity style={styles.removeImageButton} onPress={removeImage}>
+                    <X size={16} color={colors.white} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
             {/* INPUT */}
             <View style={styles.inputContainer}>
+              <TouchableOpacity style={styles.imageButton} onPress={handleImagePicker} disabled={typing || loading}>
+                <Paperclip size={20} color={colors.secondary} />
+              </TouchableOpacity>
               <TextInput
                 style={styles.textInput}
                 value={input}
@@ -162,7 +232,7 @@ export default function ChatBotModal({ visible, onClose }) {
               <TouchableOpacity
                 style={styles.sendButton}
                 onPress={handleSend}
-                disabled={typing || loading || !input.trim()}
+                disabled={typing || loading || (!input.trim() && !selectedImage)}
               >
                 <SendHorizonal size={25} color={colors.secondary} />
               </TouchableOpacity>
@@ -211,7 +281,8 @@ const createStyles = (colors) =>
       elevation: 8
     },
     messagesContainer: {
-      flex: 1
+      flex: 1,
+      flexGrow: 1
     },
     messagesContent: {
       padding: 16,
@@ -222,6 +293,41 @@ const createStyles = (colors) =>
       maxWidth: '90%',
       padding: 12,
       borderRadius: 12
+    },
+
+    imagePreviewContainer: {
+      padding: 10,
+      backgroundColor: colors.background
+    },
+    imagePreview: {
+      position: 'relative',
+      alignSelf: 'flex-start'
+    },
+    previewImage: {
+      width: 100,
+      height: 80,
+      borderRadius: 8
+    },
+    removeImageButton: {
+      position: 'absolute',
+      top: -5,
+      right: -5,
+      backgroundColor: colors.secondary,
+      borderRadius: 12,
+      width: 24,
+      height: 24,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+
+    messageContent: {
+      // flex: 1
+    },
+    messageImage: {
+      width: 200,
+      height: 150,
+      borderRadius: 8,
+      marginBottom: 8
     },
 
     userMessage: {
@@ -275,6 +381,7 @@ const createStyles = (colors) =>
       color: colors.primary,
       fontSize: 14
     },
+
     inputContainer: {
       flexDirection: 'row',
       alignItems: 'flex-end',
@@ -283,6 +390,14 @@ const createStyles = (colors) =>
       backgroundColor: colors.background,
       borderTopWidth: 1
     },
+    imageButton: {
+      width: 40,
+      height: 40,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 8
+    },
+
     textInput: {
       flex: 1,
       borderRadius: 20,

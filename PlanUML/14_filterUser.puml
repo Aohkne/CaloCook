@@ -9,7 +9,8 @@ entity "userModel" as Model #lightblue
 database "MongoDB" as MongoDB #yellow
 
 group Filter Users
-Admin -> View: 1. Select filter "activity" or "inactive"
+Admin -> View: 1. Select filter "active" or "inactive"
+activate Admin
 activate View
 
 View -> Route: 2. GET /users/filter?isActive=true
@@ -32,17 +33,29 @@ deactivate MongoDB
 Model --> Service: 8. Return result
 deactivate Model
 
-Service --> Controller: 9. Return filtered users
-deactivate Service
+alt Users found
+    Service --> Controller: 8.1 Return filtered users
 
-Controller --> Route: 10. Return filtered users
-deactivate Controller
+    Controller --> Route: 8.1.1 Return filtered users
 
-Route --> View: 11. Render filtered list
-deactivate Route
+    Route --> View: 8.1.2 Render filtered list
 
-View --> Admin: 12. Show filtered list of users
+    View --> Admin: 8.1.3 Show filtered list of users
 
-deactivate View
+else No users found
+    Service --> Controller: 8.2 Return empty list
+    deactivate Service
+
+    Controller --> Route: 8.2.1 Return empty list
+    deactivate Controller
+
+    Route --> View: 8.2.2 Show "No users found for this filter"
+    deactivate Route
+
+    View --> Admin: 8.2.3 Display empty state message
+    deactivate View
+    deactivate Admin
+end
+
 end
 @enduml

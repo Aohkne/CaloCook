@@ -132,29 +132,6 @@ function ChatAI() {
     }
   };
 
-  // HANDLE DRAG & DROP
-  // const handleDragOver = (e) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-
-  //   // CHECK DRAGGED CONTAIN: images
-  //   const items = e.dataTransfer.items;
-  //   let hasImage = false;
-
-  //   if (items) {
-  //     for (let i = 0; i < items.length; i++) {
-  //       if (items[i].type.startsWith('image/')) {
-  //         hasImage = true;
-  //         break;
-  //       }
-  //     }
-  //   }
-
-  //   if (hasImage) {
-  //     setIsDragOver(true);
-  //   }
-  // };
-
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();

@@ -163,6 +163,12 @@ function Login() {
                   setError('');
                   setSuccess('');
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleLogin(e);
+                  }
+                }}
               />
             </div>
 
@@ -176,6 +182,12 @@ function Login() {
                   setPassword(e.target.value);
                   setError('');
                   setSuccess('');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleLogin(e);
+                  }
                 }}
               />
               <span onClick={() => setShowPassword(!showPassword)}>
