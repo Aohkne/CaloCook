@@ -202,7 +202,15 @@ const Router = expesss.Router()
  *                 createdAt:
  *                   type: string
  *                   example: "2024-06-11T08:00:00.000Z"
- *  
+ *                 updatedAt:
+ *                   type: string
+ *                   example: "2024-06-11T08:00:00.000Z"
+ *                 emailVerified:
+ *                   type: boolean
+ *                   example: true
+ *                 dateVerified:
+ *                   type: string
+ *                   example: "2024-06-11T08:00:00.000Z"
  *
  *
  *   post:

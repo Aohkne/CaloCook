@@ -13,6 +13,7 @@ import { historyRoute } from '@/routes/v1/historyRoute'
 import { commentRoute } from '@/routes/v1/commentRoute'
 import { reactionRoute } from '@/routes/v1/reactionRoute'
 import { ratingRoute } from '@/routes/v1/ratingRoute'
+import { reportRoute } from '@/routes/v1/reportRoute'
 const Router = express.Router()
 
 /* Check API-v1 status */
@@ -33,5 +34,6 @@ Router.use('/history', historyRoute)
 Router.use('/rating', ratingRoute)
 Router.use('/comment', commentRoute)
 Router.use('/reaction', reactionRoute)
+Router.use('/report', reportRoute)
 
 export const APIs_V1 = Router
