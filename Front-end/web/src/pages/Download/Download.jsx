@@ -19,7 +19,7 @@ export default function Download() {
           </button>
           <button className={cx('download-button-container')}>
             <span className={cx('apk-button')}>
-              <Icon icon='uiw:android' width='20' height='20' />
+              <Icon icon='uiw:android' width='30' height='30' />
               Download APK.
             </span>
           </button>

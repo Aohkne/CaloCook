@@ -15,6 +15,7 @@ import Unauthorized from '@/pages/(auth)/Unauthorized/Unauthorized';
 
 //LANDING PAGE
 import Home from '@/pages/Home/Home';
+import Download from '@/pages/Download/Download';
 
 //ADMIN
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
@@ -25,7 +26,6 @@ import Chat from '@/pages/(admin)/Chat/Chat';
 //USER
 import Dish from '@/pages/(user)/Dish/Dish';
 import ChatAI from '@/pages/(user)/ChatAI/ChatAI';
-import Download from '@/pages/(user)/Download/Download';
 
 function AppRoutes() {
   return (
