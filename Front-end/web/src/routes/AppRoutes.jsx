@@ -15,6 +15,7 @@ import Unauthorized from '@/pages/(auth)/Unauthorized/Unauthorized';
 
 //LANDING PAGE
 import Home from '@/pages/Home/Home';
+import Download from '@/pages/Download/Download';
 
 //ADMIN
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
@@ -39,7 +40,14 @@ function AppRoutes() {
             </PublicRoute>
           }
         />
-
+        <Route
+          path={ROUTES.DOWNLOAD}
+          element={
+            <PublicRoute>
+              <Download />
+            </PublicRoute>
+          }
+        />
         {/* ERROR ROUTES */}
         <Route
           path={ROUTES.UNAUTHORIZED}
