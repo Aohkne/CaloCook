@@ -1,3 +1,4 @@
+@use '@styles/mixin' as *;
 .wrapper {
   width: 100%;
   height: 100vh;
@@ -23,15 +24,32 @@
     font-weight: 600;
     color: var(--tertiary)
   }
-  .download-button {
-    background-color: var(--tertiary);
-    border-radius: 20px;
-    width: 384px;
-    height: 73px;
-    font-size: 24px;
-    font-weight: 600;
-    border: none;
-    margin-top: 20px;
+  .download-button-wrapper {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .download-button-container {
+    height: 4.75rem;
+    min-width: 16rem;
+    cursor: pointer;
+    background-color: var(--black);
+    border-radius: 0.75rem;
+    color: var(--white);
+    border: none
+  }
+  
+  .chplay-button {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .apk-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
   }
   .phone {
     width: 290px;
@@ -45,14 +63,36 @@
     right: 70px;
     top: 100px;
     z-index: -1;
-    --size: 450px;       /* outer diameter */
-    --thickness: 30px;   /* ring thickness */
+    --size: 450px;
+    --thickness: 30px;
     width: var(--size);
     height: var(--size);
     border-radius: 50%;
-    border: var(--thickness) solid #006955; /* ring color */
-    background: transparent; /* hollow center */
+    background: conic-gradient(
+      from 380deg,
+      rgba(198, 222, 190, 1) 0%,
+      rgba(0, 105, 85, 1) 180deg
+    );
     box-sizing: border-box;
+    /* Remove the border property and add padding to create hollow center */
+    padding: var(--thickness);
+    
+    /* Create the hollow center using a pseudo-element */
+    &::after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--background);
+    }
+  }
+  .feature-container {
+    margin-top: 65rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5rem;
   }
   .feature-1 { 
     position: absolute;
@@ -84,10 +124,15 @@
   .icon {
     width: 50px;
     height: 50px;
-    background-color: #006955;
+    font-size: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(230deg,rgba(198, 222, 190, 1) 0%, rgba(0, 105, 85, 1) 100%);
     border-radius: 100%;
     box-shadow: 2px 2px 1px rgba(0, 0, 0, 1);
     flex-shrink: 0;
+    color: var(--white);
   }
   .tertiary-text {
     font-size: 24px;
@@ -99,11 +144,10 @@
   }
   .bottom-container {
     grid-column: 1 / span 2;
-    margin-top: 400px;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding-left: 200px;
+    padding: 2rem 2rem 0 2rem;
   }
   .footer-container {
     grid-column: 1 / span 2;
@@ -111,5 +155,101 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+  }
+  @keyframes floating {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.floating-1 {
+  animation: floating 3s ease-in-out infinite;
+}
+
+.floating-2 {
+  animation: floating 3.5s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.floating-3 {
+  animation: floating 4s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.feature-1,
+.feature-2,
+.feature-3 {
+  will-change: transform;
+  transition: transform 0.3s ease;
+}
+
+}
+@media (max-width: 1280px) {
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    }
+
+  .left-container {
+    align-items: center;
+    text-align: center;
+    padding: 2rem 5rem !important;
+  }
+    .right-container {
+      width: 100vw !important;
+      display: flex !important;
+      flex-direction: column !important;
+  }
+  .bottom-container {
+    padding-left: 20px;
+    margin-top: 50px;
+  }
+  .phone {
+    width: 30rem !important;
+    height: 55rem !important;
+    transform: translateX(-50%) !important;
+    left: 50% !important;
+    top: 1rem !important;
+  }
+  .feature-1, .feature-2, .feature-3 {
+    position: static !important;
+    text-align: center !important;
+;
+  }
+  .ring {
+    position: absolute;
+    top: 7.5rem !important;
+    left: 50% !important;
+    z-index: -1;
+    --size: 25rem !important;
+    --thickness: 2rem !important;
+    transform: translateX(-50%) !important;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background: conic-gradient(
+      from 360deg,
+      rgba(198, 222, 190, 1) 0%,
+      rgba(0, 105, 85, 1) 180deg
+    );
+    box-sizing: border-box;
+    /* Remove the border property and add padding to create hollow center */
+    padding: var(--thickness);
+    
+    /* Create the hollow center using a pseudo-element */
+    &::after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: (var(--background)) !important;
+    }
   }
 }
