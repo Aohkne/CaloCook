@@ -5,15 +5,18 @@
   position: relative;
   display: grid;
   grid-template-columns: 1fr 2fr;
-
+  
   .left-container {
-    padding-top: 100px;
-    padding-left: 100px;
+    padding-top: 10rem;
+    padding-left: 30%;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
   .right-container {
     position: relative;
+    margin-right: 10%;
   }
   .main-text {
     font-size: 48px;
@@ -201,7 +204,7 @@
     text-align: center;
     padding: 2rem 5rem !important;
   }
-    .right-container {
+  .right-container {
       width: 100vw !important;
       display: flex !important;
       flex-direction: column !important;
