@@ -4,7 +4,8 @@ import { reportService } from '@/services/reportService'
 // Get all reports
 const getAllReport = async (req, res, next) => {
   try {
-    const reports = await reportService.getAllReport()
+    // forward query params (page, limit, filters) to service
+    const reports = await reportService.getAllReport(req.query || {})
     res.status(StatusCodes.OK).json(reports)
   } catch (error) {
     next(error)
@@ -13,12 +14,12 @@ const getAllReport = async (req, res, next) => {
 
 // Create a report
 const createReport = async (req, res, next) => {
-    try {
-        const report = await reportService.createReport(req.body)
-        res.status(StatusCodes.CREATED).json(report)
-    } catch (error) {
-        next(error)
-    }
+  try {
+    const report = await reportService.createReport(req.body)
+    res.status(StatusCodes.CREATED).json(report)
+  } catch (error) {
+    next(error)
+  }
 }
 
 const deleteReport = async (req, res, next) => {

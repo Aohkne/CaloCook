@@ -12,13 +12,17 @@ const _COLLECTION_SCHEMA = Joi.object({
 })
 
 // getAll
-const getAllReports = async () => {
+const getAllReports = async (params = {}) => {
   try {
     const db = await GET_DB()
-    const [data, totalCount] = await Promise.all([
-      db.collection(_COLLECTION_NAME).find().toArray(),
-      db.collection(_COLLECTION_NAME).countDocuments()
-    ])
+
+    const page = Math.max(1, Number(params.page) || 1)
+    const limit = Math.max(1, Math.min(100, Number(params.limit) || 10))
+    const skip = (page - 1) * limit
+
+    // Build a simple query. Future: support filtering by user email/dish name via aggregation.
+    const cursor = db.collection(_COLLECTION_NAME).find().sort({ createdAt: -1 }).skip(skip).limit(limit)
+    const [data, totalCount] = await Promise.all([cursor.toArray(), db.collection(_COLLECTION_NAME).countDocuments()])
 
     return { data, totalCount }
   } catch (error) {

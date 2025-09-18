@@ -142,6 +142,12 @@ function Sidebar() {
               <span>Profile</span>
             </Link>
           </div>
+          <div className={cx('item')}>
+            <Link to={ROUTES.REPORT_MANAGEMENT}>
+              <Icon icon='tabler:message-report-filled' width='20' height='20' />
+              <span>Report</span>
+            </Link>
+          </div>
         </div>
 
         {/* Setting */}
