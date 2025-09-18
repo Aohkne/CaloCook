@@ -1,11 +1,12 @@
 @use '@styles/mixin' as *;
 .wrapper {
+  padding: 50px 0 0;
   width: 100%;
   height: 100vh;
   position: relative;
   display: grid;
   grid-template-columns: 1fr 2fr;
-  
+
   .left-container {
     padding-top: 10rem;
     padding-left: 30%;
@@ -19,13 +20,13 @@
     margin-right: 10%;
   }
   .main-text {
-    font-size: 48px;
-    color: var(--secondary)
+    font-size: 4.8rem;
+    color: var(--secondary);
   }
   .secondary-text {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--tertiary)
+    font-size: 2.4rem;
+    font-weight: 400;
+    color: var(--description);
   }
   .download-button-wrapper {
     display: flex;
@@ -39,9 +40,9 @@
     background-color: var(--black);
     border-radius: 0.75rem;
     color: var(--white);
-    border: none
+    border: none;
   }
-  
+
   .chplay-button {
     width: 100%;
     height: 100%;
@@ -73,15 +74,11 @@
     width: var(--size);
     height: var(--size);
     border-radius: 50%;
-    background: conic-gradient(
-      from 380deg,
-      rgba(198, 222, 190, 1) 0%,
-      rgba(0, 105, 85, 1) 180deg
-    );
+    background: conic-gradient(from 380deg, rgba(198, 222, 190, 1) 0%, rgba(0, 105, 85, 1) 180deg);
     box-sizing: border-box;
     /* Remove the border property and add padding to create hollow center */
     padding: var(--thickness);
-    
+
     /* Create the hollow center using a pseudo-element */
     &::after {
       content: '';
@@ -99,7 +96,7 @@
     align-items: center;
     gap: 5rem;
   }
-  .feature-1 { 
+  .feature-1 {
     position: absolute;
     top: 100px;
     right: 460px;
@@ -108,7 +105,7 @@
     text-align: end;
     gap: 10px;
   }
-  .feature-2 { 
+  .feature-2 {
     position: absolute;
     top: 300px;
     right: 540px;
@@ -117,7 +114,7 @@
     text-align: end;
     gap: 10px;
   }
-  .feature-3 { 
+  .feature-3 {
     position: absolute;
     top: 500px;
     right: 460px;
@@ -133,19 +130,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(230deg,rgba(198, 222, 190, 1) 0%, rgba(0, 105, 85, 1) 100%);
+    background: linear-gradient(230deg, rgba(198, 222, 190, 1) 0%, rgba(0, 105, 85, 1) 100%);
     border-radius: 100%;
-    box-shadow: 2px 2px 1px rgba(0, 0, 0, 1);
+    border: 2px solid var(--shadow);
+    box-shadow: 2px 2px 2px var(--shadow);
     flex-shrink: 0;
     color: var(--white);
   }
   .tertiary-text {
-    font-size: 24px;
+    font-size: 2.4rem;
     font-weight: 500;
+    color: var(--secondary);
   }
   .short-description-text {
-    font-size: 16px;
-    font-weight: lighter;
+    font-size: 1.5rem;
+    font-weight: 300;
   }
   .bottom-container {
     grid-column: 1 / span 2;
@@ -156,50 +155,49 @@
   }
   .footer-container {
     grid-column: 1 / span 2;
-    margin-top: 100px;
+    margin-top: 50px;
     display: flex;
     flex-direction: column;
     gap: 20px;
   }
   @keyframes floating {
-  0% {
-    transform: translateY(0px);
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
   }
-  50% {
-    transform: translateY(-5px);
+
+  .floating-1 {
+    animation: floating 3s ease-in-out infinite;
   }
-  100% {
-    transform: translateY(0px);
+
+  .floating-2 {
+    animation: floating 3.5s ease-in-out infinite;
+    animation-delay: 0.5s;
   }
-}
 
-.floating-1 {
-  animation: floating 3s ease-in-out infinite;
-}
+  .floating-3 {
+    animation: floating 4s ease-in-out infinite;
+    animation-delay: 1s;
+  }
 
-.floating-2 {
-  animation: floating 3.5s ease-in-out infinite;
-  animation-delay: 0.5s;
-}
-
-.floating-3 {
-  animation: floating 4s ease-in-out infinite;
-  animation-delay: 1s;
-}
-
-.feature-1,
-.feature-2,
-.feature-3 {
-  will-change: transform;
-  transition: transform 0.3s ease;
-}
-
+  .feature-1,
+  .feature-2,
+  .feature-3 {
+    will-change: transform;
+    transition: transform 0.3s ease;
+  }
 }
 @media (max-width: 1280px) {
   .wrapper {
     display: flex;
     flex-direction: column;
-    }
+  }
 
   .left-container {
     align-items: center;
@@ -207,9 +205,9 @@
     padding: 2rem 5rem !important;
   }
   .right-container {
-      width: 100vw !important;
-      display: flex !important;
-      flex-direction: column !important;
+    width: 100vw !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
   .bottom-container {
     padding-left: 20px;
@@ -222,10 +220,11 @@
     left: 50% !important;
     top: 1rem !important;
   }
-  .feature-1, .feature-2, .feature-3 {
+  .feature-1,
+  .feature-2,
+  .feature-3 {
     position: static !important;
     text-align: center !important;
-;
   }
   .ring {
     position: absolute;
@@ -238,15 +237,11 @@
     width: var(--size);
     height: var(--size);
     border-radius: 50%;
-    background: conic-gradient(
-      from 360deg,
-      rgba(198, 222, 190, 1) 0%,
-      rgba(0, 105, 85, 1) 180deg
-    );
+    background: conic-gradient(from 360deg, rgba(198, 222, 190, 1) 0%, rgba(0, 105, 85, 1) 180deg);
     box-sizing: border-box;
     /* Remove the border property and add padding to create hollow center */
     padding: var(--thickness);
-    
+
     /* Create the hollow center using a pseudo-element */
     &::after {
       content: '';

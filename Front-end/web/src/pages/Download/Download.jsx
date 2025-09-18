@@ -6,10 +6,12 @@ const cx = classNames.bind(styles);
 
 import styles from './Download.module.scss';
 import Footer from '@/components/sections/Footer/Footer';
+import Header from '@/components/sections/Header/Header';
 
 export default function Download() {
   return (
     <div className={cx('wrapper')}>
+      <Header />
       <div className={cx('left-container')}>
         <h1 className={cx('main-text')}>Calocook</h1>
         <h2 className={cx('secondary-text')}>Eat what you love, track what you eat</h2>
