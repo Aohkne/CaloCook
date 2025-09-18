@@ -58,7 +58,7 @@
 
     .datetime {
       font-size: 2.2rem;
-      color: var(--blue);
+      color: var(--black);
     }
 
     .description {
@@ -113,12 +113,12 @@
       font-size: 1.4rem;
       cursor: pointer;
       border: none;
-      background-color: var(--blue);
+      background-color: var(--pink-violet);
       color: var(--white);
       transition: background-color 0.3s ease;
 
       &:hover {
-        background-color: var(--blue-dark);
+        background-color: var(--pink-violet-dark);
       }
     }
 

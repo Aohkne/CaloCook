@@ -268,7 +268,7 @@ function UserManagement() {
 
       <div className={cx('content')}>
         <Panel
-          type='user'
+          type='report'
           title='Reports'
           icon='tabler:message-report-filled'
           total={totalReport}
@@ -284,7 +284,7 @@ function UserManagement() {
           data={reports}
           columns={userColumns}
           title='User Management'
-          type='user'
+          type='report'
           useServerPagination={true}
           serverPagination={pagination}
           // Search
