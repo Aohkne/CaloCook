@@ -97,6 +97,10 @@ const login = async (req, res) => {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid email/username or password' })
     }
 
+    if (!user.isActive) {
+      return res.status(StatusCodes.FORBIDDEN).json({ message: 'Account is deactivated. Please contact support.' })
+    }
+
     const isMatch = await bcrypt.compare(password, user.password_hash)
 
     if (!isMatch) {
@@ -211,7 +215,7 @@ export const resetPassword = async (req, res) => {
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
 
-    const userId = await redis.get(`reset_token:${hashedToken}`)
+    const userId = await redis.get(`reset_token:${hashedToken}`) // Lấy userId từ Redis
 
     if (!userId) {
       return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' })
@@ -241,7 +245,6 @@ export const resetPassword = async (req, res) => {
       }
     })
   } catch (error) {
-    console.error('resetPassword error:', error.message)
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
@@ -270,7 +273,8 @@ const changePassword = async (req, res) => {
 // 9. Get Profile - not implemented yet
 const getProfile = async (req, res) => {
   try {
-    res.json(req.user)
+    const users = await userService.getUserProfile(req.user)
+    res.json(users)
   } catch (error) {
     console.error('getProfile error:', error.message)
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: error.message })
@@ -378,7 +382,7 @@ const forgotPasswordOtp = async (req, res, next) => {
 }
 
 // 13. Reset password with OTP
-export const resetPasswordOtp = async (req, res, next) => {
+ const resetPasswordOtp = async (req, res, next) => {
   try {
     const { otp, email, newPassword } = req.body
     if (!email || !otp || !newPassword)
@@ -388,6 +392,36 @@ export const resetPasswordOtp = async (req, res, next) => {
     return res.status(StatusCodes.OK).json({ message: 'Password reset successful' })
   } catch (error) {
     next(error)
+  }
+}
+
+ const emailVerification = async (req, res) => {
+  try {
+    const { email } = req.body
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
+    }
+
+    await userService.emailVerification(user)
+    return res.status(StatusCodes.OK).json({ message: 'If the email exists, a verification email has been sent' })
+  } catch (err) {
+    console.log('emailVerification error:', err)
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: err.message })
+  }
+}
+ const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params
+    if (!token) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Token is required' })
+    }
+
+    await userService.verifyEmail(token)
+
+    return res.status(StatusCodes.OK).json({ message: 'Email verified successfully' })
+  } catch (err) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: err.message })
   }
 }
 
@@ -403,5 +437,7 @@ export const authController = {
   editProfile,
   loginWithGoogle,
   forgotPasswordOtp,
-  resetPasswordOtp
+  resetPasswordOtp,
+  emailVerification,
+  verifyEmail,
 }
