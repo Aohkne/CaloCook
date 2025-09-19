@@ -22,7 +22,7 @@ const cx = classNames.bind(styles);
 function Chat() {
   const NODE_ENV = import.meta.env.NODE_ENV;
 
-  const [search, setSearch] = useState();
+  const [search, setSearch] = useState('');
   const [conversations, setConversations] = useState([]);
   const [conversationId, setConversationId] = useState();
 
@@ -89,9 +89,16 @@ function Chat() {
     }
   };
 
-  const handleSearch = (e) => {
-    console.log(e);
+  const handleSearch = (value) => {
+    setSearch(value);
   };
+
+  const filteredConversations = search.trim()
+    ? conversations.filter((conv) => {
+        const username = conv?.user?.username?.toLowerCase() || '';
+        return username.includes(search.toLowerCase());
+      })
+    : conversations;
 
   return (
     <div className={cx('wrapper')}>
@@ -115,7 +122,7 @@ function Chat() {
 
           {/* CONVERSATION LIST */}
           <div className={cx('conversation-list')}>
-            {conversations.map((conversation, index) => {
+            {filteredConversations.map((conversation, index) => {
               return (
                 <Conversation
                   key={index + conversation?.user.username || ''}

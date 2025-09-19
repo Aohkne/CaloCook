@@ -99,7 +99,7 @@ const sendMessage = async (readerId, senderId, content) => {
       const convData = {
         userId: new ObjectId(userId),
         lastMessageId: null,
-        isRead: false,
+        isRead: readerId ? true : false, //Check admin sent
         createdAt: new Date(),
         updatedAt: new Date()
       }
@@ -121,7 +121,7 @@ const sendMessage = async (readerId, senderId, content) => {
     const mess = await messageModel.createNew(messageData)
 
     // 4. Update lastMessageId
-    await conversationModel.updateMessage(new ObjectId(conversation._id), new ObjectId(mess.insertedId))
+    await conversationModel.updateMessage(new ObjectId(conversation._id), new ObjectId(mess.insertedId), readerId)
 
     // 5. Update status
     await messageModel.updateMessage(new ObjectId(mess.insertedId), 'delivered')
