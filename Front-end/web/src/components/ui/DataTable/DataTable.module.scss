@@ -25,6 +25,10 @@
     background-color: var(--blue);
   }
 
+  &.report {
+    background-color: var(--pink-violet);
+  }
+
   &.dish {
     background-color: var(--green);
   }
@@ -184,7 +188,14 @@
       background: var(--light-blue);
     }
   }
+  &.report {
+    background-color: var(--pink-violet);
 
+    &:hover {
+      color: var(--title);
+      background: var(--light-pink-violet);
+    }
+  }
   &.dish {
     background-color: var(--green);
 
@@ -235,6 +246,16 @@
       background: var(--light-blue);
     }
   }
+  &.report {
+    &:nth-child(even) {
+      color: var(--title);
+      background: var(--light-pink-violet);
+    }
+    &:hover {
+      color: var(--white);
+      background: var(--light-pink-violet);
+    }
+  }
 
   &.dish {
     &:nth-child(even) {
@@ -263,9 +284,16 @@
   &.user:last-child {
     color: var(--blue);
   }
+  &.report:last-child {
+    color: var(--pink-violet);
+  }
 
   &.dish:last-child {
     color: var(--green);
+  }
+
+  &.report:last-child {
+    color: var(--pink-violet);
   }
 }
 
@@ -343,7 +371,17 @@
       box-shadow: 0px 0px 0px var(--shadow);
     }
   }
+  &.report {
+    color: white;
+    background: var(--pink-violet);
+    border-color: var(--shadow);
+    box-shadow: 2px 2px 1px var(--shadow);
 
+    &:hover:not(:disabled) {
+      border-color: transparent;
+      box-shadow: 0px 0px 0px var(--shadow);
+    }
+  }
   &.dish {
     color: white;
     background: var(--green);
@@ -422,6 +460,30 @@
       }
     }
   }
+  &.report {
+    color: var(--titleWithBg);
+    background: var(--pink-violet);
+    border-color: var(--shadow);
+    box-shadow: 2px 2px 1px var(--shadow);
+
+    &:hover {
+      background: var(--blue);
+      border-color: transparent;
+      box-shadow: 0px 0px 0px var(--shadow);
+    }
+
+    &.active {
+      color: var(--title);
+      border-color: transparent;
+      background-color: var(--light-pink-violet);
+      box-shadow: 0px 0px 0px var(--shadow);
+
+      &:hover {
+        border-color: transparent;
+        box-shadow: 0px 0px 0px var(--shadow);
+      }
+    }
+  }
 
   &.dish {
     color: var(--titleWithBg);
@@ -478,7 +540,16 @@
       }
     }
   }
+  &.report {
+    &::-webkit-scrollbar-thumb {
+      background: var(--light-pink-violet);
+      border-radius: 4px;
 
+      &:hover {
+        background: var(--pink-violet);
+      }
+    }
+  }
   &.dish {
     &::-webkit-scrollbar-thumb {
       background: var(--light-green);

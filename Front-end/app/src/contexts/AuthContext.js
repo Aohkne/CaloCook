@@ -18,6 +18,7 @@ export const useAuth = () => {
 // PROVIDER
 export const AuthProvider = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(null);
   const dispatch = useDispatch();
 
   // auth state from Redux
@@ -27,13 +28,26 @@ export const AuthProvider = ({ children }) => {
   const STORAGE_KEYS = {
     USER: '@user',
     TOKEN: '@accessToken',
-    REFRESH_TOKEN: '@refreshToken'
+    REFRESH_TOKEN: '@refreshToken',
+    ONBOARDING: '@hasSeenOnboarding'
+  };
+
+  // LOAD ONBOARDING
+  const loadOnboardingStatus = async () => {
+    try {
+      const seen = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING);
+      setHasSeenOnboarding(seen === 'true');
+    } catch (error) {
+      console.error('Error loading onboarding status:', error);
+      setHasSeenOnboarding(false);
+    }
   };
 
   // LOAD AUTH
   const loadAuthData = async () => {
     try {
       const values = await AsyncStorage.multiGet([STORAGE_KEYS.USER, STORAGE_KEYS.TOKEN, STORAGE_KEYS.REFRESH_TOKEN]);
+      await loadOnboardingStatus();
 
       const storedUser = values[0][1] ? JSON.parse(values[0][1]) : null;
       const storedToken = values[1][1];
@@ -108,6 +122,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // COMPLETE ONBOARDING
+  const setOnboardingCompleted = async () => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING, 'true');
+      setHasSeenOnboarding(true);
+    } catch (error) {
+      console.error('Error saving onboarding status:', error);
+    }
+  };
+
   useEffect(() => {
     loadAuthData();
   }, []);
@@ -163,6 +187,10 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: isUserAuthenticated,
     isLoading,
     isInitialized,
+
+    // Boarding states
+    hasSeenOnboarding,
+    setOnboardingCompleted,
 
     // Functions
     logout,

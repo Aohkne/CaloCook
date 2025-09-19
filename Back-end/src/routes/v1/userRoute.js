@@ -1,6 +1,7 @@
 import express from 'express'
 import { authMiddleware } from '@/middlewares/authMiddleware'
 import { userController } from '@/controllers/userController'
+import { authController } from '@/controllers/authController'
 import { paginationHelper } from '@/utils/pagination'
 
 const Router = express.Router()
@@ -234,6 +235,70 @@ const Router = express.Router()
  *           type: string
  *           format: date-time
  *           example: "2025-05-23T07:00:00.000Z"
+  
+ * /api/v1/user/email-verification:
+ *   post:
+ *     summary: Send email verification link to user's email
+ *     tags: [user]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Send email verification link to user's email. Accessible by users with 'admin' or 'user' roles.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "nguyenvana@example.com"
+ *     responses:
+ *      200:
+ *        description: Email verification link sent successfully
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                code:
+ *                  type: number
+ *                  example: 200
+ *                message:
+ *                  type: string
+ *                  example: "Email verification link sent successfully"
+ 
+ * /api/v1/user/verify-email/{token}: 
+ *   get:
+ *     summary: Verify user's email using the token
+ *     tags: [user]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Verify user's email using the token sent to their email. Accessible by users with 'admin' or 'user' roles.
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The email verification token
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Email verified successfully"
+ * 
+ * 
  */
 
 Router.route('/').get(
@@ -257,4 +322,15 @@ Router.route('/:id/deactivate').patch(
   authMiddleware.authorizeRole(['admin']),
   userController.deactivateUser
 )
+Router.route('/email-verification').post(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin', 'user']),
+  authController.emailVerification
+)
+Router.route('/verify-email/:token').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin', 'user']),
+  authController.verifyEmail
+)
+
 export const userRoute = Router

@@ -39,7 +39,7 @@ export default function ForgotPasswordScreen() {
       const result = await dispatch(forgotPassword(email)).unwrap();
       navigation.navigate('ResetPassword', { email });
     } catch (error) {
-      console.error('Forgot password error:', error);
+      console.log('Forgot password error:', error);
     }
   };
 

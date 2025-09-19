@@ -15,6 +15,7 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   USER_MANAGEMENT: '/user-management',
   DISH_MANAGEMENT: '/dish-management',
+  REPORT_MANAGEMENT: '/report-management',
   CHAT: '/chat',
   PROFILE_ADMIN: '/admin/profile',
 

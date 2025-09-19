@@ -15,11 +15,13 @@ import Unauthorized from '@/pages/(auth)/Unauthorized/Unauthorized';
 
 //LANDING PAGE
 import Home from '@/pages/Home/Home';
+import Download from '@/pages/Download/Download';
 
 //ADMIN
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
 import UserManagement from '@/pages/(admin)/UserManagement/UserManagement';
 import DishManagement from '@/pages/(admin)/DishManagement/DishManagement';
+import ReportManagement from '@/pages/(admin)/ReportManagement/ReportManagement';
 import Chat from '@/pages/(admin)/Chat/Chat';
 
 //USER
@@ -39,7 +41,14 @@ function AppRoutes() {
             </PublicRoute>
           }
         />
-
+        <Route
+          path={ROUTES.DOWNLOAD}
+          element={
+            <PublicRoute>
+              <Download />
+            </PublicRoute>
+          }
+        />
         {/* ERROR ROUTES */}
         <Route
           path={ROUTES.UNAUTHORIZED}
@@ -120,6 +129,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute requiredRole={ROLE.ADMIN}>
               <DishManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.REPORT_MANAGEMENT}
+          element={
+            <ProtectedRoute requiredRole={ROLE.ADMIN}>
+              <ReportManagement />
             </ProtectedRoute>
           }
         />

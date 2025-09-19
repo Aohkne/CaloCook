@@ -10,6 +10,7 @@ database "MongoDB" as MongoDB #yellow
 
 group Block User
 Admin -> View: 1. Click "Block" on\n a User Management
+activate Admin
 activate View
 Admin -> View: 2. Show confirmation dialog
 Admin -> View: 3. Confirm block user
@@ -24,10 +25,10 @@ activate Controller
 Controller -> Service: 6. deactivateUser(userId)
 activate Service
 
-Service -> Model: 7. updateUserStatus(userId, "blocked")
+Service -> Model: 7. updateUserStatus(userId, false)
 activate Model
 
-Model -> MongoDB: 8. Update user document\nset status = "blocked"
+Model -> MongoDB: 8. Update user document\nset isActive = false
 activate MongoDB
 
 MongoDB --> Model: 9. Return update result
@@ -36,21 +37,33 @@ deactivate MongoDB
 Model --> Service: 10. Return update status
 deactivate Model
 
-alt User not found
-    Service --> Controller:10.1. Return fail
-    Controller --> Route: 10.1.1. Return fail
-    Route --> View: 10.1.2. Show "User not found"
-    View --> Admin: 10.1.3. Display error message
-else Block success
-    Service --> Controller: 10.2. Return success
-    Controller --> Route: 10.2.1. Return success
-    Route --> View: 10.2.2. Update user row status
-    View --> Admin: 10.2.3. Display "User blocked"
+alt Block success
+    Service --> Controller: 10.1. Return success
+
+    Controller --> Route: 10.1.1. Return success
+
+    Route --> View: 10.1.2. Update user row status
+
+    View --> Admin: 10.1.3. Display "User blocked"
+
+else User not found
+    Service --> Controller:10.2. Return fail
+    deactivate Service
+
+    
+    Controller --> Route: 10.2.1. Return fail
+    deactivate Controller
+
+
+    Route --> View: 10.2.2. Show "User not found"
+    deactivate Route
+
+
+    View --> Admin: 10.2.3. Display error message
+    deactivate View
+    deactivate Admin
+
 end
 
-deactivate Service
-deactivate Controller
-deactivate Route
-deactivate View
 end
 @enduml
