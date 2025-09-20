@@ -60,15 +60,13 @@ const getUserConversation = async (userId, isRead = true) => {
 
 const getDetailsConversation = async (conversationId, currentUserId, isRead = true) => {
   try {
-    await conversationModel.update(conversationId, isRead)
-
     const conversation = await conversationModel.getDetails(conversationId, currentUserId)
 
     if (!conversation) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Conversation not found!')
     }
 
-    if (conversation.lastMessageId) {
+    if (conversation.lastMessageId && !isRead) {
       // 1. Update read conversation
       await conversationModel.update(conversation._id, isRead)
 

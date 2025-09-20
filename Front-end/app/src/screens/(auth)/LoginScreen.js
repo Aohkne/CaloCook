@@ -1,11 +1,22 @@
-import { Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import {
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Eye, EyeClosed, Moon, Sun } from 'lucide-react-native';
 
-import { useState } from 'react';
-
-import { useDispatch } from 'react-redux';
 import { login } from '@/redux/slices/authSlice';
+import { useDispatch } from 'react-redux';
+
 import { useTheme } from '@/contexts/ThemeProvider';
 
 export default function LoginScreen() {
@@ -60,98 +71,104 @@ export default function LoginScreen() {
         {isDark ? <Moon size={24} color='#4A90E2' /> : <Sun size={24} color='#FFA500' />}
       </TouchableOpacity>
       <View style={styles.container}>
-        <Image style={styles.logo} source={require('@assets/login/logo-removebg-preview 2.png')} />
-        <Text style={[styles.bigText, { marginBottom: 10 }]}>Create a meal plan on the go</Text>
-        <Text style={[styles.smallText, { marginBottom: 40 }]}>
-          Choose dishes, view recipes, add to favorites, and create a meal plan
-        </Text>
-
-        <TextInput
-          style={[styles.input, { marginBottom: 10 }]}
-          placeholder='Email or Username'
-          placeholderTextColor={colors.inputPlaceHolder}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType='email-address'
-          autoCapitalize='none'
-          autoComplete='email'
-        />
-        <View style={{ position: 'relative' }}>
-          <TextInput
-            style={[styles.input, { paddingRight: 50 }]}
-            placeholder='Password'
-            placeholderTextColor={colors.inputPlaceHolder}
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-            autoCompleteType='password'
-          />
-          {showPassword ? (
-            <Eye
-              style={{
-                position: 'absolute',
-                right: 15,
-                top: '50%',
-                transform: [{ translateY: '-50%' }]
-              }}
-              color={colors.inputText}
-              size={24}
-              onPress={handleShowPassword}
-            />
-          ) : (
-            <EyeClosed
-              style={{
-                position: 'absolute',
-                right: 15,
-                top: '50%',
-                transform: [{ translateY: '-50%' }]
-              }}
-              color={colors.inputText}
-              size={24}
-              onPress={handleShowPassword}
-            />
-          )}
-        </View>
-        <View
-          style={{
-            alignItems: 'flex-end',
-            width: '100%'
-          }}
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-          <Text onPress={() => navigation.navigate('ForgotPassword')} style={styles.forgotPassword}>
-            Forgot Password
+          <Image style={styles.logo} source={require('@assets/login/logo-removebg-preview 2.png')} />
+          <Text style={[styles.bigText, { marginBottom: 10 }]}>Create a meal plan on the go</Text>
+          <Text style={[styles.smallText, { marginBottom: 40 }]}>
+            Choose dishes, view recipes, add to favorites, and create a meal plan
           </Text>
-        </View>
 
-        <TouchableOpacity
-          style={[styles.button, { opacity: isLoading ? 0.7 : 1 }]}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <Text style={styles.buttonText}>{isLoading ? 'Login...' : 'Login'}</Text>
-        </TouchableOpacity>
+          <TextInput
+            style={[styles.input, { marginBottom: 10 }]}
+            placeholder='Email or Username'
+            placeholderTextColor={colors.inputPlaceHolder}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType='email-address'
+            autoCapitalize='none'
+            autoComplete='email'
+          />
+          <View style={{ position: 'relative' }}>
+            <TextInput
+              style={[styles.input, { paddingRight: 50 }]}
+              placeholder='Password'
+              placeholderTextColor={colors.inputPlaceHolder}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+              autoCompleteType='password'
+            />
+            {showPassword ? (
+              <Eye
+                style={{
+                  position: 'absolute',
+                  right: 15,
+                  top: '50%',
+                  transform: [{ translateY: '-50%' }]
+                }}
+                color={colors.inputText}
+                size={24}
+                onPress={handleShowPassword}
+              />
+            ) : (
+              <EyeClosed
+                style={{
+                  position: 'absolute',
+                  right: 15,
+                  top: '50%',
+                  transform: [{ translateY: '-50%' }]
+                }}
+                color={colors.inputText}
+                size={24}
+                onPress={handleShowPassword}
+              />
+            )}
+          </View>
+          <View
+            style={{
+              alignItems: 'flex-end',
+              width: '100%'
+            }}
+          >
+            <Text onPress={() => navigation.navigate('ForgotPassword')} style={styles.forgotPassword}>
+              Forgot Password
+            </Text>
+          </View>
 
-        <View style={styles.lineContainer}>
-          <View style={styles.line}></View>
-          <Text style={{ opacity: 0.6, fontSize: 16 }}>OR</Text>
-          <View style={styles.line}></View>
-        </View>
+          <TouchableOpacity
+            style={[styles.button, { opacity: isLoading ? 0.7 : 1 }]}
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            <Text style={styles.buttonText}>{isLoading ? 'Login...' : 'Login'}</Text>
+          </TouchableOpacity>
 
-        {/* <TouchableOpacity style={styles.googleButton}>
+          <View style={styles.lineContainer}>
+            <View style={styles.line}></View>
+            <Text style={{ opacity: 0.6, fontSize: 16 }}>OR</Text>
+            <View style={styles.line}></View>
+          </View>
+
+          {/* <TouchableOpacity style={styles.googleButton}>
           <Text style={styles.googleButtonText}>Google</Text>
         </TouchableOpacity> */}
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <Text style={styles.smallText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-            <Text style={styles.link}>Sign Up</Text>
-          </TouchableOpacity>
-        </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Text style={styles.smallText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+              <Text style={styles.link}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
   );
