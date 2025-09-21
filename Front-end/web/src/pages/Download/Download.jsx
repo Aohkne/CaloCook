@@ -31,7 +31,7 @@ export default function Download() {
         <img src='/images/phone.png' className={cx('phone')} />
         <div className={cx('ring')}></div>
         <div className={cx('feature-container')}>
-          <div className={cx('feature-1', 'floating-1')}>
+          <div className={cx('feature', 'feature-position-1', 'floating-1')}>
             <div>
               <h3 className={cx('tertiary-text')}>Tinder Like Scrolling</h3>
               <p className={cx('short-description-text')}>
@@ -42,7 +42,7 @@ export default function Download() {
               <Icon icon='tabler:brand-tinder-filled' />
             </div>
           </div>
-          <div className={cx('feature-2', 'floating-2')}>
+          <div className={cx('feature', 'feature-position-2', 'floating-2')}>
             <div>
               <h3 className={cx('tertiary-text')}>AI Assistant</h3>
               <p className={cx('short-description-text')}>
@@ -53,7 +53,7 @@ export default function Download() {
               <Icon icon='mdi:robot' />
             </div>
           </div>
-          <div className={cx('feature-3', 'floating-3')}>
+          <div className={cx('feature', 'feature-position-3', 'floating-3')}>
             <div>
               <h3 className={cx('tertiary-text')}>Track Calories</h3>
               <p className={cx('short-description-text')}>
@@ -68,11 +68,11 @@ export default function Download() {
       </div>
       <div className={cx('bottom-container')}>
         <h3 className={cx('tertiary-text')}>Supported Platforms and Devices</h3>
-        <p className={cx('short-description-text')}>
+        <p className={cx('description-text')}>
           Calocook is available on Android. Apart from mobile apps, you can also visit Calocook.com to use the Calocook
           web version
         </p>
-        <p className={cx('short-description-text')}>
+        <p className={cx('description-text')}>
           Calocook currently supports all Android versions and newest updates of the popular browsers (Chrome, Firefox,
           Safari, Edge, etc...
         </p>
