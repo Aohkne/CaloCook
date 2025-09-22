@@ -75,19 +75,27 @@ function ConversationDetail({ conversationId }) {
     // NEW MESSAGE
     newSocket.on('new_message', (messageData) => {
       // console.log('New message received:', messageData);
-      setMessages((prev) => [...prev, messageData]);
+
+      // Update if message belong to current conversation
+      if (messageData.conversationId === conversationId) {
+        setMessages((prev) => [...prev, messageData]);
+      }
     });
 
     // SENT
     newSocket.on('message_sent', (messageData) => {
       // console.log('Message sent confirmation:', messageData);
-      setMessages((prev) => {
-        const exists = prev.find((msg) => msg._id === messageData._id);
-        if (exists) {
-          return prev.map((msg) => (msg._id === messageData._id ? { ...msg, status: messageData.status } : msg));
-        }
-        return [...prev, messageData];
-      });
+
+      // Update if message belong to current conversation
+      if (messageData.conversationId === conversationId) {
+        setMessages((prev) => {
+          const exists = prev.find((msg) => msg._id === messageData._id);
+          if (exists) {
+            return prev.map((msg) => (msg._id === messageData._id ? { ...msg, status: messageData.status } : msg));
+          }
+          return [...prev, messageData];
+        });
+      }
     });
 
     // UPDATE

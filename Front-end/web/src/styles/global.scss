@@ -74,8 +74,9 @@ html ::-webkit-scrollbar-track {
 
   --light-yellow: #fee9ad;
   --yellow: #eec756;
-  --pink-violet: #c264ff;
-  --light-pink-violet: #f3d1ff;
+
+  --light-pink: #f3d1ff;
+  --pink: #c264ff;
 }
 
 /* Dark theme */
@@ -122,11 +123,13 @@ body.dark {
 
   --light-red: #ff4d6d33;
   --red: #ff4d6d;
-  --pink: #ff77a9;
 
   --light-yellow: #ffd85f33;
   --yellow: #ffd85f;
-  --orange: #ff9f45;
 
+  --light-pink: #c264ff33;
+  --pink: #c264ff;
+
+  --orange: #ff9f45;
   --purple: #a26bfa;
 }

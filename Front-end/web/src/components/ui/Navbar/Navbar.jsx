@@ -32,7 +32,7 @@ function Navbar() {
           </Link>
 
           <Link to={ROUTES.CHAT_AI} className={cx('nav-item')}>
-            AI
+            CaloBot
           </Link>
         </div>
       </div>

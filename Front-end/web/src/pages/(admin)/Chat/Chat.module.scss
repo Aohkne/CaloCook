@@ -12,7 +12,7 @@
     .conversation-container {
       height: 100%;
       width: 305px;
-      padding: 20px 15px;
+      padding: 20px 0px;
       border-right: 2px solid var(--border);
 
       display: flex;
@@ -20,6 +20,7 @@
       gap: 10px;
 
       .conversation-title {
+        margin: 0 15px;
         font-size: 3rem;
         font-weight: 600;
         color: var(--title);
@@ -27,8 +28,12 @@
 
       // SEARCH
       .search-container {
+        margin: 0 15px;
         position: relative;
         max-width: 100%;
+
+        display: flex;
+        align-items: center;
 
         // @include respond-above(md) {
         //   width: 100%;
@@ -53,6 +58,8 @@
           background: var(--background);
           transition: all 0.3s ease;
 
+          flex: 1;
+
           &:focus {
             outline: none;
             box-shadow: 2px 2px 1px var(--shadow);
@@ -67,6 +74,7 @@
       // CONVERSATION-LIST
       .conversation-list {
         height: 100%;
+        padding: 5px 15px;
         overflow-y: auto;
 
         flex: 1;

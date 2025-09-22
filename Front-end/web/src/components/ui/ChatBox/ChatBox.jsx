@@ -342,7 +342,7 @@ function ChatBox({ isChatOpen, toggleChat }) {
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyPress}
-              placeholder='Chat with admin'
+              placeholder='Chat with admin...'
             />
             <button onClick={handleSend} disabled={!input.trim()}>
               <Icon icon='mingcute:send-fill' width='24' height='24' />
