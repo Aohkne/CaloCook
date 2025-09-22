@@ -229,7 +229,7 @@ const update = async (conversationId, isRead) => {
   }
 }
 
-const updateMessage = async (conversationId, lastMessageId) => {
+const updateMessage = async (conversationId, lastMessageId, readerId) => {
   try {
     const result = await GET_DB()
       .collection(_COLLECTION_NAME)
@@ -238,7 +238,7 @@ const updateMessage = async (conversationId, lastMessageId) => {
         {
           $set: {
             lastMessageId: new ObjectId(lastMessageId),
-            isRead: false,
+            isRead: readerId ? true : false, //Check admin sent
             updatedAt: new Date()
           }
         },

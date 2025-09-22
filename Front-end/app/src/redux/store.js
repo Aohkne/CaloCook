@@ -1,17 +1,19 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setStore } from '@services/api';
+
 import authSlice from './slices/authSlice';
 import dishSlice from './slices/dishSlice';
 import favoriteSlice from './slices/favoriteSlice';
 import userSlice from './slices/userSlice';
-
+import chatSlice from './slices/chatSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authSlice,
     dish: dishSlice,
     favorite: favoriteSlice,
-    user: userSlice
+    user: userSlice,
+    chat: chatSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

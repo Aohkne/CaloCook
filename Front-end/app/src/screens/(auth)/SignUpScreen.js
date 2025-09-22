@@ -1,6 +1,17 @@
 import { useState } from 'react';
 import { ChevronLeft, Eye, EyeClosed, Moon, Sun } from 'lucide-react-native';
-import { Alert, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
@@ -75,113 +86,118 @@ export default function SignUpScreen() {
         <Text style={{ fontSize: 14, color: colors.secondary, fontWeight: 600 }}>Back to Login</Text>
       </TouchableOpacity>
       <View style={styles.container}>
-        <Image style={styles.logo} source={require('@assets/login/logo-removebg-preview 2.png')} />
-        <Text style={[styles.bigText, { marginBottom: 10 }]}>Create a meal plan on the go</Text>
-        <Text style={[styles.smallText, { marginBottom: 40 }]}>
-          Choose dishes, view recipes, add to favorites, and create a meal plan
-        </Text>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
+          <Image style={styles.logo} source={require('@assets/login/logo-removebg-preview 2.png')} />
+          <Text style={[styles.bigText, { marginBottom: 10 }]}>Create a meal plan on the go</Text>
+          <Text style={[styles.smallText, { marginBottom: 40 }]}>
+            Choose dishes, view recipes, add to favorites, and create a meal plan
+          </Text>
 
-        <TextInput
-          style={[styles.input, { marginBottom: 10 }]}
-          placeholder='Email'
-          placeholderTextColor={colors.inputPlaceHolder}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType='email-address'
-          autoCapitalize='none'
-          autoComplete='email'
-        />
-        <TextInput
-          style={[styles.input, { marginBottom: 10 }]}
-          placeholder='Username'
-          placeholderTextColor={colors.inputPlaceHolder}
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize='none'
-        />
-        <View style={{ position: 'relative' }}>
           <TextInput
-            style={[styles.input, { paddingRight: 50, marginBottom: 10 }]}
-            placeholder='Password'
+            style={[styles.input, { marginBottom: 10 }]}
+            placeholder='Email'
             placeholderTextColor={colors.inputPlaceHolder}
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-            textContentType='password'
+            value={email}
+            onChangeText={setEmail}
+            keyboardType='email-address'
+            autoCapitalize='none'
+            autoComplete='email'
           />
-          {showPassword ? (
-            <Eye
-              style={{
-                position: 'absolute',
-                right: 15,
-                top: '40%',
-                transform: [{ translateY: '-50%' }]
-              }}
-              color={colors.inputText}
-              size={24}
-              onPress={handleShowPassword}
-            />
-          ) : (
-            <EyeClosed
-              style={{
-                position: 'absolute',
-                right: 15,
-                top: '40%',
-                transform: [{ translateY: '-50%' }]
-              }}
-              color={colors.inputText}
-              size={24}
-              onPress={handleShowPassword}
-            />
-          )}
-        </View>
-        <View style={{ position: 'relative' }}>
           <TextInput
-            style={[styles.input, { paddingRight: 50, marginBottom: 10 }]}
-            placeholder='Confirm Password'
+            style={[styles.input, { marginBottom: 10 }]}
+            placeholder='Username'
             placeholderTextColor={colors.inputPlaceHolder}
-            secureTextEntry={!showConfirmPassword}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            textContentType='password'
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize='none'
           />
-          {showConfirmPassword ? (
-            <Eye
-              style={{
-                position: 'absolute',
-                right: 15,
-                top: '40%',
-                transform: [{ translateY: '-50%' }]
-              }}
-              color={colors.inputText}
-              size={24}
-              onPress={handleShowConfirmPassword}
+          <View style={{ position: 'relative' }}>
+            <TextInput
+              style={[styles.input, { paddingRight: 50, marginBottom: 10 }]}
+              placeholder='Password'
+              placeholderTextColor={colors.inputPlaceHolder}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+              textContentType='password'
             />
-          ) : (
-            <EyeClosed
-              style={{
-                position: 'absolute',
-                right: 15,
-                top: '40%',
-                transform: [{ translateY: '-50%' }]
-              }}
-              color={colors.inputText}
-              size={24}
-              onPress={handleShowConfirmPassword}
+            {showPassword ? (
+              <Eye
+                style={{
+                  position: 'absolute',
+                  right: 15,
+                  top: '40%',
+                  transform: [{ translateY: '-50%' }]
+                }}
+                color={colors.inputText}
+                size={24}
+                onPress={handleShowPassword}
+              />
+            ) : (
+              <EyeClosed
+                style={{
+                  position: 'absolute',
+                  right: 15,
+                  top: '40%',
+                  transform: [{ translateY: '-50%' }]
+                }}
+                color={colors.inputText}
+                size={24}
+                onPress={handleShowPassword}
+              />
+            )}
+          </View>
+          <View style={{ position: 'relative' }}>
+            <TextInput
+              style={[styles.input, { paddingRight: 50, marginBottom: 10 }]}
+              placeholder='Confirm Password'
+              placeholderTextColor={colors.inputPlaceHolder}
+              secureTextEntry={!showConfirmPassword}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              textContentType='password'
             />
-          )}
-        </View>
-        <View
-          style={{
-            alignItems: 'flex-end',
-            width: '100%'
-          }}
-        ></View>
-        <TouchableOpacity style={[styles.button, { marginTop: 10 }]} onPress={handleRegister}>
-          <Text style={styles.buttonText}>Sign Up</Text>
-        </TouchableOpacity>
+            {showConfirmPassword ? (
+              <Eye
+                style={{
+                  position: 'absolute',
+                  right: 15,
+                  top: '40%',
+                  transform: [{ translateY: '-50%' }]
+                }}
+                color={colors.inputText}
+                size={24}
+                onPress={handleShowConfirmPassword}
+              />
+            ) : (
+              <EyeClosed
+                style={{
+                  position: 'absolute',
+                  right: 15,
+                  top: '40%',
+                  transform: [{ translateY: '-50%' }]
+                }}
+                color={colors.inputText}
+                size={24}
+                onPress={handleShowConfirmPassword}
+              />
+            )}
+          </View>
+          <View
+            style={{
+              alignItems: 'flex-end',
+              width: '100%'
+            }}
+          ></View>
+          <TouchableOpacity style={[styles.button, { marginTop: 10 }]} onPress={handleRegister}>
+            <Text style={styles.buttonText}>Sign Up</Text>
+          </TouchableOpacity>
 
-        {/* <View style={styles.lineContainer}>
+          {/* <View style={styles.lineContainer}>
           <View style={styles.line}></View>
           <Text style={{ opacity: 0.6, fontSize: 16 }}>OR</Text>
           <View style={styles.line}></View>
@@ -190,6 +206,7 @@ export default function SignUpScreen() {
         <TouchableOpacity style={styles.googleButton}>
           <Text style={styles.googleButtonText}>Google</Text>
         </TouchableOpacity> */}
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
   );
