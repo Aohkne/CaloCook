@@ -1,10 +1,10 @@
+import { Link } from 'react-router-dom';
 import FeatCard from '@/components/ui/FeatCard/FeatCard';
 
 import { features } from '@/data/features';
 
 import styles from './Features.module.scss';
 import classNames from 'classnames/bind';
-import { Link } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
