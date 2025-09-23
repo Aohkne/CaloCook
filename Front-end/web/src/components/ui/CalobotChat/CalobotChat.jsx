@@ -45,7 +45,6 @@ function CalobotChat({ model, handleModelSelect }) {
       const formData = new FormData();
       formData.append('file', imageData);
       const response = await analyzeImage(formData);
-
       console.log(response);
 
       //   return response.data.analysis || response.data.message || 'Image analyzed successfully!';
@@ -96,12 +95,12 @@ function CalobotChat({ model, handleModelSelect }) {
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
-      //Store file
-      setImagePreview(file);
-
       const reader = new FileReader();
+
+      setSelectedImage(file);
+
       reader.onload = (e) => {
-        setSelectedImage(e.target.result);
+        setImagePreview(e.target.result);
       };
       reader.readAsDataURL(file);
     }
@@ -116,7 +115,7 @@ function CalobotChat({ model, handleModelSelect }) {
     }
   };
 
-  // DRAG
+  // DROP
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -137,11 +136,9 @@ function CalobotChat({ model, handleModelSelect }) {
     const files = e.dataTransfer.files;
     if (files && files[0] && files[0].type.startsWith('image/')) {
       const file = files[0];
-      //Store file
-      setSelectedImage(file);
-
       const reader = new FileReader();
       reader.onload = (e) => {
+        setSelectedImage(e.target.result);
         setImagePreview(e.target.result);
       };
       reader.readAsDataURL(file);
