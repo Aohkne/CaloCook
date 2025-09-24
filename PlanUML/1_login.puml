@@ -9,65 +9,60 @@ entity "userModel" as Model #lightblue
 database "MongoDB" as MongoDB #yellow
 
 group Login
-User -> View: 1.Enter login\n {email/username, password}
+User -> View: 1.Enter login\n{email/username, password}
 activate View
 activate User
 
 View -> View: 2.Validate input
-View -> Routes_FE: 3.POST /api/v1/auth/login
-activate Routes_FE
+activate View
+deactivate View
 
-Routes_FE -> Controller: 4.login(req, res)
-activate Controller
-
-Controller -> Service: 5.login(data)
-activate Service
-
-Service -> Model: 6.findUser(email/username)
-activate Model
-
-Model -> MongoDB: 7.Query user
-activate MongoDB
-MongoDB --> Model: 8.Return user
-deactivate MongoDB
-
-Model --> Service: 9.Return result
-deactivate Model
-
-alt Login Success
-    Service -> Service: 10.Verify password & generate token
-    Service --> Controller: 10.1.Return success
-
-    Controller --> Routes_FE: 10.1.1.Return success {token}
-
-    Routes_FE --> View: 10.1.2.Success response
-
-    View -> View: 10.1.3.Save token
-    View --> User: 10.1.4.Redirect to dashboard
-
-else Incorrect login information
-    Service --> Controller: 11.Return fail "Incorrect username or password"
-
-    Controller --> Routes_FE: 11.1.Unauthorized
-
-    Routes_FE --> View: 11.2.Error response
-
-    View --> User: 11.3.Display "Incorrect username or password"
-
-else Account locked
-    Service --> Controller: 12.Return fail "Account locked"
-    deactivate Service
-
-    Controller --> Routes_FE: 12.1.Forbidden
-    deactivate Controller
-
-    Routes_FE --> View: 12.2.Error response
-    deactivate Routes_FE
-
-    View --> User: 12.3.Display "Account locked, contact administrator"
-    deactivate View
-    deactivate User
+alt Invalid input
+    View --> User: 2.1.Display validation errors
 end
+    View -> Routes_FE: 3.POST /api/v1/auth/login
+    activate Routes_FE
+
+    Routes_FE -> Controller: 4.login(req, res)
+    activate Controller
+
+    Controller -> Service: 5.login(data)
+    activate Service
+
+    Service -> Model: 6.findUser(email/username)
+    activate Model
+
+    Model -> MongoDB: 7.Query user
+    activate MongoDB
+    MongoDB --> Model: 8.Return user
+    deactivate MongoDB
+
+    Model --> Service: 9.Return result
+    deactivate Model
+
+    alt Login Success
+        Service --> Controller: 9.1.Return success {token}
+        Controller --> Routes_FE: 9.1.1.Return success {token}
+        Routes_FE --> View: 9.1.2.Success response and save token
+        View --> User: 9.1.3.Redirect to dashboard
+
+    else Incorrect login information
+        Service --> Controller: 9.2.Return fail "Incorrect username or password"
+        Controller --> Routes_FE: 9.2.1.Unauthorized
+        Routes_FE --> View: 9.2.2.Error response
+        View --> User: 9.2.3.Display "Incorrect username or password"
+
+    else Account locked
+        Service --> Controller: 9.3.Return fail "Account locked"
+        deactivate Service
+        Controller --> Routes_FE: 9.3.1.Forbidden
+        deactivate Controller
+        Routes_FE --> View: 9.3.2.Error response
+        deactivate Routes_FE
+        View --> User: 9.3.3.Display "Account locked, contact administrator"
+        deactivate View
+        deactivate User
+    end
 end
 
 @enduml

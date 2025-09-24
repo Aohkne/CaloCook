@@ -59,6 +59,26 @@ const getAll = async (paginationParams) => {
     throw new Error(error)
   }
 }
+// get All Customer
+const getAllCustomer = async (paginationParams) => {
+  try {
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+    const [data, totalCount] = await Promise.all([
+      GET_DB()
+        .collection(_COLLECTION_NAME)
+        .find({ role: 'user' })
+        .sort(sortObject)
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments({ role: 'user' })
+    ])
+    return { data, totalCount }
+  } catch (error) {
+    throw new Error(error)
+  }
+}
 
 const searchByUsername = async (username, paginationParams) => {
   try {
@@ -170,5 +190,6 @@ export const userModel = {
   findById,
   create,
   updateOne,
-  countUsers
+  countUsers,
+  getAllCustomer
 }

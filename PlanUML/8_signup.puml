@@ -8,76 +8,72 @@ participant ":authService" as Service #lightblue
 entity "userModel" as Model #lightblue
 database "MongoDB" as MongoDB #yellow
 
-
-group Signup
+group Register
 User -> View: 1.Enter signup information\n(username, email, password)
-activate User
+
 activate View
+activate User
 
 View -> View: 2.Validate input
-    alt Validation Data
-         View -> Routes_FE: 3.POST /api/v1/auth/signup
-        activate Routes_FE
-    
-        Routes_FE -> Controller: 4.signup(req, res)
-        activate Controller
-    
-        Controller -> Controller: 5.Validate request body
-    
+activate View
+deactivate View
 
-        Controller -> Service: 6.createUser(userData)
-        activate Service
-        
-        Service -> Service: 7.Hash password
-        Service -> Model: 8.findOne({email},{username})
+opt Invalid data
+    View --> User: 2.1.Display validation errors
+end
+    View -> Routes_FE: 3.POST /api/v1/auth/signup
+    activate Routes_FE
+
+    Routes_FE -> Controller: 4.signup(req, res)
+    activate Controller
+
+    Controller -> Service: 5.createUser(userData)
+    activate Service
+
+    Service -> Model: 6.findOne({email},{username})
+    activate Model
+
+    Model -> MongoDB: 7.Check email/username exist 
+    activate MongoDB
+    MongoDB --> Model: 8.Return result
+    deactivate MongoDB
+
+    Model --> Service: 9.Return result
+    deactivate Model
+
+    alt Email/Username not exist
+        Service -> Model: 9.1.create(userData)
         activate Model
-        
-        Model -> MongoDB: 9.Check email/username exist 
+
+        Model -> MongoDB: 9.2.Execute insert
         activate MongoDB
-        MongoDB --> Model: 10.Return result
-        Model --> Service: 11.Return result
-        
-        alt Email/Username not exist
-            Service -> Model: 12.create(userData)
-            
-            Model -> MongoDB: 13.ExecuteQuery()
-            MongoDB --> Model: 14.Return result
-            deactivate MongoDB
-            
-            Model --> Service: 15.Return result
-            deactivate Model
-            
-            Service -> Service: 16.Generate JWT token
-            Service --> Controller: 16.1.Return success{token}
-            
-            Controller --> Routes_FE: 16.1.1.Created\n{message, user, token}       
-            
-            Routes_FE --> View: 16.1.2.Success response
-            
-            View -> View: 16.1.3.Save token to localStorage
-            View --> User: 16.1.4.Redirect to login
-            
-        else Email/Username Exist
-            Service --> Controller: 16.2.Fail message: "Email/Username existes"
-            deactivate Service
-            
-            Controller --> Routes_FE: 16.2.1.Return Fail\n message: "Email/Username exists"
-            
-            Routes_FE --> View: 16.2.2.Error response
-            
-            View --> User: 16.2.3.Show error "Email/Username exists"
-        end
-        
-    else Invalid data
-        Controller --> Routes_FE: 16.2.2.Bad Request\n{message: "Invalid data"}
+        MongoDB --> Model: 9.3.Return result
+        deactivate MongoDB
+
+        Model --> Service: 9.4.Return new user
+        deactivate Model
+
+        Service --> Controller: 9.5.Return success {token}
+
+        Controller --> Routes_FE: 9.6.Created\n{message, user, token}
+
+        Routes_FE --> View: 9.7.Success response and save token
+
+        View --> User: 9.8.Redirect to login
+
+    else Email/Username exist
+        Service --> Controller: 9.a.Fail {message: "Email/Username exists"}
+        deactivate Service
+
+        Controller --> Routes_FE: 9.b.Return Fail {message}
         deactivate Controller
-        
-        Routes_FE --> View: 16.2.3.Validation error
+
+        Routes_FE --> View: 9.c.Error response
         deactivate Routes_FE
-        
-        View --> User: 16.2.4.Show validation errors
+
+        View --> User: 9.d.Show error "Email/Username exists"
         deactivate View
-            deactivate User
+        deactivate User
     end
 
 end

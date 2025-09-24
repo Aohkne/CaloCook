@@ -14,41 +14,47 @@ activate View
 activate User
 User -> View: 2. Edit avatar, gender, height, weight, dob.
 
+View -> View: 3. Validate input
+activate View
+deactivate View
 
-View -> Route: 3. POST /api/v1/auth/profile
+opt Invalid input
+    View --> User: 3.1. Display "Invalid input information"
+end
+
+View -> Route: 4. POST /api/v1/auth/profile
 activate Route
 
-Route -> Controller: 4. editProfile(req, res)
+Route -> Controller: 5. editProfile(req, res)
 activate Controller
 
-alt Update Failed
-    Controller -> Service: 5. editProfile(userId, profileData)
+    Controller -> Service: 6. editProfile(userId, profileData)
     activate Service
 
-    Service -> Model: 6. updateUserById(userId, profileData)
+    Service -> Model: 7. updateUserById(userId, profileData)
     activate Model
 
-    Model -> MongoDB: 7. ExecuteQuery()
+    Model -> MongoDB: 8. ExecuteQuery()
     activate MongoDB
-    MongoDB --> Model: 8. Return result
+    MongoDB --> Model: 9. Return result
     deactivate MongoDB
 
-    Model --> Service: 9. Return update result
+    Model --> Service: 10. Return update result
     deactivate Model
 
-
-    Service --> Controller: 9.1. Return error
-    Controller --> Route: 9.1.1 Internal Server Error
-    Route --> View: 9.1.2. Show "Update failed"
-    View --> User: 9.1.3. Display error message
+alt Invalid Input Failed
+    Service --> Controller: 10.1. Return error
+    Controller --> Route: 10.1.1 Return error info
+    Route --> View: 10.1.2. Show "Update failed"
+    View --> User: 10.1.3. Display error message
 else Update Success
-    Service --> Controller: 9.2. Return updated user
+    Service --> Controller: 10.2. Return updated user
     deactivate Service
-    Controller --> Route: 9.2.1. Return success
+    Controller --> Route: 10.2.1. Return success
     deactivate Controller
-    Route --> View: 9.2.2. Show success
+    Route --> View: 10.2.2. Show success
     deactivate Route
-    View --> User: 9.2.3. Display "Updated successfully"
+    View --> User: 10.2.3. Display "Updated successfully"
     deactivate View
     deactivate User
 end

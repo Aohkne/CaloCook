@@ -22,7 +22,7 @@ activate Controller
 Controller -> Service: 4.getProfile(userId)
 activate Service
 
-alt Service returns profile
+
     Service -> Model: 5.findUserById(userId)
     activate Model
 
@@ -33,7 +33,7 @@ alt Service returns profile
 
     Model --> Service: 8.Return user data
     deactivate Model
-
+alt Service returns profile
     Service --> Controller: 8.1. Return profile info
 
     Controller --> Route: 8.1.1. Return success

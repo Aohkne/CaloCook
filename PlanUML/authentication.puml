@@ -1,0 +1,37 @@
+@startuml Authentication
+
+control "authRoute" as Route #lightblue
+participant ":authMiddleware" as Middleware #lightblue
+entity "authController" as Controller #lightblue
+
+Route -> Middleware: 1.Validate Token
+activate Route
+activate Middleware
+
+alt Token Invalid
+    Middleware --> Route: 1.1.401 Unauthorized
+
+else Token Valid
+    Middleware --> Route: 1.2.Token Validated
+    
+    Middleware -> Middleware: 2.Check User Role
+    activate Middleware
+    deactivate Middleware
+
+    alt Role = Admin
+        Middleware --> Route: 2.1.Role Admin Validated
+        Middleware -> Controller: 2.1.1.Forward Request to Controller (Admin Access)
+        activate Controller
+    else Role = User
+        Middleware --> Route: 2.2.Role User Validated
+        Middleware -> Controller: 2.2.1.Forward Request to Controller (User Access)
+        deactivate Controller
+    else Role Unauthorized
+        Middleware --> Route: 2.3.403 Forbidden (Unauthorized Role)
+    end
+
+    deactivate Middleware
+    deactivate Route
+end
+
+@enduml
