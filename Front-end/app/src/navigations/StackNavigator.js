@@ -19,6 +19,7 @@ import HistoryScreen from '@screens/HistoryScreen';
 import Detail from '@screens/Detail';
 import ResetPasswordScreen from '@/screens/(auth)/ResetPasswordScreen';
 import ChatScreen from '@/screens/ChatScreen';
+import NutritionAnalyzeScreen from '@/screens/NutritionAnalyzeScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +40,7 @@ export default function StackNavigator() {
           <Stack.Screen name='ChangePassword' component={ChangePasswordScreen} />
           <Stack.Screen name='History' component={HistoryScreen} />
           <Stack.Screen name='Chat' component={ChatScreen} />
+          <Stack.Screen name='Nutrition' component={NutritionAnalyzeScreen} />
         </>
       ) : hasSeenOnboarding ? (
         //  onboarding seen
