@@ -112,7 +112,7 @@ const getUserProfile = async (user) => {
     email: user.email,
     role: user.role,
     calorieLimit: user.calorieLimit,
-    avatarUrl: user.avatarUrl,
+    avatar_url: user.avatar_url,
     gender: user.gender,
     dob: user.dob,
     height: user.height,
@@ -126,8 +126,8 @@ const getUserProfile = async (user) => {
 }
 const editProfileService = async (userId, profileData) => {
   let cloudinaryResponse = null
-  if (profileData.avatarUrl) {
-    cloudinaryResponse = await cloudinary.uploader.upload(profileData.avatarUrl, {
+  if (profileData.avatar_url) {
+    cloudinaryResponse = await cloudinary.uploader.upload(profileData.avatar_url, {
       folder: 'avatars'
     })
   }
@@ -138,7 +138,7 @@ const editProfileService = async (userId, profileData) => {
         username: profileData.username,
         email: profileData.email,
         calorieLimit: profileData.calorieLimit,
-        avatarUrl: cloudinaryResponse?.secure_url ? cloudinaryResponse.secure_url : '',
+        avatar_url: cloudinaryResponse?.secure_url ? cloudinaryResponse.secure_url : '',
         gender: profileData.gender,
         dob: profileData.dob,
         height: profileData.height,

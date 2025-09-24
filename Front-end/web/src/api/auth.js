@@ -54,3 +54,19 @@ export const resetPassword = async (otp, email, newPassword) => {
     throw error;
   }
 };
+
+export const changePassword = async (oldPassword, newPassword) => {
+  try {
+    const response = await api.post('/auth/change-password', {
+      oldPassword,
+      newPassword
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Change password API failed:', error);
+    throw error;
+  }
+};
+
+
+

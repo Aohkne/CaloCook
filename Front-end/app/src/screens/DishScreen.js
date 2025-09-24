@@ -1,365 +1,227 @@
-import React, { useEffect, useCallback } from 'react'
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native'
-import { useTheme } from '@contexts/ThemeProvider'
-import { Search } from 'lucide-react-native'
-import { useDispatch, useSelector } from 'react-redux'
-import { getAllDishes, loadMoreDishes, resetDishes, clearError, updateDishLikeStatus, syncDishesWithFavorites } from '@redux/slices/dishSlice'
-import { likeDish, dislikeDish, updateFavoriteItem, getFavorites } from '@redux/slices/favoriteSlice'
-import DishCard from '../components/Card'
+import { useState, useEffect } from 'react';
+import { Icon } from '@iconify/react';
+import Navbar from '@/components/ui/Navbar/Navbar';
+import ChatBox from '@/components/ui/ChatBox/ChatBox';
+import classNames from 'classnames/bind';
+import styles from './Dish.module.scss';
+import { getDishes } from '@/api/dish';
+import testImage from '@/assets/testImage.png';
 
-export default function DishScreen({ navigation }) {
-  const { colors } = useTheme()
-  const styles = createStyles(colors)
-  const dispatch = useDispatch()
+const cx = classNames.bind(styles);
 
-  // Get state from Redux
-  const {
-    dishes,
-    isLoading,
-    isLoadingMore,
-    error,
-    hasMore,
-    currentPage
-  } = useSelector(state => state.dish)
+function Dish() {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [dishes, setDishes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 8,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
 
-  // Get user and favorites from auth/favorite state
-  const { user } = useSelector(state => state.auth)
-  const { favorites } = useSelector(state => state.favorite)
+  const toggleChat = () => setIsChatOpen((prev) => !prev);
 
-  // Helper function để capitalize text
-  const capitalizeText = (text) => {
-    if (!text) return '';
-    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-  }
-
-  // Fetch initial dishes and favorites
-  useEffect(() => {
-    const fetchData = async () => {
-      if (user?._id) {
-        // Fetch dishes with user context
-        await dispatch(getAllDishes({ page: 1, limit: 10, userId: user._id }))
-        // Fetch user's favorites
-        await dispatch(getFavorites({ userId: user._id, page: 1, limit: 100 }))
-      } else {
-        // Fetch dishes without user context
-        await dispatch(getAllDishes({ page: 1, limit: 10 }))
-      }
+  // Function to handle image URL - similar to React Native approach
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl || imageUrl.trim() === '') {
+      return testImage;
     }
 
-    fetchData()
-  }, [dispatch, user])
-
-  // Sync dishes with favorites when favorites data changes
-  useEffect(() => {
-    if (favorites.length > 0 && dishes.length > 0) {
-      dispatch(syncDishesWithFavorites(favorites))
-    }
-  }, [dispatch, favorites, dishes.length])
-
-  // Handle error display
-  useEffect(() => {
-    if (error) {
-      Alert.alert('Error', error, [
-        { text: 'OK', onPress: () => dispatch(clearError()) }
-      ])
-    }
-  }, [error, dispatch])
-
-  // Handle pull to refresh
-  const onRefresh = useCallback(() => {
-    const refreshData = async () => {
-      dispatch(resetDishes())
-      if (user?._id) {
-        await dispatch(getAllDishes({ page: 1, limit: 10, userId: user._id }))
-        await dispatch(getFavorites({ userId: user._id, page: 1, limit: 100 }))
-      } else {
-        await dispatch(getAllDishes({ page: 1, limit: 10 }))
-      }
+    // If imageUrl starts with @assets, convert to server path
+    if (imageUrl.startsWith('@assets/')) {
+      // Convert @assets/img/banh-mi.png to /api/assets/img/banh-mi.png
+      const serverPath = imageUrl.replace('@assets/', '/assets/');
+      const fullUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}${serverPath}`;
+      console.log('Generated image URL:', fullUrl); // Debug log
+      return fullUrl;
     }
 
-    refreshData()
-  }, [dispatch, user])
-
-  // Handle load more when scrolling
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !isLoadingMore && !isLoading) {
-      const nextPage = currentPage + 1
-      dispatch(loadMoreDishes({
-        page: nextPage,
-        limit: 10,
-        userId: user?._id
-      }))
-    }
-  }, [hasMore, isLoadingMore, isLoading, currentPage, dispatch, user])
-
-  // Handle heart press với API call và real-time update
-  const handleHeartPress = useCallback(async (dishId) => {
-    if (!user?._id) {
-      Alert.alert('Error', 'Please login to add favorites')
-      return
+    // If it's already a full HTTP URL
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
     }
 
+    // If it's a relative path from server
+    if (imageUrl.startsWith('/')) {
+      return `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}${imageUrl}`;
+    }
+
+    // Default: prepend API base URL
+    return `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/${imageUrl}`;
+  };
+
+  // Fetch dishes from API
+  const fetchDishes = async (page = 1) => {
+    setLoading(true);
     try {
-      // Tìm dish hiện tại để check trạng thái like
-      const currentDish = dishes.find(d => d._id === dishId)
+      const response = await getDishes({
+        page: page,
+        limit: 8,
+        isActive: true
+      });
 
-      if (currentDish?.isLiked) {
+      console.log('API Response:', response);
 
-        // Nếu đã like thì dislike
-        const result = await dispatch(dislikeDish({
-          userId: user._id,
-          dishId: dishId
-        })).unwrap()
-
-        // Cập nhật local state trong dish slice
-        dispatch(updateDishLikeStatus({ dishId, isLiked: false }))
-
-      } else {
-
-        // Nếu chưa like thì like
-        const result = await dispatch(likeDish({
-          userId: user._id,
-          dishId: dishId
-        })).unwrap()
-
-        // Cập nhật local state trong dish slice
-        dispatch(updateDishLikeStatus({ dishId, isLiked: true }))
-
-        // Cập nhật favorites list ngay lập tức
-        const newFavoriteItem = {
-          _id: result._id || `temp_${dishId}_${Date.now()}`,
-          dishId: dishId,
-          dish: currentDish,
-          createdAt: new Date().toISOString()
+      if (response.code === 200) {
+        console.log('Dishes data:', response.data);
+        // Log first dish imageUrl for debugging
+        if (response.data && response.data[0]) {
+          console.log('First dish imageUrl:', response.data[0].imageUrl);
+          console.log('Processed URL:', getImageUrl(response.data[0].imageUrl));
         }
-
-        dispatch(updateFavoriteItem({
-          dishId,
-          favoriteData: newFavoriteItem,
-          action: 'like'
-        }))
+        setDishes(response.data || []);
+        setPagination(response.pagination);
       }
-
     } catch (error) {
-      console.error('Error updating favorite status')
-      Alert.alert('Error', error.message || 'Failed to update favorite')
+      console.error('Error fetching dishes:', error);
+      setDishes([]);
+    } finally {
+      setLoading(false);
     }
-  }, [dispatch, user, dishes])
+  };
 
-  // Handle card press - Navigate to Detail
-  const handleCardPress = useCallback((dish) => {
-    navigation.navigate('Detail', { dish })
-  }, [navigation])
+  // Fetch dishes when component mounts or page changes
+  useEffect(() => {
+    fetchDishes(currentPage);
+  }, [currentPage]);
 
-  // Handle scroll to detect when to load more
-  const handleScroll = useCallback((event) => {
-    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent
-    const paddingToBottom = 20
+  const toggleFavorite = (id) => {
+    setDishes(prevDishes =>
+      prevDishes.map(dish =>
+        dish._id === id ? { ...dish, isFavorite: !dish.isFavorite } : dish
+      )
+    );
+  };
 
-    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
-      handleLoadMore()
+  // Generate page numbers array dynamically
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= pagination.totalPages; i++) {
+      pageNumbers.push(i);
     }
-  }, [handleLoadMore])
+    return pageNumbers;
+  };
 
-  // Loading state for initial load
-  if (isLoading && dishes.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Dish</Text>
-          <View style={styles.headerIcons}>
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={() => navigation.navigate('FilterScreen')}
-            >
-              <Search size={24} color={colors.text} />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Loading dishes...</Text>
-        </View>
-      </View>
-    )
-  }
-
-  // Empty state
-  if (!isLoading && dishes.length === 0) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Dish</Text>
-          <View style={styles.headerIcons}>
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={() => navigation.navigate('FilterScreen')}
-            >
-              <Search size={24} color={colors.text} />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No dishes found</Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={onRefresh}
-          >
-            <Text style={styles.retryButtonText}>Try Again</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    )
-  }
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Dish</Text>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => navigation.navigate('FilterScreen')}
+    <div className={cx('wrapper')}>
+      <Navbar />
+
+      <div className={cx('content')}>
+        <div className={cx('search-filter-section')}>
+          <div className={cx('search-bar')}>
+            <Icon icon="ph:magnifying-glass" className={cx('search-icon')} />
+            <input
+              type="text"
+              placeholder="Search dishes..."
+              className={cx('search-input')}
+            />
+          </div>
+
+          <div className={cx('filter-button')}>
+            <Icon icon="ph:funnel" />
+          </div>
+        </div>
+
+        <div className={cx('dishes-grid')}>
+          {loading ? (
+            <div className={cx('loading')}>Loading...</div>
+          ) : (
+            dishes.map((dish) => (
+              <div key={dish._id} className={cx('dish-card')}>
+                <div className={cx('card-image')}>
+                  <img
+                    src={getImageUrl(dish.imageUrl)}
+                    alt={dish.name || 'Dish image'}
+                    onError={(e) => {
+                      console.log('Image load error for:', dish.imageUrl);
+                      console.log('Failed URL:', getImageUrl(dish.imageUrl));
+                      e.target.src = testImage;
+                    }}
+                    onLoad={(e) => {
+                      console.log('Image loaded successfully:', e.target.src);
+                    }}
+                  />
+                  <div
+                    className={cx('favorite-btn', { 'active': dish.isFavorite })}
+                    onClick={() => toggleFavorite(dish._id)}
+                  >
+                    <Icon icon={dish.isFavorite ? "ph:heart-fill" : "ph:heart"} />
+                  </div>
+                </div>
+
+                <div className={cx('card-content')}>
+                  <h3 className={cx('dish-name')}>{dish.name}</h3>
+
+                  <div className={cx('dish-stats')}>
+                    <span className={cx('stat-item')}>
+                      <Icon icon="ph:clock" />
+                      {dish.cookingTime} min
+                    </span>
+                    <span className={cx('stat-item')}>
+                      <Icon icon="ph:fire" />
+                      {dish.calorie} kcal
+                    </span>
+                    <span className={cx('stat-item', 'difficulty')}>
+                      <Icon icon="ph:chef-hat" />
+                      {dish.difficulty}
+                    </span>
+                  </div>
+
+                  <p className={cx('ingredients')}>{dish.description}</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {!loading && dishes.length === 0 && (
+          <div className={cx('no-data')}>No dishes found</div>
+        )}
+
+        <div className={cx('pagination')}>
+          <button
+            className={cx('pagination-btn', 'prev')}
+            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+            disabled={!pagination.hasPrevPage || loading}
           >
-            <Search size={24} color={colors.title} />
-          </TouchableOpacity>
-        </View>
-      </View>
+            <Icon icon="ph:caret-left" />
+          </button>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={onRefresh}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
-          />
-        }
-        onScroll={handleScroll}
-        scrollEventThrottle={400}
-      >
-        {dishes.map((dish) => (
-          <DishCard
-            key={dish._id || dish.id}
-            dish={dish}
-            onHeartPress={handleHeartPress}
-            onCardPress={handleCardPress}
-          />
-        ))}
+          {getPageNumbers().map((page) => (
+            <button
+              key={page}
+              className={cx('pagination-btn', 'page-btn', { 'active': currentPage === page })}
+              onClick={() => handlePageChange(page)}
+              disabled={loading}
+            >
+              {page}
+            </button>
+          ))}
 
-        {/* Load more indicator */}
-        {isLoadingMore && (
-          <View style={styles.loadMoreContainer}>
-            <ActivityIndicator size="small" color={colors.primary} />
-            <Text style={styles.loadMoreText}>Loading more...</Text>
-          </View>
-        )}
+          <button
+            className={cx('pagination-btn', 'next')}
+            onClick={() => handlePageChange(Math.min(currentPage + 1, pagination.totalPages))}
+            disabled={!pagination.hasNextPage || loading}
+          >
+            <Icon icon="ph:caret-right" />
+          </button>
+        </div>
+      </div>
 
-        {/* End of list indicator */}
-        {!hasMore && dishes.length > 0 && (
-          <View style={styles.endOfListContainer}>
-            <Text style={styles.endOfListText}>No more dishes to load</Text>
-          </View>
-        )}
-      </ScrollView>
-    </View>
-  )
+      <div className={cx('chat-icon')} onClick={toggleChat}>
+        <Icon icon='line-md:chat-round-filled' />
+      </div>
+      {isChatOpen && <ChatBox isChatOpen={isChatOpen} toggleChat={toggleChat} />}
+    </div>
+  );
 }
 
-const createStyles = (colors) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingTop: 50,
-      paddingBottom: 20,
-      backgroundColor: colors.background,
-    },
-    title: {
-      color: colors.title,
-      fontSize: 32,
-      fontWeight: '700',
-      letterSpacing: 1
-    },
-    headerIcons: {
-      flexDirection: 'row',
-      gap: 15
-    },
-    iconButton: {
-      padding: 8
-    },
-    scrollView: {
-      flex: 1,
-      paddingHorizontal: 20
-    },
-    scrollContent: {
-      paddingTop: 0,
-      paddingBottom: 20,
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingTop: 50
-    },
-    loadingText: {
-      marginTop: 10,
-      fontSize: 16,
-      color: colors.text,
-      opacity: 0.7
-    },
-    emptyContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingTop: 50
-    },
-    emptyText: {
-      fontSize: 18,
-      color: colors.text,
-      opacity: 0.7,
-      marginBottom: 20
-    },
-    retryButton: {
-      backgroundColor: colors.primary,
-      paddingHorizontal: 20,
-      paddingVertical: 10,
-      borderRadius: 8
-    },
-    retryButtonText: {
-      color: colors.white || '#fff',
-      fontSize: 16,
-      fontWeight: '600'
-    },
-    loadMoreContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingVertical: 20,
-      gap: 10
-    },
-    loadMoreText: {
-      fontSize: 14,
-      color: colors.text,
-      opacity: 0.7
-    },
-    endOfListContainer: {
-      alignItems: 'center',
-      paddingVertical: 20
-    },
-    endOfListText: {
-      fontSize: 14,
-      color: colors.text,
-      opacity: 0.5,
-      fontStyle: 'italic'
-    }
-  })
+export default Dish;
