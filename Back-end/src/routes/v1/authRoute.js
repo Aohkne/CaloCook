@@ -181,7 +181,7 @@ const Router = expesss.Router()
  *                 calorieLimit:
  *                   type: number
  *                   example: 2000
- *                 avatarUrl:
+ *                 avatar_url:
  *                   type: string
  *                   example: none
  *                 gender:
@@ -234,7 +234,7 @@ const Router = expesss.Router()
  *               calorieLimit:
  *                 type: number
  *                 example: 2000
- *               avatarUrl:
+ *               avatar_url:
  *                 type: string
  *                 example: https://example.com/avatar.jpg
  *               gender:

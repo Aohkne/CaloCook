@@ -24,6 +24,7 @@ export const ROUTES = {
   FAVORITE: '/favorite',
   CHAT_AI: '/calobot',
   PROFILE_USER: '/user/profile',
+  CHANGE_PASSWORD: '/user/change-password',
 
   // ERROR
   UNAUTHORIZED: '/unauthorized'

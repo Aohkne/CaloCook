@@ -1,5 +1,16 @@
 @use '@styles/mixin' as *;
 
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 9;
+  backdrop-filter: blur(2px);
+}
+
 .wrapper {
   position: fixed;
   top: 0;
@@ -85,27 +96,119 @@
       }
     }
 
-    .user-profile {
-      height: 35px;
-      width: 35px;
-      color: var(--secondary);
-      background-color: var(--background);
-      border-radius: 50%;
-      border: 2px solid var(--shadow);
-      box-shadow: 3px 2px 1px var(--shadow);
-      z-index: 10;
+    .user-profile-container {
+      position: relative;
 
-      cursor: pointer;
-      transition: 0.3s all ease;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      &:hover {
+      .user-profile {
+        height: 35px;
+        width: 35px;
+        color: var(--secondary);
+        background-color: var(--background);
+        border-radius: 50%;
         border: 2px solid var(--shadow);
-        box-shadow: 0px 0px 0px var(--shadow);
+        box-shadow: 3px 2px 1px var(--shadow);
+        z-index: 10;
+
+        cursor: pointer;
+        transition: 0.3s all ease;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          border: 2px solid var(--shadow);
+          box-shadow: 0px 0px 0px var(--shadow);
+        }
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: 45px;
+        right: 0;
+        background-color: var(--background);
+        border-radius: 12px;
+        box-shadow: 4px 4px 0px var(--shadow);
+        border: 2px solid var(--shadow);
+        min-width: 220px;
+        z-index: 20;
+        padding: 8px 0;
+        animation: dropdownFadeIn 0.2s ease-out;
+
+        .dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: 30px;
+          padding: 14px 20px;
+          color: var(--input-text);
+          text-decoration: none;
+          font-size: 2rem;
+          font-weight: 600;
+          text-transform: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          height: 48px;
+          box-sizing: border-box;
+
+          svg {
+            color: var(--secondary);
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+          }
+
+          span {
+            flex: 1;
+            line-height: 1;
+          }
+
+          &:hover {
+            background-color: var(--green);
+            color: var(--input-text);
+            transform: scale(0.95);
+            border-radius: 10px;
+
+            svg {
+              color: var(--secondary);
+            }
+          }
+
+          &.logout {
+            color: var(--red);
+
+            svg {
+              color: var(--red);
+            }
+
+            &:hover {
+              background-color: var(--light-red);
+              color: var(--red);
+
+              svg {
+                color: var(--red);
+              }
+            }
+          }
+        }
+
+        .dropdown-divider {
+          height: 1px;
+          background-color: var(--shadow);
+          margin: 8px 16px;
+        }
       }
     }
+  }
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

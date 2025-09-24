@@ -23,3 +23,15 @@ export const deactivateUser = async (userId) => {
   const response = await api.patch(`/user/${userId}/deactivate`);
   return response.data;
 };
+
+
+// Thêm API functions mới cho profile
+export const getUserProfile = async () => {
+  const response = await api.get('/auth/profile');
+  return response.data;
+};
+
+export const updateUserProfile = async (profileData) => {
+  const response = await api.post('/auth/profile', profileData);
+  return response.data;
+};
