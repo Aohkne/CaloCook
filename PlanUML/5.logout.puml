@@ -17,30 +17,28 @@ activate Routes_FE
 Routes_FE -> Controller: 3.logout(req, res)
 activate Controller
 
-alt Token valid / not blocked
+
     Controller -> Service: 4.logout(token)
     activate Service
 
-    Service -> Service: 5.Remove token\n(Memory)
-    Service --> Controller: 6. Return success
+    Service --> Controller: 5. Return success
     deactivate Service
 
-    Controller --> Routes_FE: 6.1. Return success
+alt Token valid / not blocked
+    Controller --> Routes_FE: 5.1. Return success
 
-    Routes_FE --> View: 6.1.1. Response success
+    Routes_FE --> View: 5.1.1. Response success and clear token
 
-    View -> View: 6.1.2. Remove token from localStorage
-    View -> View: 6.1.3. Clear user state
-    View --> User: 6.1.4. Redirect to login page
+    View --> User: 5.1.2. Redirect to login page
 
 else Token missing or account blocked
-    Controller --> Routes_FE: 6.2. Ignore token cancellation\nand redirect to login
+    Controller --> Routes_FE: 5.2. Ignore token cancellation\nand redirect to login
     deactivate Controller
 
 
-    Routes_FE --> View: 6.2.1.Response (redirect)
+    Routes_FE --> View: 5.2.1.Response (redirect)
     deactivate Routes_FE
-    View --> User: 6.2.2.Redirect to login page
+    View --> User: 5.2.2.Redirect to login page
     deactivate View
     deactivate User
 end

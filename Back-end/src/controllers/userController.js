@@ -18,7 +18,7 @@ const getAll = async (req, res, next) => {
     } else if (isActive !== undefined) {
       result = await userService.searchByIsActive(isActive, paginationParams)
     } else {
-      result = await userService.getAll(paginationParams)
+      result = await userService.getAllUsers(paginationParams)
     }
 
     const response = paginationHelper.formatPaginatedResponse(
