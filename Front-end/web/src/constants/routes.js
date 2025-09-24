@@ -18,6 +18,8 @@ export const ROUTES = {
   REPORT_MANAGEMENT: '/report-management',
   CHAT: '/chat',
   PROFILE_ADMIN: '/admin/profile',
+  CHANGE_PASSWORD_ADMIN: '/admin/change-password',
+
 
   //USER
   DISH: '/dish',
