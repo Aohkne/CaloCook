@@ -6,6 +6,7 @@ import dishSlice from './slices/dishSlice';
 import favoriteSlice from './slices/favoriteSlice';
 import userSlice from './slices/userSlice';
 import chatSlice from './slices/chatSlice';
+import modelSlice from './slices/modelSlice';
 
 export const store = configureStore({
   reducer: {
@@ -13,7 +14,8 @@ export const store = configureStore({
     dish: dishSlice,
     favorite: favoriteSlice,
     user: userSlice,
-    chat: chatSlice
+    chat: chatSlice,
+    model: modelSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

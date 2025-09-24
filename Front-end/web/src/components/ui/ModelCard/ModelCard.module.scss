@@ -1,0 +1,68 @@
+.wrapper {
+  padding: 5px 20px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  box-shadow: 0px 0px 0px var(--shadow);
+
+  border-color: transparent;
+  transition: all 0.2s ease-in;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: var(--shadow);
+    box-shadow: 4px 4px 1px var(--shadow);
+    background-color: var(--background);
+  }
+
+  &:active {
+    transition: all 0.1s linear;
+    transform: translateY(3px);
+    border-color: transparent;
+    box-shadow: 0px 0px 0px var(--shadow);
+    background-color: var(--background);
+  }
+
+  &.active {
+    transition: all 0.1s linear;
+    border-color: transparent;
+    box-shadow: 0px 0px 0px var(--shadow);
+    background-color: var(--background);
+
+    .title {
+      font-weight: 600;
+    }
+  }
+
+  .icon-container {
+    display: inline-block;
+
+    svg {
+      margin: auto;
+    }
+
+    img {
+      height: 25px;
+      width: auto;
+    }
+  }
+
+  .title {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--secondary);
+
+    &.gemini {
+      color: var(--blue);
+    }
+
+    &.calobot {
+      color: var(--secondary);
+    }
+  }
+}
