@@ -8,7 +8,7 @@
   grid-template-columns: 1fr 2fr;
 
   .left-container {
-    padding-top: 10rem;
+    padding-top: 20rem;
     padding-left: 10%;
     display: flex;
     flex-direction: column;
@@ -293,7 +293,11 @@
     }
     .feature {
       position: static;
+      flex-direction: column-reverse;
       text-align: center;
+      align-items: center;
+      justify-content: center;
+      width: 30rem;
     }
 
     .ring {
