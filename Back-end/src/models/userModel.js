@@ -60,7 +60,7 @@ const getAll = async (paginationParams) => {
   }
 }
 // get All Customer
-const getAllCustomer = async () => {
+const getAllCustomer = async (paginationParams) => {
   try {
     const { skip, limit, sortBy, order } = paginationParams
     const sortObject = createSortObject(sortBy, order)

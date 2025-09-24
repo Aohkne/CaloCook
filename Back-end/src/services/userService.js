@@ -15,9 +15,9 @@ const getAll = async (paginationParams) => {
     throw error
   }
 }
-const getAllUsers = async (paginationParams) => {
+const getAllCustomer = async (paginationParams) => {
   try {
-    return await userModel.getAllUsers(paginationParams)
+    return await userModel.getAllCustomer(paginationParams)
   } catch (error) {
     throw error
   }
@@ -206,7 +206,7 @@ const verifyEmail = async (token) => {
 
 export const userService = {
   getAll,
-  getAllUsers,
+  getAllCustomer,
   searchByUsername,
   searchByEmail,
   searchByIsActive,
