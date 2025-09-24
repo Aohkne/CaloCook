@@ -22,6 +22,8 @@ import UserManagement from '@/pages/(admin)/UserManagement/UserManagement';
 import DishManagement from '@/pages/(admin)/DishManagement/DishManagement';
 import ReportManagement from '@/pages/(admin)/ReportManagement/ReportManagement';
 import Chat from '@/pages/(admin)/Chat/Chat';
+import ProfileAdmin from '@/pages/(admin)/ProfileAdmin/ProfileAdmin';
+import ChangePasswordAdmin from '@/pages/(admin)/ChangePasswordAdmin/ChangePasswordAdmin';
 
 //USER
 import Dish from '@/pages/(user)/Dish/Dish';
@@ -142,6 +144,23 @@ function AppRoutes() {
           element={
             <ProtectedRoute requiredRole={ROLE.ADMIN}>
               <Chat />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.PROFILE_ADMIN}
+          element={
+            <ProtectedRoute requiredRole={ROLE.ADMIN}>
+              <ProfileAdmin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.CHANGE_PASSWORD_ADMIN}
+          element={
+            <ProtectedRoute requiredRole={ROLE.ADMIN}>
+              <ChangePasswordAdmin />
             </ProtectedRoute>
           }
         />
