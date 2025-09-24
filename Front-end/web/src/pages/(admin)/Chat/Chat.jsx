@@ -95,9 +95,9 @@ function Chat() {
 
   const filteredConversations = search.trim()
     ? conversations.filter((conv) => {
-        const username = conv?.user?.username?.toLowerCase() || '';
-        return username.includes(search.toLowerCase());
-      })
+      const username = conv?.user?.username?.toLowerCase() || '';
+      return username.includes(search.toLowerCase());
+    })
     : conversations;
 
   return (

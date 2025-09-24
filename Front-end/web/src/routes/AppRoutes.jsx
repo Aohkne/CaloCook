@@ -15,7 +15,6 @@ import Unauthorized from '@/pages/(auth)/Unauthorized/Unauthorized';
 
 //LANDING PAGE
 import Home from '@/pages/Home/Home';
-import Download from '@/pages/Download/Download';
 
 //ADMIN
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
@@ -26,7 +25,10 @@ import Chat from '@/pages/(admin)/Chat/Chat';
 
 //USER
 import Dish from '@/pages/(user)/Dish/Dish';
+import Favorite from '@/pages/(user)/Favorite/Favorite';
 import ChatAI from '@/pages/(user)/ChatAI/ChatAI';
+import ProfileUser from '@/pages/(user)/ProfileUser/ProfileUser';
+import ChangePassword from '@/pages/(user)/ChangePassword/ChangePassword';
 
 function AppRoutes() {
   return (
@@ -41,14 +43,7 @@ function AppRoutes() {
             </PublicRoute>
           }
         />
-        <Route
-          path={ROUTES.DOWNLOAD}
-          element={
-            <PublicRoute>
-              <Download />
-            </PublicRoute>
-          }
-        />
+
         {/* ERROR ROUTES */}
         <Route
           path={ROUTES.UNAUTHORIZED}
@@ -132,6 +127,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path={ROUTES.REPORT_MANAGEMENT}
           element={
@@ -160,10 +156,35 @@ function AppRoutes() {
           }
         />
         <Route
+          path={ROUTES.FAVORITE}
+          element={
+            <ProtectedRoute requiredRole={ROLE.USER}>
+              <Favorite />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path={ROUTES.CHAT_AI}
           element={
             <ProtectedRoute requiredRole={ROLE.USER}>
               <ChatAI />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.PROFILE_USER}
+          element={
+            <ProtectedRoute requiredRole={ROLE.USER}>
+              <ProfileUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.CHANGE_PASSWORD}
+          element={
+            <ProtectedRoute requiredRole={ROLE.USER}>
+              <ChangePassword />
             </ProtectedRoute>
           }
         />

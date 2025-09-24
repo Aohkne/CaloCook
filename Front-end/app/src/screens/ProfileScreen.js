@@ -108,7 +108,7 @@ export default function ProfileScreen({ navigation }) {
     calorieLimit: '',
     gender: 'male',
     dob: '',
-    avatarUrl: ''
+    avatar_url: ''
   });
 
   // Load user profile on component mount
@@ -127,7 +127,7 @@ export default function ProfileScreen({ navigation }) {
         calorieLimit: userData.calorieLimit?.toString() || '',
         gender: userData.gender || 'male',
         dob: userData.dob || '',
-        avatarUrl: userData.avatarUrl || ''
+        avatar_url: userData.avatar_url || ''
       });
     }
   }, [userData]);
@@ -391,7 +391,7 @@ export default function ProfileScreen({ navigation }) {
       calorieLimit: editData.calorieLimit ? parseInt(editData.calorieLimit) : null,
       gender: editData.gender,
       dob: editData.dob,
-      avatarUrl: editData.avatarUrl
+      avatar_url: editData.avatar_url
     };
 
     try {
@@ -423,7 +423,7 @@ export default function ProfileScreen({ navigation }) {
         calorieLimit: userData.calorieLimit?.toString() || '',
         gender: userData.gender || 'male',
         dob: userData.dob || '',
-        avatarUrl: userData.avatarUrl || ''
+        avatar_url: userData.avatar_url || ''
       });
     }
     setIsEditModalVisible(false);
@@ -473,8 +473,8 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.cardContainer}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                {userData?.avatarUrl ? (
-                  <Image source={{ uri: userData?.avatarUrl }} style={styles.avatarImage} />
+                {userData?.avatar_url ? (
+                  <Image source={{ uri: userData?.avatar_url }} style={styles.avatarImage} />
                 ) : (
                   <User size={50} color='#888888' />
                 )}
@@ -630,9 +630,9 @@ export default function ProfileScreen({ navigation }) {
                             rotate:
                               progressPercentage > 100
                                 ? flameRotation.interpolate({
-                                    inputRange: [-1, 1],
-                                    outputRange: ['-10deg', '10deg']
-                                  })
+                                  inputRange: [-1, 1],
+                                  outputRange: ['-10deg', '10deg']
+                                })
                                 : '0deg'
                           }
                         ],
@@ -821,8 +821,8 @@ export default function ProfileScreen({ navigation }) {
               <Text style={styles.inputLabel}>Avatar URL (Optional)</Text>
               <TextInput
                 style={styles.textInput}
-                value={editData.avatarUrl}
-                onChangeText={(text) => setEditData((prev) => ({ ...prev, avatarUrl: text }))}
+                value={editData.avatar_url}
+                onChangeText={(text) => setEditData((prev) => ({ ...prev, avatar_url: text }))}
                 placeholder='Enter avatar image URL'
                 placeholderTextColor='#999'
                 autoCapitalize='none'
