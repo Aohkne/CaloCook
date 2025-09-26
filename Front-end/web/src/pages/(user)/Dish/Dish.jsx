@@ -5,6 +5,7 @@ import ChatBox from '@/components/ui/ChatBox/ChatBox';
 import classNames from 'classnames/bind';
 import styles from './Dish.module.scss';
 import { getDishes } from '@/api/dish';
+import { getFavorites, addToFavorites, removeFromFavorites } from '@/api/favorite';
 import { getWebImagePath } from '@/utils/imageHelper';
 const defaultImage = '/images/default-img.png';
 
@@ -15,6 +16,7 @@ function Dish() {
   const [currentPage, setCurrentPage] = useState(1);
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [pagination, setPagination] = useState({
     totalPages: 1,
     totalItems: 0,
@@ -24,6 +26,65 @@ function Dish() {
   });
 
   const toggleChat = () => setIsChatOpen((prev) => !prev);
+
+  // Helper function to get cookie value by name
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  };
+
+  // Optimized getUserId - more concise
+  const getUserId = () => {
+    // Try different sources in order of preference
+    let userId = getCookie('user_id') ||
+      localStorage.getItem('user_id');
+
+    // Last resort: decode from JWT token
+    if (!userId) {
+      const accessToken = getCookie('accessToken');
+      if (accessToken) {
+        try {
+          const base64Url = accessToken.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          const decoded = JSON.parse(jsonPayload);
+          userId = decoded.userId || decoded.id || decoded.sub;
+        } catch (e) {
+          console.error('Error decoding token:', e);
+        }
+      }
+    }
+
+    return userId;
+  };
+
+  // Fetch user's favorite dishes
+  const fetchFavorites = async () => {
+    const userId = getUserId();
+    if (!userId) return;
+
+    try {
+      const response = await getFavorites(userId, {
+        page: 1,
+        limit: 100
+      });
+
+      if (response && response.code === 200 && response.data) {
+        const favorites = Array.isArray(response.data) ? response.data : [];
+        const favoriteSet = new Set(favorites.map(fav => fav.dishId));
+        setFavoriteIds(favoriteSet);
+      } else {
+        setFavoriteIds(new Set());
+      }
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+      setFavoriteIds(new Set());
+    }
+  };
 
   // Fetch dishes from API
   const fetchDishes = async (page = 1) => {
@@ -47,17 +108,51 @@ function Dish() {
     }
   };
 
-  // Fetch dishes when component mounts or page changes
+  // Load dishes when component mount or page changes
   useEffect(() => {
     fetchDishes(currentPage);
   }, [currentPage]);
 
-  const toggleFavorite = (id) => {
-    setDishes(prevDishes =>
-      prevDishes.map(dish =>
-        dish._id === id ? { ...dish, isFavorite: !dish.isFavorite } : dish
-      )
-    );
+  // Load favorites after component mount
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
+
+  const toggleFavorite = async (dishId) => {
+    const userId = getUserId();
+
+    if (!userId) {
+      alert('Please login to add favorites');
+      return;
+    }
+
+    try {
+      const isFavorite = favoriteIds.has(dishId);
+
+      if (isFavorite) {
+        const response = await removeFromFavorites(userId, dishId);
+
+        if (response && response.code === 200) {
+          setFavoriteIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(dishId);
+            return newSet;
+          });
+        }
+      } else {
+        const response = await addToFavorites(userId, dishId);
+
+        if (response && response.code === 201) {
+          setFavoriteIds(prev => {
+            const newSet = new Set([...prev, dishId]);
+            return newSet;
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('Error updating favorite. Please try again.');
+    }
   };
 
   // Generate page numbers array dynamically
@@ -115,10 +210,13 @@ function Dish() {
                     onError={handleImageError}
                   />
                   <div
-                    className={cx('favorite-btn', { 'active': dish.isFavorite })}
+                    className={cx('favorite-btn', {
+                      'active': favoriteIds.has(dish._id)
+                    })}
                     onClick={() => toggleFavorite(dish._id)}
+                    title={favoriteIds.has(dish._id) ? 'Remove from favorites' : 'Add to favorites'}
                   >
-                    <Icon icon={dish.isFavorite ? "ph:heart-fill" : "ph:heart"} />
+                    <Icon icon={favoriteIds.has(dish._id) ? "ph:heart-fill" : "ph:heart"} />
                   </div>
                 </div>
 
@@ -128,15 +226,15 @@ function Dish() {
                   <div className={cx('dish-stats')}>
                     <span className={cx('stat-item')}>
                       <Icon icon="ph:clock" />
-                      {dish.cookingTime} min
+                      {dish.cookingTime} Min
                     </span>
                     <span className={cx('stat-item')}>
                       <Icon icon="ph:fire" />
-                      {dish.calorie} kcal
+                      {dish.calorie} Kcal
                     </span>
                     <span className={cx('stat-item', 'difficulty')}>
                       <Icon icon="ph:chef-hat" />
-                      {dish.difficulty}
+                      {dish.difficulty?.charAt(0).toUpperCase() + dish.difficulty?.slice(1).toLowerCase()}
                     </span>
                   </div>
 

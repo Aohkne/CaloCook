@@ -78,6 +78,7 @@
         grid-template-columns: repeat(4, 1fr);
         gap: 50px;
         margin-bottom: 50px;
+        padding-top: 90px;
 
         .dish-card {
             background: var(--titleWithBg);
@@ -167,11 +168,13 @@
                         align-items: center;
                         gap: 4px;
                         font-size: 12px;
-                        color: var(--description);
+                        color: var(--title);
                         font-weight: 500;
 
                         svg {
                             font-size: 14px;
+                            color: var(--description);
+
                         }
                     }
                 }
