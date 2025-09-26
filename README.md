@@ -138,6 +138,8 @@ Track your daily calories through every homemade dish
   - Nguyễn Gia Chấn - CE181288
   - Nguyễn Gia Bảo - CE180908
 - **Frontend Developer**:
+  - Lê Hữu Khoa - CE181099
+  - Nguyễn Thanh Bảo - CE181098
   - Nguyễn Trọng Quý - CE180596
 - **Mobile Developers**:
   - Lê Hữu Khoa - CE181099
