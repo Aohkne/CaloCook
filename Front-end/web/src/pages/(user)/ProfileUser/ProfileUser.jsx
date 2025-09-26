@@ -481,7 +481,7 @@ function ProfileUser() {
                             <form className={cx('edit-form')} onSubmit={handleSubmit}>
                                 <div className={cx('form-grid')}>
                                     <div className={cx('form-group', 'full-width')}>
-                                        <label className={cx('form-label')}>Full Name</label>
+                                        <label className={cx('form-label')}>User Name</label>
                                         <input
                                             type="text"
                                             name="name"
