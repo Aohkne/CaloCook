@@ -20,12 +20,12 @@ export const ROUTES = {
   PROFILE_ADMIN: '/admin/profile',
   CHANGE_PASSWORD_ADMIN: '/admin/change-password',
 
-
   //USER
   DISH: '/dish',
   FAVORITE: '/favorite',
   CHAT_AI: '/calobot',
   PROFILE_USER: '/user/profile',
+  VERIFY_EMAIL: '/user/profile/verify-email',
   CHANGE_PASSWORD: '/user/change-password',
 
   // ERROR

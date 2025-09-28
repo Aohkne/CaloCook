@@ -167,7 +167,7 @@ const emailVerification = async (user) => {
     await redis.set(`reset_token:${rawToken}`, user._id.toString(), 'EX', 30 * 60)
 
     // build URL đúng format (token param, optional email)
-    const verifyURL = `http://localhost:5173/verify-email?token=${rawToken}`
+    const verifyURL = `http://localhost:5173/user/profile/verify-email?token=${rawToken}`
 
     const message = `
       <p>Click vào liên kết sau để xác thực email (hợp lệ 30 phút):</p>
@@ -189,6 +189,12 @@ const verifyEmail = async (token) => {
     if (!userId) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid or expired token' })
     }
+    // Nếu như đã xác thực rồi thì thôi
+    const existingRecord = await emailServiceModel.getByUserId(userId)
+    if (existingRecord && existingRecord.emailVerified) {
+      await redis.del(`reset_token:${token}`)
+      return { message: 'Email already verified' }
+    }
     await emailServiceModel.createEmailService({
       userId: new ObjectId(userId),
       emailVerified: true,
@@ -199,7 +205,6 @@ const verifyEmail = async (token) => {
 
     return { message: 'Email verified' }
   } catch (error) {
-    console.log(error)
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error verifying email')
   }
 }

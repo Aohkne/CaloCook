@@ -24,7 +24,6 @@ export const deactivateUser = async (userId) => {
   return response.data;
 };
 
-
 // Thêm API functions mới cho profile
 export const getUserProfile = async () => {
   const response = await api.get('/auth/profile');
@@ -33,5 +32,15 @@ export const getUserProfile = async () => {
 
 export const updateUserProfile = async (profileData) => {
   const response = await api.post('/auth/profile', profileData);
+  return response.data;
+};
+
+// API function to send verification email
+export const sendVerificationEmail = async () => {
+  const response = await api.post('/user/email-verification');
+  return response.data;
+};
+export const verifyEmail = async (token) => {
+  const response = await api.get(`/user/verify-email/${token}`);
   return response.data;
 };
