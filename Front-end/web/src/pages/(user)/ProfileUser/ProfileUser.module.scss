@@ -151,18 +151,19 @@
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+
     .verify-btn {
-      background: var(--blue);
+      background: var(--secondary);
       color: var(--titleWithBg);
       border: 3px solid var(--border);
       border-radius: 12px;
-      padding: 1rem 2rem;
+      padding: 10px 15px;
       display: flex;
       align-items: center;
       gap: 0.75rem;
       cursor: pointer;
       font-weight: 600;
-      font-size: 1rem;
+      font-size: 1.2rem;
       transition: all 0.15s ease;
       box-shadow: 2px 2px 0px var(--shadow);
 
@@ -176,17 +177,20 @@
         box-shadow: 2px 2px 0px var(--shadow);
       }
       &.verified {
-        background: var(--green);
         cursor: default;
+        color: var(--green);
+        background: transparent;
+        box-shadow: 2px 2px 0px transparent;
+        border: 2px solid var(--green);
 
         &:hover {
           filter: none;
-          box-shadow: 2px 2px 0px var(--shadow);
+          box-shadow: 2px 2px 0px transparent;
         }
 
         &:active {
           transform: none;
-          box-shadow: 2px 2px 0px var(--shadow);
+          box-shadow: 2px 2px 0px transparent;
         }
         &:disabled {
           cursor: default;
@@ -200,8 +204,8 @@
 // MSG
 .success-message {
   position: fixed;
-  left: 5px;
-  bottom: 5px;
+  right: 5px;
+  top: 5px;
   padding: 10px 15px;
   margin: 10px 0;
   font-size: 1.4rem;
@@ -213,8 +217,8 @@
 }
 .error-message {
   position: fixed;
-  left: 5px;
-  bottom: 5px;
+  right: 5px;
+  top: 5px;
   padding: 10px 15px;
   margin: 10px 0;
   font-size: 1.4rem;
