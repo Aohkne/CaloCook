@@ -210,6 +210,14 @@ function AppRoutes() {
           }
         />
         <Route
+          path={ROUTES.VERIFY_EMAIL}
+          element={
+            <ProtectedRoute requiredRole={ROLE.USER}>
+              <ProfileUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path={ROUTES.CHANGE_PASSWORD}
           element={
             <ProtectedRoute requiredRole={ROLE.USER}>

@@ -52,7 +52,7 @@ const OnboardingScreen = () => {
       {/* Top: white background with image */}
       <View style={styles.topContainer}>
         <Animatable.View animation='fadeInDown' duration={1200} key={index}>
-          <Image source={current.images} style={styles.image} resizeMode='contain' />
+          <Image source={current.images} style={styles.image} resizeMode='cover' />
         </Animatable.View>
       </View>
 
@@ -111,7 +111,9 @@ const createStyles = (colors) =>
     },
 
     image: {
-      width: '460'
+      flex: 1,
+      maxHeight: height * 0.54,
+      maxWidth: '100%'
     },
     content: {
       alignItems: 'center'

@@ -80,8 +80,7 @@ const signup = async (req, res) => {
       role: user.role
     })
   } catch (error) {
-    console.error('Error in signup controller', error.message)
-    res.status(500).json({ message: error.message })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error', error: error.message })
   }
 }
 // 3. Đăng nhập – trả JSON cho mobile
@@ -120,7 +119,6 @@ const login = async (req, res) => {
       refreshToken
     })
   } catch (error) {
-    console.error('Login error:', error.message)
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' })
   }
 }
@@ -397,7 +395,10 @@ const forgotPasswordOtp = async (req, res, next) => {
 
  const emailVerification = async (req, res) => {
   try {
-    const { email } = req.body
+    const { email } = req.user
+    if (!email) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Email is required' })
+    }
     const user = await User.findOne({ email })
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({ message: 'User not found' })
