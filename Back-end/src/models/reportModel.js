@@ -11,7 +11,18 @@ const _COLLECTION_SCHEMA = Joi.object({
   createdAt: Joi.date().timestamp('javascript').default(Date.now)
 })
 
-// getAll
+// Enhanced sort object with validation
+const createSortObject = (sortBy = 'createdAt', order = 'desc') => {
+  const sortOrder = order === 'asc' ? 1 : -1
+
+  // Validate sortBy field for reports
+  const allowedSortFields = ['createdAt', 'updatedAt', 'description']
+  const validSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt'
+
+  return { [validSortBy]: sortOrder }
+}
+
+// getAll với sort hoàn thiện
 const getAllReports = async (params = {}) => {
   try {
     const db = await GET_DB()
@@ -19,10 +30,72 @@ const getAllReports = async (params = {}) => {
     const page = Math.max(1, Number(params.page) || 1)
     const limit = Math.max(1, Math.min(100, Number(params.limit) || 10))
     const skip = (page - 1) * limit
+    const sortBy = params.sortBy || 'createdAt'
+    const order = params.order || 'desc'
+    const sortObject = createSortObject(sortBy, order)
 
-    // Build a simple query. Future: support filtering by user email/dish name via aggregation.
-    const cursor = db.collection(_COLLECTION_NAME).find().sort({ createdAt: -1 }).skip(skip).limit(limit)
-    const [data, totalCount] = await Promise.all([cursor.toArray(), db.collection(_COLLECTION_NAME).countDocuments()])
+    const { dishName } = params
+    let data, totalCount
+
+    if (dishName && dishName.trim()) {
+      // Use aggregation pipeline for dish name search with proper sort
+      const pipeline = [
+        {
+          $lookup: {
+            from: 'dish',
+            localField: 'dishId',
+            foreignField: '_id',
+            as: 'dish'
+          }
+        },
+        {
+          $unwind: '$dish'
+        },
+        {
+          $match: {
+            'dish.name': { $regex: dishName.trim(), $options: 'i' }
+          }
+        },
+        { $sort: sortObject },
+        { $skip: skip },
+        { $limit: limit }
+      ]
+
+      // Execute aggregation
+      data = await db.collection(_COLLECTION_NAME).aggregate(pipeline).toArray()
+
+      // Count total documents with same filter
+      const countPipeline = [
+        {
+          $lookup: {
+            from: 'dish',
+            localField: 'dishId',
+            foreignField: '_id',
+            as: 'dish'
+          }
+        },
+        {
+          $unwind: '$dish'
+        },
+        {
+          $match: {
+            'dish.name': { $regex: dishName.trim(), $options: 'i' }
+          }
+        },
+        { $count: 'total' }
+      ]
+
+      const countResult = await db.collection(_COLLECTION_NAME).aggregate(countPipeline).toArray()
+      totalCount = countResult.length > 0 ? countResult[0].total : 0
+    } else {
+      // Normal query without search with proper sort
+      const [dataResult, totalCountResult] = await Promise.all([
+        db.collection(_COLLECTION_NAME).find().sort(sortObject).skip(skip).limit(limit).toArray(),
+        db.collection(_COLLECTION_NAME).countDocuments()
+      ])
+      data = dataResult
+      totalCount = totalCountResult
+    }
 
     return { data, totalCount }
   } catch (error) {

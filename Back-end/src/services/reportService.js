@@ -6,9 +6,9 @@ import { userModel } from '@/models/userModel'
 import { dishModel } from '@/models/dishModel'
 
 // Get all reports
-const getAllReport = async (params = {}) => {
+const getAllReport = async (queryParams = {}) => {
   try {
-    const reports = await reportModel.getAllReports(params)
+    const reports = await reportModel.getAllReports(queryParams)
 
     // reports.data is an array; enrich each report with user email and dish name
     const data = await Promise.all(
