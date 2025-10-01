@@ -33,9 +33,9 @@ function UserManagement() {
 
   // Filter states
   const [filters, setFilters] = useState({
-    username: '',
-    email: '',
-    isActive: ''
+    dishName: '',
+    sortBy: 'createdAt',
+    order: 'desc'
   });
 
   // Handle FILTER changes
@@ -72,6 +72,7 @@ function UserManagement() {
     try {
       await deleteReport(toDeleteId);
       setSuccess('Report deleted');
+      setTimeout(() => setSuccess(''), 5000);
       closeConfirm();
 
       // Refresh current page. handleUsers will return the page info so we can clamp if needed.
@@ -107,17 +108,28 @@ function UserManagement() {
     try {
       const limit = 10;
 
-      // Build params by including only truthy filter values
-      const params = { page: currentPage, limit };
+      // Build params by including only truthy filter values + always include sort
+      const params = {
+        page: currentPage,
+        limit,
+        sortBy: filterParams.sortBy || 'createdAt',
+        order: filterParams.order || 'desc'
+      };
+
+      // Add other filter params
       if (filterParams && typeof filterParams === 'object') {
         Object.keys(filterParams).forEach((k) => {
-          const v = filterParams[k];
-          if (v !== undefined && v !== null && String(v).trim() !== '') {
-            params[k] = v;
+          if (k !== 'sortBy' && k !== 'order') {
+            // Skip sort params as they're already added
+            const v = filterParams[k];
+            if (v !== undefined && v !== null && String(v).trim() !== '') {
+              params[k] = v;
+            }
           }
         });
       }
 
+      console.log('API call params:', params);
       const reportResponse = await getReports(params);
 
       const items = reportResponse?.data ?? [];
@@ -149,12 +161,43 @@ function UserManagement() {
     }
   }, []);
 
-  // Columns cho Top Favorite table
+  // Columns cho Report table
   const userColumns = useMemo(
     () => [
       {
         accessorKey: 'datetime',
-        header: 'Datetime',
+        header: () => {
+          return (
+            <div
+              className={cx('sortable-header')}
+              onClick={() => {
+                const currentSort = filters.sortBy === 'createdAt' ? filters.order : null;
+                const newOrder = currentSort === 'desc' ? 'asc' : 'desc';
+                console.log('Sort clicked:', { currentSort, newOrder, currentFilters: filters });
+                setFilters((prev) => ({ ...prev, sortBy: 'createdAt', order: newOrder }));
+              }}
+              style={{
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                userSelect: 'none',
+                fontSize: '18px',
+                fontWeight: 'bold'
+              }}
+            >
+              Datetime
+              {filters.sortBy === 'createdAt' && (
+                <Icon
+                  icon={filters.order === 'desc' ? 'mingcute:down-line' : 'mingcute:up-line'}
+                  width={16}
+                  height={16}
+                />
+              )}
+            </div>
+          );
+        },
+        enableSorting: false, // Disable built-in sorting since we handle manually
         cell: ({ row }) => {
           const raw = row.original.createdAt;
           let formatted = 'N/A';
@@ -184,16 +227,19 @@ function UserManagement() {
       {
         accessorKey: 'email',
         header: 'Email',
+        enableSorting: false,
         cell: ({ row }) => <span className={cx('email')}>{row.original.userEmail || 'N/A'}</span>
       },
       {
         accessorKey: 'dishName',
         header: 'Dish',
+        enableSorting: false,
         cell: ({ row }) => <span className={cx('dish')}>{row.original.dishName || 'N/A'}</span>
       },
       {
         accessorKey: 'description',
         header: 'Description',
+        enableSorting: false,
         cell: ({ row }) => (
           <span
             className={cx('description')}
@@ -224,7 +270,7 @@ function UserManagement() {
         )
       }
     ],
-    []
+    [filters]
   );
 
   useEffect(() => {
@@ -283,15 +329,14 @@ function UserManagement() {
         <DataTable
           data={reports}
           columns={userColumns}
-          title='User Management'
+          title='Report Management'
           type='report'
           useServerPagination={true}
           serverPagination={pagination}
-          // Search
           onServerPageChange={handlePageChange}
           showServerSearch={true}
-          // Status
           onServerSearch={handleFilterChange}
+          serverSearchFields={[{ key: 'dishName', placeholder: 'Search by dish name...' }]}
         />
         <ComfirmDelete
           open={confirmOpen}

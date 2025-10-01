@@ -806,6 +806,12 @@
   &.full-width {
     grid-column: 1 / -1;
   }
+  &.hidden-field {
+    display: none !important;
+  }
+  &.disabled-field {
+    pointer-events: none;
+  }
 }
 
 .form-label {
@@ -877,4 +883,28 @@
 
 .spinning {
   animation: spin 1s linear infinite;
+}
+
+.verification-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--green);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 128, 0, 0.3);
+}
+
+.email-verification-status {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: auto;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--description);
+  margin-top: 7px;
+}
+.verification-status {
+  font-size: 12px;
+  line-height: 1;
 }

@@ -41,6 +41,8 @@ export const sendVerificationEmail = async () => {
   return response.data;
 };
 export const verifyEmail = async (token) => {
-  const response = await api.get(`/user/verify-email/${token}`);
+  // Ensure token is properly encoded
+  const cleanToken = token.trim();
+  const response = await api.get(`/user/verify-email/${cleanToken}`);
   return response.data;
 };
