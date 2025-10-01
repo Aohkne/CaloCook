@@ -38,16 +38,19 @@ api.interceptors.response.use(
             refreshToken: refreshToken
           });
 
-          const { accessToken } = response.data;
+          const { accessToken, refreshToken: newRefreshToken } = response.data;
 
           // Lưu token mới (chỉ có accessToken, refreshToken vẫn dùng cái cũ)
           setCookie('accessToken', accessToken, 7);
+          if (newRefreshToken) {
+            setCookie('refreshToken', newRefreshToken, 30);
+          }
 
           // Retry request với token mới
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return api(originalRequest);
-        } catch (error) {
-          console.error('Refresh token failed:', error);
+        } catch (refreshError) {
+          console.error('Refresh token failed:', refreshError);
           // Refresh token hết hạn, clear tất cả và redirect login
           deleteCookie('accessToken');
           deleteCookie('refreshToken');
