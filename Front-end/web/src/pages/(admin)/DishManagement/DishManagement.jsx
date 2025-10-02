@@ -264,6 +264,10 @@ function DishManagement() {
             navigate(ROUTES.DISH_MANAGEMENT);
           }}
         />
+        <button className={cx('create-button')}>
+          <Icon icon='typcn:plus' width={50} height={50} className={cx('plus-icon')} />
+          CREATE DISH
+        </button>
       </div>
 
       <div className={cx('table')}>
