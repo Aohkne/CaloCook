@@ -630,9 +630,9 @@ export default function ProfileScreen({ navigation }) {
                             rotate:
                               progressPercentage > 100
                                 ? flameRotation.interpolate({
-                                  inputRange: [-1, 1],
-                                  outputRange: ['-10deg', '10deg']
-                                })
+                                    inputRange: [-1, 1],
+                                    outputRange: ['-10deg', '10deg']
+                                  })
                                 : '0deg'
                           }
                         ],
@@ -716,7 +716,7 @@ export default function ProfileScreen({ navigation }) {
             contentContainerStyle={styles.modalScrollContent}
           >
             {/* Username */}
-            <View style={styles.inputGroup}>
+            <View style={styles.inputGroupHidden}>
               <Text style={styles.inputLabel}>Username</Text>
               <TextInput
                 style={styles.textInput}
@@ -728,7 +728,7 @@ export default function ProfileScreen({ navigation }) {
             </View>
 
             {/* Email */}
-            <View style={styles.inputGroup}>
+            <View style={styles.inputGroupHidden}>
               <Text style={styles.inputLabel}>Email</Text>
               <TextInput
                 style={styles.textInput}
@@ -1263,6 +1263,10 @@ const createStyles = (colors) =>
     },
     inputGroup: {
       marginBottom: 24
+    },
+    inputGroupHidden: {
+      marginBottom: 24,
+      display: 'none'
     },
     inputLabel: {
       fontSize: 16,
