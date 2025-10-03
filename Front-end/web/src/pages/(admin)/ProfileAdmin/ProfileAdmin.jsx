@@ -222,6 +222,12 @@ function ProfileAdmin() {
                             </div>
 
                             <form className={cx('edit-form')} onSubmit={handleSubmit}>
+                                 {/* Note cảnh báo */}
+                                <div className={cx('warning-note')}>
+                                    <Icon icon='heroicons:exclamation-triangle' width='20' height='20' />
+                                    <span className={cx('warning-text')}>Username and Email cannot be changed for security reasons.</span>
+                                </div>
+
                                 <div className={cx('form-grid')}>
                                     <div className={cx('form-group', 'full-width')}>
                                         <label className={cx('form-label')}>User Name</label>
@@ -231,6 +237,7 @@ function ProfileAdmin() {
                                             value={editFormData.name}
                                             onChange={handleInputChange}
                                             className={cx('form-input')}
+                                            disabled
                                             required
                                         />
                                     </div>
@@ -243,6 +250,7 @@ function ProfileAdmin() {
                                             value={editFormData.email}
                                             onChange={handleInputChange}
                                             className={cx('form-input')}
+                                            disabled
                                             required
                                         />
                                     </div>
