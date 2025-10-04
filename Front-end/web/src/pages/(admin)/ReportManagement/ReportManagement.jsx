@@ -7,7 +7,7 @@ import Sidebar from '@/components/ui/Sidebar/Sidebar';
 import DataTable from '@/components/ui/DataTable/DataTable';
 
 import { ROUTES } from '@/constants/routes';
-import { getReports, deleteReport } from '@/api/report';
+import { getReports, deleteReport, updateReport } from '@/api/report';
 
 import styles from './ReportManagement.module.scss';
 import classNames from 'classnames/bind';
@@ -87,6 +87,17 @@ function UserManagement() {
       await handleTotalUser();
     } catch (err) {
       setError(err.response?.data?.message || 'Delete failed');
+    }
+  };
+
+  const handleStatusToggle = async (reportId) => {
+    if (!reportId) return 'ID not provided';
+    try {
+      await updateReport(reportId);
+      setSuccess('Report updated');
+      setTimeout(() => setSuccess(''), 5000);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Status update failed');
     }
   };
 
@@ -266,6 +277,30 @@ function UserManagement() {
             <button onClick={() => openConfirm(row.original._id || row.original.id)}>
               <Icon icon='material-symbols-light:delete-rounded' width='24' height='24' className={cx('block-icon')} />
             </button>
+          </div>
+        )
+      },
+      {
+        accessorKey: 'Status',
+        header: 'Status',
+        cell: ({ row }) => (
+          <div className={cx('status-wrapper')}>
+            {row.original.checked ? (
+              <div className={cx('status-reviewed')}>
+                <Icon icon='material-symbols:verified' width='18' height='18' />
+                <span>Reviewed</span>
+              </div>
+            ) : (
+              <button
+                className={cx('status-pending-btn')}
+                onClick={() => handleStatusToggle(row.original._id)}
+                title='Click to mark as reviewed'
+              >
+                <Icon icon='material-symbols:schedule' width='16' height='16' />
+                <span>Mark as Reviewed</span>
+                <Icon icon='material-symbols:arrow-forward-ios' width='12' height='12' className={cx('arrow-icon')} />
+              </button>
+            )}
           </div>
         )
       }

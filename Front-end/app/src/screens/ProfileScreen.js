@@ -103,6 +103,7 @@ export default function ProfileScreen({ navigation }) {
   const [editData, setEditData] = useState({
     username: '',
     email: '',
+    fullName: '',
     height: '',
     weight: '',
     calorieLimit: '',
@@ -122,6 +123,7 @@ export default function ProfileScreen({ navigation }) {
       setEditData({
         username: userData.username || '',
         email: userData.email || '',
+        fullName: userData.fullName || '',
         height: userData.height?.toString() || '',
         weight: userData.weight?.toString() || '',
         calorieLimit: userData.calorieLimit?.toString() || '',
@@ -369,6 +371,10 @@ export default function ProfileScreen({ navigation }) {
       Alert.alert('Error', 'Email cannot be empty');
       return;
     }
+    if (editData.fullName.trim().length === 0) {
+      Alert.alert('Error', 'Full Name cannot be empty');
+      return;
+    }
     if (editData.height && (isNaN(parseInt(editData.height)) || parseInt(editData.height) <= 0)) {
       Alert.alert('Error', 'Please enter a valid height');
       return;
@@ -386,6 +392,7 @@ export default function ProfileScreen({ navigation }) {
     const updateData = {
       username: editData.username,
       email: editData.email,
+      fullName: editData.fullName,
       height: editData.height ? parseInt(editData.height) : null,
       weight: editData.weight ? parseInt(editData.weight) : null,
       calorieLimit: editData.calorieLimit ? parseInt(editData.calorieLimit) : null,
@@ -418,6 +425,7 @@ export default function ProfileScreen({ navigation }) {
       setEditData({
         username: userData.username || '',
         email: userData.email || '',
+        fullName: userData.fullName || '',
         height: userData.height?.toString() || '',
         weight: userData.weight?.toString() || '',
         calorieLimit: userData.calorieLimit?.toString() || '',
@@ -716,7 +724,7 @@ export default function ProfileScreen({ navigation }) {
             contentContainerStyle={styles.modalScrollContent}
           >
             {/* Username */}
-            <View style={styles.inputGroupHidden}>
+            <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Username</Text>
               <TextInput
                 style={styles.textInput}
@@ -724,11 +732,12 @@ export default function ProfileScreen({ navigation }) {
                 onChangeText={(text) => setEditData((prev) => ({ ...prev, username: text }))}
                 placeholder='Enter your username'
                 placeholderTextColor='#999'
+                readOnly
               />
             </View>
 
             {/* Email */}
-            <View style={styles.inputGroupHidden}>
+            <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Email</Text>
               <TextInput
                 style={styles.textInput}
@@ -738,9 +747,19 @@ export default function ProfileScreen({ navigation }) {
                 placeholderTextColor='#999'
                 keyboardType='email-address'
                 autoCapitalize='none'
+                readOnly
               />
             </View>
-
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <TextInput
+                style={styles.textInput}
+                value={editData.fullName}
+                onChangeText={(text) => setEditData((prev) => ({ ...prev, fullName: text }))}
+                placeholder='Enter your full name'
+                placeholderTextColor='#999'
+              />
+            </View>
             {/* Gender */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Gender</Text>

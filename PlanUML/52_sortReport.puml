@@ -1,0 +1,44 @@
+@startuml UC46_SortReport
+
+actor Admin
+boundary "Report List Page" as View #lightblue
+control "reportController" as Controller #lightblue
+participant ":reportService" as Service #lightblue
+entity "reportModel" as Model #lightblue
+database "MongoDB" as DB #yellow
+
+group Sort Report
+Admin -> View: 1. Select sort  (Created At)
+activate Admin
+activate View
+
+View -> Controller: 2. sendSortRequest(criteria)
+activate Controller
+
+Controller -> Service: 3. createSortObject(criteria)
+activate Service
+
+Service -> Model: 4. createSortObject(criteria)
+activate Model
+
+Model -> DB: 5. createSortObject(criteria)
+activate DB
+
+DB --> Model: 6. return sorted report list
+deactivate DB
+
+Model --> Service: 7. return sorted report list
+deactivate Model
+
+Service --> Controller: 8. sorted report list
+deactivate Service
+
+Controller --> View: 9. display sorted reports
+deactivate Controller
+
+View --> Admin: 10. show report list
+deactivate View
+deactivate Admin
+end
+@endcreole
+@enduml

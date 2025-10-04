@@ -2,6 +2,7 @@ import express from 'express'
 import { authMiddleware } from '@/middlewares/authMiddleware'
 import { reportController } from '@/controllers/reportController'
 import { reportValidation } from '@/validations/reportValidation'
+import { paginationHelper } from '@/utils/pagination'
 
 const Router = express.Router()
 
@@ -102,9 +103,6 @@ const Router = express.Router()
  *               dishId:
  *                 type: string
  *                 example: 66574e301a6d1f001e8a1c02
- *               userId:
- *                 type: string
- *                 example: 68b19543d85de3cac690a1b5
  *               description:
  *                 type: string
  *                 example: "This is a report description"
@@ -178,10 +176,63 @@ const Router = express.Router()
  *                       type: string
  *                       format: date-time
  *                       example: "2023-06-15T12:34:56.789Z"
+ *
+ *   patch:
+ *     summary: Update a report's checked status
+ *     tags: [report]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Update a report's checked status by its ID. Accessible only by users with the 'admin' role.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the report to update.
+ *         schema:
+ *           type: string
+ *           example: 64a7b2f5e4b0c8a1d2f3e4b5
+ *
+ *     responses:
+ *       200:
+ *         description: Report updated successfully
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               code:
+ *                 type: integer
+ *                 example: 200
+ *               message:
+ *                 type: string
+ *                 example: Report updated successfully
+ *               data:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     example: 64a7b2f5e4b0c8a1d2f3e4b5
+ *                   dishId:
+ *                     type: string
+ *                     example: 64a3b2dc410a1db97da1ad22
+ *                   userId:
+ *                     type: string
+ *                     example: 6843b2dc410a1db97da1ad22
+ *                   description:
+ *                     type: string
+ *                     example: "This is a report description"
+ *                   checked:
+ *                     type: boolean
+ *                     example: true
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2023-06-15T12:34:56.789Z"
  */
 Router.route('/').get(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['admin', 'user']),
+  paginationHelper.validatePaginationMiddleware,
   reportController.getAllReport
 )
 Router.route('/').post(
@@ -194,6 +245,11 @@ Router.route('/:id').delete(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['admin']),
   reportController.deleteReport
+)
+Router.route('/:id').patch(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  reportController.updateReport
 )
 
 export const reportRoute = Router

@@ -9,3 +9,7 @@ export const deleteReport = async (id) => {
   const response = await api.delete(`/report/${id}`);
   return response.data;
 };
+export const updateReport = async (id) => {
+  const response = await api.patch(`/report/${id}`);
+  return response.data;
+};
