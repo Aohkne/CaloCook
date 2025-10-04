@@ -811,6 +811,23 @@
   }
   &.disabled-field {
     pointer-events: none;
+    opacity: 0.7;
+  }
+  &.email-group {
+    position: relative;
+
+    .form-input {
+      padding-right: 50px; // Tạo space cho icon
+    }
+
+    .email-verification-status {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-top: 10.5px;
+      z-index: 2;
+    }
   }
 }
 
@@ -894,16 +911,6 @@
   box-shadow: 0 2px 8px rgba(0, 128, 0, 0.3);
 }
 
-.email-verification-status {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin-top: auto;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--description);
-  margin-top: 7px;
-}
 .verification-status {
   font-size: 12px;
   line-height: 1;

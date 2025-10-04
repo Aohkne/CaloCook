@@ -14,6 +14,7 @@ function ProfileUser() {
   const [userData, setUserData] = useState({
     name: '',
     email: '',
+    fullName: '',
     avatar: null,
     dob: '',
     gender: 'male',
@@ -47,6 +48,7 @@ function ProfileUser() {
         const formattedData = {
           name: profileData.username || 'Unknown User',
           email: profileData.email || '',
+          fullName: profileData.fullName || 'Unknown User',
           avatar: profileData.avatar_url || null,
           dob: profileData.dob || '2000-01-01',
           gender: profileData.gender || 'male',
@@ -65,6 +67,7 @@ function ProfileUser() {
         const fallbackData = {
           name: user?.name || 'Nguyen Thanh Bao',
           email: user?.email || 'user123@gmail.com',
+          fullName: user?.fullName || 'Nguyen Thanh Bao',
           avatar: user?.avatar || null,
           dob: user?.dob || '2000-05-24',
           gender: user?.gender || 'male',
@@ -159,6 +162,7 @@ function ProfileUser() {
       const updateData = {
         username: editFormData.name,
         email: editFormData.email,
+        fullName: editFormData.fullName,
         avatar_url: editFormData.avatar,
         gender: editFormData.gender,
         dob: editFormData.dob,
@@ -178,7 +182,7 @@ function ProfileUser() {
       }
 
       setShowEditModal(false);
-      alert('Profile updated successfully!');
+      setSuccess('Profile updated successfully!');
     } catch {
       alert('Failed to update profile. Please try again.');
     } finally {
@@ -539,19 +543,7 @@ function ProfileUser() {
 
               <form className={cx('edit-form')} onSubmit={handleSubmit}>
                 <div className={cx('form-grid')}>
-                  <div className={cx('form-group', 'full-width', 'hidden-field')}>
-                    <label className={cx('form-label')}>User Name</label>
-                    <input
-                      type='text'
-                      name='name'
-                      value={editFormData.name}
-                      onChange={handleInputChange}
-                      className={cx('form-input')}
-                      required
-                    />
-                  </div>
-
-                  <div className={cx('form-group', 'full-width', 'disabled-field')}>
+                  <div className={cx('form-group', 'full-width', 'disabled-field', 'email-group')}>
                     <label className={cx('form-label')}>Email</label>
                     <input
                       type='email'
@@ -570,8 +562,31 @@ function ProfileUser() {
                           className={cx('verification-icon')}
                         />
                       )}
-                      <div className={cx('verification-status')}>Verified Email</div>
                     </div>
+                  </div>
+
+                  <div className={cx('form-group', 'disabled-field')}>
+                    <label className={cx('form-label')}>User Name</label>
+                    <input
+                      type='text'
+                      name='name'
+                      value={editFormData.name}
+                      onChange={handleInputChange}
+                      className={cx('form-input')}
+
+                      required
+                    />
+                  </div>
+                  <div className={cx('form-group')}>
+                    <label className={cx('form-label')}>Full Name</label>
+                    <input
+                      type='text'
+                      name='fullName'
+                      value={editFormData.fullName}
+                      onChange={handleInputChange}
+                      className={cx('form-input')}
+                      required
+                    />
                   </div>
 
                   <div className={cx('form-group')}>

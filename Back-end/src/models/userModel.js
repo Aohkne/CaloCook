@@ -16,6 +16,8 @@ const _COLLECTION_SCHEMA = Joi.object({
 
   password_hash: Joi.string().required().min(10).max(256).trim().strict(),
 
+  fullName: Joi.string().required().min(3).max(100).trim().strict(),
+
   role: Joi.string().valid('admin', 'user').required(),
 
   calorieLimit: Joi.number().integer().min(0).default(2000),
