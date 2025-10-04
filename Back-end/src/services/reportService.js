@@ -10,24 +10,13 @@ const getAllReport = async (queryParams = {}) => {
   try {
     const reports = await reportModel.getAllReports(queryParams)
 
-    // reports.data is an array; enrich each report with user email and dish name
+    // Enrich data with user email and dish name
     const data = await Promise.all(
       (reports.data || []).map(async (r) => {
-        let user = null
-        let dish = null
-
-        try {
-          user = r.userId ? await userModel.getDetails(r.userId) : null
-        } catch (e) {
-          // swallow per-item errors and continue
-          user = null
-        }
-
-        try {
-          dish = r.dishId ? await dishModel.getDetails(r.dishId) : null
-        } catch (e) {
-          dish = null
-        }
+        const [user, dish] = await Promise.all([
+          r.userId ? userModel.getDetails(r.userId).catch(() => null) : null,
+          r.dishId ? dishModel.getDetails(r.dishId).catch(() => null) : null
+        ])
 
         return {
           ...r,
@@ -37,7 +26,7 @@ const getAllReport = async (queryParams = {}) => {
       })
     )
 
-    return { data, totalCount: reports.totalCount ?? (data ? data.length : 0) }
+    return { data, totalCount: reports.totalCount ?? data.length }
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching reports')
   }
@@ -50,6 +39,7 @@ const createReport = async (reportPayload) => {
       dishId: new ObjectId(reportPayload.dishId),
       userId: new ObjectId(reportPayload.userId),
       description: reportPayload.description,
+      checked: false,
       createdAt: new Date()
     })
     return newReport
@@ -67,8 +57,19 @@ const deleteReport = async (id) => {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error deleting report')
   }
 }
+
+// Update report - toggle checked status
+const updateReport = async (id) => {
+  try {
+    const updatedReport = await reportModel.updateReport(id)
+    return updatedReport
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error updating report')
+  }
+}
 export const reportService = {
   getAllReport,
   createReport,
-  deleteReport
+  deleteReport,
+  updateReport
 }

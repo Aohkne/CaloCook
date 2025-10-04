@@ -6,16 +6,11 @@ import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '@/utils/validators'
 const createReport = async (req, res, next) => {
   const correctCondition = Joi.object({
     dishId: Joi.string().pattern(OBJECT_ID_RULE).required().messages({
-        'string.empty': 'dishId is not allowed to be empty',
-        'any.required': 'dishId is required',
-        'string.pattern.base': OBJECT_ID_RULE_MESSAGE,
+      'string.empty': 'dishId is not allowed to be empty',
+      'any.required': 'dishId is required',
+      'string.pattern.base': OBJECT_ID_RULE_MESSAGE
     }),
-    userId: Joi.string().pattern(OBJECT_ID_RULE).required().messages({
-        'string.empty': 'userId is not allowed to be empty',
-        'any.required': 'userId is required',
-        'string.pattern.base': OBJECT_ID_RULE_MESSAGE
-    }),
-    
+
     description: Joi.string().min(10).max(1000).required().messages({
       'string.min': 'description must be at least 10 characters long',
       'string.max': 'description must be at most 1000 characters long'

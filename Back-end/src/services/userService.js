@@ -117,6 +117,7 @@ const getUserProfile = async (user) => {
     _id: user._id,
     username: user.username,
     email: user.email,
+    fullName: user.fullName,
     role: user.role,
     calorieLimit: user.calorieLimit,
     avatar_url: user.avatar_url,
@@ -144,6 +145,7 @@ const editProfileService = async (userId, profileData) => {
       $set: {
         username: profileData.username,
         email: profileData.email,
+        fullName: profileData.fullName,
         calorieLimit: profileData.calorieLimit,
         avatar_url: cloudinaryResponse?.secure_url ? cloudinaryResponse.secure_url : '',
         gender: profileData.gender,

@@ -8,6 +8,7 @@ const _COLLECTION_SCHEMA = Joi.object({
   dishId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
   userId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
   description: Joi.string().max(10000).min(10).required(),
+  checked: Joi.boolean().default(false),
   createdAt: Joi.date().timestamp('javascript').default(Date.now)
 })
 
@@ -22,80 +23,45 @@ const createSortObject = (sortBy = 'createdAt', order = 'desc') => {
   return { [validSortBy]: sortOrder }
 }
 
-// getAll với sort hoàn thiện
 const getAllReports = async (params = {}) => {
   try {
     const db = await GET_DB()
+    const { dishName, page = 1, limit = 10, sortBy = 'createdAt', order = 'desc' } = params
 
-    const page = Math.max(1, Number(params.page) || 1)
-    const limit = Math.max(1, Math.min(100, Number(params.limit) || 10))
-    const skip = (page - 1) * limit
-    const sortBy = params.sortBy || 'createdAt'
-    const order = params.order || 'desc'
+    const pageNum = Math.max(1, Number(page))
+    const limitNum = Math.max(1, Math.min(100, Number(limit)))
+    const skip = (pageNum - 1) * limitNum
     const sortObject = createSortObject(sortBy, order)
+    const searchTerm = dishName?.trim()
 
-    const { dishName } = params
-    let data, totalCount
-
-    if (dishName && dishName.trim()) {
-      // Use aggregation pipeline for dish name search with proper sort
-      const pipeline = [
-        {
-          $lookup: {
-            from: 'dish',
-            localField: 'dishId',
-            foreignField: '_id',
-            as: 'dish'
-          }
-        },
-        {
-          $unwind: '$dish'
-        },
-        {
-          $match: {
-            'dish.name': { $regex: dishName.trim(), $options: 'i' }
-          }
-        },
-        { $sort: sortObject },
-        { $skip: skip },
-        { $limit: limit }
+    if (searchTerm) {
+      // Create base pipeline for search
+      const basePipeline = [
+        { $lookup: { from: 'dish', localField: 'dishId', foreignField: '_id', as: 'dish' } },
+        { $unwind: '$dish' },
+        { $match: { 'dish.name': { $regex: searchTerm, $options: 'i' } } }
       ]
 
-      // Execute aggregation
-      data = await db.collection(_COLLECTION_NAME).aggregate(pipeline).toArray()
-
-      // Count total documents with same filter
-      const countPipeline = [
-        {
-          $lookup: {
-            from: 'dish',
-            localField: 'dishId',
-            foreignField: '_id',
-            as: 'dish'
-          }
-        },
-        {
-          $unwind: '$dish'
-        },
-        {
-          $match: {
-            'dish.name': { $regex: dishName.trim(), $options: 'i' }
-          }
-        },
-        { $count: 'total' }
-      ]
-
-      const countResult = await db.collection(_COLLECTION_NAME).aggregate(countPipeline).toArray()
-      totalCount = countResult.length > 0 ? countResult[0].total : 0
-    } else {
-      // Normal query without search with proper sort
-      const [dataResult, totalCountResult] = await Promise.all([
-        db.collection(_COLLECTION_NAME).find().sort(sortObject).skip(skip).limit(limit).toArray(),
-        db.collection(_COLLECTION_NAME).countDocuments()
+      // Execute data and count queries in parallel
+      const [data, countResult] = await Promise.all([
+        db
+          .collection(_COLLECTION_NAME)
+          .aggregate([...basePipeline, { $sort: sortObject }, { $skip: skip }, { $limit: limitNum }])
+          .toArray(),
+        db
+          .collection(_COLLECTION_NAME)
+          .aggregate([...basePipeline, { $count: 'total' }])
+          .toArray()
       ])
-      data = dataResult
-      totalCount = totalCountResult
+
+      return { data, totalCount: countResult[0]?.total ?? 0 }
     }
+
+    // Normal query without search
+    const [data, totalCount] = await Promise.all([
+      db.collection(_COLLECTION_NAME).find().sort(sortObject).skip(skip).limit(limitNum).toArray(),
+      db.collection(_COLLECTION_NAME).countDocuments()
+    ])
 
     return { data, totalCount }
   } catch (error) {
@@ -125,8 +91,37 @@ const deleteReport = async (id) => {
   }
 }
 
+// Update report - toggle checked status
+const updateReport = async (id) => {
+  try {
+    // First get current document to check current status
+    const currentDoc = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .findOne({ _id: new ObjectId(id) })
+    
+    if (!currentDoc) {
+      throw new Error('Report not found')
+    }
+    
+    // Toggle the checked status
+    const newCheckedStatus = !currentDoc.checked
+    
+    const result = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { checked: newCheckedStatus } },
+        { returnDocument: 'after' } // Return the updated document
+      )
+    return result
+  } catch (error) {
+    throw new Error('Failed to update report')
+  }
+}
+
 export const reportModel = {
   getAllReports,
   createReport,
-  deleteReport
+  deleteReport,
+  updateReport
 }
