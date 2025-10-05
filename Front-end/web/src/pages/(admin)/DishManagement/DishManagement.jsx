@@ -11,7 +11,7 @@ import { ROUTES } from '@/constants/routes';
 import { getWebImagePath } from '@/utils/imageHelper';
 
 import { getTotalDish } from '@/api/dashboard';
-import { activateDish, deactivateDish, getDishes } from '@/api/dish';
+import { activateDish, deactivateDish, createDish, getDishes } from '@/api/dish';
 
 import styles from './DishManagement.module.scss';
 import classNames from 'classnames/bind';
@@ -23,6 +23,7 @@ function DishManagement() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [totalDish, setTotalDish] = useState(0);
   const [dishes, setDishes] = useState([]);
   const [pagination, setPagination] = useState({
@@ -43,6 +44,17 @@ function DishManagement() {
     maxCalorie: '',
     difficulty: '',
     isActive: ''
+  });
+
+  // Add form state
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    cookingTime: '',
+    calorie: '',
+    difficulty: 'easy',
+    isActive: true,
+    imageUrl: ''
   });
 
   // Handle FILTER changes
@@ -73,6 +85,25 @@ function DishManagement() {
     } catch (error) {
       console.error(error.response?.data?.message || 'Get total dish failed.');
     }
+  };
+
+  // Handle Modal
+  const handleOpenCreateModal = () => {
+    setCreateModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setFormData({
+      name: '',
+      description: '',
+      cookingTime: '',
+      calorie: '',
+      difficulty: 'easy',
+      isActive: true,
+      imageUrl: ''
+    });
+
+    setCreateModalOpen(false);
   };
 
   //API
@@ -111,6 +142,64 @@ function DishManagement() {
     } catch (error) {
       setError(error.response?.data?.message || 'Activate dish failed.');
       console.error(error.response?.data?.message || 'Activate dish failed.');
+    }
+  };
+
+  // Add form handlers
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleDifficultyChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      difficulty: e.target.value
+    }));
+  };
+
+  const handleActiveChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      isActive: e.target.checked
+    }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData((prev) => ({
+          ...prev,
+          imageUrl: reader.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await createDish(formData);
+      setSuccess(response.message || 'Dish created successfully');
+      handleCloseModal();
+      // Reset form
+      setFormData({
+        name: '',
+        description: '',
+        cookingTime: '',
+        calorie: '',
+        difficulty: 'easy',
+        isActive: true,
+        imageUrl: ''
+      });
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to create dish');
     }
   };
 
@@ -264,7 +353,7 @@ function DishManagement() {
             navigate(ROUTES.DISH_MANAGEMENT);
           }}
         />
-        <button className={cx('create-button')}>
+        <button className={cx('create-button')} onClick={handleOpenCreateModal}>
           <Icon icon='typcn:plus' width={50} height={50} className={cx('plus-icon')} />
           CREATE DISH
         </button>
@@ -302,6 +391,175 @@ function DishManagement() {
           onRangeFilterChange={handleRangeFilterChange}
         />
       </div>
+      {/* CREATE MODAL */}
+      {createModalOpen && (
+        <div className={cx('modal')}>
+          <div className={cx('modal-content')}>
+            <div className={cx('modal-content-top')}>
+              <h3 className={cx('modal-title')}>Create Dish</h3>
+              <button
+                type='button'
+                className={cx('modal-close-button')}
+                onClick={handleCloseModal}
+                aria-label='Close modal'
+              >
+                &times;
+              </button>
+            </div>
+            <form className={cx('modal-form')} onSubmit={handleSubmit}>
+              <div className={cx('form-group')}>
+                <label htmlFor='name' className={cx('modal-input-label')}>
+                  Name
+                </label>
+                <input
+                  id='name'
+                  type='text'
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder='Enter dish name'
+                  className={cx('modal-input')}
+                  required
+                />
+              </div>
+
+              <div className={cx('form-group')}>
+                <label htmlFor='cookingTime' className={cx('modal-input-label')}>
+                  Cooking Time (minutes)
+                </label>
+                <input
+                  id='cookingTime'
+                  type='number'
+                  value={formData.cookingTime}
+                  onChange={handleInputChange}
+                  placeholder='Enter cooking time'
+                  className={cx('modal-input')}
+                  required
+                />
+              </div>
+
+              <div className={cx('form-group')}>
+                <label htmlFor='calorie' className={cx('modal-input-label')}>
+                  Calories
+                </label>
+                <input
+                  id='calorie'
+                  type='number'
+                  value={formData.calorie}
+                  onChange={handleInputChange}
+                  placeholder='Enter calories'
+                  className={cx('modal-input')}
+                  required
+                />
+              </div>
+
+              <div className={cx('form-group', 'difficulty-group')}>
+                <span className={cx('modal-input-label')}>Difficulty</span>
+                <div className={cx('difficulty-blocks')}>
+                  <label className={cx('difficulty-block')}>
+                    <input
+                      type='radio'
+                      name='difficulty'
+                      value='easy'
+                      checked={formData.difficulty === 'easy'}
+                      onChange={handleDifficultyChange}
+                      className={cx('difficulty-radio')}
+                    />
+                    <span className={cx('difficulty-block-text')}>Easy</span>
+                  </label>
+                  <label className={cx('difficulty-block')}>
+                    <input
+                      type='radio'
+                      name='difficulty'
+                      value='medium'
+                      checked={formData.difficulty === 'medium'}
+                      onChange={handleDifficultyChange}
+                      className={cx('difficulty-radio')}
+                    />
+                    <span className={cx('difficulty-block-text')}>Medium</span>
+                  </label>
+                  <label className={cx('difficulty-block')}>
+                    <input
+                      type='radio'
+                      name='difficulty'
+                      value='hard'
+                      checked={formData.difficulty === 'hard'}
+                      onChange={handleDifficultyChange}
+                      className={cx('difficulty-radio')}
+                    />
+                    <span className={cx('difficulty-block-text')}>Hard</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className={cx('form-group', 'description-group')}>
+                <label htmlFor='description' className={cx('modal-input-label')}>
+                  Description
+                </label>
+                <textarea
+                  id='description'
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder='Enter dish description'
+                  className={cx('modal-input', 'modal-textarea')}
+                  rows={10}
+                  required
+                />
+              </div>
+
+              <div className={cx('form-group', 'image-group')}>
+                <label className={cx('modal-input-label')}>Image</label>
+                <label htmlFor='image-upload' className={cx('image-upload-area')}>
+                  <input
+                    type='file'
+                    id='image-upload'
+                    accept='image/*'
+                    onChange={handleImageChange}
+                    className={cx('image-upload-input')}
+                  />
+                  <div className={cx('image-upload-content')}>
+                    {formData.imageUrl ? (
+                      <img src={formData.imageUrl} alt='Preview' className={cx('image-preview')} />
+                    ) : (
+                      <>
+                        <Icon icon='mdi-light:image' width='50' height='50' />
+                        <span className={cx('image-upload-text')}>Click to upload</span>
+                        <span className={cx('image-upload-subtext')}>No file selected</span>
+                      </>
+                    )}
+                  </div>
+                </label>
+              </div>
+
+              <div className={cx('form-group', 'activate-group')}>
+                <div className={cx('activate-content')}>
+                  <div>
+                    <h4 className={cx('activate-title')}>Activate Dish</h4>
+                    <p className={cx('activate-text')}>Make this dish available to users</p>
+                  </div>
+                  <label className={cx('switch')}>
+                    <input
+                      type='checkbox'
+                      checked={formData.isActive}
+                      onChange={handleActiveChange}
+                      className={cx('switch-input')}
+                    />
+                    <span className={cx('switch-slider')}></span>
+                  </label>
+                </div>
+              </div>
+
+              <div className={cx('modal-actions')}>
+                <button type='button' className={cx('modal-button', 'modal-button-cancel')} onClick={handleCloseModal}>
+                  Cancel
+                </button>
+                <button type='submit' className={cx('modal-button', 'modal-button-create')}>
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
