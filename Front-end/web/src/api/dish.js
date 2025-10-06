@@ -37,3 +37,16 @@ export const deactivateDish = async (dishId) => {
   const response = await api.patch(`/dish/${dishId}/deactivate`);
   return response.data;
 };
+
+export const createDish = async ({ name, description, cookingTime, calorie, difficulty, isActive, imageUrl }) => {
+  const response = await api.post('/dish', {
+    name,
+    description,
+    cookingTime,
+    calorie,
+    difficulty,
+    isActive,
+    imageUrl
+  });
+  return response.data;
+};
