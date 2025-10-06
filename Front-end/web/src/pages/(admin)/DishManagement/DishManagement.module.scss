@@ -16,6 +16,7 @@
     border: 1px solid var(--secondary);
     border-radius: 8px;
     text-align: center;
+    z-index: 10;
   }
   .error-message {
     position: fixed;
@@ -29,6 +30,7 @@
     border: 1px solid var(--red);
     border-radius: 8px;
     text-align: center;
+    z-index: 10;
   }
 
   .title {
@@ -100,7 +102,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 5;
 
     .modal-content {
       background-color: var(--background);
