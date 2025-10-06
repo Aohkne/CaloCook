@@ -187,6 +187,7 @@ function DishManagement() {
     try {
       const response = await createDish(formData);
       setSuccess(response.message || 'Dish created successfully');
+
       handleCloseModal();
       // Reset form
       setFormData({
