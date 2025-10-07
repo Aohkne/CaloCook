@@ -3,12 +3,12 @@ import { useState } from 'react';
 
 import { exportDish } from '@/api/dish';
 
-import styles from './ModalExport.module.scss';
+import styles from './ExportDish.module.scss';
 import classNames from 'classnames/bind';
 
 const cx = classNames.bind(styles);
 
-function ModalExport({ modelOpen = false, onClose }) {
+function ExportDish({ modelOpen = false, onClose }) {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [isExporting, setIsExporting] = useState(false);
@@ -382,4 +382,4 @@ function ModalExport({ modelOpen = false, onClose }) {
   );
 }
 
-export default ModalExport;
+export default ExportDish;

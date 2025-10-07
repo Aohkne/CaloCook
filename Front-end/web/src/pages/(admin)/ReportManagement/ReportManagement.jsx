@@ -5,13 +5,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Panel from '@/components/ui/Panel/Panel';
 import Sidebar from '@/components/ui/Sidebar/Sidebar';
 import DataTable from '@/components/ui/DataTable/DataTable';
+import ExportReport from '@/components/ui/ExportReport/ExportReport';
+import ComfirmDelete from '@/components/ui/ComfirmDelete/ComfirmDelete';
 
 import { ROUTES } from '@/constants/routes';
 import { getReports, deleteReport, updateReport } from '@/api/report';
 
 import styles from './ReportManagement.module.scss';
 import classNames from 'classnames/bind';
-import ComfirmDelete from '@/components/ui/ComfirmDelete/ComfirmDelete';
 
 const cx = classNames.bind(styles);
 
@@ -19,6 +20,8 @@ function UserManagement() {
   const navigate = useNavigate();
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   const [totalReport, setTotalReport] = useState(0);
   const [reports, setReports] = useState([]);
@@ -50,6 +53,11 @@ function UserManagement() {
   const handlePageChange = async (newPage) => {
     const page = Number(newPage) || 1;
     await handleUsers(filters, page);
+  };
+
+  // Handle Export Modal
+  const handleOpenExportModal = () => {
+    setExportModalOpen(true);
   };
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -357,6 +365,17 @@ function UserManagement() {
             navigate(ROUTES.REPORT_MANAGEMENT);
           }}
         />
+
+        {/* IF ADD MORE */}
+        <div></div>
+        <div></div>
+
+        <div className={cx('btn-action')}>
+          <button className={cx('btn', 'export-button')} onClick={handleOpenExportModal}>
+            <Icon icon='line-md:download-loop' width={25} height={25} />
+            EXPORT REPORT
+          </button>
+        </div>
       </div>
 
       <div className={cx('table')}>
@@ -395,6 +414,9 @@ function UserManagement() {
           </div>
         )}
       </div>
+
+      {/* EXPORT MODAL */}
+      {exportModalOpen && <ExportReport modelOpen={exportModalOpen} onClose={() => setExportModalOpen(false)} />}
     </div>
   );
 }

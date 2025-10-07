@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Panel from '@/components/ui/Panel/Panel';
 import Sidebar from '@/components/ui/Sidebar/Sidebar';
 import DataTable from '@/components/ui/DataTable/DataTable';
-import ModalExport from '@/components/ui/ModalExport/ModalExport';
+import ExportDish from '@/components/ui/ExportDish/ExportDish';
 
 import { ROUTES } from '@/constants/routes';
 
@@ -26,6 +26,7 @@ function DishManagement() {
 
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+
   const [totalDish, setTotalDish] = useState(0);
   const [dishes, setDishes] = useState([]);
   const [pagination, setPagination] = useState({
@@ -586,7 +587,7 @@ function DishManagement() {
       )}
 
       {/* EXPORT MODAL */}
-      {exportModalOpen && <ModalExport modelOpen={exportModalOpen} onClose={() => setExportModalOpen(false)} />}
+      {exportModalOpen && <ExportDish modelOpen={exportModalOpen} onClose={() => setExportModalOpen(false)} />}
     </div>
   );
 }
