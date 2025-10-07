@@ -7,29 +7,28 @@ import { exportHelper } from '@/utils/exportHelper'
 const getAll = async (req, res, next) => {
   try {
     const { name, minCookingTime, maxCookingTime, minCalorie, maxCalorie, difficulty, isActive } = req.query
-
     const paginationParams = req.pagination
 
-    // NAVIGATION TO SERVICE
+    const hasMultipleFilters =
+      [name, minCookingTime, maxCookingTime, minCalorie, maxCalorie, difficulty, isActive].filter(
+        (f) => f !== undefined && f !== ''
+      ).length > 0
+
     let result
-    if (name) {
-      result = await dishService.searchByName(name, paginationParams)
-    } else if (minCookingTime || maxCookingTime) {
-      const condition = {}
-      if (minCookingTime) condition.$gte = parseInt(minCookingTime)
-      if (maxCookingTime) condition.$lte = parseInt(maxCookingTime)
 
-      result = await dishService.searchByCookingTime(condition, paginationParams)
-    } else if (minCalorie || maxCalorie) {
-      const condition = {}
-      if (minCalorie) condition.$gte = parseInt(minCalorie)
-      if (maxCalorie) condition.$lte = parseInt(maxCalorie)
-
-      result = await dishService.searchByCalorie(condition, paginationParams)
-    } else if (difficulty) {
-      result = await dishService.searchByDifficulty(difficulty, paginationParams)
-    } else if (isActive) {
-      result = await dishService.searchByIsActive(isActive, paginationParams)
+    if (hasMultipleFilters) {
+      result = await dishService.getAllWithFilters(
+        {
+          name,
+          minCookingTime,
+          maxCookingTime,
+          minCalorie,
+          maxCalorie,
+          difficulty,
+          isActive
+        },
+        paginationParams
+      )
     } else {
       result = await dishService.getAll(paginationParams)
     }

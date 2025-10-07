@@ -14,6 +14,59 @@ const getAll = async (paginationParams) => {
   }
 }
 
+const getAllWithFilters = async (filters, paginationParams) => {
+  try {
+    const { name, minCookingTime, maxCookingTime, minCalorie, maxCalorie, difficulty, isActive } = filters
+
+    const combinedFilters = {}
+
+    if (name) {
+      combinedFilters.name = name
+    }
+
+    if (minCookingTime || maxCookingTime) {
+      const condition = {}
+      if (minCookingTime) condition.$gte = parseInt(minCookingTime)
+      if (maxCookingTime) condition.$lte = parseInt(maxCookingTime)
+      combinedFilters.cookingTime = condition
+    }
+
+    if (minCalorie || maxCalorie) {
+      const condition = {}
+      if (minCalorie) condition.$gte = parseInt(minCalorie)
+      if (maxCalorie) condition.$lte = parseInt(maxCalorie)
+      combinedFilters.calorie = condition
+    }
+
+    if (difficulty) {
+      let difficultyQuery
+      if (Array.isArray(difficulty)) {
+        difficultyQuery = { $in: difficulty }
+      } else if (typeof difficulty === 'string' && difficulty.includes(',')) {
+        const difficultyArray = difficulty.split(',').map((d) => d.trim())
+        difficultyQuery = { $in: difficultyArray }
+      } else {
+        difficultyQuery = { $regex: `^${difficulty}`, $options: 'i' }
+      }
+      combinedFilters.difficulty = difficultyQuery
+    }
+
+    if (isActive !== undefined && isActive !== '') {
+      combinedFilters.isActive = isActive === 'true'
+    }
+
+    const result = await dishModel.getAllWithFilters(combinedFilters, paginationParams)
+
+    if (!result.data || result.data.length === 0) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
+    }
+
+    return result
+  } catch (error) {
+    throw error
+  }
+}
+
 const getDetails = async (dishId) => {
   try {
     const dish = await dishModel.getDetails(dishId)
@@ -224,23 +277,31 @@ const getAllForExport = async (filters) => {
     // SET MAX LIMIT: for server overload
     const maxExportLimit = 10000
 
-    let result
+    const combinedFilters = {}
 
+    // Name
     if (name) {
-      result = await dishModel.getAllForExport({ name }, maxExportLimit)
-    } else if (minCookingTime || maxCookingTime) {
+      combinedFilters.name = name
+    }
+
+    // Cooking time range
+    if (minCookingTime || maxCookingTime) {
       const condition = {}
       if (minCookingTime) condition.$gte = parseInt(minCookingTime)
       if (maxCookingTime) condition.$lte = parseInt(maxCookingTime)
+      combinedFilters.cookingTime = condition
+    }
 
-      result = await dishModel.getAllForExport({ cookingTime: condition }, maxExportLimit)
-    } else if (minCalorie || maxCalorie) {
+    // Calorie range
+    if (minCalorie || maxCalorie) {
       const condition = {}
       if (minCalorie) condition.$gte = parseInt(minCalorie)
       if (maxCalorie) condition.$lte = parseInt(maxCalorie)
+      combinedFilters.calorie = condition
+    }
 
-      result = await dishModel.getAllForExport({ calorie: condition }, maxExportLimit)
-    } else if (difficulty) {
+    // Difficulty
+    if (difficulty) {
       let difficultyQuery
       if (Array.isArray(difficulty)) {
         difficultyQuery = { $in: difficulty }
@@ -250,14 +311,15 @@ const getAllForExport = async (filters) => {
       } else {
         difficultyQuery = { $regex: `^${difficulty}`, $options: 'i' }
       }
-
-      result = await dishModel.getAllForExport({ difficulty: difficultyQuery }, maxExportLimit)
-    } else if (isActive) {
-      const isActiveValue = isActive === 'true'
-      result = await dishModel.getAllForExport({ isActive: isActiveValue }, maxExportLimit)
-    } else {
-      result = await dishModel.getAllForExport({}, maxExportLimit)
+      combinedFilters.difficulty = difficultyQuery
     }
+
+    // isActive
+    if (isActive !== undefined && isActive !== '') {
+      combinedFilters.isActive = isActive === 'true'
+    }
+
+    const result = await dishModel.getAllForExport(combinedFilters, maxExportLimit)
 
     return result
   } catch (error) {
@@ -267,6 +329,7 @@ const getAllForExport = async (filters) => {
 
 export const dishService = {
   getAll,
+  getAllWithFilters,
   getDetails,
   getRandomUnfavoritedDishes,
   searchByName,
