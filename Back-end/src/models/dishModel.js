@@ -188,10 +188,45 @@ const updateIsActive = async (dishId, isActive) => {
   }
 }
 
-// lay so luong dish
 const countDish = async () => {
   try {
     return await GET_DB().collection(_COLLECTION_NAME).countDocuments()
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const getAllForExport = async (filter = {}, maxLimit = 10000) => {
+  try {
+    const queryFilter = {}
+
+    if (filter.name) {
+      queryFilter.name = { $regex: filter.name, $options: 'i' }
+    }
+
+    if (filter.cookingTime) {
+      queryFilter.cookingTime = filter.cookingTime
+    }
+
+    if (filter.calorie) {
+      queryFilter.calorie = filter.calorie
+    }
+
+    if (filter.difficulty) {
+      queryFilter.difficulty = filter.difficulty
+    }
+
+    if (filter.isActive !== undefined) {
+      queryFilter.isActive = filter.isActive
+    }
+
+    const dishes = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .find(queryFilter, { projection: { imageUrl: 0 } })
+      .limit(maxLimit)
+      .toArray()
+
+    return dishes
   } catch (error) {
     throw new Error(error)
   }
@@ -211,5 +246,6 @@ export const dishModel = {
   createNew,
   updateDish,
   updateIsActive,
-  countDish
+  countDish,
+  getAllForExport
 }

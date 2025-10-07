@@ -1,6 +1,8 @@
 import { StatusCodes } from 'http-status-codes'
 import { dishService } from '@/services/dishService'
+
 import { paginationHelper } from '@/utils/pagination'
+import { exportHelper } from '@/utils/exportHelper'
 
 const getAll = async (req, res, next) => {
   try {
@@ -141,7 +143,6 @@ const deactivateDish = async (req, res, next) => {
   }
 }
 
-// lay so luong dish
 const getDishCount = async (req, res, next) => {
   try {
     const dishCount = await dishService.getDishCount()
@@ -156,6 +157,81 @@ const getDishCount = async (req, res, next) => {
   }
 }
 
+const exportExcel = async (req, res, next) => {
+  try {
+    // FILTER
+    const { name, minCookingTime, maxCookingTime, minCalorie, maxCalorie, difficulty, isActive } = req.query
+
+    const dishes = await dishService.getAllForExport({
+      name,
+      minCookingTime,
+      maxCookingTime,
+      minCalorie,
+      maxCalorie,
+      difficulty,
+      isActive
+    })
+
+    if (!dishes || dishes.length === 0) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        code: StatusCodes.NOT_FOUND,
+        message: 'No dishes found to export'
+      })
+    }
+
+    // GENERATE EXCEL
+    const buffer = await exportHelper.generateExcelFile(dishes)
+
+    // SET RESPONSE HEADER
+    const filename = `dishes_${new Date().toISOString().split('T')[0]}.xlsx`
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+    res.setHeader('Content-Length', buffer.length)
+
+    // SEND
+    res.send(buffer)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const exportCSV = async (req, res, next) => {
+  try {
+    //FILTER
+    const { name, minCookingTime, maxCookingTime, minCalorie, maxCalorie, difficulty, isActive } = req.query
+
+    const dishes = await dishService.getAllForExport({
+      name,
+      minCookingTime,
+      maxCookingTime,
+      minCalorie,
+      maxCalorie,
+      difficulty,
+      isActive
+    })
+
+    if (!dishes || dishes.length === 0) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        code: StatusCodes.NOT_FOUND,
+        message: 'No dishes found to export'
+      })
+    }
+
+    // GENERATE CSV
+    const csv = await exportHelper.generateCSVFile(dishes)
+
+    // SET RESPONSE HEADER
+    const filename = `dishes_${new Date().toISOString().split('T')[0]}.csv`
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+
+    // SEND
+    res.send('\uFEFF' + csv)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const dishController = {
   getAll,
   getDetails,
@@ -164,5 +240,7 @@ export const dishController = {
   updateDish,
   activateDish,
   deactivateDish,
-  getDishCount
+  getDishCount,
+  exportExcel,
+  exportCSV
 }

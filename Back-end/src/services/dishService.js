@@ -208,14 +208,60 @@ const deactivateDish = async (dishId) => {
   }
 }
 
-// lay so luong dish
-
 const getDishCount = async () => {
   try {
     const count = await dishModel.countDish()
     return count
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching user count')
+  }
+}
+
+const getAllForExport = async (filters) => {
+  try {
+    const { name, minCookingTime, maxCookingTime, minCalorie, maxCalorie, difficulty, isActive } = filters
+
+    // SET MAX LIMIT: for server overload
+    const maxExportLimit = 10000
+
+    let result
+
+    if (name) {
+      result = await dishModel.getAllForExport({ name }, maxExportLimit)
+    } else if (minCookingTime || maxCookingTime) {
+      const condition = {}
+      if (minCookingTime) condition.$gte = parseInt(minCookingTime)
+      if (maxCookingTime) condition.$lte = parseInt(maxCookingTime)
+
+      result = await dishModel.getAllForExport({ cookingTime: condition }, maxExportLimit)
+    } else if (minCalorie || maxCalorie) {
+      const condition = {}
+      if (minCalorie) condition.$gte = parseInt(minCalorie)
+      if (maxCalorie) condition.$lte = parseInt(maxCalorie)
+
+      result = await dishModel.getAllForExport({ calorie: condition }, maxExportLimit)
+    } else if (difficulty) {
+      let difficultyQuery
+      if (Array.isArray(difficulty)) {
+        difficultyQuery = { $in: difficulty }
+      } else if (typeof difficulty === 'string' && difficulty.includes(',')) {
+        const difficultyArray = difficulty.split(',').map((d) => d.trim())
+        difficultyQuery = { $in: difficultyArray }
+      } else {
+        difficultyQuery = { $regex: `^${difficulty}`, $options: 'i' }
+      }
+
+      result = await dishModel.getAllForExport({ difficulty: difficultyQuery }, maxExportLimit)
+    } else if (isActive) {
+      const isActiveValue = isActive === 'true'
+      result = await dishModel.getAllForExport({ isActive: isActiveValue }, maxExportLimit)
+    } else {
+      result = await dishModel.getAllForExport({}, maxExportLimit)
+    }
+
+    return result
+  } catch (error) {
+    throw error
   }
 }
 
@@ -232,5 +278,6 @@ export const dishService = {
   updateDish,
   activateDish,
   deactivateDish,
-  getDishCount
+  getDishCount,
+  getAllForExport
 }

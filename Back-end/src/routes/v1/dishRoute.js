@@ -403,6 +403,132 @@ const Router = express.Router()
  *                   example: "Dish deactivated successfully"
  *                 data:
  *                   $ref: '#/components/schemas/Dish' 
+ 
+ * /api/v1/dish/export/excel:
+ *   get:
+ *     summary: Export dishes to Excel file
+ *     tags: [dish]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Filter dishes by name
+ *       - in: query
+ *         name: minCookingTime
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Minimum cooking time to filter dishes
+ *       - in: query
+ *         name: maxCookingTime
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Maximum cooking time to filter dishes
+ *       - in: query
+ *         name: minCalorie
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Minimum calorie to filter dishes
+ *       - in: query
+ *         name: maxCalorie
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Maximum calorie to filter dishes
+ *       - in: query
+ *         name: difficulty
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *             enum: [easy, medium, hard]
+ *           collectionFormat: multi
+ *         required: false
+ *         description: Filter dishes by difficulty level
+ *       - in: query
+ *         name: isActive
+ *         schema:
+ *           type: boolean
+ *         required: false
+ *         description: Filter dishes by active status (true or false)
+ *     responses:
+ *       200:
+ *         description: Excel file download
+ *         content:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *             example: Binary Excel file 
+
+ * /api/v1/dish/export/csv:
+ *   get:
+ *     summary: Export dishes to CSV file
+ *     tags: [dish]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Filter dishes by name
+ *       - in: query
+ *         name: minCookingTime
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Minimum cooking time to filter dishes
+ *       - in: query
+ *         name: maxCookingTime
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Maximum cooking time to filter dishes
+ *       - in: query
+ *         name: minCalorie
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Minimum calorie to filter dishes
+ *       - in: query
+ *         name: maxCalorie
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Maximum calorie to filter dishes
+ *       - in: query
+ *         name: difficulty
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *             enum: [easy, medium, hard]
+ *           collectionFormat: multi
+ *         required: false
+ *         description: Filter dishes by difficulty level
+ *       - in: query
+ *         name: isActive
+ *         schema:
+ *           type: boolean
+ *         required: false
+ *         description: Filter dishes by active status (true or false)
+ *     responses:
+ *       200:
+ *         description: CSV file download
+ *         content:
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *             example: Binary CSV file
 
  * components:
  *   schemas:
@@ -481,6 +607,18 @@ Router.route('/:id/deactivate').patch(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['admin']),
   dishController.deactivateDish
+)
+
+Router.route('/export/excel').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  dishController.exportExcel
+)
+
+Router.route('/export/csv').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  dishController.exportCSV
 )
 
 export const dishRoute = Router
