@@ -1,7 +1,8 @@
 import ExcelJS from 'exceljs'
 import { Parser } from 'json2csv'
 
-const generateExcelFile = async (dishes) => {
+// DISH
+const generateDishExcelFile = async (dishes) => {
   try {
     // workbook ~ Excel
     // worksheet ~ Sheet
@@ -110,7 +111,7 @@ const generateExcelFile = async (dishes) => {
   }
 }
 
-const generateCSVFile = async (dishes) => {
+const generateDishCSVFile = async (dishes) => {
   try {
     // FIELDs: CSV
     const fields = [
@@ -148,7 +149,132 @@ const generateCSVFile = async (dishes) => {
   }
 }
 
+// REPORT
+const generateReportExcelFile = async (reports) => {
+  try {
+    // workbook ~ Excel
+    // worksheet ~ Sheet
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Reports')
+
+    // FIELDs
+    worksheet.columns = [
+      { header: 'User email', key: 'userEmail', width: 30 },
+      { header: 'Dish Name', key: 'dishName', width: 30 },
+      { header: 'Description', key: 'description', width: 100 },
+      { header: 'Created At', key: 'createdAt', width: 20 }
+    ]
+
+    // HEADER ROW: style
+    const headerRow = worksheet.getRow(1)
+    headerRow.font = { bold: true, color: { argb: 'FCFAF3' }, size: 12 }
+
+    headerRow.eachCell({ includeEmpty: false }, (cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'c264ff' }
+      }
+    })
+
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' }
+    headerRow.height = 30
+
+    // HEADER ROW: border - includeEmpty(limit to cell have data)
+    headerRow.eachCell({ includeEmpty: false }, (cell) => {
+      cell.border = {
+        left: { style: 'medium', color: { argb: 'ffffff' } },
+        right: { style: 'thin', color: { argb: '888888' } },
+        bottom: { style: 'thin', color: { argb: '888888' } }
+      }
+    })
+
+    // ROWS: Add data
+    reports.forEach((report) => {
+      const row = worksheet.addRow({
+        userEmail: report.user?.email,
+        dishName: report.dish?.name,
+        description: report.description,
+        createdAt: report.createdAt ? new Date(report.createdAt).toLocaleString() : ''
+      })
+
+      // ROWS: STYLE
+      row.alignment = { vertical: 'middle', wrapText: true }
+      row.height = 40
+
+      // SPECIFIC: rows
+      row.getCell('dishName').font = { bold: true }
+
+      // ROWS: borders
+      row.eachCell({ includeEmpty: false }, (cell) => {
+        cell.border = {
+          left: { style: 'medium', color: { argb: 'ffffff' } },
+          right: { style: 'thin', color: { argb: '888888' } },
+          bottom: { style: 'thin', color: { argb: '888888' } }
+        }
+      })
+
+      // Alternate row coloring
+      if (row.number % 2 === 0) {
+        row.eachCell({ includeEmpty: false }, (cell) => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'f3d1ff' }
+          }
+        })
+      }
+    })
+
+    // Auto-filter(total field)
+    worksheet.autoFilter = {
+      from: 'A1',
+      to: 'D1'
+    }
+
+    // HEADER: Freeze row
+    worksheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }]
+
+    // GENERATE: buffer
+    const buffer = await workbook.xlsx.writeBuffer()
+    return buffer
+  } catch (error) {
+    throw new Error('Failed to generate Excel file: ' + error.message)
+  }
+}
+
+const generateReportCSVFile = async (reports) => {
+  try {
+    // FIELDs: CSV
+    const fields = [
+      { label: 'User email', value: 'userEmail' },
+      { label: 'Dish Name', value: 'dishName' },
+      { label: 'Description', value: 'description' },
+      { label: 'Created At', value: 'createdAt' }
+    ]
+
+    // TRASFORM: data
+    const transformedData = reports.map((report) => ({
+      userEmail: report.user?.email,
+      dishName: report.dish?.name,
+      description: report.description,
+      createdAt: report.createdAt ? new Date(report.createdAt).toLocaleString() : ''
+    }))
+
+    // PARSE: to CSV
+    const json2csvParser = new Parser({ fields })
+    const csv = json2csvParser.parse(transformedData)
+
+    return csv
+  } catch (error) {
+    throw new Error('Failed to generate CSV file: ' + error.message)
+  }
+}
+
 export const exportHelper = {
-  generateExcelFile,
-  generateCSVFile
+  generateDishExcelFile,
+  generateDishCSVFile,
+
+  generateReportExcelFile,
+  generateReportCSVFile
 }

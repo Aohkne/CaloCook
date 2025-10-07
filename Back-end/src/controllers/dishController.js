@@ -179,7 +179,7 @@ const exportExcel = async (req, res, next) => {
     }
 
     // GENERATE EXCEL
-    const buffer = await exportHelper.generateExcelFile(dishes)
+    const buffer = await exportHelper.generateDishExcelFile(dishes)
 
     // SET RESPONSE HEADER
     const filename = `dishes_${new Date().toISOString().split('T')[0]}.xlsx`
@@ -217,7 +217,7 @@ const exportCSV = async (req, res, next) => {
     }
 
     // GENERATE CSV
-    const csv = await exportHelper.generateCSVFile(dishes)
+    const csv = await exportHelper.generateDishCSVFile(dishes)
 
     // SET RESPONSE HEADER
     const filename = `dishes_${new Date().toISOString().split('T')[0]}.csv`
