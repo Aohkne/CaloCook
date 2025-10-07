@@ -11,7 +11,7 @@ const Router = express.Router()
  * /api/v1/comment:
  *  get:
  *    summary: Get all comments
- *    tags: [Comment]
+ *    tags: [comment]
  *    security:
  *      - bearerAuth: []
  *    description: Retrieve a list of all comments
@@ -57,7 +57,7 @@ const Router = express.Router()
  *
  *  post:
  *    summary: Create a new comment
- *    tags: [Comment]
+ *    tags: [comment]
  *    security:
  *      - bearerAuth: []
  *    description: Create a new comment
@@ -132,7 +132,7 @@ const Router = express.Router()
  * /api/v1/comment/{id}:
  *   get:
  *     summary: Get a comment by ID
- *     tags: [Comment]
+ *     tags: [comment]
  *     security:
  *       - bearerAuth: []
  *     description: Get a comment by ID
@@ -186,7 +186,7 @@ const Router = express.Router()
  * 
  *   patch:
  *    summary: Update a comment by ID
- *    tags: [Comment]
+ *    tags: [comment]
  *    security:
  *      - bearerAuth: []
  *    description: Update content of comment by ID
@@ -250,7 +250,7 @@ const Router = express.Router()
  *
  *   delete:
  *    summary: Delete comment by ID
- *    tags: [Comment]
+ *    tags: [comment]
  *    security:
  *      - bearerAuth: []
  *    description: Delete comment by ID
@@ -305,7 +305,7 @@ const Router = express.Router()
  * /api/v1/comment/{id}/comments:
  *   get:
  *     summary: Get all comments for a specific comment
- *     tags: [Comment]
+ *     tags: [comment]
  *     security:
  *       - bearerAuth: []
  *     description: Get all comments for a specific comment
@@ -362,7 +362,7 @@ const Router = express.Router()
  * /api/v1/comment/{dishId}/dish:
  *  get:
  *    summary: Get all comments for a specific dish
- *    tags: [Comment]
+ *    tags: [comment]
  *    security:
  *      - bearerAuth: []
  *    description: Get all comments for a specific dish

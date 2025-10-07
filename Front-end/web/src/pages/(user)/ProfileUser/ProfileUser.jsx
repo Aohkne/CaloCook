@@ -423,11 +423,11 @@ function ProfileUser() {
                 {userData.avatar ? (
                   <img src={userData.avatar} alt='Avatar' />
                 ) : (
-                  <span className={cx('avatar-initials')}>{getInitials(userData.name)}</span>
+                  <span className={cx('avatar-initials')}>{getInitials(userData.fullName)}</span>
                 )}
               </div>
               <div className={cx('user-basic-info')}>
-                <h3 className={cx('user-name')}>{userData.name}</h3>
+                <h3 className={cx('user-name')}>{userData.fullName}</h3>
                 <p className={cx('user-email')}>{userData.email}</p>
               </div>
 
@@ -573,7 +573,6 @@ function ProfileUser() {
                       value={editFormData.name}
                       onChange={handleInputChange}
                       className={cx('form-input')}
-
                       required
                     />
                   </div>

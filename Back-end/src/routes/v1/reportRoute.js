@@ -86,7 +86,7 @@ const Router = express.Router()
  *         description: Unauthorized - missing or invalid token
  *       500:
  *         description: Internal server error
- *
+ 
  *   post:
  *     summary: Create a new report
  *     tags: [report]
@@ -127,7 +127,7 @@ const Router = express.Router()
  *                   type: string
  *                   format: date-time
  *                   example: "2023-06-15T12:34:56.789Z"
- *
+
  * /api/v1/report/{id}:
  *   delete:
  *     summary: Delete a report
@@ -176,7 +176,7 @@ const Router = express.Router()
  *                       type: string
  *                       format: date-time
  *                       example: "2023-06-15T12:34:56.789Z"
- *
+
  *   patch:
  *     summary: Update a report's checked status
  *     tags: [report]
@@ -228,6 +228,52 @@ const Router = express.Router()
  *                     type: string
  *                     format: date-time
  *                     example: "2023-06-15T12:34:56.789Z"
+
+ * /api/v1/report/export/excel:
+ *   get:
+ *     summary: Export reports to Excel file
+ *     tags: [report]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: dishName
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Filter reports by dish name
+ *     responses:
+ *       200:
+ *         description: Excel file download
+ *         content:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *             example: Binary Excel file 
+
+ * /api/v1/report/export/csv:
+ *   get:
+ *     summary: Export reports to CSV file
+ *     tags: [report]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: dishName
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Filter reports by dish name
+ *     responses:
+ *       200:
+ *         description: CSV file download
+ *         content:
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *             example: Binary CSV file 
  */
 Router.route('/').get(
   authMiddleware.authenticateUser,
@@ -235,21 +281,36 @@ Router.route('/').get(
   paginationHelper.validatePaginationMiddleware,
   reportController.getAllReport
 )
+
 Router.route('/').post(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['admin', 'user']),
   reportValidation.createReport,
   reportController.createReport
 )
+
 Router.route('/:id').delete(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['admin']),
   reportController.deleteReport
 )
+
 Router.route('/:id').patch(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['admin']),
   reportController.updateReport
+)
+
+Router.route('/export/excel').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  reportController.exportExcel
+)
+
+Router.route('/export/csv').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  reportController.exportCSV
 )
 
 export const reportRoute = Router

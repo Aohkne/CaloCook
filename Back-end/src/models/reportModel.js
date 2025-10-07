@@ -98,14 +98,14 @@ const updateReport = async (id) => {
     const currentDoc = await GET_DB()
       .collection(_COLLECTION_NAME)
       .findOne({ _id: new ObjectId(id) })
-    
+
     if (!currentDoc) {
       throw new Error('Report not found')
     }
-    
+
     // Toggle the checked status
     const newCheckedStatus = !currentDoc.checked
-    
+
     const result = await GET_DB()
       .collection(_COLLECTION_NAME)
       .findOneAndUpdate(
@@ -119,9 +119,88 @@ const updateReport = async (id) => {
   }
 }
 
+const getAllForExport = async (filter = {}, maxLimit = 10000) => {
+  try {
+    let reports
+
+    if (filter.dishName) {
+      reports = await GET_DB()
+        .collection(_COLLECTION_NAME)
+        .aggregate([
+          { $lookup: { from: 'dish', localField: 'dishId', foreignField: '_id', as: 'dish' } },
+          { $unwind: '$dish' },
+          { $match: { 'dish.name': { $regex: filter.dishName, $options: 'i' } } },
+          {
+            $lookup: {
+              from: 'user',
+              localField: 'userId',
+              foreignField: '_id',
+              as: 'user'
+            }
+          },
+          {
+            $unwind: { path: '$user' }
+          },
+          {
+            $project: {
+              description: 1,
+              userId: 1,
+              createdAt: 1,
+              'user.email': 1,
+              'dish.name': 1
+            }
+          }
+        ])
+        .toArray()
+    } else {
+      reports = await GET_DB()
+        .collection(_COLLECTION_NAME)
+        .aggregate([
+          {
+            $lookup: {
+              from: 'dish',
+              localField: 'dishId',
+              foreignField: '_id',
+              as: 'dish'
+            }
+          },
+          {
+            $unwind: { path: '$dish' }
+          },
+          {
+            $lookup: {
+              from: 'user',
+              localField: 'userId',
+              foreignField: '_id',
+              as: 'user'
+            }
+          },
+          {
+            $unwind: { path: '$user' }
+          },
+          {
+            $project: {
+              description: 1,
+              userId: 1,
+              createdAt: 1,
+              'user.email': 1,
+              'dish.name': 1
+            }
+          }
+        ])
+        .toArray()
+    }
+
+    return reports
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const reportModel = {
   getAllReports,
   createReport,
   deleteReport,
-  updateReport
+  updateReport,
+  getAllForExport
 }

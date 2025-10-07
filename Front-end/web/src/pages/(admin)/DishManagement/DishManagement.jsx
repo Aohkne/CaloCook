@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Panel from '@/components/ui/Panel/Panel';
 import Sidebar from '@/components/ui/Sidebar/Sidebar';
 import DataTable from '@/components/ui/DataTable/DataTable';
+import ExportDish from '@/components/ui/ExportDish/ExportDish';
 
 import { ROUTES } from '@/constants/routes';
 
@@ -23,7 +24,9 @@ function DishManagement() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
+  const [exportModalOpen, setExportModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+
   const [totalDish, setTotalDish] = useState(0);
   const [dishes, setDishes] = useState([]);
   const [pagination, setPagination] = useState({
@@ -87,7 +90,12 @@ function DishManagement() {
     }
   };
 
-  // Handle Modal
+  // Handle Export Modal
+  const handleOpenExportModal = () => {
+    setExportModalOpen(true);
+  };
+
+  // Handle Create Modal
   const handleOpenCreateModal = () => {
     setCreateModalOpen(true);
   };
@@ -119,6 +127,9 @@ function DishManagement() {
         setDishes(response.data);
         setPagination(response.pagination);
       } catch (error) {
+        setDishes('');
+        setPagination('');
+        setError(error.response?.data?.message || 'Get dishes failed.');
         console.error(error.response?.data?.message || 'Get dishes failed.');
       }
     },
@@ -354,10 +365,22 @@ function DishManagement() {
             navigate(ROUTES.DISH_MANAGEMENT);
           }}
         />
-        <button className={cx('create-button')} onClick={handleOpenCreateModal}>
-          <Icon icon='typcn:plus' width={50} height={50} className={cx('plus-icon')} />
-          CREATE DISH
-        </button>
+
+        {/* IF ADD MORE */}
+        <div></div>
+        <div></div>
+
+        <div className={cx('btn-action')}>
+          <button className={cx('btn', 'export-button')} onClick={handleOpenExportModal}>
+            <Icon icon='line-md:download-loop' width={25} height={25} />
+            EXPORT DISH
+          </button>
+
+          <button className={cx('btn', 'create-button')} onClick={handleOpenCreateModal}>
+            <Icon icon='line-md:plus' width={25} height={25} />
+            ADD DISH
+          </button>
+        </div>
       </div>
 
       <div className={cx('table')}>
@@ -392,6 +415,7 @@ function DishManagement() {
           onRangeFilterChange={handleRangeFilterChange}
         />
       </div>
+
       {/* CREATE MODAL */}
       {createModalOpen && (
         <div className={cx('modal')}>
@@ -561,6 +585,9 @@ function DishManagement() {
           </div>
         </div>
       )}
+
+      {/* EXPORT MODAL */}
+      {exportModalOpen && <ExportDish modelOpen={exportModalOpen} onClose={() => setExportModalOpen(false)} />}
     </div>
   );
 }

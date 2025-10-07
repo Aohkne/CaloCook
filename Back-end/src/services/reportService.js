@@ -67,9 +67,32 @@ const updateReport = async (id) => {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error updating report')
   }
 }
+
+const getAllForExport = async (filters) => {
+  try {
+    const { dishName } = filters
+
+    // SET MAX LIMIT: for server overload
+    const maxExportLimit = 10000
+
+    let result
+
+    if (dishName) {
+      result = await reportModel.getAllForExport({ dishName }, maxExportLimit)
+    } else {
+      result = await reportModel.getAllForExport({}, maxExportLimit)
+    }
+
+    return result
+  } catch (error) {
+    throw error
+  }
+}
+
 export const reportService = {
   getAllReport,
   createReport,
   deleteReport,
-  updateReport
+  updateReport,
+  getAllForExport
 }
