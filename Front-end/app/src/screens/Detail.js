@@ -17,6 +17,7 @@ import { getDishDetailData, clearDishDetail, updateDishLikeStatus } from '@redux
 import { likeDish, dislikeDish, updateFavoriteItem } from '@redux/slices/favoriteSlice'
 import { imageMap } from '@/constants/imageAssets';
 import { addEatingHistory, getTotalCalories } from '@redux/slices/userSlice'
+import CookingStepsModal from '@/components/CookingStepsModal'
 
 export default function Detail({ route, navigation }) {
     const { dish } = route.params
@@ -41,6 +42,7 @@ export default function Detail({ route, navigation }) {
     const dishId = dish._id || dish.id
     const isFavoriteDish = favorites.some(fav => fav.dishId === dishId)
     const [isLiked, setIsLiked] = useState(dish.isLiked || isFavoriteDish)
+    const [isCookingModalVisible, setIsCookingModalVisible] = useState(false)
 
     // Helper function để capitalize text
     const capitalizeText = (text) => {
@@ -140,29 +142,36 @@ export default function Detail({ route, navigation }) {
         }
     }, [dispatch, user, isLiked, dish, dishDetail, dishId])
 
-    const handleLetsCook = async () => {
+    const handleLetsCook = () => {
         if (!user?._id) {
             Alert.alert('Error', 'Please login to track calories')
             return
         }
+        setIsCookingModalVisible(true) // Hiện modal cooking steps thay vì add history ngay
+    }
 
+    const handleCookingComplete = async () => {
         try {
-            // Thêm vào history
             const historyResult = await dispatch(addEatingHistory({
                 userId: user._id,
                 dishId: dishId
             })).unwrap()
+            
             // Tính ngày hiện tại với timezone đúng
             const today = new Date();
             const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
             const todayString = localDate.toISOString().split('T')[0];
+            
             setTimeout(async () => {
                 await dispatch(getTotalCalories({
                     userId: user._id,
                     date: todayString
                 }))
             }, 1000)
-
+            
+            
+            setIsCookingModalVisible(false)
+            
             // Thông báo thành công
             Alert.alert(
                 'Success!',
@@ -354,6 +363,15 @@ export default function Detail({ route, navigation }) {
                     <ChevronRight size={20} color={colors.title} />
                 </TouchableOpacity>
             </View>
+
+            {/* Cooking Steps Modal */}
+            <CookingStepsModal
+                visible={isCookingModalVisible}
+                onClose={() => setIsCookingModalVisible(false)}
+                steps={steps}
+                dishData={dishData}
+                onComplete={handleCookingComplete}
+            />
         </SafeAreaView>
     )
 }
