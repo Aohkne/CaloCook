@@ -322,8 +322,8 @@
 }
 
 .user-name {
-  font-size: 2.75rem;
-  font-weight: 800;
+  font-size: 2.8rem;
+  font-weight: 600;
   color: var(--title);
   margin: 0 0 0.5rem 0;
 
@@ -806,6 +806,29 @@
   &.full-width {
     grid-column: 1 / -1;
   }
+  &.hidden-field {
+    display: none !important;
+  }
+  &.disabled-field {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  &.email-group {
+    position: relative;
+
+    .form-input {
+      padding-right: 50px; // Tạo space cho icon
+    }
+
+    .email-verification-status {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-top: 10.5px;
+      z-index: 2;
+    }
+  }
 }
 
 .form-label {
@@ -877,4 +900,18 @@
 
 .spinning {
   animation: spin 1s linear infinite;
+}
+
+.verification-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--green);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 128, 0, 0.3);
+}
+
+.verification-status {
+  font-size: 12px;
+  line-height: 1;
 }

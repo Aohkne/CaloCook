@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import { useAuth } from '@/hooks/useAuth';
 import { getUserProfile, updateUserProfile, sendVerificationEmail, verifyEmail } from '@/api/user';
@@ -14,6 +14,7 @@ function ProfileUser() {
   const [userData, setUserData] = useState({
     name: '',
     email: '',
+    fullName: '',
     avatar: null,
     dob: '',
     gender: 'male',
@@ -35,6 +36,7 @@ function ProfileUser() {
 
   // Mock data cho calories consumed - thay thế bằng data thực
   const [caloriesConsumed] = React.useState(2000);
+  const hasVerified = useRef(false);
 
   // Load user profile data
   useEffect(() => {
@@ -46,6 +48,7 @@ function ProfileUser() {
         const formattedData = {
           name: profileData.username || 'Unknown User',
           email: profileData.email || '',
+          fullName: profileData.fullName || 'Unknown User',
           avatar: profileData.avatar_url || null,
           dob: profileData.dob || '2000-01-01',
           gender: profileData.gender || 'male',
@@ -64,6 +67,7 @@ function ProfileUser() {
         const fallbackData = {
           name: user?.name || 'Nguyen Thanh Bao',
           email: user?.email || 'user123@gmail.com',
+          fullName: user?.fullName || 'Nguyen Thanh Bao',
           avatar: user?.avatar || null,
           dob: user?.dob || '2000-05-24',
           gender: user?.gender || 'male',
@@ -71,7 +75,8 @@ function ProfileUser() {
           weight: user?.weight || 70,
           calorieLimit: user?.calorieLimit || 2000,
           createdAt: user?.createdAt || '2024-06-11T08:00:00.000Z',
-          updatedAt: user?.updatedAt || '2024-06-11T08:00:00.000Z'
+          updatedAt: user?.updatedAt || '2024-06-11T08:00:00.000Z',
+          emailVerified: user?.emailVerified || false
         };
         setUserData(fallbackData);
         setEditFormData(fallbackData);
@@ -86,7 +91,9 @@ function ProfileUser() {
   // Check for email verification token in URL
   useEffect(() => {
     const token = searchParams.get('token');
-    if (token) {
+    if (token && !hasVerified.current) {
+      // Clear token NGAY LẬP TỨC để tránh loop
+      hasVerified.current = true; // Đánh dấu đã verify
       handleVerifyFromURL(token);
     }
   }, []);
@@ -111,18 +118,20 @@ function ProfileUser() {
     try {
       setError('');
       setIsSubmitting(true);
-
+      setSuccess('');
       await verifyEmail(token); // Gọi API verify
       setSuccess('Email verified successfully!');
 
       setUserData((prev) => ({ ...prev, emailVerified: true }));
 
-      // Clear token từ URL
-      navigate('/user/profile');
+      navigate('/user/profile', { replace: true });
       setTimeout(() => setSuccess(''), 5000);
     } catch (e) {
+      console.log('Email verification error:', e);
       setError('Email verification failed. Please try again.');
       setTimeout(() => setError(''), 5000);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -153,6 +162,7 @@ function ProfileUser() {
       const updateData = {
         username: editFormData.name,
         email: editFormData.email,
+        fullName: editFormData.fullName,
         avatar_url: editFormData.avatar,
         gender: editFormData.gender,
         dob: editFormData.dob,
@@ -172,7 +182,7 @@ function ProfileUser() {
       }
 
       setShowEditModal(false);
-      alert('Profile updated successfully!');
+      setSuccess('Profile updated successfully!');
     } catch {
       alert('Failed to update profile. Please try again.');
     } finally {
@@ -413,11 +423,11 @@ function ProfileUser() {
                 {userData.avatar ? (
                   <img src={userData.avatar} alt='Avatar' />
                 ) : (
-                  <span className={cx('avatar-initials')}>{getInitials(userData.name)}</span>
+                  <span className={cx('avatar-initials')}>{getInitials(userData.fullName)}</span>
                 )}
               </div>
               <div className={cx('user-basic-info')}>
-                <h3 className={cx('user-name')}>{userData.name}</h3>
+                <h3 className={cx('user-name')}>{userData.fullName}</h3>
                 <p className={cx('user-email')}>{userData.email}</p>
               </div>
 
@@ -533,7 +543,29 @@ function ProfileUser() {
 
               <form className={cx('edit-form')} onSubmit={handleSubmit}>
                 <div className={cx('form-grid')}>
-                  <div className={cx('form-group', 'full-width')}>
+                  <div className={cx('form-group', 'full-width', 'disabled-field', 'email-group')}>
+                    <label className={cx('form-label')}>Email</label>
+                    <input
+                      type='email'
+                      name='email'
+                      value={editFormData.email}
+                      onChange={handleInputChange}
+                      className={cx('form-input')}
+                      required
+                    />
+                    <div className={cx('email-verification-status')}>
+                      {userData.emailVerified && (
+                        <Icon
+                          icon='simple-line-icons:check'
+                          width='16'
+                          height='16'
+                          className={cx('verification-icon')}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className={cx('form-group', 'disabled-field')}>
                     <label className={cx('form-label')}>User Name</label>
                     <input
                       type='text'
@@ -544,13 +576,12 @@ function ProfileUser() {
                       required
                     />
                   </div>
-
-                  <div className={cx('form-group', 'full-width')}>
-                    <label className={cx('form-label')}>Email</label>
+                  <div className={cx('form-group')}>
+                    <label className={cx('form-label')}>Full Name</label>
                     <input
-                      type='email'
-                      name='email'
-                      value={editFormData.email}
+                      type='text'
+                      name='fullName'
+                      value={editFormData.fullName}
                       onChange={handleInputChange}
                       className={cx('form-input')}
                       required

@@ -193,6 +193,9 @@ const Router = express.Router()
  *           example: "68306f4d4928f3fe108df627"
  *         username:
  *           type: string
+ *           example: "NguyenVanA"
+ *         fullName:
+ *           type: string
  *           example: "Nguyễn Văn A"
  *         email:
  *           type: string
