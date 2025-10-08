@@ -14,7 +14,7 @@ import { cloud } from '@/config/cloud'
 // 1. Tạo access và refresh token
 const generateTokens = (userId) => {
   const accessToken = jwt.sign({ userId }, env.ACCESS_TOKEN_SECRET, {
-    expiresIn: '30m'
+    expiresIn: '24h'
   })
 
   const refreshToken = jwt.sign({ userId }, env.REFRESH_TOKEN_SECRET, {
@@ -127,7 +127,6 @@ const login = async (req, res) => {
 const refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body
-    // console.log('Refresh token request:', { refreshToken })
     if (!refreshToken) {
       return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'No refresh token provided' })
     }
@@ -140,7 +139,7 @@ const refreshToken = async (req, res) => {
     }
 
     const newAccessToken = jwt.sign({ userId: decoded.userId }, env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '30m'
+      expiresIn: '24h'
     })
 
     res.json({ accessToken: newAccessToken })
@@ -152,8 +151,6 @@ const refreshToken = async (req, res) => {
 
 // 5. Logout – xóa refresh token khỏi Redis
 const logout = async (req, res) => {
-  // console.log('req.body:', req.body)
-  // console.log('req.headers:', req.headers)
 
   try {
     // Cố gắng lấy token từ body hoặc header
@@ -380,7 +377,7 @@ const forgotPasswordOtp = async (req, res, next) => {
 }
 
 // 13. Reset password with OTP
- const resetPasswordOtp = async (req, res, next) => {
+const resetPasswordOtp = async (req, res, next) => {
   try {
     const { otp, email, newPassword } = req.body
     if (!email || !otp || !newPassword)
@@ -393,7 +390,7 @@ const forgotPasswordOtp = async (req, res, next) => {
   }
 }
 
- const emailVerification = async (req, res) => {
+const emailVerification = async (req, res) => {
   try {
     const { email } = req.user
     if (!email) {
@@ -411,14 +408,14 @@ const forgotPasswordOtp = async (req, res, next) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: err.message })
   }
 }
- const verifyEmail = async (req, res) => {
+const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params
     if (!token) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Token is required' })
     }
 
-    await userService.verifyEmail(token)
+    const result = await userService.verifyEmail(token)
 
     return res.status(StatusCodes.OK).json({ message: 'Email verified successfully' })
   } catch (err) {

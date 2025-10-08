@@ -1,0 +1,76 @@
+@startuml ViewReportList
+
+actor Admin
+boundary "Admin Dashboard" as View #lightblue
+participant ":reportRoute" as Route #lightblue
+control "reportController" as Controller #lightblue
+participant ":reportService" as Service #lightblue
+entity "reportModel" as Model #lightblue
+entity "userModel" as User #lightblue
+entity "dishModel" as Dish #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View Report List
+Admin -> View: 1. Click "View Report List"
+activate Admin
+activate View
+
+View -> Route: 2. GET /api/v1/report
+activate Route
+
+Route -> Controller: 3. getAllReport(req, res)
+activate Controller
+
+Controller -> Service: 4. getAllReport()
+activate Service
+
+Service -> Model: 5. fetchReports()
+activate Model
+Model -> MongoDB: 6. Query all reports
+activate MongoDB
+MongoDB --> Model: 7. Return report list
+deactivate MongoDB
+Model --> Service: 8. Return report list
+deactivate Model
+
+Service -> User: 9. fetchUserDetails(userId)
+activate User
+User -> MongoDB: 10. Query user
+activate MongoDB
+MongoDB --> User: 11. Return user details
+deactivate MongoDB
+User --> Service: 12. Return user details
+deactivate User
+
+Service -> Dish: 13. fetchDishDetails(dishId)
+activate Dish
+Dish -> MongoDB: 14. Query dish
+activate MongoDB
+MongoDB --> Dish: 15. Return dish details
+deactivate MongoDB
+Dish --> Service: 16. Return dish details
+deactivate Dish
+
+alt Reports available
+    Service --> Controller: 16.1. Return reports + details
+    Controller --> Route: 16.1.1. Return 200 OK {reports}
+    Route --> View: 16.1.2. Render report list
+    View --> Admin: 16.1.3. Show reports with user & dish details
+else No reports found
+    Service --> Controller: 16.2. Return empty result
+    Controller --> Route: 16.2.1. Return 200 OK {empty}
+    deactivate Controller
+    Route --> View: 16.2.2. Show "No reports found"
+    deactivate Route
+    View --> Admin: 16.2.3. Display empty list message
+    deactivate View
+    deactivate Admin
+end
+
+deactivate Service
+deactivate Controller
+deactivate Route
+deactivate View
+deactivate Admin
+end
+@enduml

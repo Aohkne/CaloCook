@@ -10,7 +10,7 @@ const Router = express.Router()
  * /api/v1/rating:
  *   post:
  *     summary: Add a new rating for a dish
- *     tags: [Rating]
+ *     tags: [rating]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -57,7 +57,7 @@ const Router = express.Router()
  *                   $ref: '#/components/schemas/Rating'
  *   get:
  *     summary: View ratings for a dish
- *     tags: [Rating]
+ *     tags: [rating]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -102,7 +102,7 @@ const Router = express.Router()
  * /api/v1/rating/average:
  *   get:
  *     summary: Get average rating for a dish
- *     tags: [Rating]
+ *     tags: [rating]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -138,7 +138,7 @@ const Router = express.Router()
  * /api/v1/rating/{id}:
  *   put:
  *     summary: Update a rating
- *     tags: [Rating]
+ *     tags: [rating]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -216,10 +216,16 @@ Router.route('/')
   .post(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['user']), ratingController.addRating)
   .get(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['user', 'admin']), ratingController.viewRatings)
 
-Router.route('/average')
-  .get(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['user', 'admin']), ratingController.getAverageRating)
+Router.route('/average').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user', 'admin']),
+  ratingController.getAverageRating
+)
 
-Router.route('/:id')
-  .put(authMiddleware.authenticateUser, authMiddleware.authorizeRole(['user']), ratingController.updateRating)
+Router.route('/:id').put(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['user']),
+  ratingController.updateRating
+)
 
 export const ratingRoute = Router

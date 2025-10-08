@@ -14,6 +14,59 @@ const getAll = async (paginationParams) => {
   }
 }
 
+const getAllWithFilters = async (filters, paginationParams) => {
+  try {
+    const { name, minCookingTime, maxCookingTime, minCalorie, maxCalorie, difficulty, isActive } = filters
+
+    const combinedFilters = {}
+
+    if (name) {
+      combinedFilters.name = name
+    }
+
+    if (minCookingTime || maxCookingTime) {
+      const condition = {}
+      if (minCookingTime) condition.$gte = parseInt(minCookingTime)
+      if (maxCookingTime) condition.$lte = parseInt(maxCookingTime)
+      combinedFilters.cookingTime = condition
+    }
+
+    if (minCalorie || maxCalorie) {
+      const condition = {}
+      if (minCalorie) condition.$gte = parseInt(minCalorie)
+      if (maxCalorie) condition.$lte = parseInt(maxCalorie)
+      combinedFilters.calorie = condition
+    }
+
+    if (difficulty) {
+      let difficultyQuery
+      if (Array.isArray(difficulty)) {
+        difficultyQuery = { $in: difficulty }
+      } else if (typeof difficulty === 'string' && difficulty.includes(',')) {
+        const difficultyArray = difficulty.split(',').map((d) => d.trim())
+        difficultyQuery = { $in: difficultyArray }
+      } else {
+        difficultyQuery = { $regex: `^${difficulty}`, $options: 'i' }
+      }
+      combinedFilters.difficulty = difficultyQuery
+    }
+
+    if (isActive !== undefined && isActive !== '') {
+      combinedFilters.isActive = isActive === 'true'
+    }
+
+    const result = await dishModel.getAllWithFilters(combinedFilters, paginationParams)
+
+    if (!result.data || result.data.length === 0) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Dish not found!')
+    }
+
+    return result
+  } catch (error) {
+    throw error
+  }
+}
+
 const getDetails = async (dishId) => {
   try {
     const dish = await dishModel.getDetails(dishId)
@@ -208,8 +261,6 @@ const deactivateDish = async (dishId) => {
   }
 }
 
-// lay so luong dish
-
 const getDishCount = async () => {
   try {
     const count = await dishModel.countDish()
@@ -219,8 +270,66 @@ const getDishCount = async () => {
   }
 }
 
+const getAllForExport = async (filters) => {
+  try {
+    const { name, minCookingTime, maxCookingTime, minCalorie, maxCalorie, difficulty, isActive } = filters
+
+    // SET MAX LIMIT: for server overload
+    const maxExportLimit = 10000
+
+    const combinedFilters = {}
+
+    // Name
+    if (name) {
+      combinedFilters.name = name
+    }
+
+    // Cooking time range
+    if (minCookingTime || maxCookingTime) {
+      const condition = {}
+      if (minCookingTime) condition.$gte = parseInt(minCookingTime)
+      if (maxCookingTime) condition.$lte = parseInt(maxCookingTime)
+      combinedFilters.cookingTime = condition
+    }
+
+    // Calorie range
+    if (minCalorie || maxCalorie) {
+      const condition = {}
+      if (minCalorie) condition.$gte = parseInt(minCalorie)
+      if (maxCalorie) condition.$lte = parseInt(maxCalorie)
+      combinedFilters.calorie = condition
+    }
+
+    // Difficulty
+    if (difficulty) {
+      let difficultyQuery
+      if (Array.isArray(difficulty)) {
+        difficultyQuery = { $in: difficulty }
+      } else if (typeof difficulty === 'string' && difficulty.includes(',')) {
+        const difficultyArray = difficulty.split(',').map((d) => d.trim())
+        difficultyQuery = { $in: difficultyArray }
+      } else {
+        difficultyQuery = { $regex: `^${difficulty}`, $options: 'i' }
+      }
+      combinedFilters.difficulty = difficultyQuery
+    }
+
+    // isActive
+    if (isActive !== undefined && isActive !== '') {
+      combinedFilters.isActive = isActive === 'true'
+    }
+
+    const result = await dishModel.getAllForExport(combinedFilters, maxExportLimit)
+
+    return result
+  } catch (error) {
+    throw error
+  }
+}
+
 export const dishService = {
   getAll,
+  getAllWithFilters,
   getDetails,
   getRandomUnfavoritedDishes,
   searchByName,
@@ -232,5 +341,6 @@ export const dishService = {
   updateDish,
   activateDish,
   deactivateDish,
-  getDishCount
+  getDishCount,
+  getAllForExport
 }

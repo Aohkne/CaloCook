@@ -12,7 +12,7 @@ const Router = expesss.Router()
  * /api/v1/dashboard/user-count:
  *   get:
  *     summary: Get all users count
- *     tags: [Dashboard]
+ *     tags: [dashboard]
  *     security:
  *       - bearerAuth: []
  *     description: Get the total number of users in the system
@@ -38,7 +38,7 @@ const Router = expesss.Router()
  * /api/v1/dashboard/dish-count:
  *   get:
  *     summary: Get all dishes count
- *     tags: [Dashboard]
+ *     tags: [dashboard]
  *     security:
  *       - bearerAuth: []
  *     description: Get the total number of dishes in the system
@@ -64,7 +64,7 @@ const Router = expesss.Router()
  * /api/v1/dashboard/top-favorites:
  *   get:
  *     summary: Get top 10 most favorited dishes
- *     tags: [Dashboard]
+ *     tags: [dashboard]
  *     security:
  *       - bearerAuth: []
  *     description: Get the top 10 dishes with the highest number of favorites
@@ -122,7 +122,7 @@ const Router = expesss.Router()
  * /api/v1/dashboard/top-ratings:
  *   get:
  *     summary: Get top 10 dishes with highest average rating
- *     tags: [Dashboard]
+ *     tags: [dashboard]
  *     security:
  *       - bearerAuth: []
  *     description: Get the top 10 dishes with the highest average rating

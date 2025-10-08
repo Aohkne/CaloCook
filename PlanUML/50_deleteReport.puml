@@ -1,0 +1,65 @@
+@startuml DeleteReport
+
+actor Admin
+boundary "Admin Dashboard" as View #lightblue
+participant ":reportRoute" as Route #lightblue
+control "reportController" as Controller #lightblue
+participant ":reportService" as Service #lightblue
+entity "reportModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Delete Report
+Admin -> View: 1. Select a report and click "Delete"
+activate Admin
+activate View
+
+View -> View: 2. Prompt "Are you sure?"
+activate View
+deactivate View
+alt Admin cancels
+    View --> Admin: 2.1. Abort deletion, return to list
+else Admin confirms
+    View -> Route: 3. DELETE /api/v1/reports/{reportId}
+    activate Route
+
+    Route -> Controller: 4. deleteReport(req, res)
+    activate Controller
+
+    Controller -> Service: 5. deleteReport(reportId)
+    activate Service
+
+    Service -> Model: 6. deleteReport(reportId)
+    activate Model
+    Model -> MongoDB: 7. ExecuteDelete()
+    activate MongoDB
+    MongoDB --> Model: 8. Return result
+    deactivate MongoDB
+    Model --> Service: 9. Return success
+    deactivate Model
+
+    alt Report exists
+
+        Service --> Controller: 9.1. Return success
+
+        Controller --> Route: 9.1.1. Return { "message": "Report deleted successfully" }
+
+        Route --> View: 9.1.2. Refresh report list
+
+        View --> Admin: 9.1.3. Show "Report deleted successfully"
+    else Report not found
+        Service --> Controller: 9.2. Return error "Report not found"
+        deactivate Service
+
+        Controller --> Route: 9.2.1. Return 404 Not Found
+        deactivate Controller
+
+        Route --> View: 9.2.2. Show error
+        deactivate Route
+
+        View --> Admin: 9.2.3. Display "Report not found or already deleted"
+        deactivate View
+        deactivate Admin
+    end
+end
+end
+@enduml

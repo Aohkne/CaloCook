@@ -3,12 +3,12 @@ import { authMiddleware } from '@/middlewares/authMiddleware'
 import { authController } from '@/controllers/authController'
 const Router = expesss.Router()
 
-// swagger: tags: ['Auth']
+// swagger: tags: ['auth']
 /**
  * @swagger
  * /api/v1/auth/login:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: User login
  *     requestBody:
  *       required: true
@@ -30,7 +30,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/signup:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: User signup
  *     requestBody:
  *       required: true
@@ -52,7 +52,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/refresh-token:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: Refresh access token
  *     requestBody:
  *       required: true
@@ -70,7 +70,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/logout:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     security:
  *       - bearerAuth: []
  *     summary: Logout user
@@ -90,7 +90,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/forgot-password:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: Request password reset
  *     requestBody:
  *       required: true
@@ -107,7 +107,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/forgot-password/{token}:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: Reset password with token
  *     parameters:
  *       - in: path
@@ -132,7 +132,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/change-password:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     security:
  *       - bearerAuth: []
  *     summary: Change password
@@ -154,7 +154,7 @@ const Router = expesss.Router()
  
  * /api/v1/auth/profile:
   *   get:
- *     tags: [Auth]
+ *     tags: [auth]
  *     security:
  *       - bearerAuth: []
  *     summary: Get user profile
@@ -214,7 +214,7 @@ const Router = expesss.Router()
  *
  *
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     security:
  *       - bearerAuth: []
  *     summary: Edit user profile
@@ -256,7 +256,7 @@ const Router = expesss.Router()
  *
  * /api/v1/auth/forgot-password-otp:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: Send OTP for forgot password
  *     requestBody:
  *       required: true
@@ -274,7 +274,7 @@ const Router = expesss.Router()
  * 
  * /api/v1/auth/reset-password-otp:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: Verify OTP and reset password
  *     requestBody:
  *       required: true

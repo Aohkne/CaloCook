@@ -8,21 +8,60 @@ const _COLLECTION_SCHEMA = Joi.object({
   dishId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
   userId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
   description: Joi.string().max(10000).min(10).required(),
+  checked: Joi.boolean().default(false),
   createdAt: Joi.date().timestamp('javascript').default(Date.now)
 })
 
-// getAll
+// Enhanced sort object with validation
+const createSortObject = (sortBy = 'createdAt', order = 'desc') => {
+  const sortOrder = order === 'asc' ? 1 : -1
+
+  // Validate sortBy field for reports
+  const allowedSortFields = ['createdAt', 'updatedAt', 'description']
+  const validSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt'
+
+  return { [validSortBy]: sortOrder }
+}
+
 const getAllReports = async (params = {}) => {
   try {
     const db = await GET_DB()
+    const { dishName, page = 1, limit = 10, sortBy = 'createdAt', order = 'desc' } = params
 
-    const page = Math.max(1, Number(params.page) || 1)
-    const limit = Math.max(1, Math.min(100, Number(params.limit) || 10))
-    const skip = (page - 1) * limit
+    const pageNum = Math.max(1, Number(page))
+    const limitNum = Math.max(1, Math.min(100, Number(limit)))
+    const skip = (pageNum - 1) * limitNum
+    const sortObject = createSortObject(sortBy, order)
+    const searchTerm = dishName?.trim()
 
-    // Build a simple query. Future: support filtering by user email/dish name via aggregation.
-    const cursor = db.collection(_COLLECTION_NAME).find().sort({ createdAt: -1 }).skip(skip).limit(limit)
-    const [data, totalCount] = await Promise.all([cursor.toArray(), db.collection(_COLLECTION_NAME).countDocuments()])
+    if (searchTerm) {
+      // Create base pipeline for search
+      const basePipeline = [
+        { $lookup: { from: 'dish', localField: 'dishId', foreignField: '_id', as: 'dish' } },
+        { $unwind: '$dish' },
+        { $match: { 'dish.name': { $regex: searchTerm, $options: 'i' } } }
+      ]
+
+      // Execute data and count queries in parallel
+      const [data, countResult] = await Promise.all([
+        db
+          .collection(_COLLECTION_NAME)
+          .aggregate([...basePipeline, { $sort: sortObject }, { $skip: skip }, { $limit: limitNum }])
+          .toArray(),
+        db
+          .collection(_COLLECTION_NAME)
+          .aggregate([...basePipeline, { $count: 'total' }])
+          .toArray()
+      ])
+
+      return { data, totalCount: countResult[0]?.total ?? 0 }
+    }
+
+    // Normal query without search
+    const [data, totalCount] = await Promise.all([
+      db.collection(_COLLECTION_NAME).find().sort(sortObject).skip(skip).limit(limitNum).toArray(),
+      db.collection(_COLLECTION_NAME).countDocuments()
+    ])
 
     return { data, totalCount }
   } catch (error) {
@@ -52,8 +91,116 @@ const deleteReport = async (id) => {
   }
 }
 
+// Update report - toggle checked status
+const updateReport = async (id) => {
+  try {
+    // First get current document to check current status
+    const currentDoc = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .findOne({ _id: new ObjectId(id) })
+
+    if (!currentDoc) {
+      throw new Error('Report not found')
+    }
+
+    // Toggle the checked status
+    const newCheckedStatus = !currentDoc.checked
+
+    const result = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { checked: newCheckedStatus } },
+        { returnDocument: 'after' } // Return the updated document
+      )
+    return result
+  } catch (error) {
+    throw new Error('Failed to update report')
+  }
+}
+
+const getAllForExport = async (filter = {}, maxLimit = 10000) => {
+  try {
+    let reports
+
+    if (filter.dishName) {
+      reports = await GET_DB()
+        .collection(_COLLECTION_NAME)
+        .aggregate([
+          { $lookup: { from: 'dish', localField: 'dishId', foreignField: '_id', as: 'dish' } },
+          { $unwind: '$dish' },
+          { $match: { 'dish.name': { $regex: filter.dishName, $options: 'i' } } },
+          {
+            $lookup: {
+              from: 'user',
+              localField: 'userId',
+              foreignField: '_id',
+              as: 'user'
+            }
+          },
+          {
+            $unwind: { path: '$user' }
+          },
+          {
+            $project: {
+              description: 1,
+              userId: 1,
+              createdAt: 1,
+              'user.email': 1,
+              'dish.name': 1
+            }
+          }
+        ])
+        .toArray()
+    } else {
+      reports = await GET_DB()
+        .collection(_COLLECTION_NAME)
+        .aggregate([
+          {
+            $lookup: {
+              from: 'dish',
+              localField: 'dishId',
+              foreignField: '_id',
+              as: 'dish'
+            }
+          },
+          {
+            $unwind: { path: '$dish' }
+          },
+          {
+            $lookup: {
+              from: 'user',
+              localField: 'userId',
+              foreignField: '_id',
+              as: 'user'
+            }
+          },
+          {
+            $unwind: { path: '$user' }
+          },
+          {
+            $project: {
+              description: 1,
+              userId: 1,
+              createdAt: 1,
+              'user.email': 1,
+              'dish.name': 1
+            }
+          }
+        ])
+        .toArray()
+    }
+
+    return reports
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const reportModel = {
   getAllReports,
   createReport,
-  deleteReport
+  deleteReport,
+  updateReport,
+  getAllForExport
 }
