@@ -1,0 +1,151 @@
+@use '@styles/mixin' as *;
+.wrapper {
+  max-width: 100rem;
+  margin: auto;
+  padding: 6rem 2rem;
+  @include respond-above(md) {
+    padding: 6rem 2rem;
+  }
+
+  .dish-h2 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--title);
+  }
+  // Back Button
+  .back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+  }
+
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--description);
+    text-decoration: none;
+    transition: color 0.3s;
+
+    &:hover {
+      color: var(--black);
+    }
+  }
+  // Main Container
+  .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+
+    @include respond-above(md) {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+  // Dish Image
+  .dish-image-container {
+    aspect-ratio: 1 / 1;
+
+    @include respond-above(md) {
+      aspect-ratio: 4/3;
+      height: auto;
+    }
+  }
+
+  .dish-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  // Dish Name
+  .dish-name {
+    font-size: 48px;
+    color: var(--title);
+  }
+
+  // Dish Description
+
+  .dish-description {
+    font-size: 18px;
+    color: var(--description);
+  }
+
+  // Time, Calories, Difficulty Level Cards
+  .time-colories-difficulty-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+
+    .span-2 {
+      grid-column: span 2;
+    }
+
+    .card {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      font-size: 16px;
+      color: var(--title);
+      padding: 1rem;
+    }
+
+    .card-text-container {
+      display: flex;
+      flex-direction: column;
+    }
+    .card-icon {
+      background-color: var(--tertiary);
+      color: var(--secondary);
+      border-radius: 10px;
+      width: 35px;
+      height: 35px;
+      padding: 4px;
+    }
+    .card-title {
+      font-size: 14px;
+      color: var(--title);
+    }
+
+    .card-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--title);
+    }
+
+    // Edit Button
+    .edit-button {
+      display: flex;
+      cursor: pointer;
+      padding: 2rem 0;
+      background-color: var(--secondary);
+      border: none;
+      border-radius: 8px;
+      color: var(--white);
+      font-size: 16px;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border: 2px solid var(--secondary);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.25s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      &:active {
+        transform: translateY(0px);
+      }
+    }
+  }
+}
