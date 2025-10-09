@@ -1,12 +1,10 @@
-/* CookingStepsModal.module.scss */
-
-.modalOverlay {
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,8 +12,8 @@
   padding: 20px;
 }
 
-.modalContainer {
-  background-color: var(--background-color);
+.modal-container {
+  background: var(--card-bg);
   border-radius: 24px;
   width: 100%;
   max-width: 600px;
@@ -31,127 +29,122 @@
   align-items: flex-start;
   justify-content: space-between;
   padding: 30px 20px 16px;
-  background-color: var(--secondary-color);
+  background: var(--secondary);
   border-bottom-left-radius: 24px;
   border-bottom-right-radius: 24px;
 }
 
-.headerContent {
+.header-content {
   flex: 1;
   margin-right: 16px;
 }
 
-.headerTitle {
+.header-title {
   font-size: 24px;
   font-weight: 800;
-  color: white;
-  margin: 0 0 8px 0;
+  color: var(--white);
+  margin-bottom: 8px;
+  margin: 0;
   letter-spacing: 0.5px;
 }
 
-.headerSubtitle {
+.header-subtitle {
   font-size: 16px;
-  color: white;
+  color: var(--white);
   opacity: 0.9;
-  font-weight: 500;
   margin: 0;
+  font-weight: 500;
 }
 
-.closeButton {
+.close-button {
   width: 40px;
   height: 40px;
   border-radius: 20px;
-  background-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
+  color: var(--white);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  color: white;
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);
   }
 }
 
-.progressContainer {
-  padding: 20px;
-  background-color: var(--card-bg-color);
+.progress-container {
+  padding: 24px;
+  background: var(--card-bg);
 }
 
-.progressHeader {
+.progress-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
 }
 
-.progressLabel {
+.progress-label {
   font-size: 16px;
   font-weight: 600;
-  color: var(--title-color);
+  color: var(--title);
 }
 
-.progressSteps {
+.progress-steps {
   font-size: 16px;
   font-weight: 600;
-  color: var(--description-color);
+  color: var(--description);
 }
 
-.progressBarContainer {
+.progress-bar-container {
   width: 100%;
 }
 
-.progressBar {
+.progress-bar {
   height: 8px;
-  background-color: var(--input-border-color);
+  background: var(--input-border);
   border-radius: 4px;
   overflow: hidden;
 }
 
-.progressFill {
+.progress-fill {
   height: 100%;
-  background-color: var(--green-color);
+  background: var(--green);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
 
-.stepsContainer {
+.steps-container {
   flex: 1;
-  background-color: var(--background-color);
+  background: var(--background);
   overflow-y: auto;
+  max-height: calc(90vh - 200px);
 }
 
-.stepsContent {
-  padding: 20px;
+.steps-content {
+  padding: 24px;
+  padding-bottom: 100px;
 }
 
-.stepCard {
-  background-color: #E8F5E9;
+.step-card {
+  background: var(--light-green);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  &:last-child {
-    margin-bottom: 0;
-  }
+  display: flex;
+  flex-direction: column;
 }
 
-.stepCardHeader {
+.step-card-header {
   display: flex;
   align-items: center;
   margin-bottom: 12px;
 }
 
-.stepIcon {
+.step-icon {
   width: 32px;
   height: 32px;
   border-radius: 16px;
@@ -159,62 +152,56 @@
   align-items: center;
   justify-content: center;
   margin-right: 12px;
-  background-color: var(--primary-color);
-  color: white;
-  font-weight: 700;
+}
+
+.step-icon-text {
   font-size: 16px;
-}
-
-.stepIconCompleted {
-  background-color: var(--green-color);
-}
-
-.stepIconText {
-  color: white;
   font-weight: 700;
-  font-size: 16px;
+  color: var(--white);
 }
 
-.stepTitle {
+.step-title {
   font-size: 18px;
   font-weight: 700;
-  color: var(--title-color);
+  color: var(--title);
   flex: 1;
+}
+
+.step-description {
+  font-size: 16px;
+  color: var(--description);
+  line-height: 24px;
+  margin-bottom: 8px;
   margin: 0;
 }
 
-.stepDescription {
-  font-size: 16px;
-  color: var(--description-color);
-  line-height: 24px;
-  margin: 0 0 8px 0;
-}
-
-.completedStatus {
+.completed-status {
   display: flex;
   align-items: center;
   align-self: flex-end;
-  color: var(--green-color);
 }
 
-.completedText {
+.completed-text {
   font-size: 14px;
   font-weight: 600;
+  color: var(--green);
   margin-left: 4px;
 }
 
-.navigationContainer {
+.navigation-container {
   display: flex;
   justify-content: space-between;
-  padding: 20px;
-  background-color: var(--card-bg-color);
+  padding: 20px 24px;
+  background: var(--card-bg);
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  gap: 16px;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
 }
 
-.navButton {
+.nav-button {
   display: flex;
   align-items: center;
   padding: 16px 24px;
@@ -225,7 +212,6 @@
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-  gap: 8px;
 
   &:hover {
     transform: translateY(-1px);
@@ -237,86 +223,37 @@
   }
 }
 
-.backButton {
-  background-color: var(--secondary-color);
-  color: white;
+.back-button {
+  background: var(--secondary);
+  color: var(--white);
 }
 
-.continueButton {
-  background-color: var(--secondary-color);
-  color: white;
+.continue-button {
+  background: var(--secondary);
+  color: var(--white);
 }
 
-.navButtonText {
+.nav-button-text {
   font-size: 16px;
   font-weight: 700;
+  margin: 0 8px;
   letter-spacing: 0.3px;
 }
 
-/* Responsive Design */
+// Responsive
 @media (max-width: 768px) {
-  .modalOverlay {
-    padding: 10px;
-  }
-
-  .modalContainer {
-    max-height: 95vh;
+  .modal-container {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
   }
 
   .header {
-    padding: 20px 16px 12px;
+    border-radius: 0;
   }
 
-  .headerTitle {
-    font-size: 20px;
-  }
-
-  .headerSubtitle {
-    font-size: 14px;
-  }
-
-  .progressContainer {
-    padding: 16px;
-  }
-
-  .stepsContent {
-    padding: 16px;
-  }
-
-  .stepCard {
-    padding: 16px;
-  }
-
-  .navigationContainer {
-    padding: 16px;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .navButton {
-    width: 100%;
-    min-width: auto;
-  }
-}
-
-@media (max-width: 480px) {
-  .modalOverlay {
-    padding: 5px;
-  }
-
-  .headerTitle {
-    font-size: 18px;
-  }
-
-  .stepCard {
-    padding: 12px;
-  }
-
-  .stepTitle {
-    font-size: 16px;
-  }
-
-  .stepDescription {
-    font-size: 14px;
+  .navigation-container {
+    border-radius: 0;
   }
 }

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, ChevronLeft } from 'lucide-react';
+import { Icon } from '@iconify/react';
 import styles from './CookingStepsModal.module.scss';
+import classNames from 'classnames/bind';
+
+const cx = classNames.bind(styles);
 
 const CookingStepsModal = ({ 
   visible, 
@@ -81,17 +84,17 @@ const CookingStepsModal = ({
   };
 
   const renderProgressBar = () => (
-    <div className={styles.progressContainer}>
-      <div className={styles.progressHeader}>
-        <span className={styles.progressLabel}>Progress</span>
-        <span className={styles.progressSteps}>
+    <div className={cx('progress-container')}>
+      <div className={cx('progress-header')}>
+        <span className={cx('progress-label')}>Progress</span>
+        <span className={cx('progress-steps')}>
           {completedSteps.size}/{steps.length} steps
         </span>
       </div>
-      <div className={styles.progressBarContainer}>
-        <div className={styles.progressBar}>
+      <div className={cx('progress-bar-container')}>
+        <div className={cx('progress-bar')}>
           <div 
-            className={styles.progressFill}
+            className={cx('progress-fill')}
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
@@ -104,28 +107,33 @@ const CookingStepsModal = ({
     const isCurrent = isCurrentStep(index);
     
     return (
-      <div key={index} className={styles.stepCard}>
-        <div className={styles.stepCardHeader}>
-          <div className={`${styles.stepIcon} ${isCompleted ? styles.stepIconCompleted : ''}`}>
+      <div key={index} className={cx('step-card')}>
+        <div className={cx('step-card-header')}>
+          <div 
+            className={cx('step-icon')}
+            style={{
+              backgroundColor: isCompleted ? 'var(--green)' : 'var(--primary)'
+            }}
+          >
             {isCompleted ? (
-              <Check size={16} />
+            <Icon icon="heroicons:check" width="16" height="16" color="var(--white)" />
             ) : (
-              <span className={styles.stepIconText}>{index + 1}</span>
+              <span className={cx('step-icon-text')}>{index + 1}</span>
             )}
           </div>
-          <span className={styles.stepTitle}>
+          <span className={cx('step-title')}>
             {step.title || `Step ${index + 1}`}
           </span>
         </div>
         
-        <p className={styles.stepDescription}>
+        <p className={cx('step-description')}>
           {step.description || step.content || 'No description'}
         </p>
         
         {isCompleted && (
-          <div className={styles.completedStatus}>
-            <Check size={14} />
-            <span className={styles.completedText}>Completed</span>
+          <div className={cx('completed-status')}>
+            <Icon icon="heroicons:check" width="14" height="14" color="var(--green)" />
+            <span className={cx('completed-text')}>Completed</span>
           </div>
         )}
       </div>
@@ -137,18 +145,18 @@ const CookingStepsModal = ({
   }
 
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContainer} onClick={(e) => e.stopPropagation()}>
+    <div className={cx('modal-overlay')}>
+      <div className={cx('modal-container')}>
         {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <h2 className={styles.headerTitle}>{dishData.name || 'Dish'}</h2>
-            <p className={styles.headerSubtitle}>
+        <div className={cx('header')}>
+          <div className={cx('header-content')}>
+            <h2 className={cx('header-title')}>{dishData.name || 'Dish'}</h2>
+            <p className={cx('header-subtitle')}>
               Time: {getCookingTime()} • Difficulty: {getDifficulty()}
             </p>
           </div>
-          <button onClick={onClose} className={styles.closeButton}>
-            <X size={24} />
+          <button onClick={onClose} className={cx('close-button')}>
+            <Icon icon="heroicons:x-mark" width="24" height="24" />
           </button>
         </div>
 
@@ -156,30 +164,30 @@ const CookingStepsModal = ({
         {renderProgressBar()}
 
         {/* Steps List */}
-        <div className={styles.stepsContainer}>
-          <div className={styles.stepsContent}>
+        <div className={cx('steps-container')}>
+          <div className={cx('steps-content')}>
             {steps.map((step, index) => renderStepCard(step, index))}
           </div>
         </div>
 
         {/* Navigation Buttons */}
-        <div className={styles.navigationContainer}>
+        <div className={cx('navigation-container')}>
           <button
-            className={`${styles.navButton} ${styles.backButton}`}
+            className={cx('nav-button', 'back-button')}
             onClick={handleBack}
           >
-            <ChevronLeft size={20} />
-            <span className={styles.navButtonText}>Back</span>
+            <Icon icon="heroicons:chevron-left" width="20" height="20" />
+            <span className={cx('nav-button-text')}>Back</span>
           </button>
 
           <button
-            className={`${styles.navButton} ${styles.continueButton}`}
+            className={cx('nav-button', 'continue-button')}
             onClick={handleStepComplete}
           >
-            <span className={styles.navButtonText}>
+            <span className={cx('nav-button-text')}>
               {currentStepIndex === steps.length - 1 ? 'Complete' : 'Continue'}
             </span>
-            <Check size={20} />
+            <Icon icon="heroicons:check" width="20" height="20" />
           </button>
         </div>
       </div>
