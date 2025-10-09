@@ -120,14 +120,32 @@ const CookingStepsModal = ({
     const isCompleted = isStepCompleted(index);
     const isCurrent = isCurrentStep(index);
     
+    // Determine step status and colors
+    let stepCardStyle = styles.stepCard;
+    let stepIconBgColor = colors.description; // Default for pending
+    let stepTitleColor = colors.description;
+    let stepDescriptionOpacity = 0.7;
+    
+    if (isCompleted) {
+      stepIconBgColor = colors.green;
+      stepTitleColor = colors.title;
+      stepDescriptionOpacity = 1;
+    } else if (isCurrent) {
+      stepIconBgColor = colors.primary;
+      stepTitleColor = colors.primary;
+      stepDescriptionOpacity = 1;
+    }
+    
     return (
-      <View key={index} style={styles.stepCard}>
+      <View key={index} style={[
+        stepCardStyle,
+        isCurrent && { borderColor: colors.primary, borderWidth: 2 },
+        !isCurrent && !isCompleted && { opacity: 0.6 }
+      ]}>
         <View style={styles.stepCardHeader}>
           <View style={[
             styles.stepIcon,
-            {
-              backgroundColor: isCompleted ? colors.green : colors.primary
-            }
+            { backgroundColor: stepIconBgColor }
           ]}>
             {isCompleted ? (
               <Check size={16} color={colors.white} />
@@ -135,12 +153,15 @@ const CookingStepsModal = ({
               <Text style={styles.stepIconText}>{index + 1}</Text>
             )}
           </View>
-          <Text style={styles.stepTitle}>
+          <Text style={[styles.stepTitle, { color: stepTitleColor }]}>
             {step.title || `Step ${index + 1}`}
           </Text>
         </View>
         
-        <Text style={styles.stepDescription}>
+        <Text style={[
+          styles.stepDescription,
+          { opacity: stepDescriptionOpacity }
+        ]}>
           {step.description || step.content || 'No description'}
         </Text>
         
@@ -307,11 +328,6 @@ const createStyles = (colors) => StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
   },
   stepCardHeader: {
     flexDirection: 'row',

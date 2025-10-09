@@ -106,15 +106,18 @@ const CookingStepsModal = ({
     const isCompleted = isStepCompleted(index);
     const isCurrent = isCurrentStep(index);
     
+    // Determine step status
+    let stepStatus = 'pending';
+    if (isCompleted) {
+      stepStatus = 'completed';
+    } else if (isCurrent) {
+      stepStatus = 'current';
+    }
+    
     return (
-      <div key={index} className={cx('step-card')}>
+      <div key={index} className={cx('step-card', stepStatus)}>
         <div className={cx('step-card-header')}>
-          <div 
-            className={cx('step-icon')}
-            style={{
-              backgroundColor: isCompleted ? 'var(--green)' : 'var(--primary)'
-            }}
-          >
+          <div className={cx('step-icon')}>
             {isCompleted ? (
             <Icon icon="heroicons:check" width="16" height="16" color="var(--white)" />
             ) : (

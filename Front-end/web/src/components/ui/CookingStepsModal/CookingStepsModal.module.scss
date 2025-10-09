@@ -136,6 +136,23 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
+
+  &.pending {
+    background: var(--input-bg);
+    opacity: 0.6;
+  }
+
+  &.current {
+    background: var(--light-green);
+    opacity: 1;
+    border: 2px solid var(--primary);
+  }
+
+  &.completed {
+    background: var(--light-green);
+    opacity: 1;
+  }
 }
 
 .step-card-header {
@@ -152,6 +169,19 @@
   align-items: center;
   justify-content: center;
   margin-right: 12px;
+  transition: background-color 0.3s ease;
+
+  .step-card.pending & {
+    background-color: var(--description) !important;
+  }
+
+  .step-card.current & {
+    background-color: var(--primary) !important;
+  }
+
+  .step-card.completed & {
+    background-color: var(--green) !important;
+  }
 }
 
 .step-icon-text {
@@ -165,6 +195,19 @@
   font-weight: 700;
   color: var(--title);
   flex: 1;
+  transition: color 0.3s ease;
+
+  .step-card.pending & {
+    color: var(--description);
+  }
+
+  .step-card.current & {
+    color: var(--primary);
+  }
+
+  .step-card.completed & {
+    color: var(--title);
+  }
 }
 
 .step-description {
@@ -173,6 +216,22 @@
   line-height: 24px;
   margin-bottom: 8px;
   margin: 0;
+  transition: color 0.3s ease;
+
+  .step-card.pending & {
+    color: var(--description);
+    opacity: 0.7;
+  }
+
+  .step-card.current & {
+    color: var(--description);
+    opacity: 1;
+  }
+
+  .step-card.completed & {
+    color: var(--description);
+    opacity: 1;
+  }
 }
 
 .completed-status {
