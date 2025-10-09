@@ -89,3 +89,8 @@ export const exportDish = async (params = {}) => {
 
   return { message: 'Export successful' };
 };
+
+export const getDishById = async (dishId) => {
+  const response = await api.get(`/dish/${dishId}`);
+  return response.data;
+};

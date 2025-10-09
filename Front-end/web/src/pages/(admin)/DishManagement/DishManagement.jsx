@@ -222,7 +222,11 @@ function DishManagement() {
         accessorKey: 'imageUrl',
         header: 'Image',
         cell: ({ row }) => (
-          <div className={cx('dish-image')}>
+          <div
+            className={cx('dish-image')}
+            onClick={() => navigate(ROUTES.DISH_MANAGEMENT_DETAIL.replace(':id', row.original._id))}
+            style={{ cursor: 'pointer' }}
+          >
             {row.original.imageUrl ? (
               <img
                 src={getWebImagePath(row.original.imageUrl)}
@@ -242,7 +246,11 @@ function DishManagement() {
         accessorKey: 'name',
         header: 'Name',
         cell: ({ row }) => (
-          <span className={cx('dish-name')}>
+          <span
+            className={cx('dish-name')}
+            onClick={() => navigate(ROUTES.DISH_MANAGEMENT_DETAIL.replace(':id', row.original._id))}
+            style={{ cursor: 'pointer' }}
+          >
             <strong>{row.original.name || 'N/A'}</strong>
           </span>
         )
@@ -313,7 +321,7 @@ function DishManagement() {
         )
       }
     ],
-    []
+    [navigate]
   );
 
   useEffect(() => {
