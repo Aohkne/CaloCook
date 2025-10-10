@@ -21,6 +21,7 @@ import Download from '@/pages/Download/Download';
 import Dashboard from '@/pages/(admin)/Dashboard/Dashboard';
 import UserManagement from '@/pages/(admin)/UserManagement/UserManagement';
 import DishManagement from '@/pages/(admin)/DishManagement/DishManagement';
+import DishDetail from '@/pages/(admin)/DishDetail/DishDetail';
 import ReportManagement from '@/pages/(admin)/ReportManagement/ReportManagement';
 import Chat from '@/pages/(admin)/Chat/Chat';
 import ProfileAdmin from '@/pages/(admin)/ProfileAdmin/ProfileAdmin';
@@ -136,6 +137,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute requiredRole={ROLE.ADMIN}>
               <DishManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path={ROUTES.DISH_MANAGEMENT_DETAIL}
+          element={
+            <ProtectedRoute requiredRole={ROLE.ADMIN}>
+              <DishDetail />
             </ProtectedRoute>
           }
         />
