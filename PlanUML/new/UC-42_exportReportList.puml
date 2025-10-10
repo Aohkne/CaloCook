@@ -1,16 +1,16 @@
-@startuml Export Dish List
+@startuml Export Report List
 
 actor Admin as "Admin"
-boundary "DishListExportPage" as View #lightblue
-participant ":dishRoute" as Route #lightblue
+boundary "ReportListExportPage" as View #lightblue
+participant ":reportRoute" as Route #lightblue
 control "authMiddleware" as Auth #orange
-control "dishController" as Controller #lightblue
-participant ":dishService" as Service #lightblue
-entity "dishModel" as Model #lightblue
+control "reportController" as Controller #lightblue
+participant ":reportService" as Service #lightblue
+entity "reportModel" as Model #lightblue
 database "MongoDB" as MongoDB #yellow
 participant ":exportHelper" as Helper #lightgreen
 
-Group Export Dish List
+Group Export Report List
 Admin -> View: 1. Click "Export" button
 activate Admin
 activate View
@@ -18,7 +18,7 @@ activate View
 Admin -> View: 2. Select export type (Excel/CSV)\nand apply filters (optional)
 Admin -> View: 3. Confirm export
 
-View -> Route: 4. GET /api/v1/dish/export/{type}\n(params: name, minCookingTime, maxCookingTime,\nminCalorie, maxCalorie, difficulty, isActive)
+View -> Route: 4. GET /api/v1/report/export/{type}\n(params: name)
 activate Route
 
 Route -> Auth: 5. authenticateUser(req) &\nauthorizeRole(['admin'])
@@ -48,31 +48,31 @@ activate Model
 
 Model -> MongoDB: 11. ExecuteQuery(find with filters)
 activate MongoDB
-MongoDB --> Model: 12. Return dishes array
+MongoDB --> Model: 12. Return reports array
 deactivate MongoDB
 
-Model --> Service: 13. Return dishes data
+Model --> Service: 13. Return reports data
 deactivate Model
 
-Service --> Controller: 14. Return dishes array
+Service --> Controller: 14. Return reports array
 deactivate Service
 
-opt No dishes found
+opt No reports found
     Controller --> Route: 14.1. Return 404 Error
     Route --> View: 14.2. Show error message
-    View --> Admin: 14.3. Display "No dishes found to export"
+    View --> Admin: 14.3. Display "No reports found to export"
 end
 
 alt Export Type = Excel
 
-    Controller -> Helper: 15.1.1. generateDishExcelFile(dishes)
+    Controller -> Helper: 15.1.1. generateReportExcelFile(reports)
     activate Helper
     
     Helper --> Controller: 15.1.2. Return Excel buffer
     deactivate Helper
     
 else Export Type = CSV
-    Controller -> Helper: 15.2.1. generateDishCSVFile(dishes)
+    Controller -> Helper: 15.2.1. generateReportCSVFile(reports)
     activate Helper
     
     Helper --> Controller: 15.2.2. Return CSV string
