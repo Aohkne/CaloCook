@@ -28,6 +28,11 @@ export const getDishes = async (params = {}) => {
   return response.data;
 };
 
+export const updateDish = async (dishId, payload) => {
+  const response = await api.put(`/dish/${dishId}`, payload);
+  return response.data;
+};
+
 export const activateDish = async (dishId) => {
   const response = await api.patch(`/dish/${dishId}/activate`);
   return response.data;
