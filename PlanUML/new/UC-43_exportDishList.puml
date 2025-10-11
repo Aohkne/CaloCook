@@ -65,17 +65,17 @@ end
 
 alt Export Type = Excel
 
-    Controller -> Helper: 15.1.1. generateDishExcelFile(dishes)
+    Controller -> Helper: 15.1. generateDishExcelFile(dishes)
     activate Helper
     
-    Helper --> Controller: 15.1.2. Return Excel buffer
+    Helper --> Controller: 15.1.1. Return Excel buffer
     deactivate Helper
     
 else Export Type = CSV
-    Controller -> Helper: 15.2.1. generateDishCSVFile(dishes)
+    Controller -> Helper: 15.2. generateDishCSVFile(dishes)
     activate Helper
     
-    Helper --> Controller: 15.2.2. Return CSV string
+    Helper --> Controller: 15.2.1. Return CSV string
     deactivate Helper
 end
 
