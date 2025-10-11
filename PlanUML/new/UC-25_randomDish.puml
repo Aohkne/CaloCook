@@ -1,0 +1,91 @@
+@startuml Get Random Unfavorited Dishes
+
+actor User as "User"
+boundary "DishPage" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "authMiddleware" as Auth #orange
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "favoriteModel" as FavoriteModel #lightgreen
+entity "dishModel" as DishModel #lightblue
+database "MongoDB" as MongoDB #yellow
+
+Group Get Random Unfavorited Dishes
+User -> View: 1. Request random dishes
+activate User
+activate View
+
+View -> Route: 2. GET /api/v1/dish/random/userId/{id}\n(params: limit)
+activate Route
+
+Route -> Auth: 3. authenticateUser(req) &\nauthorizeRole(['user'])
+activate Auth
+
+note right of Auth #white
+  4. Verify Token & Check Role
+end note
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 4.1. Return 401/403 Error
+    Route --> View: 4.2. Show error
+    View --> User: 4.3. Display error message
+end
+
+Auth --> Route: 5. User authenticated & authorized
+deactivate Auth
+
+Route -> Controller: 6. getRandomUnfavoritedDishes(req, res)
+activate Controller
+
+Controller -> Service: 7. getRandomUnfavoritedDishes(userId, limit)
+activate Service
+
+Service -> FavoriteModel: 8. getfavoriteByUserId(userId)
+activate FavoriteModel
+
+FavoriteModel -> MongoDB: 9. Query favorites by userId
+activate MongoDB
+MongoDB --> FavoriteModel: 10. Return favorites array
+deactivate MongoDB
+
+FavoriteModel --> Service: 11. Return user favorites
+deactivate FavoriteModel
+
+Service -> DishModel: 12. getAllExistDish()
+activate DishModel
+
+DishModel -> MongoDB: 13. Query all active dishes\n(isActive: true)
+activate MongoDB
+MongoDB --> DishModel: 14. Return all dishes array
+deactivate MongoDB
+
+DishModel --> Service: 15. Return all dishes
+deactivate DishModel
+
+opt No dishes found
+    Service --> Controller: 15.1. Throw 404 Error
+    Controller --> Route: 15.2. Return 404 Error
+    Route --> View: 15.3. Show error message
+    View --> User: 15.4. Display "Dish not found!"
+end
+
+note right of Service #white
+Filter unfavorited dishes & Randomize remaining dishes
+end note
+
+Service --> Controller: 16. Return random unfavorited dishes
+deactivate Service
+
+Controller --> Route: 17. Return 200 OK
+deactivate Controller
+
+Route --> View: 18. Return dishes data
+deactivate Route
+
+View --> User: 19. Display random dishes
+deactivate User
+deactivate View
+
+end
+
+@enduml
