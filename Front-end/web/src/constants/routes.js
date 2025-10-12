@@ -23,6 +23,7 @@ export const ROUTES = {
 
   //USER
   DISH: '/dish',
+  DISH_DETAIL: '/dish/:id',
   FAVORITE: '/favorite',
   CHAT_AI: '/calobot',
   PROFILE_USER: '/user/profile',

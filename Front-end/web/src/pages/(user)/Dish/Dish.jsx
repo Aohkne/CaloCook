@@ -7,6 +7,7 @@ import styles from './Dish.module.scss';
 import { getDishes } from '@/api/dish';
 import { getFavorites, addToFavorites, removeFromFavorites } from '@/api/favorite';
 import { getWebImagePath } from '@/utils/imageHelper';
+import { useNavigate } from 'react-router-dom';
 const defaultImage = '/images/default-img.png';
 
 const cx = classNames.bind(styles);
@@ -24,12 +25,12 @@ function Dish() {
     hasNextPage: false,
     hasPrevPage: false
   });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [openFilterModal, setOpenFilterModal] = useState(false);
-  const [cookingTimeRange, setCookingTimeRange] = useState({ min: 5, max: 60 });
-  const [calorieRange, setCalorieRange] = useState({ min: 5, max: 60 });
 
   const toggleChat = () => setIsChatOpen((prev) => !prev);
+  const navigate = useNavigate();
+  const handleCardClick = (dishId) => {
+    navigate(`/dish/${dishId}`);
+  };
 
   // Helper function to get cookie value by name
   const getCookie = (name) => {
@@ -42,7 +43,8 @@ function Dish() {
   // Optimized getUserId - more concise
   const getUserId = () => {
     // Try different sources in order of preference
-    let userId = getCookie('user_id') || localStorage.getItem('user_id');
+    let userId = getCookie('user_id') ||
+      localStorage.getItem('user_id');
 
     // Last resort: decode from JWT token
     if (!userId) {
@@ -51,14 +53,9 @@ function Dish() {
         try {
           const base64Url = accessToken.split('.')[1];
           const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-          const jsonPayload = decodeURIComponent(
-            atob(base64)
-              .split('')
-              .map(function (c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-              })
-              .join('')
-          );
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
           const decoded = JSON.parse(jsonPayload);
           userId = decoded.userId || decoded.id || decoded.sub;
         } catch (e) {
@@ -83,7 +80,7 @@ function Dish() {
 
       if (response && response.code === 200 && response.data) {
         const favorites = Array.isArray(response.data) ? response.data : [];
-        const favoriteSet = new Set(favorites.map((fav) => fav.dishId));
+        const favoriteSet = new Set(favorites.map(fav => fav.dishId));
         setFavoriteIds(favoriteSet);
       } else {
         setFavoriteIds(new Set());
@@ -95,14 +92,13 @@ function Dish() {
   };
 
   // Fetch dishes from API
-  const fetchDishes = async (page = 1, name = searchQuery) => {
+  const fetchDishes = async (page = 1) => {
     setLoading(true);
     try {
       const response = await getDishes({
         page: page,
         limit: 8,
-        isActive: true,
-        name: name
+        isActive: true
       });
 
       if (response.code === 200) {
@@ -127,7 +123,8 @@ function Dish() {
     fetchFavorites();
   }, []);
 
-  const toggleFavorite = async (dishId) => {
+  const toggleFavorite = async (dishId, e) => {
+    e.stopPropagation();
     const userId = getUserId();
 
     if (!userId) {
@@ -142,7 +139,7 @@ function Dish() {
         const response = await removeFromFavorites(userId, dishId);
 
         if (response && response.code === 200) {
-          setFavoriteIds((prev) => {
+          setFavoriteIds(prev => {
             const newSet = new Set(prev);
             newSet.delete(dishId);
             return newSet;
@@ -152,7 +149,7 @@ function Dish() {
         const response = await addToFavorites(userId, dishId);
 
         if (response && response.code === 201) {
-          setFavoriteIds((prev) => {
+          setFavoriteIds(prev => {
             const newSet = new Set([...prev, dishId]);
             return newSet;
           });
@@ -183,46 +180,6 @@ function Dish() {
     e.target.src = defaultImage;
   };
 
-  // Handle search
-  const handleSearch = (e) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-    fetchDishes(1, e.target.value);
-  };
-
-  // Handle open filter modal
-  const handleOpenFilterModal = () => {
-    setOpenFilterModal(true);
-  };
-
-  // Handle close filter modal
-  const handleCloseFilterModal = () => {
-    setOpenFilterModal(false);
-  };
-
-  // Handle Cooking Time Range
-  const handleCookingTimeRangeChange = (type) => (e) => {
-    const value = parseInt(e.target.value);
-    setCookingTimeRange((prev) => {
-      if (type === 'min') {
-        return { ...prev, min: Math.min(value, prev.max) };
-      } else {
-        return { ...prev, max: Math.max(value, prev.min) };
-      }
-    });
-  };
-  // Handle Calorie Range
-  const handleCalorieRangeChange = (type) => (e) => {
-    const value = parseInt(e.target.value);
-    setCalorieRange((prev) => {
-      if (type === 'min') {
-        return { ...prev, min: Math.min(value, prev.max) };
-      } else {
-        return { ...prev, max: Math.max(value, prev.min) };
-      }
-    });
-  };
-
   return (
     <div className={cx('wrapper')}>
       <Navbar />
@@ -230,18 +187,16 @@ function Dish() {
       <div className={cx('content')}>
         <div className={cx('search-filter-section')}>
           <div className={cx('search-bar')}>
-            <Icon icon='ph:magnifying-glass' className={cx('search-icon')} />
+            <Icon icon="ph:magnifying-glass" className={cx('search-icon')} />
             <input
-              type='text'
-              placeholder='Search dishes...'
+              type="text"
+              placeholder="Search dishes..."
               className={cx('search-input')}
-              value={searchQuery}
-              onChange={handleSearch}
             />
           </div>
 
-          <div className={cx('filter-button')} onClick={handleOpenFilterModal}>
-            <Icon icon='ph:funnel' />
+          <div className={cx('filter-button')}>
+            <Icon icon="ph:funnel" />
           </div>
         </div>
 
@@ -250,21 +205,24 @@ function Dish() {
             <div className={cx('loading')}>Loading...</div>
           ) : (
             dishes.map((dish) => (
-              <div key={dish._id} className={cx('dish-card')}>
+              <div key={dish._id} className={cx('dish-card')} onClick={() => handleCardClick(dish._id)}>
                 <div className={cx('card-image')}>
                   <img
-                    src={dish.imageUrl && dish.imageUrl.trim() !== '' ? getWebImagePath(dish.imageUrl) : defaultImage}
+                    src={dish.imageUrl && dish.imageUrl.trim() !== ""
+                      ? getWebImagePath(dish.imageUrl)
+                      : defaultImage
+                    }
                     alt={dish.name}
                     onError={handleImageError}
                   />
                   <div
                     className={cx('favorite-btn', {
-                      active: favoriteIds.has(dish._id)
+                      'active': favoriteIds.has(dish._id)
                     })}
-                    onClick={() => toggleFavorite(dish._id)}
+                    onClick={(e) => toggleFavorite(dish._id, e)}
                     title={favoriteIds.has(dish._id) ? 'Remove from favorites' : 'Add to favorites'}
                   >
-                    <Icon icon={favoriteIds.has(dish._id) ? 'ph:heart-fill' : 'ph:heart'} />
+                    <Icon icon={favoriteIds.has(dish._id) ? "ph:heart-fill" : "ph:heart"} />
                   </div>
                 </div>
 
@@ -273,15 +231,15 @@ function Dish() {
 
                   <div className={cx('dish-stats')}>
                     <span className={cx('stat-item')}>
-                      <Icon icon='ph:clock' />
+                      <Icon icon="ph:clock" />
                       {dish.cookingTime} Min
                     </span>
                     <span className={cx('stat-item')}>
-                      <Icon icon='ph:fire' />
+                      <Icon icon="ph:fire" />
                       {dish.calorie} Kcal
                     </span>
                     <span className={cx('stat-item', 'difficulty')}>
-                      <Icon icon='ph:chef-hat' />
+                      <Icon icon="ph:chef-hat" />
                       {dish.difficulty?.charAt(0).toUpperCase() + dish.difficulty?.slice(1).toLowerCase()}
                     </span>
                   </div>
@@ -293,7 +251,9 @@ function Dish() {
           )}
         </div>
 
-        {!loading && dishes.length === 0 && <div className={cx('no-data')}>No dishes found</div>}
+        {!loading && dishes.length === 0 && (
+          <div className={cx('no-data')}>No dishes found</div>
+        )}
 
         <div className={cx('pagination')}>
           <button
@@ -301,13 +261,13 @@ function Dish() {
             onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
             disabled={!pagination.hasPrevPage || loading}
           >
-            <Icon icon='ph:caret-left-bold' width='20' height='20' />
+            <Icon icon="ph:caret-left-bold" width="20" height="20" />
           </button>
 
           {getPageNumbers().map((page) => (
             <button
               key={page}
-              className={cx('pagination-btn', 'page-btn', { active: currentPage === page })}
+              className={cx('pagination-btn', 'page-btn', { 'active': currentPage === page })}
               onClick={() => handlePageChange(page)}
               disabled={loading}
             >
@@ -320,7 +280,7 @@ function Dish() {
             onClick={() => handlePageChange(Math.min(currentPage + 1, pagination.totalPages))}
             disabled={!pagination.hasNextPage || loading}
           >
-            <Icon icon='ph:caret-right-bold' width='20' height='20' />
+            <Icon icon="ph:caret-right-bold" width="20" height="20" />
           </button>
         </div>
       </div>
@@ -329,115 +289,6 @@ function Dish() {
         <Icon icon='line-md:chat-round-filled' />
       </div>
       {isChatOpen && <ChatBox isChatOpen={isChatOpen} toggleChat={toggleChat} />}
-      {/* Filter Modal */}
-      {openFilterModal && (
-        <div className={cx('modal')}>
-          <div className={cx('modal-content')}>
-            <button
-              type='button'
-              className={cx('modal-close-button')}
-              onClick={handleCloseFilterModal}
-              aria-label='Close modal'
-            >
-              <Icon icon='material-symbols-light:close' width='24' height='24' />
-            </button>
-            <form className={cx('modal-form')}>
-              {/* Search Ingredient */}
-              <div className={cx('form-group')}>
-                <label htmlFor='search' className={cx('modal-input-label')}>
-                  Contains Products
-                </label>
-                <input
-                  id='search'
-                  type='text'
-                  className={cx('modal-search-input')}
-                  placeholder='Search ingredients...'
-                />
-              </div>
-              {/* Difficulty */}
-              <div className={cx('form-group', 'difficulty-group')}>
-                <span className={cx('modal-input-label')}>Difficulty</span>
-                <div className={cx('difficulty-blocks')}>
-                  <label className={cx('difficulty-block')}>
-                    <input type='checkbox' name='difficulty' value='easy' className={cx('difficulty-radio')} />
-                    <span className={cx('difficulty-block-text')}>Easy</span>
-                  </label>
-                  <label className={cx('difficulty-block')}>
-                    <input type='checkbox' name='difficulty' value='medium' className={cx('difficulty-radio')} />
-                    <span className={cx('difficulty-block-text')}>Medium</span>
-                  </label>
-                  <label className={cx('difficulty-block')}>
-                    <input type='checkbox' name='difficulty' value='hard' className={cx('difficulty-radio')} />
-                    <span className={cx('difficulty-block-text')}>Hard</span>
-                  </label>
-                </div>
-              </div>
-              {/* Cooking Time & Calories*/}
-              <div className={cx('cooking-time-calories-container')}>
-                <div className={cx('form-group')}>
-                  {/* Cooking Time */}
-                  <label htmlFor='search' className={cx('modal-input-label')}>
-                    Cooking Time (Minutes)
-                  </label>
-                  <p className={cx('min-max-text')}>
-                    {cookingTimeRange.min} - {cookingTimeRange.max}
-                  </p>
-                  <div className={cx('range-slider-container')}>
-                    <input
-                      type='range'
-                      min={5}
-                      max={60}
-                      aria-label='Minimum value'
-                      value={cookingTimeRange.min}
-                      onChange={handleCookingTimeRangeChange('min')}
-                      className={cx('range-slider')}
-                    />
-                    <input
-                      type='range'
-                      min={5}
-                      max={60}
-                      value={cookingTimeRange.max}
-                      onChange={handleCookingTimeRangeChange('max')}
-                      className={cx('range-slider')}
-                    />
-                  </div>
-                </div>
-                {/* Calories */}
-                <div className={cx('form-group')}>
-                  <label htmlFor='search' className={cx('modal-input-label')}>
-                    Calories (Kcal)
-                  </label>
-                  <p className={cx('min-max-text')}>
-                    {calorieRange.min} - {calorieRange.max}
-                  </p>
-                  <div className={cx('range-slider-container')}>
-                    <input
-                      type='range'
-                      min={5}
-                      max={60}
-                      aria-label='Minimum value'
-                      value={calorieRange.min}
-                      onChange={handleCalorieRangeChange('min')}
-                      className={cx('range-slider')}
-                    />
-                    <input
-                      type='range'
-                      min={5}
-                      max={60}
-                      value={calorieRange.max}
-                      onChange={handleCalorieRangeChange('max')}
-                      className={cx('range-slider')}
-                    />
-                  </div>
-                </div>
-              </div>
-              <button type='submit' className={cx('confirm-filter-button')}>
-                Filter Dishes <Icon icon='material-symbols-light:chevron-right' width='32' height='32' />
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
