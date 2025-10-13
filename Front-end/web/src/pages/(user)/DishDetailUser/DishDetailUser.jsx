@@ -36,26 +36,40 @@ function DishDetailUser() {
 
                 if (dishResponse.code === 200) {
                     setDish(dishResponse.data);
+                } else {
+                    setError('Dish not found');
+                    setLoading(false);
+                    return;
                 }
 
-                // Fetch ingredients
-                const ingredientResponse = await getIngredientsByDishId(id, {
-                    sortBy: 'createdAt',
-                    order: 'asc'
-                });
+                // Fetch ingredients (allow to fail silently)
+                try {
+                    const ingredientResponse = await getIngredientsByDishId(id, {
+                        sortBy: 'createdAt',
+                        order: 'asc'
+                    });
 
-                if (ingredientResponse.code === 200) {
-                    setIngredients(ingredientResponse.data || []);
+                    if (ingredientResponse.code === 200) {
+                        setIngredients(ingredientResponse.data || []);
+                    }
+                } catch (err) {
+                    console.warn('No ingredients found for this dish:', err);
+                    setIngredients([]);
                 }
 
-                // Fetch steps
-                const stepResponse = await getStepsByDishId(id, {
-                    sortBy: 'stepNumber',
-                    order: 'asc'
-                });
+                // Fetch steps (allow to fail silently)
+                try {
+                    const stepResponse = await getStepsByDishId(id, {
+                        sortBy: 'stepNumber',
+                        order: 'asc'
+                    });
 
-                if (stepResponse.code === 200) {
-                    setSteps(stepResponse.data || []);
+                    if (stepResponse.code === 200) {
+                        setSteps(stepResponse.data || []);
+                    }
+                } catch (err) {
+                    console.warn('No steps found for this dish:', err);
+                    setSteps([]);
                 }
 
             } catch (err) {
@@ -161,33 +175,45 @@ function DishDetailUser() {
                             <h2>Description</h2>
                             <p>{dish.description || 'No description available'}</p>
                         </div>
+
+                        {/* Dish Stats Section - moved to bottom */}
+                        <div className={cx('dish-stats')}>
+                            <div className={cx('stat-card')}>
+                                <Icon icon='ph:clock' />
+                                <span>{dish.cookingTime || 0} Min</span>
+                            </div>
+                            <div className={cx('stat-card')}>
+                                <Icon icon='ph:fire' />
+                                <span>{dish.calorie || 0} Kcal</span>
+                            </div>
+                            <div className={cx('stat-card')}>
+                                <Icon icon='ph:chef-hat' />
+                                <span>{dish.difficulty ? dish.difficulty.charAt(0).toUpperCase() + dish.difficulty.slice(1).toLowerCase() : 'N/A'}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {(ingredients.length > 0 || steps.length > 0) && (
-                    <div className={cx('tabs-section')}>
-                        <div className={cx('tabs-header')}>
-                            {ingredients.length > 0 && (
-                                <button
-                                    className={cx('tab-btn', { active: activeTab === 'ingredients' })}
-                                    onClick={() => setActiveTab('ingredients')}
-                                >
-                                    Ingredients
-                                </button>
-                            )}
-                            {steps.length > 0 && (
-                                <button
-                                    className={cx('tab-btn', { active: activeTab === 'steps' })}
-                                    onClick={() => setActiveTab('steps')}
-                                >
-                                    Steps
-                                </button>
-                            )}
-                        </div>
+                <div className={cx('tabs-section')}>
+                    <div className={cx('tabs-header')}>
+                        <button
+                            className={cx('tab-btn', { active: activeTab === 'ingredients' })}
+                            onClick={() => setActiveTab('ingredients')}
+                        >
+                            Ingredients
+                        </button>
+                        <button
+                            className={cx('tab-btn', { active: activeTab === 'steps' })}
+                            onClick={() => setActiveTab('steps')}
+                        >
+                            Steps
+                        </button>
+                    </div>
 
-                        <div className={cx('tabs-content')}>
-                            {activeTab === 'ingredients' && ingredients.length > 0 && (
-                                <div className={cx('tab-panel')}>
+                    <div className={cx('tabs-content')}>
+                        {activeTab === 'ingredients' && (
+                            <div className={cx('tab-panel')}>
+                                {ingredients.length > 0 ? (
                                     <ol>
                                         {ingredients.map((ingredient) => (
                                             <li key={ingredient._id}>
@@ -195,11 +221,15 @@ function DishDetailUser() {
                                             </li>
                                         ))}
                                     </ol>
-                                </div>
-                            )}
+                                ) : (
+                                    <p className={cx('empty-message')}>Không có nguyên liệu nào được thêm vào món này.</p>
+                                )}
+                            </div>
+                        )}
 
-                            {activeTab === 'steps' && steps.length > 0 && (
-                                <div className={cx('tab-panel')}>
+                        {activeTab === 'steps' && (
+                            <div className={cx('tab-panel')}>
+                                {steps.length > 0 ? (
                                     <ol>
                                         {steps.map((step) => (
                                             <li key={step._id}>
@@ -207,11 +237,13 @@ function DishDetailUser() {
                                             </li>
                                         ))}
                                     </ol>
-                                </div>
-                            )}
-                        </div>
+                                ) : (
+                                    <p className={cx('empty-message')}>Không có bước nấu nào được thêm vào món này.</p>
+                                )}
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
 
                 <div className={cx('rating-section')}>
                     <h2 className={cx('rating-title')}>Rating</h2>
