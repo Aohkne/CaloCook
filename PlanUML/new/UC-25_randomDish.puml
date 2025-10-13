@@ -21,9 +21,7 @@ activate Route
 Route -> Auth: 3. authenticateUser(req) &\nauthorizeRole(['user'])
 activate Auth
 
-note right of Auth #white
-  4. Verify Token & Check Role
-end note
+ref over Auth : 4. 3.0 Verify Token & Check Role
 
 opt Authentication/Authorization Failed
     Auth --> Route: 4.1. Return 401/403 Error
