@@ -156,22 +156,22 @@ export default function Detail({ route, navigation }) {
                 userId: user._id,
                 dishId: dishId
             })).unwrap()
-            
+
             // Tính ngày hiện tại với timezone đúng
             const today = new Date();
             const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
             const todayString = localDate.toISOString().split('T')[0];
-            
+
             setTimeout(async () => {
                 await dispatch(getTotalCalories({
                     userId: user._id,
                     date: todayString
                 }))
             }, 1000)
-            
-            
+
+
             setIsCookingModalVisible(false)
-            
+
             // Thông báo thành công
             Alert.alert(
                 'Success!',
@@ -360,7 +360,6 @@ export default function Detail({ route, navigation }) {
                     onPress={handleLetsCook}
                 >
                     <Text style={styles.cookButtonText}>Let's Cook</Text>
-                    <ChevronRight size={20} color={colors.title} />
                 </TouchableOpacity>
             </View>
 

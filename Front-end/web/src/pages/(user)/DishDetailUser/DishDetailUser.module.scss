@@ -1,0 +1,354 @@
+.wrapper {
+    min-height: 100vh;
+    background-color: var(--background);
+    padding: 1rem;
+    position: relative;
+}
+
+.back-btn {
+    position: fixed;
+    top: 1.5rem;
+    left: 1.5rem;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--description);
+    font-weight: 500;
+    font-size: 1.5rem;
+    text-decoration: none;
+    z-index: 100;
+    transition: all 0.3s ease;
+
+    &:hover {
+        color: var(--secondary);
+    }
+
+    @media (max-width: 768px) {
+        left: 1rem;
+        top: 1rem;
+        font-size: 1.3rem;
+    }
+}
+
+.favorite-btn {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--background-subside);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 50px;
+    z-index: 100;
+    color: var(--red);
+
+    svg {
+        stroke: transparent;
+        stroke-width: 0;
+    }
+
+    &.active {
+        color: var(--red);
+    }
+
+    @media (max-width: 768px) {
+        right: 1rem;
+        top: 1rem;
+        width: 42px;
+        height: 42px;
+        font-size: 32px;
+    }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 7rem;
+
+    @media (max-width: 768px) {
+        padding-top: 5rem;
+    }
+}
+
+.content-section {
+    display: flex;
+    gap: 5rem;
+    margin-bottom: 2rem;
+
+    @media (max-width: 968px) {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+}
+
+.left-side {
+    flex: 0 0 500px;
+
+    @media (max-width: 968px) {
+        flex: none;
+    }
+}
+
+.dish-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 16px;
+}
+
+.right-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    @media (max-width: 968px) {
+        padding-left: 0;
+    }
+}
+
+.dish-name {
+    font-size: 4.5rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: var(--title);
+
+    @media (max-width: 768px) {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+}
+
+.section {
+    margin-bottom: 1.5rem;
+
+    h2 {
+        font-size: 4rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        color: var(--title);
+
+        @media (max-width: 768px) {
+            font-size: 1.2rem;
+        }
+    }
+
+    p {
+        color: var(--description);
+        line-height: 1.6;
+        font-size: 2.5rem;
+        text-align: justify;
+
+        @media (max-width: 768px) {
+            font-size: 0.95rem;
+        }
+    }
+}
+
+// Tabs Section
+.tabs-section {
+    margin-bottom: 2rem;
+    min-height: 250px;
+}
+
+.tabs-header {
+    display: flex;
+    gap: 5rem;
+    border-bottom: 2px solid var(--description);
+    margin-bottom: 2rem;
+    margin-top: 3rem;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--description);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0 0 1rem 0;
+
+    &.active {
+        color: var(--secondary);
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--secondary);
+        }
+    }
+
+    @media (max-width: 768px) {
+        font-size: 1rem;
+    }
+}
+
+.tabs-content {
+    padding: 0;
+}
+
+.tab-panel {
+    ol {
+        padding-left: 1.5rem;
+        color: var(--description);
+        margin: 0;
+
+        li {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            font-size: 1.5rem;
+
+            @media (max-width: 768px) {
+                font-size: 0.95rem;
+                margin-bottom: 0.8rem;
+            }
+        }
+    }
+}
+
+// Rating Section - Moved below tabs
+.rating-section {
+    margin-top: 3rem;
+    margin-bottom: 4rem;
+}
+
+.rating-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--title);
+
+    @media (max-width: 768px) {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+}
+
+.rating-top {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-end;
+    justify-content: flex-start;
+    margin-bottom: 1.5rem;
+
+    @media (max-width: 500px) {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+.average-rating {
+    .rating-number {
+        font-size: 5.5rem;
+        font-weight: 700;
+        color: var(--title);
+        line-height: 1;
+
+        @media (max-width: 768px) {
+            font-size: 4rem;
+        }
+    }
+}
+
+.stars-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stars-display {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.rating-count {
+    font-size: 1.5rem;
+    color: var(--description);
+}
+
+.user-rating {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-start;
+}
+
+.cook-btn {
+    width: auto;
+    min-width: 800px;
+    margin: 2rem auto 0;
+    display: block;
+    background-color: var(--secondary);
+    color: var(--titleWithBg);
+    border: none;
+    padding: 1.25rem 3rem;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+
+    @media (max-width: 768px) {
+        padding: 1.2rem 2.5rem;
+        font-size: 1.1rem;
+        min-width: 250px;
+    }
+
+    &:hover {
+        background-color: var(--green);
+    }
+}
+
+// Star styling
+.star {
+    font-size: 2.2rem;
+    color: var(--description);
+
+    &.filled {
+        color: var(--yellow);
+    }
+
+    &.interactive {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 3.5rem;
+        color: var(--description);
+
+        @media (max-width: 768px) {
+            font-size: 3rem;
+        }
+
+        &:hover {
+            transform: scale(1.15);
+        }
+
+        &.filled {
+            color: var(--yellow);
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .wrapper {
+        padding: 0.5rem;
+    }
+
+    .container {
+        padding-top: 1rem;
+    }
+}

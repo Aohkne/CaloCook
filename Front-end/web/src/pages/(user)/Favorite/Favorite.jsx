@@ -5,6 +5,7 @@ import ChatBox from '@/components/ui/ChatBox/ChatBox';
 import classNames from 'classnames/bind';
 import styles from './Favorite.module.scss';
 import { getFavorites, removeFromFavorites } from '@/api/favorite';
+import { useNavigate } from 'react-router-dom';
 import { getWebImagePath } from '@/utils/imageHelper';
 const defaultImage = '/images/default-img.png';
 
@@ -24,6 +25,10 @@ function FavoriteDish() {
     });
 
     const toggleChat = () => setIsChatOpen((prev) => !prev);
+    const navigate = useNavigate();
+    const handleCardClick = (dishId) => {
+        navigate(`/dish/${dishId}`);
+    };
 
     // Helper function to get cookie value by name
     const getCookie = (name) => {
@@ -128,7 +133,8 @@ function FavoriteDish() {
         fetchFavorites(currentPage);
     }, [currentPage]);
 
-    const toggleFavorite = async (dishId) => {
+    const toggleFavorite = async (dishId, e) => {
+        e.stopPropagation();
         const userId = getUserId();
 
         if (!userId) {
@@ -193,7 +199,7 @@ function FavoriteDish() {
                         <div className={cx('loading')}>Loading favorite dishes...</div>
                     ) : (
                         dishes.map((dish) => (
-                            <div key={dish._id} className={cx('dish-card')}>
+                            <div key={dish._id} className={cx('dish-card')} onClick={() => handleCardClick(dish._id)}>
                                 <div className={cx('card-image')}>
                                     <img
                                         src={dish.imageUrl && dish.imageUrl.trim() !== ""
@@ -205,7 +211,7 @@ function FavoriteDish() {
                                     />
                                     <div
                                         className={cx('favorite-btn', { 'active': dish.isFavorite })}
-                                        onClick={() => toggleFavorite(dish._id)}
+                                        onClick={(e) => toggleFavorite(dish._id, e)}
                                         title="Remove from favorites"
                                     >
                                         <Icon icon={dish.isFavorite ? "ph:heart-fill" : "ph:heart"} />

@@ -6,6 +6,7 @@ import classNames from 'classnames/bind';
 import styles from './Dish.module.scss';
 import { getDishes } from '@/api/dish';
 import { getFavorites, addToFavorites, removeFromFavorites } from '@/api/favorite';
+import { useNavigate } from 'react-router-dom';
 import { getWebImagePath } from '@/utils/imageHelper';
 const defaultImage = '/images/default-img.png';
 
@@ -30,6 +31,11 @@ function Dish() {
   const [calorieRange, setCalorieRange] = useState({ min: 5, max: 60 });
 
   const toggleChat = () => setIsChatOpen((prev) => !prev);
+  const navigate = useNavigate();
+  const handleCardClick = (dishId) => {
+    navigate(`/dish/${dishId}`);
+  };
+
 
   // Helper function to get cookie value by name
   const getCookie = (name) => {
@@ -127,7 +133,8 @@ function Dish() {
     fetchFavorites();
   }, []);
 
-  const toggleFavorite = async (dishId) => {
+  const toggleFavorite = async (dishId, e) => {
+    e.stopPropagation();
     const userId = getUserId();
 
     if (!userId) {
@@ -250,7 +257,7 @@ function Dish() {
             <div className={cx('loading')}>Loading...</div>
           ) : (
             dishes.map((dish) => (
-              <div key={dish._id} className={cx('dish-card')}>
+              <div key={dish._id} className={cx('dish-card')} onClick={() => handleCardClick(dish._id)}>
                 <div className={cx('card-image')}>
                   <img
                     src={dish.imageUrl && dish.imageUrl.trim() !== '' ? getWebImagePath(dish.imageUrl) : defaultImage}
@@ -261,7 +268,7 @@ function Dish() {
                     className={cx('favorite-btn', {
                       active: favoriteIds.has(dish._id)
                     })}
-                    onClick={() => toggleFavorite(dish._id)}
+                    onClick={(e) => toggleFavorite(dish._id, e)}
                     title={favoriteIds.has(dish._id) ? 'Remove from favorites' : 'Add to favorites'}
                   >
                     <Icon icon={favoriteIds.has(dish._id) ? 'ph:heart-fill' : 'ph:heart'} />
