@@ -124,7 +124,6 @@ function DishDetail() {
   }, [dish, id, stepOrder, stepSort]);
 
   if (loading) return <div className={cx('wrapper')}>Loading...</div>;
-  if (error) return <div className={cx('wrapper', 'error')}>{error}</div>;
   if (!dish) return <div className={cx('wrapper')}>No dish found</div>;
 
   // Handle Open Create Ingredient Modal
@@ -414,7 +413,6 @@ function DishDetail() {
 
   // Render Ingredients List
   const renderIngredients = () => {
-    if (!ingredients || ingredients.length === 0) return <div className={cx('empty')}>No ingredients found</div>;
     return (
       <div className={cx('list')}>
         <h3 className={cx('list-title')}>Ingredients</h3>
@@ -424,53 +422,57 @@ function DishDetail() {
           Add
         </button>
         {/* Ingredient List */}
-        <ul className={cx('ingredient-list')}>
-          {ingredients.map((ingredient) => (
-            <li key={ingredient._id} className={cx('ingredient-item', { banned: ingredient.isActive === false })}>
-              <div className={cx('ingredient-value')}>
-                <span className={cx('ingredient-value-tick')}>•</span> {ingredient.quantity} {ingredient.name}
-              </div>
-              {/* Edit Ingredient Button */}
-              <div className={cx('ingredient-actions')}>
-                <button
-                  className={cx('action-btn')}
-                  title='Edit ingredient'
-                  onClick={() => handleOpenEditIngredientModal(ingredient)}
-                >
-                  <Icon icon='lucide:pen' width='24' height='24' />
-                </button>
-                <button
-                  className={cx('action-btn')}
-                  title={ingredient.isActive ? 'Ban ingredient' : 'Activate ingredient'}
-                  onClick={async () => {
-                    try {
-                      if (ingredient.isActive) {
-                        await deactivateIngredient(ingredient._id);
-                        setIngredients((prev) =>
-                          prev.map((p) => (p._id === ingredient._id ? { ...p, isActive: false } : p))
-                        );
-                      } else {
-                        await activateIngredient(ingredient._id);
-                        setIngredients((prev) =>
-                          prev.map((p) => (p._id === ingredient._id ? { ...p, isActive: true } : p))
-                        );
+        {ingredients.length === 0 ? (
+          <p className={cx('no-item-text')}>Please Add ingredients</p>
+        ) : (
+          <ul className={cx('ingredient-list')}>
+            {ingredients.map((ingredient) => (
+              <li key={ingredient._id} className={cx('ingredient-item', { banned: ingredient.isActive === false })}>
+                <div className={cx('ingredient-value')}>
+                  <span className={cx('ingredient-value-tick')}>•</span> {ingredient.quantity} {ingredient.name}
+                </div>
+                {/* Edit Ingredient Button */}
+                <div className={cx('ingredient-actions')}>
+                  <button
+                    className={cx('action-btn')}
+                    title='Edit ingredient'
+                    onClick={() => handleOpenEditIngredientModal(ingredient)}
+                  >
+                    <Icon icon='lucide:pen' width='24' height='24' />
+                  </button>
+                  <button
+                    className={cx('action-btn')}
+                    title={ingredient.isActive ? 'Ban ingredient' : 'Activate ingredient'}
+                    onClick={async () => {
+                      try {
+                        if (ingredient.isActive) {
+                          await deactivateIngredient(ingredient._id);
+                          setIngredients((prev) =>
+                            prev.map((p) => (p._id === ingredient._id ? { ...p, isActive: false } : p))
+                          );
+                        } else {
+                          await activateIngredient(ingredient._id);
+                          setIngredients((prev) =>
+                            prev.map((p) => (p._id === ingredient._id ? { ...p, isActive: true } : p))
+                          );
+                        }
+                      } catch (err) {
+                        console.error(err);
                       }
-                    } catch (err) {
-                      console.error(err);
-                    }
-                  }}
-                >
-                  {/* Check Ingredient Active Status */}
-                  {ingredient.isActive ? (
-                    <Icon icon='mdi:ban' width='24' height='24' color='red' />
-                  ) : (
-                    <Icon icon='mdi:tick' width='24' height='24' color='green' />
-                  )}
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                    }}
+                  >
+                    {/* Check Ingredient Active Status */}
+                    {ingredient.isActive ? (
+                      <Icon icon='mdi:ban' width='24' height='24' color='red' />
+                    ) : (
+                      <Icon icon='mdi:tick' width='24' height='24' color='green' />
+                    )}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     );
   };
@@ -507,45 +509,49 @@ function DishDetail() {
             Add
           </button>
         </div>
-        <ol className={cx('step-list')}>
-          {steps.map((s) => (
-            <li key={s._id} className={cx('ingredient-item', { banned: s.isActive === false })}>
-              <div className={cx('ingredient-value')}>
-                <span className={cx('ingredient-value-tick')}>•</span>
-                <strong className={cx('step-number')}>Step {s.stepNumber}:</strong>
-                <span className={cx('step-desc')}> {s.description}</span>
-              </div>
-              <div className={cx('ingredient-actions')}>
-                <button className={cx('action-btn')} title='Edit step' onClick={() => handleOpenEditStepModal(s)}>
-                  <Icon icon='lucide:pen' width='24' height='24' />
-                </button>
-                <button
-                  className={cx('action-btn')}
-                  title={s.isActive ? 'Ban step' : 'Activate step'}
-                  onClick={async () => {
-                    try {
-                      if (s.isActive) {
-                        await deactivateStep(s._id);
-                        setSteps((prev) => prev.map((p) => (p._id === s._id ? { ...p, isActive: false } : p)));
-                      } else {
-                        await activateStep(s._id);
-                        setSteps((prev) => prev.map((p) => (p._id === s._id ? { ...p, isActive: true } : p)));
+        {steps.length === 0 ? (
+          <p className={cx('no-item-text')}>Please Add steps</p>
+        ) : (
+          <ol className={cx('step-list')}>
+            {steps.map((s) => (
+              <li key={s._id} className={cx('ingredient-item', { banned: s.isActive === false })}>
+                <div className={cx('ingredient-value')}>
+                  <span className={cx('ingredient-value-tick')}>•</span>
+                  <strong className={cx('step-number')}>Step {s.stepNumber}:</strong>
+                  <span className={cx('step-desc')}> {s.description}</span>
+                </div>
+                <div className={cx('ingredient-actions')}>
+                  <button className={cx('action-btn')} title='Edit step' onClick={() => handleOpenEditStepModal(s)}>
+                    <Icon icon='lucide:pen' width='24' height='24' />
+                  </button>
+                  <button
+                    className={cx('action-btn')}
+                    title={s.isActive ? 'Ban step' : 'Activate step'}
+                    onClick={async () => {
+                      try {
+                        if (s.isActive) {
+                          await deactivateStep(s._id);
+                          setSteps((prev) => prev.map((p) => (p._id === s._id ? { ...p, isActive: false } : p)));
+                        } else {
+                          await activateStep(s._id);
+                          setSteps((prev) => prev.map((p) => (p._id === s._id ? { ...p, isActive: true } : p)));
+                        }
+                      } catch (err) {
+                        console.error(err);
                       }
-                    } catch (err) {
-                      console.error(err);
-                    }
-                  }}
-                >
-                  {s.isActive ? (
-                    <Icon icon='mdi:ban' width='24' height='24' color='red' />
-                  ) : (
-                    <Icon icon='mdi:tick' width='24' height='24' color='green' />
-                  )}
-                </button>
-              </div>
-            </li>
-          ))}
-        </ol>
+                    }}
+                  >
+                    {s.isActive ? (
+                      <Icon icon='mdi:ban' width='24' height='24' color='red' />
+                    ) : (
+                      <Icon icon='mdi:tick' width='24' height='24' color='green' />
+                    )}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
     );
   };
