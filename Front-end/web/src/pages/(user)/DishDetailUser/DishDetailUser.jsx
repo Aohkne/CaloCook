@@ -222,7 +222,7 @@ function DishDetailUser() {
                                         ))}
                                     </ol>
                                 ) : (
-                                    <p className={cx('empty-message')}>Không có nguyên liệu nào được thêm vào món này.</p>
+                                    <p className={cx('empty-message')}>No ingredients added to this dish yet.</p>
                                 )}
                             </div>
                         )}
@@ -238,7 +238,7 @@ function DishDetailUser() {
                                         ))}
                                     </ol>
                                 ) : (
-                                    <p className={cx('empty-message')}>Không có bước nấu nào được thêm vào món này.</p>
+                                    <p className={cx('empty-message')}>No cooking steps added to this dish yet.</p>
                                 )}
                             </div>
                         )}
