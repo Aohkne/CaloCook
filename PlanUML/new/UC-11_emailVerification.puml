@@ -1,0 +1,132 @@
+@startuml EmailVerification
+
+actor User as "Customer"
+boundary "Profile Page" as View #lightblue
+participant ":authRoute" as Route #lightblue
+control "authMiddleware" as Auth #orange
+control "authController" as Controller #lightblue
+participant ":authService" as Service #lightblue
+entity "userModel" as Model #lightblue
+database "MongoDB" as DB #yellow
+participant "Email Service Provider" as ESP #pink
+
+group Email Verification
+User -> View: 1.Navigate to Profile Page
+activate View
+activate User
+
+View -> Route: 2.GET /api/v1/auth/profile
+activate Route
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+activate Auth
+ref over Auth : 4. 3.0 Verify Token & Check Role
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 4.1. Return 401/403 Error
+    Route --> View: 4.2. Show error
+    View --> User: 4.3. Display error message
+end
+Auth --> Route: 5. User authenticated & authorized
+deactivate Auth
+
+Route -> Controller: 6.getProfile(req, res)
+activate Controller
+
+Controller -> Service: 7.checkEmailStatus(userId)
+activate Service
+
+Service -> Model: 8.findUserById(userId)
+activate Model
+
+Model -> DB: 9.Query user by ID
+activate DB
+DB --> Model: 10.Return user data
+deactivate DB
+
+Model --> Service: 11.Return user
+deactivate Model
+
+Service --> Controller: 12.Return email status (Not Verified)
+deactivate Service
+Controller --> Route: 13.Return profile data
+deactivate Controller
+Route --> View: 14.Render profile page (Not Verified)
+deactivate Route
+
+View --> User: 15.Show "Verify Email" button
+
+User -> View: 16.Click "Verify Email"
+View -> Route: 17.POST /api/v1/auth/verifyEmail
+activate Route
+
+Route -> Controller: 18.verifyEmail(req, res)
+activate Controller
+
+Controller -> Service: 19.generateVerificationToken(userId)
+activate Service
+
+Service -> DB: 20.Store token with expiration
+activate DB
+DB --> Service: 21.Success
+deactivate DB
+
+Service -> ESP: 22.Send email with verification link
+activate ESP
+ESP --> User: 23.Receive email with link
+deactivate ESP
+
+Service --> Controller: 24.Return success
+deactivate Service
+Controller --> Route: 25.Return success
+deactivate Controller
+Route --> View: 26.Show "Verification email sent"
+deactivate Route
+View --> User: 27.Notify "Check your email"
+
+User -> ESP: 28.Click verification link
+activate ESP
+ESP -> Route: 29.GET /api/v1/auth/verify?token=xxx
+deactivate ESP
+activate Route
+
+Route -> Controller: 30.verifyToken(req, res)
+activate Controller
+
+Controller -> Service: 31.validateToken(token)
+activate Service
+
+Service -> DB: 32.Check token validity
+activate DB
+DB --> Service: 33.Token info
+deactivate DB
+
+alt Token valid and not expired
+    Service -> DB: 33.1.Update email status = Verified
+    activate DB
+    DB --> Service: 33.1.1.Success
+    deactivate DB
+
+    Service --> Controller: 33.1.2. Return success
+
+    Controller --> Route: 33.1.3.Return success
+
+    Route --> View: 33.1.4."Email successfully verified"
+
+    View --> User: 33.1.5."Email successfully verified"
+else Token expired or invalid
+    Service --> Controller: 33.2.Return error
+    deactivate Service
+
+    Controller --> Route: 33.2.1.Return error message
+    deactivate Controller
+
+    Route --> View: 33.2.2.Return error message
+    deactivate Route
+    Route --> User: 33.2.3."Invalid or expired token"
+
+    deactivate User
+    deactivate View
+end
+end
+
+@enduml
