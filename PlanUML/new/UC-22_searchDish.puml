@@ -1,0 +1,68 @@
+@startuml Search Dish
+
+actor User as "User" 
+boundary "DishListPage" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Search Dish
+note right User: User searches for dishes by name
+User -> View: 1. Enter keyword (eg. "pizza")
+activate User
+activate View
+
+View -> Route: 2. GET /dishes?search=pizza
+activate Route
+
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+activate Auth
+ref over Auth : 4. 3.0 Verify Token & Check Role
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 4.1. Return 401/403 Error
+    Route --> View: 4.2. Show error
+    View --> User: 4.3. Display error message
+end
+Auth --> Route: 5. User authenticated & authorized
+deactivate Auth
+
+Route -> Controller: 6. searchDishes(req, res)
+activate Controller
+
+Controller -> Service: 7. searchDishesByName("pizza")
+activate Service
+
+Service -> Model: 8. findDishesByName("pizza")
+activate Model
+
+Model -> MongoDB: 9. Execute query 
+activate MongoDB
+MongoDB --> Model: 10. Return matching dishes
+deactivate MongoDB
+
+Model --> Service: 11. Return result
+deactivate Model
+
+alt No dish found
+    Service --> Controller: 11.1 Return []
+    Controller --> Route: 11.1.1 200 OK + []
+    Route --> View: 11.1.2 Show "No dishes found"
+    View --> User: 11.1.3 Display empty state
+else Dish(es) found
+    Service --> Controller: 11.2 Return dishes
+    deactivate Service
+    Controller --> Route: 11.2.1 200 OK + result
+    deactivate Controller
+    Route --> View: 11.2.2 Render dish list
+    deactivate Route
+    View --> User: 11.2.3 Show matching dishes
+    deactivate View
+    deactivate User
+end
+
+end
+@enduml

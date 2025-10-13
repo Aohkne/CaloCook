@@ -3,6 +3,7 @@
 actor "Admin" as Admin
 boundary "DishDetailPage" as View #lightblue
 participant ":ingredientRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
 control "ingredientValidation" as Validation #yellow
 control "ingredientController" as Controller #lightblue
 participant ":ingredientService" as Service #lightblue
@@ -16,87 +17,116 @@ Admin -> View: 1. Click "Add Ingredient" button
 activate View
 activate Admin
 
-View -> Admin: 2. Show ingredient form (dishId, name, quantity, isActive)
+View -> View: 2. Show ingredient form (dishId, name, quantity, isActive)
+activate View
+deactivate View
+
+opt User cancels
+    View --> Admin: 2.1 Cancel adding ingredient (form closed)
+end
 
 Admin -> View: 3. Fill form and submit
-View -> Route: 4. POST /api/v1/ingredient
+View -> View: 4. Validate input data
+activate View
+deactivate View
+opt User cancels
+    View --> Admin: 4.1 Invalid input (show errors)
+end
+View -> Route: 5. POST /api/v1/ingredient
 activate Route
+  Route -> Auth: 6.authenticateUser(req) & authorizeRole()
+
+    activate Auth
+    ref over Auth : 7. 3.0 Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 7.1. Return 401/403 Error
+                deactivate Auth
+        Route --> View: 7.2. Show error
+        View --> Admin: 7.3. Display error message
+
+    end
+    Auth --> Route: 8. User authenticated & authorized
 
 note right of Route: Body: {\n  dishId: "66574e301a6d1f001e8a1c01",\n  name: "Garlic powder",\n  quantity: "1 tsp",\n  isActive: true\n}
 
-Route -> Validation: 5. createNew(req, res, next)
+Route -> Validation: 9. createNew(req, res, next)
 activate Validation
+Validation -> Validation: 10. Validate input data
+activate Validation
+deactivate Validation
+opt Validation Failed
+    Validation --> Route: 10.1. 400 Bad Request
+    Route --> View: 10.2. Show validation error
+    View --> Admin: 10.3 Display error message
 
-alt Validation Success
-    Validation -> Controller: 6. next() - validation passed
+end
+
+    Validation -> Controller: 11. next() - validation passed
+        deactivate Validation
     
     activate Controller
-    Controller -> Service: 7. createNew(req.body)
+    Controller -> Service: 12. createNew(req.body)
     activate Service
-    
-    Service -> DishModel: 8. getDetails(dishId)
+
+    Service -> DishModel: 13. getDetails(dishId)
     activate DishModel
-    
-    DishModel -> MongoDB: 9. ExecuteQuery()
+
+    DishModel -> MongoDB: 14. ExecuteQuery()
     activate MongoDB
-    MongoDB --> DishModel: 10. Return Dish data
+    MongoDB --> DishModel: 15. Return Dish data
+    deactivate MongoDB
 
     alt Dish Not Found
-        DishModel --> Service: 10.1 Dish not Found
-        
-        Service --> Controller: 10.2 Throw ApiError(404, "Dish ID not found!")
-        
-        Controller --> Route: 10.3 next(error)
-        
-        Route --> View: 10.4 Return 404 error
-        
-        View --> Admin: 10.5 Show error message
+        DishModel --> Service: 15.1 Dish not Found
+
+        Service --> Controller: 15.1.1 Throw ApiError(404, "Dish ID not found!")
+
+        Controller --> Route: 15.1.2 next(error)
+
+        Route --> View: 15.1.3 Return 404 error
+
+        View --> Admin: 15.1.4 Show error message
 
     else Dish Found
-        DishModel --> Service: 11. Dish Found
+        DishModel --> Service: 15.2 Dish Found
         deactivate DishModel
-        
-        Service -> IngredientModel: 12. createNew(newIngredient)
+
+        Service -> IngredientModel: 15.2.1. createNew(newIngredient)
         activate IngredientModel
-        
-        IngredientModel -> MongoDB: 13. ExecuteQuery()
-        
-        MongoDB --> IngredientModel: 14. Return insertedId
-        
-        IngredientModel --> Service: 15. Return creation result
-        
-        Service -> IngredientModel: 16. getDetails(insertedId)
-        
-        IngredientModel -> MongoDB: 17. ExecuteQuery()
-        
-        MongoDB --> IngredientModel: 18. Return created ingredient
+
+        IngredientModel -> MongoDB: 15.2.2. ExecuteQuery()
+        activate MongoDB
+
+        MongoDB --> IngredientModel: 15.2.3. Return insertedId
         deactivate MongoDB
-        
-        IngredientModel --> Service: 19. Return ingredient details
+
+        IngredientModel --> Service: 15.2.4. Return creation result
+
+        Service -> IngredientModel: 15.2.5. getDetails(insertedId)
+
+        IngredientModel -> MongoDB: 15.2.6. ExecuteQuery()
+        activate MongoDB
+
+        MongoDB --> IngredientModel: 15.2.7. Return created ingredient
+        deactivate MongoDB
+
+        IngredientModel --> Service: 15.2.8. Return ingredient details
         deactivate IngredientModel
-        
-        Service --> Controller: 20. Return created ingredient
+
+        Service --> Controller: 15.2.9. Return created ingredient
         deactivate Service
-        
-        Controller --> Route: 21. Send 201 JSON response
+
+        Controller --> Route: 15.2.10. Send 201 JSON response
         deactivate Controller
-        
-        Route --> View: 22. Return success response
-        
-        View --> Admin: 23. Show success message & update ingredient list
+
+        Route --> View: 15.2.11. Return success response
+        deactivate Route
+
+        View --> Admin: 15.2.12. Show success message & update ingredient list
+        deactivate View
+        deactivate Admin
     end
-    
-else Validation Failed
-    Validation --> Route: 5.1 next(ApiError(422, validation errors))
-    deactivate Validation
-    
-    Route --> View: 5.2 Return 422 validation errors
-    deactivate Route
-    
-    View --> Admin: 5.3 Show validation error messages
-    deactivate View
-    deactivate Admin
-end
 
 end
 

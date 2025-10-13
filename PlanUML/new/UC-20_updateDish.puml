@@ -1,0 +1,92 @@
+@startuml Update Dish
+
+actor Admin as "Admin"
+boundary "EditDishView" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "dishValidation" as Validation #orange
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Update Dish
+Admin -> View: 1. Click "Edit" button
+activate Admin
+activate View
+View -> View: 2. Show confirmation dialog
+activate View
+deactivate View
+
+opt User cancels
+    View --> Admin: 2.1 Cancel update (dialog closed)
+end
+Admin -> Route: 3. Input updated dish data
+View -> View: 3. Validate input data
+activate View
+deactivate View
+opt User cancels
+    View --> Admin: 3.1 Invalid input (show errors)
+end
+View -> Route: 4. PUT /api/v1/dish/{dishId}
+activate Route
+Route -> Auth: 5. authenticateUser(req) & authorizeRole()
+activate Auth
+ref over Auth : 6. 3.0 Verify Token & Check Role
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 6.1. Return 401/403 Error
+    Route --> View: 6.2. Show error
+    View --> Admin: 6.3. Display error message
+end
+Auth --> Route: 7. User authenticated & authorized
+deactivate Auth
+
+Route -> Validation: 8. validateUpdateDish(data)
+activate Validation
+
+alt Validation Failed
+    Validation --> Route: 8.1. 400 Bad Request
+    Route --> View: 8.1. Show validation error
+    View --> Admin: 8.1.1 Display error message
+else Validation Passed
+    Validation --> Route: 8.2. Proceed
+    deactivate Validation
+
+    Route -> Controller: 8.2.1. updateDish(req, res)
+    activate Controller
+
+    Controller -> Service: 8.2.2. updateDish(dishId, updateData)
+    activate Service
+
+    Service -> Model: 8.2.3. updateDishById(dishId, updateData)
+    activate Model
+
+    Model -> MongoDB: 8.2.4. Execute update query
+    activate MongoDB
+    MongoDB --> Model: 8.2.5. Return update result
+    deactivate MongoDB
+
+    alt Dish not found
+        Model --> Service: 8.2.6a. Return null
+        Service --> Controller: 8.2.7a. 404 Not Found
+        Controller --> Route: 8.2.8a. 404 Not Found
+        Route --> View: 8.2.9a. Show "Dish not found"
+        View --> Admin: 8.2.10a. Display error
+    else Dish updated
+        Model --> Service: 8.2.6b. Return updated dish
+        deactivate Model
+        Service --> Controller: 8.2.7b. Return success
+        deactivate Service
+        Controller --> Route: 8.2.8b. 200 OK + updated dish
+        deactivate Controller
+        Route --> View: 8.2.9b. Show updated dish
+        deactivate Route
+        View --> Admin: 8.2.10b. Display success message
+        deactivate View
+        deactivate Admin 
+    end
+
+end
+end
+@enduml
