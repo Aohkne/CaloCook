@@ -24,9 +24,7 @@ activate Route
 Route -> Auth: 5. authenticateUser(req) &\nauthorizeRole(['admin'])
 activate Auth
 
-note right of Auth #white
-  6. Verify Token & Check Role
-end note
+ref over Auth : 6. 3.0 Verify Token & Check Role
 
 opt Authentication/Authorization Failed
     Auth --> Route: 6.1. Return 401/403 Error
@@ -58,7 +56,7 @@ Service --> Controller: 14. Return reports array
 deactivate Service
 
 opt No reports found
-    Controller --> Route: 14.1. Return 404 Error
+    Controller --> Route: 14.1. Show error message
     Route --> View: 14.2. Show error message
     View --> Admin: 14.3. Display "No reports found to export"
 end
