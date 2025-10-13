@@ -80,7 +80,7 @@
 
 .content-section {
     display: flex;
-    gap: 5rem;
+    gap: 7rem;
     margin-bottom: 2rem;
 
     @media (max-width: 968px) {
@@ -115,7 +115,7 @@
 }
 
 .dish-name {
-    font-size: 4.5rem;
+    font-size: 5rem;
     font-weight: 700;
     margin-bottom: 1.2rem;
     color: var(--title);
@@ -130,7 +130,7 @@
     margin-bottom: 1.5rem;
 
     h2 {
-        font-size: 4rem;
+        font-size: 3.5rem;
         font-weight: 600;
         margin-bottom: 0.8rem;
         color: var(--title);
@@ -143,7 +143,7 @@
     p {
         color: var(--description);
         line-height: 1.6;
-        font-size: 2.5rem;
+        font-size: 2rem;
         text-align: justify;
 
         @media (max-width: 768px) {
@@ -152,10 +152,64 @@
     }
 }
 
+// Thêm vào sau phần .section
+.dish-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: auto;
+    padding-top: 2rem;
+
+    @media (max-width: 768px) {
+        gap: 1rem;
+        padding-top: 1.5rem;
+    }
+
+    .stat-card {
+        flex: 1;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        padding: 1.5rem 1rem;
+        background-color: var(--secondary);
+        border: 3px solid var(--shadow);
+        box-shadow: 2px 2px 0px var(--shadow);
+        border-radius: 12px;
+        transition: all 0.15s ease;
+
+        @media (max-width: 768px) {
+            padding: 1rem 0.8rem;
+            gap: 0.5rem;
+        }
+
+        svg {
+            font-size: 2.5rem;
+            color: var(--primary);
+
+            @media (max-width: 768px) {
+                font-size: 1.8rem;
+            }
+        }
+
+        span {
+            font-size: 1.8rem;
+            color: var(--titleWithBg);
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+
+            @media (max-width: 768px) {
+                font-size: 1rem;
+            }
+        }
+    }
+}
+
 // Tabs Section
 .tabs-section {
     margin-bottom: 2rem;
-    min-height: 250px;
+    min-height: 300px;
 }
 
 .tabs-header {
@@ -169,7 +223,7 @@
 .tab-btn {
     background: transparent;
     border: none;
-    font-size: 2.5rem;
+    font-size: 3rem;
     font-weight: 600;
     color: var(--description);
     cursor: pointer;
@@ -209,7 +263,7 @@
         li {
             margin-bottom: 1rem;
             line-height: 1.6;
-            font-size: 1.5rem;
+            font-size: 2rem;
 
             @media (max-width: 768px) {
                 font-size: 0.95rem;
@@ -217,6 +271,12 @@
             }
         }
     }
+}
+
+.empty-message {
+    font-size: 1.5rem;
+    color: var(--description);
+
 }
 
 // Rating Section - Moved below tabs
