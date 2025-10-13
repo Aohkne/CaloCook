@@ -19,7 +19,14 @@ export const getDishes = async (params = {}) => {
   if (maxCookingTime) queryParams.maxCookingTime = maxCookingTime;
   if (minCalorie) queryParams.minCalorie = minCalorie;
   if (maxCalorie) queryParams.maxCalorie = maxCalorie;
-  if (difficulty) queryParams.difficulty = difficulty;
+  if (difficulty) {
+    // If difficulty is an array (multiple selections), send as comma-separated string
+    if (Array.isArray(difficulty)) {
+      queryParams.difficulty = difficulty.join(',');
+    } else {
+      queryParams.difficulty = difficulty;
+    }
+  }
   if (isActive !== '') queryParams.isActive = isActive;
   queryParams.page = page;
   queryParams.limit = limit;
@@ -74,7 +81,13 @@ export const exportDish = async (params = {}) => {
   if (maxCookingTime) queryParams.maxCookingTime = maxCookingTime;
   if (minCalorie) queryParams.minCalorie = minCalorie;
   if (maxCalorie) queryParams.maxCalorie = maxCalorie;
-  if (difficulty) queryParams.difficulty = difficulty;
+  if (difficulty) {
+    if (Array.isArray(difficulty)) {
+      queryParams.difficulty = difficulty.join(',');
+    } else {
+      queryParams.difficulty = difficulty;
+    }
+  }
   if (isActive !== '') queryParams.isActive = isActive;
 
   const response = await api.get(`/dish/export/${type}`, { params: queryParams, responseType: 'blob' });

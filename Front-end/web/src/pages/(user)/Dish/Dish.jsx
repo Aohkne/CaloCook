@@ -26,8 +26,9 @@ function Dish() {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [openFilterModal, setOpenFilterModal] = useState(false);
+  const [difficulty, setDifficulty] = useState([]);
   const [cookingTimeRange, setCookingTimeRange] = useState({ min: 5, max: 60 });
-  const [calorieRange, setCalorieRange] = useState({ min: 5, max: 60 });
+  const [calorieRange, setCalorieRange] = useState({ min: 5, max: 2000 });
 
   const toggleChat = () => setIsChatOpen((prev) => !prev);
 
@@ -98,13 +99,25 @@ function Dish() {
   const fetchDishes = async (page = 1, name = searchQuery) => {
     setLoading(true);
     try {
+      // Normalize difficulty: if multiple selected, send as comma-separated string
+      let difficultyParam = '';
+      if (Array.isArray(difficulty) && difficulty.length > 0) {
+        difficultyParam = difficulty.join(',');
+      } else if (difficulty) {
+        difficultyParam = difficulty;
+      }
+
       const response = await getDishes({
         page: page,
         limit: 8,
         isActive: true,
-        name: name
+        name: name,
+        minCookingTime: cookingTimeRange.min,
+        maxCookingTime: cookingTimeRange.max,
+        minCalorie: calorieRange.min,
+        maxCalorie: calorieRange.max,
+        difficulty: difficultyParam
       });
-
       if (response.code === 200) {
         setDishes(response.data || []);
         setPagination(response.pagination);
@@ -200,6 +213,21 @@ function Dish() {
     setOpenFilterModal(false);
   };
 
+  // Handle Change Difficulty
+  const handleDifficultyChange = (e) => {
+    const { value, checked } = e.target;
+
+    setDifficulty((prev) => {
+      if (checked) {
+        // Add difficulty if checked
+        return [...prev, value];
+      } else {
+        // Remove if unchecked
+        return prev.filter((item) => item !== value);
+      }
+    });
+  };
+
   // Handle Cooking Time Range
   const handleCookingTimeRangeChange = (type) => (e) => {
     const value = parseInt(e.target.value);
@@ -221,6 +249,13 @@ function Dish() {
         return { ...prev, max: Math.max(value, prev.min) };
       }
     });
+  };
+
+  // Handle Apply Filter
+  const handleApplyFilter = () => {
+    setCurrentPage(1);
+    fetchDishes(1);
+    setOpenFilterModal(false);
   };
 
   return (
@@ -341,33 +376,42 @@ function Dish() {
             >
               <Icon icon='material-symbols-light:close' width='24' height='24' />
             </button>
-            <form className={cx('modal-form')}>
-              {/* Search Ingredient */}
-              <div className={cx('form-group')}>
-                <label htmlFor='search' className={cx('modal-input-label')}>
-                  Contains Products
-                </label>
-                <input
-                  id='search'
-                  type='text'
-                  className={cx('modal-search-input')}
-                  placeholder='Search ingredients...'
-                />
-              </div>
+            <div className={cx('modal-form')}>
               {/* Difficulty */}
               <div className={cx('form-group', 'difficulty-group')}>
                 <span className={cx('modal-input-label')}>Difficulty</span>
                 <div className={cx('difficulty-blocks')}>
                   <label className={cx('difficulty-block')}>
-                    <input type='checkbox' name='difficulty' value='easy' className={cx('difficulty-radio')} />
+                    <input
+                      onChange={handleDifficultyChange}
+                      checked={difficulty.includes('easy')}
+                      type='checkbox'
+                      name='difficulty'
+                      value='easy'
+                      className={cx('difficulty-radio')}
+                    />
                     <span className={cx('difficulty-block-text')}>Easy</span>
                   </label>
                   <label className={cx('difficulty-block')}>
-                    <input type='checkbox' name='difficulty' value='medium' className={cx('difficulty-radio')} />
+                    <input
+                      onChange={handleDifficultyChange}
+                      checked={difficulty.includes('medium')}
+                      type='checkbox'
+                      name='difficulty'
+                      value='medium'
+                      className={cx('difficulty-radio')}
+                    />
                     <span className={cx('difficulty-block-text')}>Medium</span>
                   </label>
                   <label className={cx('difficulty-block')}>
-                    <input type='checkbox' name='difficulty' value='hard' className={cx('difficulty-radio')} />
+                    <input
+                      onChange={handleDifficultyChange}
+                      checked={difficulty.includes('hard')}
+                      type='checkbox'
+                      name='difficulty'
+                      value='hard'
+                      className={cx('difficulty-radio')}
+                    />
                     <span className={cx('difficulty-block-text')}>Hard</span>
                   </label>
                 </div>
@@ -423,7 +467,7 @@ function Dish() {
                     <input
                       type='range'
                       min={5}
-                      max={60}
+                      max={2000}
                       value={calorieRange.max}
                       onChange={handleCalorieRangeChange('max')}
                       className={cx('range-slider')}
@@ -431,10 +475,10 @@ function Dish() {
                   </div>
                 </div>
               </div>
-              <button type='submit' className={cx('confirm-filter-button')}>
+              <button onClick={handleApplyFilter} className={cx('confirm-filter-button')}>
                 Filter Dishes <Icon icon='material-symbols-light:chevron-right' width='32' height='32' />
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}
