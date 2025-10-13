@@ -10,7 +10,7 @@ import {
   deactivateIngredient,
   activateIngredient
 } from '@/api/ingredient';
-import { getStepsByDish } from '@/api/step';
+import { getStepsByDish, createStep, updateStep, deactivateStep, activateStep } from '@/api/step';
 import { Icon } from '@iconify/react';
 import { getWebImagePath } from '@/utils/imageHelper';
 
@@ -31,12 +31,25 @@ function DishDetail() {
   const [openEditIngredientModal, setOpenEditIngredientModal] = useState(false);
   const [openEditDishModal, setOpenEditDishModal] = useState(false);
   const [editingIngredient, setEditingIngredient] = useState(null);
+  const [openCreateStepModal, setOpenCreateStepModal] = useState(false);
+  const [openEditStepModal, setOpenEditStepModal] = useState(false);
+  const [editingStep, setEditingStep] = useState(null);
+  const [stepSort, setStepSort] = useState('stepNumber');
+  const [stepOrder, setStepOrder] = useState('asc');
 
   // Add Ingredient form state
   const [ingredientFormData, setIngredientFormData] = useState({
     dishId: id,
     name: '',
     quantity: '',
+    isActive: true
+  });
+
+  // Add Step form state
+  const [stepFormData, setStepFormData] = useState({
+    dishId: id,
+    stepNumber: '',
+    description: '',
     isActive: true
   });
 
@@ -76,24 +89,39 @@ function DishDetail() {
   }, [id]);
 
   useEffect(() => {
-    // fetch ingredients and steps when dish is loaded
-    const fetchSubs = async () => {
-      setSubLoading(true);
+    const fetchIngredients = async () => {
       try {
-        const [ingsRes, stepsRes] = await Promise.all([getIngredientsByDish(id), getStepsByDish(id)]);
-
-        // API returns { code, message, data } commonly
-        setIngredients(ingsRes?.data || ingsRes || []);
-        setSteps(stepsRes?.data || stepsRes || []);
+        setSubLoading(true);
+        const response = await getIngredientsByDish(id);
+        console.log(response.data);
+        setIngredients(response.data);
       } catch (err) {
-        console.error('Failed to load ingredients/steps', err);
+        setError(err.response?.data?.message || 'Failed to load ingredient');
       } finally {
         setSubLoading(false);
       }
     };
 
-    if (dish) fetchSubs();
-  }, [dish, id]);
+    if (dish) fetchIngredients();
+  }, [dish, id, stepSort, stepOrder]);
+
+  useEffect(() => {
+    const fetchSteps = async () => {
+      try {
+        setSubLoading(true);
+        const response = await getStepsByDish(id);
+        console.log(response.data);
+        // Apply client-side sort so changing sort/order doesn't refetch or reload page
+        setSteps(sortSteps(response.data || [], stepSort, stepOrder));
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to load step');
+      } finally {
+        setSubLoading(false);
+      }
+    };
+
+    if (dish) fetchSteps();
+  }, [dish, id, stepOrder, stepSort]);
 
   if (loading) return <div className={cx('wrapper')}>Loading...</div>;
   if (error) return <div className={cx('wrapper', 'error')}>{error}</div>;
@@ -194,6 +222,77 @@ function DishDetail() {
     }
   };
 
+  // --- Step handlers (create / edit / toggle active) ---
+  const handleOpenCreateStepModal = () => {
+    setOpenCreateStepModal(true);
+  };
+
+  const handleCloseCreateStepModal = () => {
+    setOpenCreateStepModal(false);
+  };
+
+  const handleStepInputChange = (e) => {
+    const { id, value } = e.target;
+    setStepFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleStepActiveChange = (e) => {
+    setStepFormData((prev) => ({ ...prev, isActive: e.target.checked }));
+  };
+
+  const handleSubmitCreateStep = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await createStep(stepFormData);
+      setSuccess(response.message || 'Step created successfully');
+
+      const updated = await getStepsByDish(id);
+      setSteps(sortSteps(updated.data || updated, stepSort, stepOrder));
+
+      handleCloseCreateStepModal();
+      setStepFormData({ dishId: id, stepNumber: null, description: '', isActive: true });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to create step');
+    }
+  };
+
+  const handleOpenEditStepModal = (step) => {
+    setEditingStep(step);
+    setStepFormData({
+      dishId: id,
+      stepNumber: step.stepNumber || '',
+      description: step.description || '',
+      isActive: step.isActive ?? true
+    });
+    setOpenEditStepModal(true);
+  };
+
+  const handleCloseEditStepModal = () => {
+    setOpenEditStepModal(false);
+  };
+
+  const handleSubmitEditStep = async (e) => {
+    e.preventDefault();
+    try {
+      if (!editingStep) return;
+      const response = await updateStep(editingStep._id, stepFormData);
+      setSuccess(response.message || 'Step updated successfully');
+
+      setSteps((prev) =>
+        sortSteps(
+          prev.map((s) => (s._id === editingStep._id ? { ...s, ...stepFormData } : s)),
+          stepSort,
+          stepOrder
+        )
+      );
+
+      handleCloseEditStepModal();
+      setEditingStep(null);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update step');
+    }
+  };
+
   const handleDifficultyChange = (e) => {
     setDishFormData((prev) => ({
       ...prev,
@@ -261,9 +360,60 @@ function DishDetail() {
     }
   };
 
+  // Handle Step Sort Change
+  const handleStepSortChange = (e) => {
+    const newSort = e.target.value;
+    setStepSort(newSort);
+    // sort current steps client-side
+    setSteps((prev) => sortSteps(prev, newSort, stepOrder));
+  };
+
+  // Handle Step Order Change
+  const handleStepOrderChange = (e) => {
+    const newOrder = e.target.value;
+    setStepOrder(newOrder);
+    // sort current steps client-side
+    setSteps((prev) => sortSteps(prev, stepSort, newOrder));
+  };
+
+  // Client-side sort helper for steps
+  const sortSteps = (stepsArray = [], sortBy = 'stepNumber', order = 'asc') => {
+    if (!Array.isArray(stepsArray)) return stepsArray;
+    const copy = stepsArray.slice();
+    copy.sort((a, b) => {
+      let aval = a?.[sortBy];
+      let bval = b?.[sortBy];
+
+      // normalize for undefined/null
+      if (aval === undefined || aval === null) aval = '';
+      if (bval === undefined || bval === null) bval = '';
+
+      // If sorting by stepNumber ensure numeric compare
+      if (sortBy === 'stepNumber') {
+        const na = Number(aval) || 0;
+        const nb = Number(bval) || 0;
+        return order === 'asc' ? na - nb : nb - na;
+      }
+
+      // If values are dates
+      if (sortBy === 'createdAt') {
+        const da = new Date(aval).getTime() || 0;
+        const db = new Date(bval).getTime() || 0;
+        return order === 'asc' ? da - db : db - da;
+      }
+
+      // fallback to string compare
+      const sa = String(aval).toLowerCase();
+      const sb = String(bval).toLowerCase();
+      if (sa < sb) return order === 'asc' ? -1 : 1;
+      if (sa > sb) return order === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return copy;
+  };
+
   // Render Ingredients List
   const renderIngredients = () => {
-    if (subLoading) return <div className={cx('sub-loading')}>Loading...</div>;
     if (!ingredients || ingredients.length === 0) return <div className={cx('empty')}>No ingredients found</div>;
     return (
       <div className={cx('list')}>
@@ -328,17 +478,75 @@ function DishDetail() {
   // Render Steps List
   const renderSteps = () => {
     if (subLoading) return <div className={cx('sub-loading')}>Loading...</div>;
-    if (!steps || steps.length === 0) return <div className={cx('empty')}>No steps found</div>;
-    const sorted = [...steps].sort((a, b) => (a.stepNumber || 0) - (b.stepNumber || 0));
     return (
-      <ol className={cx('step-list')}>
-        {sorted.map((s) => (
-          <li key={s._id} className={cx('step-item')}>
-            <div className={cx('step-number')}>Step {s.stepNumber}</div>
-            <div className={cx('step-desc')}>{s.description}</div>
-          </li>
-        ))}
-      </ol>
+      <div className={cx('list')}>
+        <h3 className={cx('list-title')}>Steps</h3>
+        <div className={cx('step-actions-container')}>
+          <select
+            name='Sort'
+            id='sortBy'
+            className={cx('sort-button')}
+            onChange={handleStepSortChange}
+            value={stepSort}
+          >
+            <option value='stepNumber'>Step Number</option>
+            <option value='createdAt'>Created At</option>
+          </select>
+          <select
+            name='Order'
+            id='order'
+            className={cx('order-button')}
+            onChange={handleStepOrderChange}
+            value={stepOrder}
+          >
+            <option value='asc'>Ascending</option>
+            <option value='desc'>Descending</option>
+          </select>
+          <button onClick={handleOpenCreateStepModal} className={cx('add-step-button')}>
+            <Icon icon='ic:baseline-plus' width='24' height='24' />
+            Add
+          </button>
+        </div>
+        <ol className={cx('step-list')}>
+          {steps.map((s) => (
+            <li key={s._id} className={cx('ingredient-item', { banned: s.isActive === false })}>
+              <div className={cx('ingredient-value')}>
+                <span className={cx('ingredient-value-tick')}>•</span>
+                <strong className={cx('step-number')}>Step {s.stepNumber}:</strong>
+                <span className={cx('step-desc')}> {s.description}</span>
+              </div>
+              <div className={cx('ingredient-actions')}>
+                <button className={cx('action-btn')} title='Edit step' onClick={() => handleOpenEditStepModal(s)}>
+                  <Icon icon='lucide:pen' width='24' height='24' />
+                </button>
+                <button
+                  className={cx('action-btn')}
+                  title={s.isActive ? 'Ban step' : 'Activate step'}
+                  onClick={async () => {
+                    try {
+                      if (s.isActive) {
+                        await deactivateStep(s._id);
+                        setSteps((prev) => prev.map((p) => (p._id === s._id ? { ...p, isActive: false } : p)));
+                      } else {
+                        await activateStep(s._id);
+                        setSteps((prev) => prev.map((p) => (p._id === s._id ? { ...p, isActive: true } : p)));
+                      }
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                >
+                  {s.isActive ? (
+                    <Icon icon='mdi:ban' width='24' height='24' color='red' />
+                  ) : (
+                    <Icon icon='mdi:tick' width='24' height='24' color='green' />
+                  )}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
     );
   };
 
@@ -582,6 +790,167 @@ function DishDetail() {
                   type='button'
                   className={cx('modal-button', 'modal-button-cancel')}
                   onClick={handleCloseEditIngredientModal}
+                >
+                  Cancel
+                </button>
+                <button type='submit' className={cx('modal-button', 'modal-button-create')}>
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Create Step Modal */}
+      {openCreateStepModal && (
+        <div className={cx('modal')}>
+          <div className={cx('modal-content')}>
+            <div className={cx('modal-content-top')}>
+              <h3 className={cx('modal-title')}>Create Step</h3>
+              <button
+                type='button'
+                className={cx('modal-close-button')}
+                aria-label='Close modal'
+                onClick={handleCloseCreateStepModal}
+              >
+                &times;
+              </button>
+            </div>
+            <form className={cx('modal-form')} onSubmit={handleSubmitCreateStep}>
+              <div className={cx('form-group')}>
+                <label htmlFor='stepNumber' className={cx('modal-input-label')}>
+                  Step number
+                </label>
+                <input
+                  id='stepNumber'
+                  type='number'
+                  value={stepFormData.stepNumber}
+                  onChange={handleStepInputChange}
+                  placeholder='Enter step number'
+                  className={cx('modal-input')}
+                  required
+                />
+              </div>
+
+              <div className={cx('form-group')}>
+                <label htmlFor='description' className={cx('modal-input-label')}>
+                  Description
+                </label>
+                <textarea
+                  id='description'
+                  value={stepFormData.description}
+                  onChange={handleStepInputChange}
+                  placeholder='Enter step description'
+                  className={cx('modal-input', 'modal-textarea')}
+                  rows={6}
+                  required
+                />
+              </div>
+
+              <div className={cx('form-group', 'activate-group')}>
+                <div className={cx('activate-content')}>
+                  <div>
+                    <h4 className={cx('activate-title')}>Activate Step</h4>
+                    <p className={cx('activate-text')}>Make this step available to users</p>
+                  </div>
+                  <label className={cx('switch')}>
+                    <input
+                      type='checkbox'
+                      className={cx('switch-input')}
+                      checked={stepFormData.isActive}
+                      onChange={handleStepActiveChange}
+                    />
+                    <span className={cx('switch-slider')}></span>
+                  </label>
+                </div>
+              </div>
+
+              <div className={cx('modal-actions')}>
+                <button
+                  type='button'
+                  className={cx('modal-button', 'modal-button-cancel')}
+                  onClick={handleCloseCreateStepModal}
+                >
+                  Cancel
+                </button>
+                <button type='submit' className={cx('modal-button', 'modal-button-create')}>
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Step Modal */}
+      {openEditStepModal && (
+        <div className={cx('modal')}>
+          <div className={cx('modal-content')}>
+            <div className={cx('modal-content-top')}>
+              <h3 className={cx('modal-title')}>Edit Step</h3>
+              <button
+                type='button'
+                className={cx('modal-close-button')}
+                aria-label='Close modal'
+                onClick={handleCloseEditStepModal}
+              >
+                &times;
+              </button>
+            </div>
+            <form className={cx('modal-form')} onSubmit={handleSubmitEditStep}>
+              <div className={cx('form-group')}>
+                <label htmlFor='stepNumber' className={cx('modal-input-label')}>
+                  Step number
+                </label>
+                <input
+                  id='stepNumber'
+                  type='number'
+                  value={stepFormData.stepNumber}
+                  onChange={handleStepInputChange}
+                  placeholder='Enter step number'
+                  className={cx('modal-input')}
+                  required
+                />
+              </div>
+
+              <div className={cx('form-group')}>
+                <label htmlFor='description' className={cx('modal-input-label')}>
+                  Description
+                </label>
+                <textarea
+                  id='description'
+                  value={stepFormData.description}
+                  onChange={handleStepInputChange}
+                  placeholder='Enter step description'
+                  className={cx('modal-input', 'modal-textarea')}
+                  rows={6}
+                  required
+                />
+              </div>
+
+              <div className={cx('form-group', 'activate-group')}>
+                <div className={cx('activate-content')}>
+                  <div>
+                    <h4 className={cx('activate-title')}>Activate Step</h4>
+                    <p className={cx('activate-text')}>Make this step available to users</p>
+                  </div>
+                  <label className={cx('switch')}>
+                    <input
+                      type='checkbox'
+                      className={cx('switch-input')}
+                      checked={stepFormData.isActive}
+                      onChange={handleStepActiveChange}
+                    />
+                    <span className={cx('switch-slider')}></span>
+                  </label>
+                </div>
+              </div>
+
+              <div className={cx('modal-actions')}>
+                <button
+                  type='button'
+                  className={cx('modal-button', 'modal-button-cancel')}
+                  onClick={handleCloseEditStepModal}
                 >
                   Cancel
                 </button>

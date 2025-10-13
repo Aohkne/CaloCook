@@ -326,6 +326,27 @@
     }
   }
 
+  .sort-steps-button {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    border-radius: 10px;
+    border: none;
+    background-color: var(--input-bg);
+    color: var(--title);
+    padding: 0.8rem 1rem;
+    position: absolute;
+    right: 12rem;
+    cursor: pointer;
+    gap: 0.5rem;
+    transition: all 0.15s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      background-color: var(--input-border);
+    }
+  }
+
   // MODAL STYLES
   .modal {
     position: fixed;
@@ -661,5 +682,57 @@
         }
       }
     }
+  }
+  .step-actions-container {
+    position: absolute;
+    right: 3rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+  .add-step-button {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    border-radius: 10px;
+    border: none;
+    background-color: var(--secondary);
+    color: var(--white);
+    padding: 1rem 1rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: translateY(0px);
+    }
+  }
+
+  .step-number {
+    font-size: 16px;
+  }
+
+  .step-desc {
+    font-size: 16px;
+  }
+
+  .step-list {
+    list-style-type: none;
+    line-height: 3rem;
+    max-height: 40rem;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+
+  .sort-button {
+    font-size: 16px;
+    border-radius: 10px;
+  }
+
+  .order-button {
+    font-size: 16px;
+    border-radius: 10px;
   }
 }
