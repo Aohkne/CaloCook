@@ -1,0 +1,102 @@
+@startuml CreateStep
+
+actor "Admin" as Admin
+boundary "StepManagementPage" as View #lightblue
+participant ":stepRoute" as Route #lightblue
+control ":authMiddleware" as Auth #orange
+participant ":stepValidation" as Validation #orange
+control "stepController" as Controller #lightblue
+participant ":stepService" as Service #lightblue
+entity "stepModel" as Model #lightblue
+entity "dishModel" as DishModel #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Create New Step
+Admin -> View: 1. Fill step form (dishId, stepNumber, description)
+activate Admin
+activate View
+
+View -> Route: 2. POST /api/v1/step
+activate Route
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+activate Auth
+ref over Auth : 4. 3.0 Verify Token & Check Role
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 4.1. Return 401/403 Error
+    Route --> View: 4.2. Show error
+    View --> Admin: 4.3. Display error message
+end
+Auth --> Route: 5. User authenticated & authorized
+deactivate Auth
+Route -> Validation: 6. createNew validation
+activate Validation
+
+Validation -> Validation: 7. Validate dishId, stepNumber, description, isActive
+activate Validation
+deactivate Validation
+opt Validation Success
+    Validation --> Route: 7.1. Return 404 error
+    Route -> View: 7.2. Show error
+    View --> Admin: 7.3. Show loading state
+end
+    Validation -> Controller: 8. createNew(req, res)
+      deactivate Validation
+    activate Controller
+  
+
+    Controller -> Service: 9. createNew(reqBody)
+    activate Service
+
+    Service -> DishModel: 10. getDetails(dishId) - verify dish exists
+    activate DishModel
+    
+    DishModel -> MongoDB: 11. ExecuteQuery()
+    activate MongoDB
+    
+    MongoDB --> DishModel: 12. Return dish data
+    deactivate MongoDB
+    
+    DishModel --> Service: 13. Return dish or null
+    deactivate DishModel
+
+    alt Dish Found
+        Service -> Model: 13.1. createNew(newStepData)
+        activate Model
+
+        Model -> MongoDB: 13.1.2. ExecuteQuery()
+        activate MongoDB
+
+        MongoDB --> Model: 13.1.3. Return created step
+        deactivate MongoDB
+
+        Model --> Service: 13.1.4. Return created step
+        deactivate Model
+
+        Service --> Controller: 13.1.5. Return created step
+
+        Controller --> Route: 13.1.6. Send JSON response (201, created step)
+
+        Route --> View: 13.1.7. Show success message
+
+        View --> Admin: 13.1.8. Display created step
+
+    else Dish Not Found
+        Service --> Controller: 13.2 Throw ApiError(404, "Dish not found!")
+        deactivate Service
+
+        Controller --> Route: 13.2.1 next(error)
+        deactivate Controller
+
+        Route --> View: 13.2.2 Return 404 error
+        deactivate Route
+
+        View --> Admin: 13.2.3 Show error message
+        deactivate View
+        deactivate Admin
+
+    end
+
+end
+
+@enduml

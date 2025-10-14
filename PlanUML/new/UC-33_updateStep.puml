@@ -1,0 +1,91 @@
+@startuml UpdateStep
+
+actor "Admin" as Admin
+boundary "StepEditPage" as View #lightblue
+participant ":stepRoute" as Route #lightblue
+control ":authMiddleware" as Auth #orange
+participant ":stepValidation" as Validation #orange
+control "stepController" as Controller #lightblue
+participant ":stepService" as Service #lightblue
+entity "stepModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Update Step
+Admin -> View: 1. Edit step form and submit
+activate Admin
+activate View
+
+View -> Route: 2. PUT /api/v1/step/:id
+activate Route
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+activate Auth
+ref over Auth : 4. 3.0 Verify Token & Check Role
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 4.1. Return 401/403 Error
+    Route --> View: 4.2. Show error
+    View --> Admin: 4.3. Display error message
+end
+Auth --> Route: 5. User authenticated & authorized
+deactivate Auth
+Route -> Validation: 6. updateStep validation
+activate Validation
+
+Validation -> Validation: 7. Validate dishId, stepNumber, description, isActive
+activate Validation
+deactivate Validation
+
+opt Validation Success
+    Validation --> Route: 7.1. Return 404 error
+    Route -> View: 7.2. Show error
+    View --> Admin: 7.3. Show loading state
+end
+    Validation -> Controller: 8. updateStep(req, res)
+    deactivate Validation
+    activate Controller
+
+    Controller -> Service: 9. updateStep(stepId, updateData)
+    activate Service
+
+    Service -> Model: 10. updateStep(stepId, dataToUpdate)
+    activate Model
+
+    Model -> MongoDB: 11. ExecuteQuery()
+    activate MongoDB
+
+    MongoDB --> Model: 12. Return updated step 
+    deactivate MongoDB
+
+
+    alt Step Found and Updated
+        Model --> Service: 12.1. Return updated step
+
+        Service --> Controller: 12.1.1. Return updated step
+
+        Controller --> Route: 12.1.2. Send JSON response (200, updated step)
+
+        Route --> View: 12.1.3. Show success message
+
+        View --> Admin: 12.1.4. Display updated step
+
+    else Step Not Found
+        Model --> Service: 12.2. Step Not Found
+        deactivate Model
+
+        Service --> Controller: 12.2.1. Throw ApiError(404, "Step not found!")
+        deactivate Service
+
+        Controller --> Route: 12.2.2. next(error)
+        deactivate Controller
+        
+
+        Route --> View: 12.2.3. Return 404 error
+       deactivate Route
+        View --> Admin: 12.2.4. Show error message
+         deactivate  View
+        deactivate Admin
+    end
+
+end
+
+@enduml
