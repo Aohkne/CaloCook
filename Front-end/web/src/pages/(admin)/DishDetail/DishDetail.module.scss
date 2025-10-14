@@ -37,6 +37,12 @@
     z-index: 10;
   }
 
+  .no-item-text {
+    text-align: center;
+    font-size: 16px;
+    color: var(--description);
+  }
+
   .dish-h2 {
     font-size: 16px;
     font-weight: 500;
