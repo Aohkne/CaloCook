@@ -112,3 +112,25 @@ export const getDishById = async (dishId) => {
   const response = await api.get(`/dish/${dishId}`);
   return response.data;
 };
+
+export const getIngredientsByDishId = async (dishId, params = {}) => {
+  const { sortBy = '', order = '' } = params;
+
+  const queryParams = {};
+  if (sortBy) queryParams.sortBy = sortBy;
+  if (order) queryParams.order = order;
+
+  const response = await api.get(`/ingredient/by-dish/${dishId}`, { params: queryParams });
+  return response.data;
+};
+
+export const getStepsByDishId = async (dishId, params = {}) => {
+  const { sortBy = '', order = '' } = params;
+
+  const queryParams = {};
+  if (sortBy) queryParams.sortBy = sortBy;
+  if (order) queryParams.order = order;
+
+  const response = await api.get(`/step/by-dish/${dishId}`, { params: queryParams });
+  return response.data;
+};

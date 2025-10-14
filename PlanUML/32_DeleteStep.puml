@@ -13,64 +13,75 @@ Admin -> View: 1. Click Delete/Deactivate Step
 activate Admin
 activate View
 
-View -> Route: 2. PATCH /api/v1/step/:id/deactivate
+View -> View: 2. Show confirmation dialog
+activate View
+deactivate View
+
+opt User cancels
+    View --> Admin: 2.1 Cancel deletion (dialog closed)
+end
+
+View -> Route: 3. PATCH /api/v1/step/:id/deactivate
 activate Route
 
-Route -> Controller: 3. deactivateStep(req, res)
+Route -> Controller: 4. deactivateStep(req, res)
 activate Controller
 
-Controller -> Service: 4. deactivateStep(stepId)
+Controller -> Service: 5. deactivateStep(stepId)
 activate Service
 
-Service -> Model: 5. updateIsActive(stepId, false)
+Service -> Model: 6. updateIsActive(stepId, false)
 activate Model
 
-Model -> MongoDB: 6. ExecuteQuery()
+Model -> MongoDB: 7. ExecuteQuery()
 activate MongoDB
 
-MongoDB --> Model: 7. Return updated step or null
+MongoDB --> Model: 8. Return updated step or null
+deactivate MongoDB
+Model --> Service: 9. Return deactivated step
+deactivate Model
 
-Model --> Service: 8. Return deactivated step
+Service --> Controller: 10. Return deactivated step
 
-Service --> Controller: 9. Return deactivated step
+Controller --> Route: 11. Send JSON response (200, deactivated step)
 
-Controller --> Route: 10. Send JSON response (200, deactivated step)
+Route --> View: 12. Show success message
 
-Route --> View: 11. Show success message
-
-View --> Admin: 12. Display step as inactive/deleted
+View --> Admin: 13. Display step as inactive/deleted
 
 end
 
 group Alternative: Activate Step
-Admin -> View: 13. Click Activate Step
+Admin -> View: 14. Click Activate Step
 
-View -> Route: 14. PATCH /api/v1/step/:id/activate
+View -> Route: 15. PATCH /api/v1/step/:id/activate
 
-Route -> Controller: 15. activateStep(req, res)
+Route -> Controller: 16. activateStep(req, res)
 
-Controller -> Service: 16. activateStep(stepId)
+Controller -> Service: 17. activateStep(stepId)
 
-Service -> Model: 17. updateIsActive(stepId, true)
+Service -> Model: 18. updateIsActive(stepId, true)
+activate Model
 
-Model -> MongoDB: 18. ExecuteQuery()
+Model -> MongoDB: 19. ExecuteQuery()
+activate MongoDB
 
-MongoDB --> Model: 19. Return updated step or null
+MongoDB --> Model: 20. Return updated step or null
 deactivate MongoDB
 
-Model --> Service: 20. Return activated step
+Model --> Service: 21. Return activated step
 deactivate Model
 
-Service --> Controller: 21. Return activated step
+Service --> Controller: 22. Return activated step
 deactivate Service
 
-Controller --> Route: 22. Send JSON response (200, activated step)
+Controller --> Route: 23. Send JSON response (200, activated step)
 deactivate Controller
 
-Route --> View: 23. Show success message
+Route --> View: 24. Show success message
 deactivate Route
 
-View --> Admin: 24. Display step as active
+View --> Admin: 25. Display step as active
 deactivate View
 deactivate Admin
 end

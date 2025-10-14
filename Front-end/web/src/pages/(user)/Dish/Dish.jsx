@@ -6,6 +6,7 @@ import classNames from 'classnames/bind';
 import styles from './Dish.module.scss';
 import { getDishes } from '@/api/dish';
 import { getFavorites, addToFavorites, removeFromFavorites } from '@/api/favorite';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getWebImagePath } from '@/utils/imageHelper';
 const defaultImage = '/images/default-img.png';
 
@@ -31,8 +32,13 @@ function Dish() {
   const [calorieRange, setCalorieRange] = useState({ min: 5, max: 2000 });
 
   const toggleChat = () => setIsChatOpen((prev) => !prev);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Helper function to get cookie value by name
+  const handleCardClick = (dishId) => {
+    navigate(`/dish/${dishId}`);
+  };
+
   const getCookie = (name) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -40,12 +46,9 @@ function Dish() {
     return null;
   };
 
-  // Optimized getUserId - more concise
   const getUserId = () => {
-    // Try different sources in order of preference
     let userId = getCookie('user_id') || localStorage.getItem('user_id');
 
-    // Last resort: decode from JWT token
     if (!userId) {
       const accessToken = getCookie('accessToken');
       if (accessToken) {
@@ -71,7 +74,6 @@ function Dish() {
     return userId;
   };
 
-  // Fetch user's favorite dishes
   const fetchFavorites = async () => {
     const userId = getUserId();
     if (!userId) return;
@@ -95,7 +97,6 @@ function Dish() {
     }
   };
 
-  // Fetch dishes from API
   const fetchDishes = async (page = 1, name = searchQuery) => {
     setLoading(true);
     try {
@@ -140,7 +141,17 @@ function Dish() {
     fetchFavorites();
   }, []);
 
-  const toggleFavorite = async (dishId) => {
+  useEffect(() => {
+    // Nếu có state từ navigation (ví dụ: { refresh: true })
+    if (location.state?.refresh) {
+      fetchDishes(currentPage);
+      // Clear state để tránh refresh nhiều lần
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
+  const toggleFavorite = async (dishId, e) => {
+    e.stopPropagation();
     const userId = getUserId();
 
     if (!userId) {
@@ -177,7 +188,6 @@ function Dish() {
     }
   };
 
-  // Generate page numbers array dynamically
   const getPageNumbers = () => {
     const pageNumbers = [];
     for (let i = 1; i <= pagination.totalPages; i++) {
@@ -186,29 +196,24 @@ function Dish() {
     return pageNumbers;
   };
 
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  // Handle image error - fallback to default image
   const handleImageError = (e) => {
     e.target.src = defaultImage;
   };
 
-  // Handle search
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
     fetchDishes(1, e.target.value);
   };
 
-  // Handle open filter modal
   const handleOpenFilterModal = () => {
     setOpenFilterModal(true);
   };
 
-  // Handle close filter modal
   const handleCloseFilterModal = () => {
     setOpenFilterModal(false);
   };
@@ -228,7 +233,6 @@ function Dish() {
     });
   };
 
-  // Handle Cooking Time Range
   const handleCookingTimeRangeChange = (type) => (e) => {
     const value = parseInt(e.target.value);
     setCookingTimeRange((prev) => {
@@ -239,7 +243,7 @@ function Dish() {
       }
     });
   };
-  // Handle Calorie Range
+
   const handleCalorieRangeChange = (type) => (e) => {
     const value = parseInt(e.target.value);
     setCalorieRange((prev) => {
@@ -285,7 +289,7 @@ function Dish() {
             <div className={cx('loading')}>Loading...</div>
           ) : (
             dishes.map((dish) => (
-              <div key={dish._id} className={cx('dish-card')}>
+              <div key={dish._id} className={cx('dish-card')} onClick={() => handleCardClick(dish._id)}>
                 <div className={cx('card-image')}>
                   <img
                     src={dish.imageUrl && dish.imageUrl.trim() !== '' ? getWebImagePath(dish.imageUrl) : defaultImage}
@@ -296,7 +300,7 @@ function Dish() {
                     className={cx('favorite-btn', {
                       active: favoriteIds.has(dish._id)
                     })}
-                    onClick={() => toggleFavorite(dish._id)}
+                    onClick={(e) => toggleFavorite(dish._id, e)}
                     title={favoriteIds.has(dish._id) ? 'Remove from favorites' : 'Add to favorites'}
                   >
                     <Icon icon={favoriteIds.has(dish._id) ? 'ph:heart-fill' : 'ph:heart'} />
@@ -364,7 +368,7 @@ function Dish() {
         <Icon icon='line-md:chat-round-filled' />
       </div>
       {isChatOpen && <ChatBox isChatOpen={isChatOpen} toggleChat={toggleChat} />}
-      {/* Filter Modal */}
+
       {openFilterModal && (
         <div className={cx('modal')}>
           <div className={cx('modal-content')}>
@@ -376,7 +380,19 @@ function Dish() {
             >
               <Icon icon='material-symbols-light:close' width='24' height='24' />
             </button>
-            <div className={cx('modal-form')}>
+            <form className={cx('modal-form')}>
+              {/* Search Ingredient */}
+              <div className={cx('form-group')}>
+                <label htmlFor='search' className={cx('modal-input-label')}>
+                  Contains Products
+                </label>
+                <input
+                  id='search'
+                  type='text'
+                  className={cx('modal-search-input')}
+                  placeholder='Search ingredients...'
+                />
+              </div>
               {/* Difficulty */}
               <div className={cx('form-group', 'difficulty-group')}>
                 <span className={cx('modal-input-label')}>Difficulty</span>
@@ -416,10 +432,8 @@ function Dish() {
                   </label>
                 </div>
               </div>
-              {/* Cooking Time & Calories*/}
               <div className={cx('cooking-time-calories-container')}>
                 <div className={cx('form-group')}>
-                  {/* Cooking Time */}
                   <label htmlFor='search' className={cx('modal-input-label')}>
                     Cooking Time (Minutes)
                   </label>
@@ -446,7 +460,6 @@ function Dish() {
                     />
                   </div>
                 </div>
-                {/* Calories */}
                 <div className={cx('form-group')}>
                   <label htmlFor='search' className={cx('modal-input-label')}>
                     Calories (Kcal)

@@ -1,0 +1,85 @@
+@startuml Create Dish
+
+actor Admin as "Admin" 
+boundary "DishListPage" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "dishValidation" as Validation #orange
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Create Dish
+Admin -> View: 1. Click "Create Dish"
+activate Admin
+activate View
+View -> View: 2. Show create dish form
+activate View
+deactivate View
+opt User cancels
+    View --> Admin: 2.1 Cancel creation (dialog closed)
+end
+Admin -> View: 3. Fill form(name, cookingTime,\n, calorie, difficulty, description, image)
+Admin -> View: 4. Click "Submit"
+
+View -> Route: 5. POST /api/v1/dishes (body)
+activate Route
+Route -> Auth: 6. authenticateUser(req) & authorizeRole()
+activate Auth
+ref over Auth : 7. 3.0 Verify Token & Check Role
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 7.1. Return 401/403 Error
+    Route --> View: 7.2. Show error
+    View --> Admin: 7.3. Display error message
+end
+Auth --> Route: 8. User authenticated & authorized
+deactivate Auth
+Route -> Validation: 9. validateCreateDish(data)
+activate Validation
+
+alt Validation Failed
+    Validation --> Route: 9.1. Return 400 Bad Request
+    Route --> View: 9.1.1. Show validation error
+    View --> Admin: 9.1.2. Display error message
+
+else Validation Passed
+    Validation --> Route: 9.2. Proceed
+    deactivate Validation
+
+    Route -> Controller: 9.2.1. createNew(req, res)
+    activate Controller
+
+    Controller -> Service: 9.2.2. createNew(dishData)
+    activate Service
+
+    Service -> Model: 9.2.3. insertDish(dishData)
+    activate Model
+
+    Model -> MongoDB: 9.2.4. ExecuteQuery(insertDish)
+    activate MongoDB
+    MongoDB --> Model: 9.2.5. Return insert result
+    deactivate MongoDB
+
+    Model --> Service: 9.2.6. Return created dish
+    deactivate Model
+
+    Service --> Controller: 9.2.7. Return success
+    deactivate Service
+
+    Controller --> Route: 9.2.8. 201 Created + dish
+    deactivate Route
+    deactivate Controller
+
+    Route --> View: 9.2.9. Show success
+    deactivate Route
+
+    View --> Admin: 9.2.10. Display "Dish created successfully"
+    deactivate Admin
+    deactivate View
+end
+
+deactivate View
+end
+@enduml

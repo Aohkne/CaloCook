@@ -1,8 +1,9 @@
 @startuml ViewDishDetail
 
-actor User as "User/Admin"
+actor User as "User"
 boundary "DishDetailView" as View #lightblue
 participant ":dishRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
 control "dishController" as Controller #lightblue
 participant ":dishService" as Service #lightblue
 entity "dishModel" as Model #lightblue
@@ -16,36 +17,48 @@ activate View
 View -> Route: 2. GET /api/v1/dish/{dishId}
 activate Route
 
-Route -> Controller: 3. getDetails(req, res)
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+activate Auth
+ref over Auth : 4. 3.0 Verify Token & Check Role
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 4.1. Return 401/403 Error
+    Route --> View: 4.2. Show error
+    View --> User: 4.3. Display error message
+end
+Auth --> Route: 5. User authenticated & authorized
+deactivate Auth
+
+Route -> Controller: 6. getDetails(req, res)
 activate Controller
 
-Controller -> Service: 4. getDetails(dishId)
+Controller -> Service: 7. getDetails(dishId)
 activate Service
 
-Service -> Model: 5. findDishById(dishId)
+Service -> Model: 8. findDishById(dishId)
 activate Model
 
-Model -> MongoDB: 6. Execute find query
+Model -> MongoDB: 9. Execute find query
 activate MongoDB
-MongoDB --> Model: 7. Return dish document
+MongoDB --> Model: 10. Return dish document
 deactivate MongoDB
 
-Model --> Service: 8. Return dish
+Model --> Service: 11. Return dish
 deactivate Model
 
 alt Dish not found
-    Service --> Controller: 9.1. Return 404 error
-    Controller --> Route: 9.1.1. 404 Not Found
-    Route --> View: 9.1.2. Show "Dish not found"
-    View --> User: 9.1.3. Display error message
+    Service --> Controller: 11.1. Return 404 error
+    Controller --> Route: 11.1.1. 404 Not Found
+    Route --> View: 11.1.2. Show "Dish not found"
+    View --> User: 11.1.3. Display error message
 else Dish found
-    Service --> Controller: 9.2. Return dish
+    Service --> Controller: 11.2. Return dish
     deactivate Service
-    Controller --> Route: 9.2.1. 200 OK + dish detail
+    Controller --> Route: 11.2.1. 200 OK + dish detail
     deactivate Controller
-    Route --> View: 9.2.2. Render dish detail
+    Route --> View: 11.2.2. Render dish detail
     deactivate Route
-    View --> User: 9.2.3. Display dish info details
+    View --> User: 11.2.3. Display dish info details
     deactivate View
     deactivate User
 end

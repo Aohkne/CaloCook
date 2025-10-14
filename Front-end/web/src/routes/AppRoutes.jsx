@@ -33,6 +33,7 @@ import Favorite from '@/pages/(user)/Favorite/Favorite';
 import ChatAI from '@/pages/(user)/ChatAI/ChatAI';
 import ProfileUser from '@/pages/(user)/ProfileUser/ProfileUser';
 import ChangePassword from '@/pages/(user)/ChangePassword/ChangePassword';
+import DishDetailUser from '@/pages/(user)/DishDetailUser/DishDetailUser';
 
 function AppRoutes() {
   return (
@@ -191,6 +192,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute requiredRole={ROLE.USER}>
               <Dish />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.DISH_DETAIL}
+          element={
+            <ProtectedRoute requiredRole={ROLE.USER}>
+              <DishDetailUser />
             </ProtectedRoute>
           }
         />
