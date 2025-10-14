@@ -1,0 +1,52 @@
+@startuml DishRecommendationByIngredient
+
+actor "User/Admin" as User
+boundary "IngredientSearchPage" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Dish Recommendation by Ingredient
+User -> View: 1. Select/Input Ingredient(s)
+activate View
+activate User
+
+View -> Route: 2. GET /api/v1/dish/by-ingredient/:ingredientId
+activate Route
+
+Route -> Controller: 3. getDishesByIngredient(req, res)
+activate Controller
+
+Controller -> Service: 4. getDishesByIngredient(ingredientId, sortBy, order)
+activate Service
+
+Service -> Model: 5. getDishesByIngredient(ingredientId, sortBy, order)
+activate Model
+
+Model -> MongoDB: 6. ExecuteQuery()
+activate MongoDB
+
+MongoDB --> Model: 7. Return dish list
+deactivate MongoDB
+
+Model --> Service: 8. Return dishes
+deactivate Model
+
+Service --> Controller: 9. Return dishes
+deactivate Service
+
+Controller --> Route: 10. Send JSON response
+deactivate Controller
+
+Route --> View: 11. Render dish recommendations
+deactivate Route
+
+View --> User: 12. Show recommended dishes
+deactivate View
+deactivate User
+
+end
+
+@enduml
