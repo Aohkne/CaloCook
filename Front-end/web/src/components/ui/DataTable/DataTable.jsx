@@ -279,8 +279,7 @@ function DataTable({
               disabled={!serverPagination.hasPrevPage}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:left-line' />
-              <Icon icon='mingcute:left-line' />
+              <Icon icon='icon-park-outline:double-left' width='20' height='20' />
             </button>
 
             <button
@@ -288,7 +287,7 @@ function DataTable({
               disabled={!serverPagination.hasPrevPage}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:left-line' />
+              <Icon icon='mingcute:left-line' width='20' height='20' />
             </button>
 
             <div className={cx('page-numbers')}>
@@ -315,7 +314,7 @@ function DataTable({
               disabled={!serverPagination.hasNextPage}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:right-line' />
+              <Icon icon='mingcute:right-line' width='20' height='20' />
             </button>
 
             <button
@@ -323,15 +322,14 @@ function DataTable({
               disabled={!serverPagination.hasNextPage}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:right-line' />
-              <Icon icon='mingcute:right-line' />
+              <Icon icon='icon-park-outline:double-right' width='20' height='20' />
             </button>
           </div>
         </div>
       )}
 
       {/* Client-side Pagination */}
-      {showPagination && !useServerPagination && (
+      {/* {showPagination && !useServerPagination && (
         <div className={cx('pagination-container')}>
           <div className={cx('pagination-info')}>
             Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
@@ -348,8 +346,7 @@ function DataTable({
               disabled={!table.getCanPreviousPage()}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:left-line' />
-              <Icon icon='mingcute:left-line' />
+              <Icon icon='icon-park-outline:double-left' width='20' height='20' />
             </button>
 
             <button
@@ -357,7 +354,7 @@ function DataTable({
               disabled={!table.getCanPreviousPage()}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:left-line' />
+              <Icon icon='mingcute:left-line' width='20' height='20' />
             </button>
 
             <div className={cx('page-numbers')}>
@@ -384,7 +381,7 @@ function DataTable({
               disabled={!table.getCanNextPage()}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:right-line' />
+              <Icon icon='mingcute:right-line' width='20' height='20' />
             </button>
 
             <button
@@ -392,12 +389,11 @@ function DataTable({
               disabled={!table.getCanNextPage()}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:right-line' />
-              <Icon icon='mingcute:right-line' />
+              <Icon icon='icon-park-outline:double-right' width='20' height='20' />
             </button>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

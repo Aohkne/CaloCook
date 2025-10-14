@@ -141,8 +141,7 @@ function TopTable({
               disabled={!table.getCanPreviousPage()}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:left-line' />
-              <Icon icon='mingcute:left-line' />
+              <Icon icon='icon-park-outline:double-left' width='20' height='20' />
             </button>
 
             <button
@@ -150,7 +149,7 @@ function TopTable({
               disabled={!table.getCanPreviousPage()}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:left-line' />
+              <Icon icon='mingcute:left-line' width='20' height='20' />
             </button>
 
             <div className={cx('page-numbers')}>
@@ -177,7 +176,7 @@ function TopTable({
               disabled={!table.getCanNextPage()}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:right-line' />
+              <Icon icon='mingcute:right-line' width='20' height='20' />
             </button>
 
             <button
@@ -185,8 +184,7 @@ function TopTable({
               disabled={!table.getCanNextPage()}
               className={cx('pagination-btn', type)}
             >
-              <Icon icon='mingcute:right-line' />
-              <Icon icon='mingcute:right-line' />
+              <Icon icon='icon-park-outline:double-right' width='20' height='20' />
             </button>
           </div>
         </div>
