@@ -380,7 +380,7 @@ function Dish() {
             >
               <Icon icon='material-symbols-light:close' width='24' height='24' />
             </button>
-            <form className={cx('modal-form')}>
+            <div className={cx('modal-form')}>
               {/* Search Ingredient */}
               <div className={cx('form-group')}>
                 <label htmlFor='search' className={cx('modal-input-label')}>
