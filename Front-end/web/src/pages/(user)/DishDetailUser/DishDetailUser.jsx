@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import classNames from 'classnames/bind';
@@ -14,6 +14,7 @@ const defaultImage = '/images/default-img.png';
 
 function DishDetailUser() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [userRating, setUserRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -34,7 +35,6 @@ function DishDetailUser() {
 
   const getUserId = () => {
     let userId = getCookie('user_id') || localStorage.getItem('user_id');
-
     if (!userId) {
       const accessToken = getCookie('accessToken');
       if (accessToken) {
@@ -54,7 +54,6 @@ function DishDetailUser() {
         }
       }
     }
-
     return userId;
   };
 
@@ -94,7 +93,7 @@ function DishDetailUser() {
 
   const handleCook = () => {
     if (!userId || !id) return alert('Please log in first!');
-    setIsModalVisible(true); // ✅ Hiện modal trước tiên
+    setIsModalVisible(true); // ✅ modal hiện trước
   };
 
   const handleCookingComplete = async () => {
@@ -105,12 +104,12 @@ function DishDetailUser() {
 
       setIsModalVisible(false);
 
-      const message = `Added "${dish.name}" (${dish.calorie || dish.calories} Kcal) to your eating history!\n\nView your profile?`;
-      const goToProfile = window.confirm(message);
-
-      if (goToProfile) {
-        window.location.href = '/profile';
-      }
+      // ✅ hỏi người dùng có muốn xem profile không
+      setTimeout(() => {
+        const message = `Added "${dish.name}" (${dish.calorie || dish.calories} Kcal) to your eating history!\n\nView your profile?`;
+        const goToProfile = window.confirm(message);
+        if (goToProfile) navigate(ROUTES.PROFILE_USER);
+      }, 300);
     } catch (err) {
       alert('Failed to add to history.');
     }
@@ -292,7 +291,7 @@ function DishDetailUser() {
         onClose={() => setIsModalVisible(false)}
         steps={steps}
         dishData={dish}
-        onComplete={handleCookingComplete} 
+        onComplete={handleCookingComplete}
       />
     </div>
   );
