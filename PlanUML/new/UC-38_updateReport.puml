@@ -1,0 +1,75 @@
+@startuml UC44_UpdateReport
+
+actor Admin as "Admin/Seller"
+boundary "Report Page" as View #lightblue
+participant ":reportRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "reportController" as Controller #lightblue
+participant ":reportService" as Service #lightblue
+entity "reportModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Update Report
+    Admin -> View: 1.Select a report to update
+    activate View
+    activate Admin
+
+    View -> Route: 2.PATCH /api/v1/report/:id
+    activate Route
+    Route -> Auth: 3.authenticateUser(req) & authorizeRole()
+
+    activate Auth
+    ref over Auth : 4. 3.0 Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 4.1. Return 401/403 Error
+        Route --> View: 4.2. Show error
+        View --> Admin: 4.3. Display error message
+    end
+    Auth --> Route: 5. User authenticated & authorized
+
+    Route -> Controller: 6.updateReport(req, res)
+    activate Controller
+
+    Controller -> Service: 7.updateReport(id, newData)
+    activate Service
+
+    Service -> Model: 8.findById(id)
+    activate Model
+
+    Model -> MongoDB: 9.Query report by id
+    activate MongoDB
+    MongoDB --> Model: 10.Return report
+    deactivate MongoDB
+
+    Model --> Service: 11.Return result
+    deactivate Model
+
+    alt Report not found
+        Service --> Controller: 11.1.Return error "Report not found"
+        Controller --> Route: 11.1.1.Return 404
+        Route --> View: 11.1.2.Show error message
+        View --> Admin: 11.1.3.Display "Report not found"
+    else Report found
+        Service -> Model: 11.2.Update report fields (status, description,…)
+        activate Model
+        Model -> MongoDB: 11.2.1.Execute update query
+        activate MongoDB
+        MongoDB --> Model: 11.2.2.Return update result
+        deactivate MongoDB
+        Model --> Service: 11.2.3.Return updated report
+        deactivate Model
+
+        Service --> Controller: 11.2.4.Return success
+        deactivate Service
+        Controller --> Route: 11.2.5.Return success {message, updatedReport}
+        deactivate Controller
+        Route --> View: 11.2.6.Display updated report info
+        deactivate Route
+        View --> Admin: 11.2.7.Show "Report updated successfully"
+        deactivate View
+        deactivate Admin
+    end
+end
+
+@enduml

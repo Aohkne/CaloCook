@@ -1,0 +1,62 @@
+@startuml ViewDishList
+
+actor User as "User"
+boundary "DishListPage" as View #lightblue
+participant ":dishRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View Dish List
+User -> View: 1. Navigate to Dish List
+activate User
+activate View
+
+View -> Route: 2. GET /api/v1/dish
+activate Route
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+activate Auth
+ref over Auth : 4. 3.0 Verify Token & Check Role
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 4.1. Return 401/403 Error
+    Route --> View: 4.2. Show error
+    View --> User: 4.3. Display error message
+end
+Auth --> Route: 5. User authenticated & authorized
+deactivate Auth
+
+Route -> Controller: 6. getAll(req, res)
+activate Controller
+
+Controller -> Service: 7. getAll()
+activate Service
+
+Service -> Model: 8. findAll()
+activate Model
+
+Model -> MongoDB: 9. Query all dishes
+activate MongoDB
+MongoDB --> Model: 10. Return dish list
+deactivate MongoDB
+
+Model --> Service: 11. Return result
+deactivate Model
+
+Service --> Controller: 12. Return dish list
+deactivate Service
+
+Controller --> Route: 13. 200 OK + dish list
+deactivate Controller
+
+Route --> View: 14. Render dish list
+deactivate Route
+
+View --> User: 15. Display dish list
+deactivate View
+deactivate User
+
+end
+@enduml
