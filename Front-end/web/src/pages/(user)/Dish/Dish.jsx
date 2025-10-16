@@ -325,7 +325,7 @@ function Dish() {
                     </span>
                   </div>
 
-                  <p className={cx('ingredients')}>{dish.description}</p>
+                  <p className={cx('ingredients')}>{dish.description.length > 50 ? dish.description.substring(0, 50) + '...' : dish.description}</p>
                 </div>
               </div>
             ))
