@@ -85,7 +85,9 @@ function DishDetailUser() {
           console.log('Ingredients response:', ingredientResponse);
 
           if (ingredientResponse.code === 200) {
-            setIngredients(ingredientResponse.data || []);
+            // ✅ Chỉ lấy ingredients có isActive = true
+            const activeIngredients = (ingredientResponse.data || []).filter(ing => ing.isActive === true);
+            setIngredients(activeIngredients);
           } else {
             setIngredients([]);
           }
@@ -100,7 +102,9 @@ function DishDetailUser() {
           console.log('Steps response:', stepResponse);
 
           if (stepResponse.code === 200) {
-            setSteps(stepResponse.data || []);
+            // ✅ Chỉ lấy steps có isActive = true
+            const activeSteps = (stepResponse.data || []).filter(step => step.isActive === true);
+            setSteps(activeSteps);
           } else {
             setSteps([]);
           }
