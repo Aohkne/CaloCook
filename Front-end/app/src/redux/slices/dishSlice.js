@@ -212,7 +212,11 @@ const dishSlice = createSlice({
       .addCase(loadMoreDishes.fulfilled, (state, action) => {
         state.isLoadingMore = false;
         const newDishes = action.payload.data;
-        state.dishes = [...state.dishes, ...newDishes];
+
+        const existingIds = new Set(state.dishes.map(dish => dish._id));
+        const uniqueNewDishes = newDishes.filter(dish => !existingIds.has(dish._id));
+
+        state.dishes = [...state.dishes, ...uniqueNewDishes];
         state.hasMore = action.payload.pagination.hasNextPage;
         state.currentPage = action.payload.pagination.currentPage;
       })
