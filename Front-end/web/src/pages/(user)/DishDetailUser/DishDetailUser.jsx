@@ -67,7 +67,6 @@ function DishDetailUser() {
         setLoading(true);
         setError(null);
 
-        // ✅ Fetch dish (bắt buộc phải có)
         const dishResponse = await getDishById(id);
         console.log('Dish response:', dishResponse);
 
@@ -79,13 +78,11 @@ function DishDetailUser() {
           return;
         }
 
-        // ✅ Fetch ingredients (không bắt buộc, catch riêng)
         try {
           const ingredientResponse = await getIngredientsByDishId(id);
           console.log('Ingredients response:', ingredientResponse);
 
           if (ingredientResponse.code === 200) {
-            // ✅ Chỉ lấy ingredients có isActive = true
             const activeIngredients = (ingredientResponse.data || []).filter(ing => ing.isActive === true);
             setIngredients(activeIngredients);
           } else {
@@ -96,13 +93,11 @@ function DishDetailUser() {
           setIngredients([]);
         }
 
-        // ✅ Fetch steps (không bắt buộc, catch riêng)
         try {
           const stepResponse = await getStepsByDishId(id);
           console.log('Steps response:', stepResponse);
 
           if (stepResponse.code === 200) {
-            // ✅ Chỉ lấy steps có isActive = true
             const activeSteps = (stepResponse.data || []).filter(step => step.isActive === true);
             setSteps(activeSteps);
           } else {
