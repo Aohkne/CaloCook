@@ -54,8 +54,8 @@ export const createDish = async ({ name, description, cookingTime, calorie, diff
   const response = await api.post('/dish', {
     name,
     description,
-    cookingTime,
-    calorie,
+    cookingTime: Number(cookingTime),
+    calorie: Number(calorie),
     difficulty,
     isActive,
     imageUrl

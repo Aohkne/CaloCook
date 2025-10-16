@@ -62,22 +62,55 @@ function DishDetailUser() {
   useEffect(() => {
     const fetchDishDetail = async () => {
       if (!id) return;
+
       try {
         setLoading(true);
         setError(null);
 
+        // ✅ Fetch dish (bắt buộc phải có)
         const dishResponse = await getDishById(id);
-        if (dishResponse.code === 200) setDish(dishResponse.data);
-        else return setError('Dish not found');
+        console.log('Dish response:', dishResponse);
 
-        const ingredientResponse = await getIngredientsByDishId(id);
-        if (ingredientResponse.code === 200)
-          setIngredients(ingredientResponse.data || []);
+        if (dishResponse.code === 200) {
+          setDish(dishResponse.data);
+        } else {
+          setError('Dish not found');
+          setLoading(false);
+          return;
+        }
 
-        const stepResponse = await getStepsByDishId(id);
-        if (stepResponse.code === 200)
-          setSteps(stepResponse.data || []);
+        // ✅ Fetch ingredients (không bắt buộc, catch riêng)
+        try {
+          const ingredientResponse = await getIngredientsByDishId(id);
+          console.log('Ingredients response:', ingredientResponse);
+
+          if (ingredientResponse.code === 200) {
+            setIngredients(ingredientResponse.data || []);
+          } else {
+            setIngredients([]);
+          }
+        } catch (ingredientErr) {
+          console.warn('Failed to load ingredients:', ingredientErr);
+          setIngredients([]);
+        }
+
+        // ✅ Fetch steps (không bắt buộc, catch riêng)
+        try {
+          const stepResponse = await getStepsByDishId(id);
+          console.log('Steps response:', stepResponse);
+
+          if (stepResponse.code === 200) {
+            setSteps(stepResponse.data || []);
+          } else {
+            setSteps([]);
+          }
+        } catch (stepErr) {
+          console.warn('Failed to load steps:', stepErr);
+          setSteps([]);
+        }
+
       } catch (err) {
+        console.error('Error fetching dish:', err);
         setError('Failed to load dish details');
       } finally {
         setLoading(false);
@@ -93,7 +126,7 @@ function DishDetailUser() {
 
   const handleCook = () => {
     if (!userId || !id) return alert('Please log in first!');
-    setIsModalVisible(true); // ✅ modal hiện trước
+    setIsModalVisible(true);
   };
 
   const handleCookingComplete = async () => {
@@ -104,13 +137,13 @@ function DishDetailUser() {
 
       setIsModalVisible(false);
 
-      // ✅ hỏi người dùng có muốn xem profile không
       setTimeout(() => {
-        const message = `Added "${dish.name}" (${dish.calorie || dish.calories} Kcal) to your eating history!\n\nView your profile?`;
+        const message = `Added "${dish.name}" (${dish.calorie || dish.calories || 0} Kcal) to your eating history!\n\nView your profile?`;
         const goToProfile = window.confirm(message);
         if (goToProfile) navigate(ROUTES.PROFILE_USER);
       }, 300);
     } catch (err) {
+      console.error('Failed to add to history:', err);
       alert('Failed to add to history.');
     }
   };
@@ -202,14 +235,14 @@ function DishDetailUser() {
               </div>
               <div className={cx('stat-card')}>
                 <Icon icon="ph:fire" />
-                <span>{dish.calorie || 0} Kcal</span>
+                <span>{dish.calorie || dish.calories || 0} Kcal</span>
               </div>
               <div className={cx('stat-card')}>
                 <Icon icon="ph:chef-hat" />
                 <span>
                   {dish.difficulty
                     ? dish.difficulty.charAt(0).toUpperCase() +
-                      dish.difficulty.slice(1).toLowerCase()
+                    dish.difficulty.slice(1).toLowerCase()
                     : 'N/A'}
                 </span>
               </div>
@@ -243,7 +276,9 @@ function DishDetailUser() {
                     ))}
                   </ol>
                 ) : (
-                  <p className={cx('empty-message')}>No ingredients found.</p>
+                  <p className={cx('empty-message')}>
+                    No ingredients found for this dish.
+                  </p>
                 )}
               </div>
             )}
@@ -256,7 +291,9 @@ function DishDetailUser() {
                     ))}
                   </ol>
                 ) : (
-                  <p className={cx('empty-message')}>No steps found.</p>
+                  <p className={cx('empty-message')}>
+                    No cooking steps found for this dish.
+                  </p>
                 )}
               </div>
             )}
