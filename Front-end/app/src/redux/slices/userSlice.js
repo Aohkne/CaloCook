@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getUserProfileService, updateUserProfileService, addEatingHistoryService, getTotalCaloriesService, getEatingHistoryService } from '@/services/user';
+import { getUserProfileService, updateUserProfileService, addEatingHistoryService, getTotalCaloriesService, getEatingHistoryService, createReportService } from '@/services/user';
 
 // Initial state
 const initialState = {
@@ -74,6 +74,15 @@ export const updateUserProfile = createAsyncThunk(
         }
     }
 );
+
+export const createReport = createAsyncThunk('user/createReport', async (reportPayload, { rejectWithValue }) => {
+  try {
+    const response = await createReportService(reportPayload);
+    return response;
+  } catch (error) {
+    return rejectWithValue(error);
+  }
+});
 
 // User slice
 const userSlice = createSlice({

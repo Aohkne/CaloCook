@@ -6,6 +6,7 @@ import styles from './DishDetailUser.module.scss';
 import { ROUTES } from '@/constants/routes';
 import { getDishById, getIngredientsByDishId, getStepsByDishId } from '@/api/dish';
 import { addToHistory, getTotalCalories } from '@/api/history';
+import { createReport } from '@/api/report';
 import { getWebImagePath } from '@/utils/imageHelper';
 import CookingStepsModal from '@/components/ui/CookingStepsModal/CookingStepsModal';
 
@@ -23,8 +24,12 @@ function DishDetailUser() {
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState('');
+  const [errorSubmitReport, setErrorSubmitReport] = useState('');
   const [activeTab, setActiveTab] = useState('ingredients');
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [reportReason, setReportReason] = useState('');
 
   const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -86,7 +91,7 @@ function DishDetailUser() {
 
           if (ingredientResponse.code === 200) {
             // ✅ Chỉ lấy ingredients có isActive = true
-            const activeIngredients = (ingredientResponse.data || []).filter(ing => ing.isActive === true);
+            const activeIngredients = (ingredientResponse.data || []).filter((ing) => ing.isActive === true);
             setIngredients(activeIngredients);
           } else {
             setIngredients([]);
@@ -103,7 +108,7 @@ function DishDetailUser() {
 
           if (stepResponse.code === 200) {
             // ✅ Chỉ lấy steps có isActive = true
-            const activeSteps = (stepResponse.data || []).filter(step => step.isActive === true);
+            const activeSteps = (stepResponse.data || []).filter((step) => step.isActive === true);
             setSteps(activeSteps);
           } else {
             setSteps([]);
@@ -112,7 +117,6 @@ function DishDetailUser() {
           console.warn('Failed to load steps:', stepErr);
           setSteps([]);
         }
-
       } catch (err) {
         console.error('Error fetching dish:', err);
         setError('Failed to load dish details');
@@ -142,13 +146,45 @@ function DishDetailUser() {
       setIsModalVisible(false);
 
       setTimeout(() => {
-        const message = `Added "${dish.name}" (${dish.calorie || dish.calories || 0} Kcal) to your eating history!\n\nView your profile?`;
+        const message = `Added "${dish.name}" (${
+          dish.calorie || dish.calories || 0
+        } Kcal) to your eating history!\n\nView your profile?`;
         const goToProfile = window.confirm(message);
         if (goToProfile) navigate(ROUTES.PROFILE_USER);
       }, 300);
     } catch (err) {
       console.error('Failed to add to history:', err);
       alert('Failed to add to history.');
+    }
+  };
+  const handleOpenReportModal = () => {
+    setIsReportModalVisible(true);
+  };
+
+  const handleCloseReportModal = () => {
+    setIsReportModalVisible(false);
+    setReportReason('');
+  };
+
+  const handleSubmitReport = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    if (!reportReason.trim() || reportReason.trim().length < 10) {
+      setErrorSubmitReport('Please enter a reason for reporting (at least 10 characters)');
+      setTimeout(() => setErrorSubmitReport(''), 5000);
+      handleCloseReportModal();
+      return;
+    }
+
+    try {
+      await createReport({ dishId: id, description: reportReason.trim() });
+      setSuccess('Report submitted successfully! Thank you for your feedback.');
+      handleCloseReportModal();
+      setTimeout(() => setSuccess(''), 5000);
+    } catch (err) {
+      console.error('Failed to submit report:', err);
+      setError('Failed to submit report.');
     }
   };
 
@@ -166,7 +202,7 @@ function DishDetailUser() {
           key={index}
           className={cx('star', {
             filled: isFilled,
-            interactive: isInteractive,
+            interactive: isInteractive
           })}
           onClick={isInteractive ? () => handleStarClick(starValue) : undefined}
           onMouseEnter={isInteractive ? () => setHoveredStar(starValue) : undefined}
@@ -188,7 +224,7 @@ function DishDetailUser() {
     return (
       <div className={cx('wrapper')}>
         <Link to={ROUTES.DISH} className={cx('back-btn')}>
-          <Icon icon="bi:chevron-left" width="18" height="18" />
+          <Icon icon='bi:chevron-left' width='18' height='18' />
           Back
         </Link>
         <div className={cx('error')}>{error || 'Dish not found'}</div>
@@ -198,7 +234,7 @@ function DishDetailUser() {
   return (
     <div className={cx('wrapper')}>
       <Link to={ROUTES.DISH} className={cx('back-btn')}>
-        <Icon icon="bi:chevron-left" width="18" height="18" />
+        <Icon icon='bi:chevron-left' width='18' height='18' />
         Back
       </Link>
 
@@ -213,16 +249,18 @@ function DishDetailUser() {
       <div className={cx('container')}>
         <div className={cx('content-section')}>
           <div className={cx('left-side')}>
-            <img
-              src={
-                dish.imageUrl && dish.imageUrl.trim() !== ''
-                  ? getWebImagePath(dish.imageUrl)
-                  : defaultImage
-              }
-              alt={dish.name}
-              className={cx('dish-image')}
-              onError={handleImageError}
-            />
+            <div className={cx('dish-image-container')} onClick={handleOpenReportModal}>
+              <img
+                src={dish.imageUrl && dish.imageUrl.trim() !== '' ? getWebImagePath(dish.imageUrl) : defaultImage}
+                alt={dish.name}
+                className={cx('dish-image')}
+                onError={handleImageError}
+              />
+              <div className={cx('image-overlay')}>
+                <Icon icon='weui:report-problem-filled' className={cx('overlay-icon')} />
+                <span className={cx('overlay-text')}>Report</span>
+              </div>
+            </div>
           </div>
 
           <div className={cx('right-side')}>
@@ -234,19 +272,18 @@ function DishDetailUser() {
 
             <div className={cx('dish-stats')}>
               <div className={cx('stat-card')}>
-                <Icon icon="ph:clock" />
+                <Icon icon='ph:clock' />
                 <span>{dish.cookingTime || 0} Min</span>
               </div>
               <div className={cx('stat-card')}>
-                <Icon icon="ph:fire" />
+                <Icon icon='ph:fire' />
                 <span>{dish.calorie || dish.calories || 0} Kcal</span>
               </div>
               <div className={cx('stat-card')}>
-                <Icon icon="ph:chef-hat" />
+                <Icon icon='ph:chef-hat' />
                 <span>
                   {dish.difficulty
-                    ? dish.difficulty.charAt(0).toUpperCase() +
-                    dish.difficulty.slice(1).toLowerCase()
+                    ? dish.difficulty.charAt(0).toUpperCase() + dish.difficulty.slice(1).toLowerCase()
                     : 'N/A'}
                 </span>
               </div>
@@ -262,10 +299,7 @@ function DishDetailUser() {
             >
               Ingredients
             </button>
-            <button
-              className={cx('tab-btn', { active: activeTab === 'steps' })}
-              onClick={() => setActiveTab('steps')}
-            >
+            <button className={cx('tab-btn', { active: activeTab === 'steps' })} onClick={() => setActiveTab('steps')}>
               Steps
             </button>
           </div>
@@ -280,9 +314,7 @@ function DishDetailUser() {
                     ))}
                   </ol>
                 ) : (
-                  <p className={cx('empty-message')}>
-                    No ingredients found for this dish.
-                  </p>
+                  <p className={cx('empty-message')}>No ingredients found for this dish.</p>
                 )}
               </div>
             )}
@@ -295,9 +327,7 @@ function DishDetailUser() {
                     ))}
                   </ol>
                 ) : (
-                  <p className={cx('empty-message')}>
-                    No cooking steps found for this dish.
-                  </p>
+                  <p className={cx('empty-message')}>No cooking steps found for this dish.</p>
                 )}
               </div>
             )}
@@ -316,9 +346,7 @@ function DishDetailUser() {
             </div>
           </div>
 
-          <div className={cx('user-rating')}>
-            {renderStars(userRating, true)}
-          </div>
+          <div className={cx('user-rating')}>{renderStars(userRating, true)}</div>
         </div>
 
         <button className={cx('cook-btn')} onClick={handleCook}>
@@ -334,6 +362,45 @@ function DishDetailUser() {
         dishData={dish}
         onComplete={handleCookingComplete}
       />
+      {success && <div className={cx('success-message')}>{success}</div>}
+      {errorSubmitReport && <div className={cx('error-message')}>{errorSubmitReport}</div>}
+      {/* Report Modal */}
+      {isReportModalVisible && (
+        <div className={cx('modal-overlay')} onClick={handleCloseReportModal}>
+          <div className={cx('modal-content')} onClick={(e) => e.stopPropagation()}>
+            <div className={cx('modal-header')}>
+              <h2 className={cx('modal-title')}>REPORT DISH</h2>
+              <button className={cx('modal-close-btn')} onClick={handleCloseReportModal}>
+                &times;
+              </button>
+            </div>
+            <form className={cx('modal-form')} onSubmit={handleSubmitReport}>
+              <div className={cx('form-group')}>
+                <label htmlFor='reportReason' className={cx('form-label')}>
+                  This report will be reviewed by our team. Please provide a reason for reporting
+                </label>
+                <textarea
+                  id='reportReason'
+                  className={cx('form-textarea')}
+                  rows='5'
+                  placeholder='Please describe the issue with this dish...'
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  required
+                />
+              </div>
+              <div className={cx('modal-actions')}>
+                <button type='button' className={cx('btn-cancel')} onClick={handleCloseReportModal}>
+                  Cancel
+                </button>
+                <button type='submit' className={cx('btn-submit')}>
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -318,10 +318,14 @@ const loginWithGoogle = async (req, res) => {
 
     // Nếu không có, tạo mới
     if (!user) {
+      // Tạo password hash ngẫu nhiên 32 ký tự cho Google user
+      const randomPassword = crypto.randomBytes(16).toString('hex') // 32 ký tự hex
+      const hashedPassword = await bcrypt.hash(randomPassword, 10)
+
       const newUserData = {
         username: name,
         email: email,
-        password_hash: '',
+        password_hash: hashedPassword,
         role: 'user',
         calorieLimit: 2000,
         avatarUrl: picture,

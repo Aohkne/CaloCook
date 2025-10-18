@@ -8,7 +8,11 @@ import {
     TouchableOpacity,
     SafeAreaView,
     ActivityIndicator,
-    Alert
+    Alert,
+    Modal,
+    TextInput,
+    KeyboardAvoidingView,
+    Platform
 } from 'react-native'
 import { useTheme } from '@contexts/ThemeProvider'
 import { Heart, Clock, Flame, ChefHat, ChevronLeft, ChevronRight } from 'lucide-react-native';
@@ -16,7 +20,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getDishDetailData, clearDishDetail, updateDishLikeStatus } from '@redux/slices/dishSlice'
 import { likeDish, dislikeDish, updateFavoriteItem } from '@redux/slices/favoriteSlice'
 import { imageMap } from '@/constants/imageAssets';
-import { addEatingHistory, getTotalCalories } from '@redux/slices/userSlice'
+import { addEatingHistory, getTotalCalories, createReport } from '@redux/slices/userSlice'
 import CookingStepsModal from '@/components/CookingStepsModal'
 
 export default function Detail({ route, navigation }) {
@@ -31,7 +35,7 @@ export default function Detail({ route, navigation }) {
         dishIngredients,
         dishSteps,
         isLoadingDetail,
-        detailError
+        detailError,
     } = useSelector(state => state.dish)
 
     // Get user and favorites data
@@ -43,6 +47,9 @@ export default function Detail({ route, navigation }) {
     const isFavoriteDish = favorites.some(fav => fav.dishId === dishId)
     const [isLiked, setIsLiked] = useState(dish.isLiked || isFavoriteDish)
     const [isCookingModalVisible, setIsCookingModalVisible] = useState(false)
+    const [isReportModalVisible, setIsReportModalVisible] = useState(false)
+    const [reportReason, setReportReason] = useState('')
+    const [reportError, setReportError] = useState('')
 
     // Helper function để capitalize text
     const capitalizeText = (text) => {
@@ -141,6 +148,49 @@ export default function Detail({ route, navigation }) {
             Alert.alert('Error', error.message || 'Failed to update favorite')
         }
     }, [dispatch, user, isLiked, dish, dishDetail, dishId])
+
+    // Handle Report Modal
+    const handleOpenReportModal = () => {
+        if (!user?._id) {
+            Alert.alert('Error', 'Please login to report')
+            return
+        }
+        setIsReportModalVisible(true)
+        setReportError('')
+        setReportReason('')
+    }
+
+    const handleCloseReportModal = () => {
+        setIsReportModalVisible(false)
+        setReportError('')
+        setReportReason('')
+    }
+
+    const handleSubmitReport = async () => {
+        const trimmedReason = reportReason.trim()
+        
+        if (!trimmedReason) {
+            setReportError('Please enter a reason for reporting')
+            return
+        }
+
+        if (trimmedReason.length < 10) {
+            setReportError('Reason must be at least 10 characters')
+            return
+        }
+
+        try {
+            await dispatch(createReport({
+                dishId: dishId,
+                description: trimmedReason
+            })).unwrap()
+
+            Alert.alert('Success', 'Report submitted successfully')
+            handleCloseReportModal()
+        } catch (error) {
+            setReportError(error.message || 'Failed to submit report')
+        }
+    }
 
     const handleLetsCook = () => {
         if (!user?._id) {
@@ -256,6 +306,7 @@ export default function Detail({ route, navigation }) {
 
             <ScrollView
                 style={styles.scrollView}
+                contentContainerStyle={styles.scrollViewContent}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Dish Image - Sử dụng logic xử lý image giống Card */}
@@ -351,8 +402,17 @@ export default function Detail({ route, navigation }) {
                         )}
                     </View>
                 </View>
+                
+                {/* Report Button */}
+                <View style={styles.reportButtonContainer}>
+                    <TouchableOpacity
+                        style={styles.reportButton}
+                        onPress={handleOpenReportModal}
+                    >
+                        <Text style={styles.reportButtonText}>Report this Dish</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
-
             {/* Let's Cook Button */}
             <View style={styles.bottomContainer}>
                 <TouchableOpacity
@@ -371,6 +431,92 @@ export default function Detail({ route, navigation }) {
                 dishData={dishData}
                 onComplete={handleCookingComplete}
             />
+
+            {/* Report Modal */}
+            <Modal
+                visible={isReportModalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={handleCloseReportModal}
+            >
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.modalOverlay}
+                >
+                    <TouchableOpacity
+                        style={styles.modalOverlay}
+                        activeOpacity={1}
+                        onPress={handleCloseReportModal}
+                    >
+                        <View style={styles.modalContentWrapper}>
+                            <TouchableOpacity
+                                activeOpacity={1}
+                                onPress={(e) => e.stopPropagation()}
+                                style={styles.modalContent}
+                            >
+
+                                {/* Title and Close */}
+                                <View style={styles.modalHeader}>
+                                    <View style={styles.modalTitleContainer}>
+                                        <Text style={styles.modalTitle}>Report</Text>
+                                        <Text style={styles.modalSubtitle}>
+                                            Help us improve by reporting issues
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity 
+                                        style={styles.closeButton}
+                                        onPress={handleCloseReportModal}
+                                    >
+                                        <Text style={styles.modalCloseButton}>✕</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                {/* Input Section */}
+                                <View style={styles.inputSection}>
+                                    <View style={styles.textInputWrapper}>
+                                        <TextInput
+                                            style={styles.reportTextInput}
+                                            multiline
+                                            numberOfLines={6}
+                                            placeholder="Tell us what's wrong with this dish..."
+                                            placeholderTextColor="#999"
+                                            value={reportReason}
+                                            onChangeText={setReportReason}
+                                            textAlignVertical="top"
+                                        />
+                                        <Text style={styles.charCount}>
+                                            {reportReason.length}/10 minimum
+                                        </Text>
+                                    </View>
+
+                                    {reportError ? (
+                                        <View style={styles.errorContainer}>
+                                            <Text style={styles.errorIcon}>⚠</Text>
+                                            <Text style={styles.errorText}>{reportError}</Text>
+                                        </View>
+                                    ) : null}
+                                </View>
+
+                                {/* Action Buttons */}
+                                <View style={styles.modalActions}>
+                                    <TouchableOpacity
+                                        style={styles.cancelButton}
+                                        onPress={handleCloseReportModal}
+                                    >
+                                        <Text style={styles.cancelButtonText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.submitReportButton}
+                                        onPress={handleSubmitReport}
+                                    >
+                                        <Text style={styles.submitReportButtonText}>Submit</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableOpacity>
+                </KeyboardAvoidingView>
+            </Modal>
         </SafeAreaView>
     )
 }
@@ -539,6 +685,30 @@ const createStyles = (colors) =>
             fontWeight: '600',
             color: '#fff',
         },
+        reportButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderColor: '#DC2E60',
+            borderRadius: 12,
+            paddingVertical: 14,
+            gap: 8,
+        },
+        reportButtonText: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: '#DC2E60',
+        },
+        reportButtonContainer: {
+            marginTop: 32,
+            marginBottom: 20,
+            paddingHorizontal: 20,
+        },
+        scrollViewContent: {
+            paddingBottom: 120,
+        },
         loadingContainer: {
             flex: 1,
             justifyContent: 'center',
@@ -555,5 +725,174 @@ const createStyles = (colors) =>
             color: colors.textSecondary,
             fontStyle: 'italic',
             opacity: 0.7,
+        },
+        // Report Modal Styles
+        modalOverlay: {
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            justifyContent: 'flex-end',
+            padding: 0,
+        },
+        modalContentWrapper: {
+            width: '100%',
+            paddingBottom: Platform.OS === 'ios' ? 34 : 0,
+        },
+        modalContent: {
+            backgroundColor: '#FFFFFF',
+            borderTopLeftRadius: 30,
+            borderTopRightRadius: 30,
+            paddingTop: 12,
+            paddingBottom: 24,
+            paddingHorizontal: 24,
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: -4,
+            },
+            shadowOpacity: 0.3,
+            shadowRadius: 12,
+            elevation: 20,
+        },
+        modalIconContainer: {
+            alignItems: 'center',
+            marginBottom: 16,
+            marginTop: 8,
+        },
+        modalIconCircle: {
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            backgroundColor: '#FFF3CD',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        modalIconText: {
+            fontSize: 32,
+        },
+        modalHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: 20,
+            marginTop: 9,
+        },
+        modalTitleContainer: {
+            flex: 1,
+            paddingRight: 12,
+        },
+        modalTitle: {
+            fontSize: 24,
+            fontWeight: 'bold',
+            color: '#111827',
+            marginBottom: 4,
+        },
+        modalSubtitle: {
+            fontSize: 14,
+            color: '#6B7280',
+            lineHeight: 20,
+            marginTop: 7,
+        },
+        closeButton: {
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: '#F3F4F6',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        modalCloseButton: {
+            fontSize: 24,
+            color: '#6B7280',
+            fontWeight: '400',
+        },
+        inputSection: {
+            marginBottom: 20,
+        },
+        modalLabel: {
+            fontSize: 15,
+            fontWeight: '600',
+            color: '#1F2937',
+            marginBottom: 12,
+        },
+        textInputWrapper: {
+            position: 'relative',
+        },
+        reportTextInput: {
+            borderWidth: 2,
+            borderColor: '#E5E7EB',
+            borderRadius: 16,
+            padding: 16,
+            fontSize: 15,
+            color: '#111827',
+            backgroundColor: '#F9FAFB',
+            minHeight: 120,
+            textAlignVertical: 'top',
+        },
+        charCount: {
+            position: 'absolute',
+            bottom: 12,
+            right: 16,
+            fontSize: 12,
+            color: '#6B7280',
+            backgroundColor: '#F9FAFB',
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            borderRadius: 8,
+        },
+        errorContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: 12,
+            padding: 12,
+            backgroundColor: '#FEE2E2',
+            borderRadius: 12,
+            gap: 8,
+        },
+        errorIcon: {
+            fontSize: 16,
+        },
+        errorText: {
+            flex: 1,
+            color: '#DC2626',
+            fontSize: 13,
+            fontWeight: '500',
+        },
+        modalActions: {
+            flexDirection: 'row',
+            gap: 12,
+        },
+        cancelButton: {
+            flex: 1,
+            backgroundColor: '#F3F4F6',
+            paddingVertical: 16,
+            borderRadius: 16,
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: '#E5E7EB',
+        },
+        cancelButtonText: {
+            color: '#374151',
+            fontSize: 16,
+            fontWeight: '600',
+        },
+        submitReportButton: {
+            flex: 1,
+            backgroundColor: '#DC2E60',
+            paddingVertical: 16,
+            borderRadius: 16,
+            alignItems: 'center',
+            shadowColor: '#DC2E60',
+            shadowOffset: {
+                width: 0,
+                height: 4,
+            },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 6,
+        },
+        submitReportButtonText: {
+            color: '#fff',
+            fontSize: 16,
+            fontWeight: 'bold',
         },
     })
