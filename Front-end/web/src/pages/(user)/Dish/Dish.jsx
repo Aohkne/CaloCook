@@ -325,7 +325,9 @@ function Dish() {
                     </span>
                   </div>
 
-                  <p className={cx('ingredients')}>{dish.description.length > 50 ? dish.description.substring(0, 50) + '...' : dish.description}</p>
+                  <p className={cx('ingredients')}>
+                    {dish.description.length > 50 ? dish.description.substring(0, 50) + '...' : dish.description}
+                  </p>
                 </div>
               </div>
             ))
@@ -381,18 +383,6 @@ function Dish() {
               <Icon icon='material-symbols-light:close' width='24' height='24' />
             </button>
             <div className={cx('modal-form')}>
-              {/* Search Ingredient */}
-              <div className={cx('form-group')}>
-                <label htmlFor='search' className={cx('modal-input-label')}>
-                  Contains Products
-                </label>
-                <input
-                  id='search'
-                  type='text'
-                  className={cx('modal-search-input')}
-                  placeholder='Search ingredients...'
-                />
-              </div>
               {/* Difficulty */}
               <div className={cx('form-group', 'difficulty-group')}>
                 <span className={cx('modal-input-label')}>Difficulty</span>
