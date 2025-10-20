@@ -55,3 +55,13 @@ export const getEatingHistoryService = async (userId) => {
         throw error.response?.data || { message: 'Get eating history failed' };
     }
 };
+
+// CREATE REPORT
+export const createReportService = async (reportPayload) => {
+    try {
+        const response = await api.post('/report', reportPayload);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: 'Create report failed' };
+    }
+};
