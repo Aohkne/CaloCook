@@ -68,5 +68,14 @@ export const changePassword = async (oldPassword, newPassword) => {
   }
 };
 
-
-
+export const googleLogin = async (credential) => {
+  try {
+    const response = await api.post('/auth/google-login', {
+      credential: credential
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Google login API failed:', error);
+    throw error;
+  }
+};
