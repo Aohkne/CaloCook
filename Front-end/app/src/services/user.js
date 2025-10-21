@@ -56,6 +56,16 @@ export const getEatingHistoryService = async (userId) => {
     }
 };
 
+// DELETE EATING HISTORY
+export const deleteEatingHistoryService = async (historyId) => {
+    try {
+        const response = await api.delete(`/history/${historyId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: 'Delete eating history failed' };
+    }
+};
+
 // CREATE REPORT
 export const createReportService = async (reportPayload) => {
     try {

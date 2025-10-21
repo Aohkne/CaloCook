@@ -34,6 +34,7 @@ import ChatAI from '@/pages/(user)/ChatAI/ChatAI';
 import ProfileUser from '@/pages/(user)/ProfileUser/ProfileUser';
 import ChangePassword from '@/pages/(user)/ChangePassword/ChangePassword';
 import DishDetailUser from '@/pages/(user)/DishDetailUser/DishDetailUser';
+import History from '@/pages/(user)/History/History';
 
 function AppRoutes() {
   return (
@@ -225,6 +226,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute requiredRole={ROLE.USER}>
               <ProfileUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.HISTORY}
+          element={
+            <ProtectedRoute requiredRole={ROLE.USER}>
+              <History />
             </ProtectedRoute>
           }
         />

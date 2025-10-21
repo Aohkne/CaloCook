@@ -5,12 +5,15 @@ import { getUserProfile, updateUserProfile, sendVerificationEmail, verifyEmail }
 import styles from './ProfileUser.module.scss';
 import classNames from 'classnames/bind';
 import { ROUTES } from '@/constants/routes';
+import { getTotalCalories } from '@/api/history';
+import { useLocation } from 'react-router-dom';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function ProfileUser() {
   const { user, updateUser } = useAuth();
+  const location = useLocation();
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -35,7 +38,7 @@ function ProfileUser() {
   const [error, setError] = useState('');
 
   // Mock data cho calories consumed - thay thế bằng data thực
-  const [caloriesConsumed] = React.useState(2000);
+  const [caloriesConsumed, setCaloriesConsumed] = useState(0);
   const hasVerified = useRef(false);
 
   // Load user profile data
@@ -87,6 +90,53 @@ function ProfileUser() {
 
     loadUserProfile();
   }, [user]);
+
+  useEffect(() => {
+    const loadTodayCalories = async () => {
+      try {
+        const profileData = await getUserProfile();
+        const userId = profileData._id || profileData.id;
+
+        if (!userId) return;
+
+        const today = new Date().toISOString().split('T')[0];
+        const response = await getTotalCalories(userId, today);
+
+        if (response.statusCode === 200) {
+          setCaloriesConsumed(response.data.totalCalories || 0);
+        }
+      } catch (err) {
+        console.error('Failed to load today calories:', err);
+        setCaloriesConsumed(0);
+      }
+    };
+
+    loadTodayCalories();
+  }, [location.pathname]);
+
+
+  useEffect(() => {
+    const loadTodayCalories = async () => {
+      try {
+        const profileData = await getUserProfile();
+        const userId = profileData._id || profileData.id;
+
+        if (!userId) return;
+
+        const today = new Date().toISOString().split('T')[0];
+        const response = await getTotalCalories(userId, today);
+
+        if (response.statusCode === 200) {
+          setCaloriesConsumed(response.data.totalCalories || 0);
+        }
+      } catch (err) {
+        console.error('Failed to load today calories:', err);
+        setCaloriesConsumed(0);
+      }
+    };
+
+    loadTodayCalories();
+  }, []);
 
   // Check for email verification token in URL
   useEffect(() => {
@@ -381,10 +431,10 @@ function ProfileUser() {
               <Icon icon='heroicons:shield-check-solid' width='24' height='24' />
               <span>Security</span>
             </Link>
-            <div className={cx('nav-tab')}>
+            <Link to={ROUTES.HISTORY} className={cx('nav-tab')}>
               <Icon icon='mdi:history' width='24' height='24' />
               <span>History</span>
-            </div>
+            </Link>
           </div>
         </div>
 

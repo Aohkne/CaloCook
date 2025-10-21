@@ -11,9 +11,9 @@ import {
     Alert
 } from 'react-native'
 import { useTheme } from '@contexts/ThemeProvider'
-import { ArrowLeft, Clock, Utensils, Calendar, Star } from 'lucide-react-native'
+import { ArrowLeft, Clock, Utensils, Calendar, Trash2 } from 'lucide-react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { getEatingHistory } from '@redux/slices/userSlice'
+import { getEatingHistory, deleteEatingHistory } from '@redux/slices/userSlice'
 
 export default function HistoryScreen({ navigation }) {
     const { colors } = useTheme()
@@ -119,6 +119,31 @@ export default function HistoryScreen({ navigation }) {
             )
         }))
     }
+    const handleDelete = React.useCallback(async (historyId) => {
+        Alert.alert(
+            'Delete History',
+            'Are you sure you want to delete this item?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel'
+                },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await dispatch(deleteEatingHistory(historyId)).unwrap();
+                            // Optionally show success message
+                            Alert.alert('Success', 'History item deleted successfully');
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to delete history item');
+                        }
+                    }
+                }
+            ]
+        );
+    }, [dispatch]);
 
     const HistoryItem = ({ item }) => (
         <View style={styles.historyItem}>
@@ -159,6 +184,13 @@ export default function HistoryScreen({ navigation }) {
                 <Text style={styles.timeText}>
                     {formatTime(item.createdAt || item.date)}
                 </Text>
+                {/* Delete Button */}
+                <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDelete(item._id)}
+                >
+                    <Trash2 size={14} color="#F44336" />
+                </TouchableOpacity>
             </View>
         </View>
     )
@@ -501,5 +533,25 @@ const createStyles = (colors) =>
         },
         bottomSpacing: {
             height: 20,
+        },
+
+        historyItemRight: {
+            alignItems: 'flex-end',
+            gap: 4,
+        },
+        deleteButton: {
+            marginTop: 4,
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            backgroundColor: '#FFE5E5',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        deleteButtonText: {
+            fontSize: 18,
+            color: '#F44336',
+            fontWeight: '700',
+            lineHeight: 20,
         },
     })

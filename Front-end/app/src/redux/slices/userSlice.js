@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getUserProfileService, updateUserProfileService, addEatingHistoryService, getTotalCaloriesService, getEatingHistoryService, createReportService } from '@/services/user';
+import { getUserProfileService, updateUserProfileService, addEatingHistoryService, getTotalCaloriesService, getEatingHistoryService, createReportService, deleteEatingHistoryService } from '@/services/user';
 
 // Initial state
 const initialState = {
@@ -49,6 +49,18 @@ export const getEatingHistory = createAsyncThunk(
     }
 );
 
+
+export const deleteEatingHistory = createAsyncThunk(
+    'user/deleteEatingHistory',
+    async (historyId, { rejectWithValue }) => {
+        try {
+            const response = await deleteEatingHistoryService(historyId);
+            return { historyId, response };
+        } catch (error) {
+            return rejectWithValue(error);
+        }
+    }
+);
 // Async thunk for getting user profile
 export const getUserProfile = createAsyncThunk(
     'user/getProfile',
@@ -76,12 +88,12 @@ export const updateUserProfile = createAsyncThunk(
 );
 
 export const createReport = createAsyncThunk('user/createReport', async (reportPayload, { rejectWithValue }) => {
-  try {
-    const response = await createReportService(reportPayload);
-    return response;
-  } catch (error) {
-    return rejectWithValue(error);
-  }
+    try {
+        const response = await createReportService(reportPayload);
+        return response;
+    } catch (error) {
+        return rejectWithValue(error);
+    }
 });
 
 // User slice
@@ -210,6 +222,20 @@ const userSlice = createSlice({
             .addCase(getEatingHistory.rejected, (state, action) => {
                 state.isLoadingHistory = false;
                 state.error = action.payload?.message || 'Failed to get eating history';
+            })
+            // Delete eating history cases
+            .addCase(deleteEatingHistory.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(deleteEatingHistory.fulfilled, (state, action) => {
+                // Remove deleted item from eatingHistory array
+                state.eatingHistory = state.eatingHistory.filter(
+                    item => item._id !== action.payload.historyId
+                );
+                state.error = null;
+            })
+            .addCase(deleteEatingHistory.rejected, (state, action) => {
+                state.error = action.payload?.message || 'Failed to delete eating history';
             })
     }
 });
