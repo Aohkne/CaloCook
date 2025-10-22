@@ -1,7 +1,7 @@
 .wrapper {
   min-height: 100vh;
   background-color: var(--background);
-  padding: 1rem;
+  padding: 0; // Đổi từ 1rem thành 0
   position: relative;
 }
 
@@ -69,18 +69,20 @@
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-top: 7rem;
+  max-width: 100%; // Đổi từ 1200px thành 100%
+  margin: 0; // Đổi từ 0 auto thành 0
+  padding: 7rem 2rem 2rem 2rem; // Thêm padding trái phải
 
   @media (max-width: 768px) {
     padding-top: 5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 
 .content-section {
   display: flex;
-  gap: 7rem;
+  gap: 3rem; // Giảm gap từ 7rem xuống 3rem
   margin-bottom: 2rem;
 
   @media (max-width: 968px) {
@@ -90,10 +92,12 @@
 }
 
 .left-side {
-  flex: 0 0 500px;
+  flex: 0 0 30%; // Đổi từ 20% thành 30%
+  min-width: 300px; // Tăng min-width để hình bự hơn
 
   @media (max-width: 968px) {
     flex: none;
+    min-width: auto;
   }
 }
 
@@ -101,10 +105,9 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  border-radius: 16px;
 
   &:hover {
-    > img {
+    >img {
       filter: brightness(0.5);
       transform: scale(1.05);
     }
@@ -120,7 +123,7 @@
   width: 100%;
   height: auto;
   object-fit: cover;
-  border-radius: 16px;
+  border-radius: 8px;
   transition: all 0.3s ease;
 }
 
@@ -165,7 +168,7 @@
 }
 
 .right-side {
-  flex: 1;
+  flex: 1; // Tự động chiếm 80% còn lại
   display: flex;
   flex-direction: column;
 
@@ -212,7 +215,6 @@
   }
 }
 
-// Thêm vào sau phần .section
 .dish-stats {
   display: flex;
   gap: 1.5rem;
@@ -338,7 +340,7 @@
   color: var(--description);
 }
 
-// Rating Section - Moved below tabs
+// Rating Section
 .rating-section {
   margin-top: 3rem;
   margin-bottom: 4rem;
@@ -464,7 +466,7 @@
 
 @media (max-width: 768px) {
   .wrapper {
-    padding: 0.5rem;
+    padding: 0;
   }
 
   .container {
@@ -608,6 +610,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -618,11 +621,13 @@
     transform: translateY(30px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
   }
 }
+
 .success-message {
   position: fixed;
   right: 500px;
@@ -636,6 +641,7 @@
   border-radius: 8px;
   text-align: center;
 }
+
 .error-message {
   position: fixed;
   right: 500px;
