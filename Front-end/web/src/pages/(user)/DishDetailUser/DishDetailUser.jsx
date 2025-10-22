@@ -312,7 +312,6 @@ function DishDetailUser() {
           <div className={cx('right-side')}>
             <h1 className={cx('dish-name')}>{dish.name}</h1>
             <div className={cx('section')}>
-              <h2>Description</h2>
               <p>{dish.description || 'No description available'}</p>
             </div>
 
