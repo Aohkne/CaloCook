@@ -5,6 +5,10 @@ export const getReports = async (params = {}) => {
   const response = await api.get('/report', { params });
   return response.data;
 };
+export const createReport = async (data) => {
+  const response = await api.post('/report', data);
+  return response.data;
+};
 export const deleteReport = async (id) => {
   const response = await api.delete(`/report/${id}`);
   return response.data;
