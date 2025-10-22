@@ -415,11 +415,10 @@ function DishDetail() {
   const renderIngredients = () => {
     return (
       <div className={cx('list')}>
-        <h3 className={cx('list-title')}>Ingredients</h3>
         {/* Create Ingredient Button */}
         <button onClick={handleOpenCreateIngredientModal} className={cx('add-ingredient-button')}>
           <Icon icon='ic:baseline-plus' width='24' height='24' />
-          Add
+          ADD
         </button>
         {/* Ingredient List */}
         {ingredients.length === 0 ? (
@@ -429,7 +428,7 @@ function DishDetail() {
             {ingredients.map((ingredient) => (
               <li key={ingredient._id} className={cx('ingredient-item', { banned: ingredient.isActive === false })}>
                 <div className={cx('ingredient-value')}>
-                  <span className={cx('ingredient-value-tick')}>•</span> {ingredient.quantity} {ingredient.name}
+                  {ingredient.quantity} {ingredient.name}
                 </div>
                 {/* Edit Ingredient Button */}
                 <div className={cx('ingredient-actions')}>
@@ -482,7 +481,6 @@ function DishDetail() {
     if (subLoading) return <div className={cx('sub-loading')}>Loading...</div>;
     return (
       <div className={cx('list')}>
-        <h3 className={cx('list-title')}>Steps</h3>
         <div className={cx('step-actions-container')}>
           <select
             name='Sort'
@@ -506,7 +504,7 @@ function DishDetail() {
           </select>
           <button onClick={handleOpenCreateStepModal} className={cx('add-step-button')}>
             <Icon icon='ic:baseline-plus' width='24' height='24' />
-            Add
+            ADD
           </button>
         </div>
         {steps.length === 0 ? (
@@ -516,7 +514,6 @@ function DishDetail() {
             {steps.map((s) => (
               <li key={s._id} className={cx('ingredient-item', { banned: s.isActive === false })}>
                 <div className={cx('ingredient-value')}>
-                  <span className={cx('ingredient-value-tick')}>•</span>
                   <strong className={cx('step-number')}>Step {s.stepNumber}:</strong>
                   <span className={cx('step-desc')}> {s.description}</span>
                 </div>
@@ -623,7 +620,7 @@ function DishDetail() {
             {/* Edit Button */}
             <button className={cx('edit-button', 'span-2')} onClick={handleOpenEditDishModal}>
               <Icon icon='lucide:pen' width='24' height='24' />
-              Edit Dish
+              EDIT DISH
             </button>
           </div>
         </div>

@@ -305,7 +305,7 @@ function DishManagement() {
         header: 'Action',
         cell: ({ row }) => (
           <div className={cx('dish-cell')}>
-            <button onClick={() => handleDeactiveDish(row.original._id)}>
+            <button onClick={() => navigate(ROUTES.DISH_MANAGEMENT_DETAIL.replace(':id', row.original._id))}>
               <Icon icon='lucide:edit' width='24' height='24' className={cx('edit-icon')} />
             </button>
             {row.original.isActive ? (
