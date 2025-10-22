@@ -125,10 +125,10 @@ function ChangePassword() {
                             <Icon icon="heroicons:shield-check-solid" width="20" height="20" />
                             <span>Security</span>
                         </div>
-                        <div className={cx('nav-tab')}>
-                            <Icon icon="mdi:history" width="20" height="20" />
+                        <Link to={ROUTES.HISTORY} className={cx('nav-tab')}>
+                            <Icon icon='mdi:history' width='24' height='24' />
                             <span>History</span>
-                        </div>
+                        </Link>
                     </div>
                 </div>
 
