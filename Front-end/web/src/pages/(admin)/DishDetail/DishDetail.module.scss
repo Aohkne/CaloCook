@@ -1,7 +1,9 @@
 @use '@styles/mixin' as *;
+
 .wrapper {
   margin: auto;
   padding: 6rem 2rem;
+
   @include respond-above(lg) {
     padding: 6rem 2rem;
   }
@@ -21,6 +23,7 @@
     text-align: center;
     z-index: 10;
   }
+
   .error-message {
     position: fixed;
     top: 5px;
@@ -49,6 +52,7 @@
     margin-bottom: 0.5rem;
     color: var(--title);
   }
+
   // Back Button
   .back-button {
     position: absolute;
@@ -69,6 +73,7 @@
       color: var(--black);
     }
   }
+
   // Main Container
   .container {
     display: grid;
@@ -80,6 +85,7 @@
       gap: 2rem;
     }
   }
+
   // Dish Image
   .dish-image-container {
     aspect-ratio: 1 / 1;
@@ -135,8 +141,8 @@
       gap: 1rem;
       align-items: center;
       border-radius: 8px;
-      border: 3px solid var(--secondary);
-      box-shadow: 4px 4px 1px var(--secondary);
+      border: 2px solid var(--secondary);
+      box-shadow: 3px 3px 0px var(--secondary);
       font-size: 16px;
       color: var(--title);
       padding: 1rem;
@@ -146,6 +152,7 @@
       display: flex;
       flex-direction: column;
     }
+
     .card-icon {
       background-color: var(--tertiary);
       color: var(--secondary);
@@ -154,6 +161,7 @@
       height: 35px;
       padding: 4px;
     }
+
     .card-title {
       font-size: 14px;
       color: var(--title);
@@ -167,6 +175,7 @@
       &.green {
         color: var(--green);
       }
+
       &.red {
         color: var(--red);
       }
@@ -203,6 +212,7 @@
   .tabs-wrapper {
     margin-top: 5rem;
   }
+
   // Tabs
   .tabs {
     grid-template-columns: 1fr 1fr;
@@ -243,10 +253,12 @@
       padding: 0rem;
     }
   }
+
   .list-title {
     font-size: 24px;
     font-weight: 500;
   }
+
   .ingredient-list {
     list-style-type: none;
     line-height: 3rem;
@@ -437,15 +449,19 @@
         &:first-child {
           grid-column: 1 / -1; // Span full width for Name field
         }
+
         &:nth-child(2) {
           grid-column: 1 / -1; // Span full width for Cooking Time field
         }
+
         &:nth-child(3) {
           grid-column: 1 / -1; // Span full width for Calories field
         }
+
         &:nth-child(4) {
           grid-column: 1 / -1; // Span full width for Difficulty field
         }
+
         &:nth-child(5) {
           grid-column: 1 / -1; // Span full width for Description field
         }
@@ -467,6 +483,7 @@
         padding: 0 1rem;
         color: var(--input-text);
       }
+
       // Difficulty
       .difficulty-blocks {
         display: flex;
@@ -485,7 +502,7 @@
         width: 0;
         height: 0;
 
-        &:checked + .difficulty-block-text {
+        &:checked+.difficulty-block-text {
           background-color: var(--secondary);
           color: var(--background);
           border-color: var(--secondary);
@@ -509,6 +526,7 @@
           border-color: var(--secondary);
         }
       }
+
       // Description
       .modal-textarea {
         resize: vertical;
@@ -517,6 +535,7 @@
         min-height: 10rem;
         font-family: inherit;
       }
+
       // Image
       .image-group {
         grid-column: 1 / -1;
@@ -563,6 +582,7 @@
         object-fit: contain;
         border-radius: 8px;
       }
+
       .image-upload-text {
         font-size: 16px;
         font-weight: 500;
@@ -620,11 +640,11 @@
         width: 0;
         height: 0;
 
-        &:checked + .switch-slider {
+        &:checked+.switch-slider {
           background-color: var(--secondary);
         }
 
-        &:checked + .switch-slider:before {
+        &:checked+.switch-slider:before {
           transform: translateX(2.4rem);
         }
       }
@@ -699,6 +719,7 @@
       }
     }
   }
+
   .step-actions-container {
     position: absolute;
     right: 0;
@@ -707,6 +728,7 @@
     grid-template-columns: 1fr 1fr 1fr;
     gap: 1rem;
   }
+
   .add-step-button {
     display: flex;
     align-items: center;

@@ -317,20 +317,35 @@ function DishDetailUser() {
 
             <div className={cx('dish-stats')}>
               <div className={cx('stat-card')}>
-                <Icon icon='ph:clock' />
-                <span>{dish.cookingTime || 0} Min</span>
+                <div className={cx('icon-wrapper')}>
+                  <Icon icon='ph:clock' />
+                </div>
+                <div className={cx('stat-content')}>
+                  <span className={cx('stat-label')}>Cooking Time</span>
+                  <span className={cx('stat-value')}>{dish.cookingTime || 0} Min</span>
+                </div>
               </div>
               <div className={cx('stat-card')}>
-                <Icon icon='ph:fire' />
-                <span>{dish.calorie || dish.calories || 0} Kcal</span>
+                <div className={cx('icon-wrapper')}>
+                  <Icon icon='ph:fire' />
+                </div>
+                <div className={cx('stat-content')}>
+                  <span className={cx('stat-label')}>Calories</span>
+                  <span className={cx('stat-value')}>{dish.calorie || dish.calories || 0} Kcal</span>
+                </div>
               </div>
               <div className={cx('stat-card')}>
-                <Icon icon='ph:chef-hat' />
-                <span>
-                  {dish.difficulty
-                    ? dish.difficulty.charAt(0).toUpperCase() + dish.difficulty.slice(1).toLowerCase()
-                    : 'N/A'}
-                </span>
+                <div className={cx('icon-wrapper')}>
+                  <Icon icon='ph:chef-hat' />
+                </div>
+                <div className={cx('stat-content')}>
+                  <span className={cx('stat-label')}>Difficulty Level</span>
+                  <span className={cx('stat-value')}>
+                    {dish.difficulty
+                      ? dish.difficulty.charAt(0).toUpperCase() + dish.difficulty.slice(1).toLowerCase()
+                      : 'N/A'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
