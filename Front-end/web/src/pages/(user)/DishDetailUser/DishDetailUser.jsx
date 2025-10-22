@@ -7,6 +7,7 @@ import { ROUTES } from '@/constants/routes';
 import { getDishById, getIngredientsByDishId, getStepsByDishId } from '@/api/dish';
 import { addToHistory, getTotalCalories } from '@/api/history';
 import { createReport } from '@/api/report';
+import { getFavorites, addToFavorites, removeFromFavorites } from '@/api/favorite';
 import { getWebImagePath } from '@/utils/imageHelper';
 import CookingStepsModal from '@/components/ui/CookingStepsModal/CookingStepsModal';
 
@@ -64,6 +65,26 @@ function DishDetailUser() {
 
   const userId = getUserId();
 
+  // Fetch favorite status
+  const checkFavoriteStatus = async () => {
+    if (!userId || !id) return;
+
+    try {
+      const response = await getFavorites(userId, {
+        page: 1,
+        limit: 100
+      });
+
+      if (response && response.code === 200 && response.data) {
+        const favorites = Array.isArray(response.data) ? response.data : [];
+        const isFav = favorites.some((fav) => fav.dishId === id || fav.dish?._id === id);
+        setIsFavorite(isFav);
+      }
+    } catch (error) {
+      console.error('Error checking favorite status:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchDishDetail = async () => {
       if (!id) return;
@@ -112,6 +133,9 @@ function DishDetailUser() {
           console.warn('Failed to load steps:', stepErr);
           setSteps([]);
         }
+
+        // Check favorite status after loading dish
+        await checkFavoriteStatus();
       } catch (err) {
         console.error('Error fetching dish:', err);
         setError('Failed to load dish details');
@@ -124,7 +148,34 @@ function DishDetailUser() {
   }, [id]);
 
   const handleStarClick = (rating) => setUserRating(rating);
-  const toggleFavorite = () => setIsFavorite((prev) => !prev);
+
+  const toggleFavorite = async () => {
+    if (!userId) {
+      alert('Please login to add favorites');
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        const response = await removeFromFavorites(userId, id);
+
+        if (response && response.code === 200) {
+          setIsFavorite(false);
+        }
+      } else {
+        const response = await addToFavorites(userId, id);
+
+        if (response && response.code === 201) {
+          setIsFavorite(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      setError('Error updating favorite. Please try again.');
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
   const handleImageError = (e) => (e.target.src = defaultImage);
 
   const handleCook = () => {
@@ -141,9 +192,8 @@ function DishDetailUser() {
       setIsModalVisible(false);
 
       setTimeout(() => {
-        const message = `Added "${dish.name}" (${
-          dish.calorie || dish.calories || 0
-        } Kcal) to your eating history!\n\nView your profile?`;
+        const message = `Added "${dish.name}" (${dish.calorie || dish.calories || 0
+          } Kcal) to your eating history!\n\nView your profile?`;
         const goToProfile = window.confirm(message);
         if (goToProfile) navigate(ROUTES.PROFILE_USER);
       }, 300);
@@ -152,6 +202,7 @@ function DishDetailUser() {
       alert('Failed to add to history.');
     }
   };
+
   const handleOpenReportModal = () => {
     setIsReportModalVisible(true);
   };
@@ -215,14 +266,14 @@ function DishDetailUser() {
       </div>
     );
 
-  if (error || !dish)
+  if (error && !dish)
     return (
       <div className={cx('wrapper')}>
         <Link to={ROUTES.DISH} className={cx('back-btn')}>
           <Icon icon='bi:chevron-left' width='18' height='18' />
           Back
         </Link>
-        <div className={cx('error')}>{error || 'Dish not found'}</div>
+        <div className={cx('error')}>{error}</div>
       </div>
     );
 
@@ -358,6 +409,7 @@ function DishDetailUser() {
         onComplete={handleCookingComplete}
       />
       {success && <div className={cx('success-message')}>{success}</div>}
+      {error && <div className={cx('error-message')}>{error}</div>}
       {errorSubmitReport && <div className={cx('error-message')}>{errorSubmitReport}</div>}
       {/* Report Modal */}
       {isReportModalVisible && (
