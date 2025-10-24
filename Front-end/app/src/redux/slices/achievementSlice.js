@@ -23,17 +23,13 @@ export const addAchievementPoints = createAsyncThunk(
       const oldLevel = oldAchievement?.currentLevel || 'none';
       const oldPoints = oldAchievement?.totalPoints || 0;
       
-      console.log('📊 Before API call:', {
-        oldLevel,
-        oldPoints,
-        difficulty
-      });
+      
       
       // Gọi API
       const response = await achievementService.addAchievementPoints(userId, difficulty);
       const data = response.data || response;
       
-      console.log('📊 API Response RAW:', data);
+      
       
       // ✅ SỬA: Map backend response đúng format
       // Backend trả: { levelUp, newLevel, oldLevel, ... }
@@ -47,16 +43,7 @@ export const addAchievementPoints = createAsyncThunk(
       const levelChanged = data.levelUp === true || (oldLevel !== newLevel && newLevel !== 'none');
       const pointsEarned = data.pointsEarned || (newPoints - oldPoints);
       
-      console.log('📊 Processed Level Check:', {
-        oldLevel,
-        newLevel,
-        backendOldLevel,
-        levelUpFromAPI: data.levelUp,
-        levelChanged,
-        oldPoints,
-        newPoints,
-        pointsEarned
-      });
+      
       
       // ✅ Return enriched data
       return {
@@ -68,7 +55,7 @@ export const addAchievementPoints = createAsyncThunk(
         currentLevel: newLevel // ✅ THÊM: Sync currentLevel
       };
     } catch (error) {
-      console.error('❌ Achievement error:', error);
+      
       return rejectWithValue(error.message || 'Failed to add achievement points');
     }
   }
@@ -147,7 +134,7 @@ const achievementSlice = createSlice({
       .addCase(getUserAchievement.fulfilled, (state, action) => {
         state.isLoading = false;
         state.userAchievement = action.payload;
-        console.log('✅ User achievement loaded:', action.payload);
+        
       })
       .addCase(getUserAchievement.rejected, (state, action) => {
         state.isLoading = false;
@@ -163,7 +150,7 @@ const achievementSlice = createSlice({
       .addCase(addAchievementPoints.fulfilled, (state, action) => {
         state.isUpdating = false;
         
-        console.log('✅ Achievement updated:', action.payload);
+        
         
         // ✅ SỬA: Lưu full enriched data vào lastAchievementResult
         state.lastAchievementResult = action.payload;

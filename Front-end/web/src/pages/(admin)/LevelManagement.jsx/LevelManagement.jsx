@@ -300,10 +300,7 @@ function LevelManagement() {
         </div>
 
         <div className={cx('actions')}>
-          <button className={cx('btn', 'btn-reset')} onClick={handleReset} disabled={saving}>
-            <Icon icon='heroicons:arrow-path' width='20' height='20' />
-            Reset
-          </button>
+         
           <button className={cx('btn', 'btn-save')} onClick={handleSave} disabled={saving}>
             {saving ? (
               <>

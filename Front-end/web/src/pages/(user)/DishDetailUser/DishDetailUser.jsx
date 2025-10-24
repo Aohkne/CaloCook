@@ -6,6 +6,8 @@ import styles from './DishDetailUser.module.scss';
 import { ROUTES } from '@/constants/routes';
 import { getDishById, getIngredientsByDishId, getStepsByDishId } from '@/api/dish';
 import { addToHistory, getTotalCalories } from '@/api/history';
+import { createReport } from '@/api/report';
+import { getFavorites, addToFavorites, removeFromFavorites } from '@/api/favorite';
 import { getWebImagePath } from '@/utils/imageHelper';
 import CookingStepsModal from '@/components/ui/CookingStepsModal/CookingStepsModal';
 import { addAchievementPoints } from '@/api/achievement';
@@ -24,11 +26,15 @@ function DishDetailUser() {
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState('');
+  const [errorSubmitReport, setErrorSubmitReport] = useState('');
   const [activeTab, setActiveTab] = useState('ingredients');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showMedalModal, setShowMedalModal] = useState(false);
   const [newLevel, setNewLevel] = useState(null);
   const [newPoints, setNewPoints] = useState(0);
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [reportReason, setReportReason] = useState('');
 
   const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -62,6 +68,26 @@ function DishDetailUser() {
   };
 
   const userId = getUserId();
+
+  // Fetch favorite status
+  const checkFavoriteStatus = async () => {
+    if (!userId || !id) return;
+
+    try {
+      const response = await getFavorites(userId, {
+        page: 1,
+        limit: 100
+      });
+
+      if (response && response.code === 200 && response.data) {
+        const favorites = Array.isArray(response.data) ? response.data : [];
+        const isFav = favorites.some((fav) => fav.dishId === id || fav.dish?._id === id);
+        setIsFavorite(isFav);
+      }
+    } catch (error) {
+      console.error('Error checking favorite status:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchDishDetail = async () => {
@@ -112,6 +138,8 @@ function DishDetailUser() {
           setSteps([]);
         }
 
+        // Check favorite status after loading dish
+        await checkFavoriteStatus();
       } catch (err) {
         console.error('Error fetching dish:', err);
         setError('Failed to load dish details');
@@ -124,7 +152,34 @@ function DishDetailUser() {
   }, [id]);
 
   const handleStarClick = (rating) => setUserRating(rating);
-  const toggleFavorite = () => setIsFavorite((prev) => !prev);
+
+  const toggleFavorite = async () => {
+    if (!userId) {
+      alert('Please login to add favorites');
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        const response = await removeFromFavorites(userId, id);
+
+        if (response && response.code === 200) {
+          setIsFavorite(false);
+        }
+      } else {
+        const response = await addToFavorites(userId, id);
+
+        if (response && response.code === 201) {
+          setIsFavorite(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      setError('Error updating favorite. Please try again.');
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
   const handleImageError = (e) => (e.target.src = defaultImage);
 
   const handleCook = () => {
@@ -199,6 +254,37 @@ function DishDetailUser() {
     }
   };
 
+  const handleOpenReportModal = () => {
+    setIsReportModalVisible(true);
+  };
+
+  const handleCloseReportModal = () => {
+    setIsReportModalVisible(false);
+    setReportReason('');
+  };
+
+  const handleSubmitReport = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    if (!reportReason.trim() || reportReason.trim().length < 10) {
+      setErrorSubmitReport('Please enter a reason for reporting (at least 10 characters)');
+      setTimeout(() => setErrorSubmitReport(''), 5000);
+      handleCloseReportModal();
+      return;
+    }
+
+    try {
+      await createReport({ dishId: id, description: reportReason.trim() });
+      setSuccess('Report submitted successfully! Thank you for your feedback.');
+      handleCloseReportModal();
+      setTimeout(() => setSuccess(''), 5000);
+    } catch (err) {
+      console.error('Failed to submit report:', err);
+      setError('Failed to submit report.');
+    }
+  };
+
   const renderStars = (rating, isInteractive = false) =>
     Array.from({ length: 5 }, (_, index) => {
       const starValue = index + 1;
@@ -213,7 +299,7 @@ function DishDetailUser() {
           key={index}
           className={cx('star', {
             filled: isFilled,
-            interactive: isInteractive,
+            interactive: isInteractive
           })}
           onClick={isInteractive ? () => handleStarClick(starValue) : undefined}
           onMouseEnter={isInteractive ? () => setHoveredStar(starValue) : undefined}
@@ -231,21 +317,21 @@ function DishDetailUser() {
       </div>
     );
 
-  if (error || !dish)
+  if (error && !dish)
     return (
       <div className={cx('wrapper')}>
         <Link to={ROUTES.DISH} className={cx('back-btn')}>
-          <Icon icon="bi:chevron-left" width="18" height="18" />
+          <Icon icon='bi:chevron-left' width='18' height='18' />
           Back
         </Link>
-        <div className={cx('error')}>{error || 'Dish not found'}</div>
+        <div className={cx('error')}>{error}</div>
       </div>
     );
 
   return (
     <div className={cx('wrapper')}>
       <Link to={ROUTES.DISH} className={cx('back-btn')}>
-        <Icon icon="bi:chevron-left" width="18" height="18" />
+        <Icon icon='bi:chevron-left' width='18' height='18' />
         Back
       </Link>
 
@@ -260,42 +346,57 @@ function DishDetailUser() {
       <div className={cx('container')}>
         <div className={cx('content-section')}>
           <div className={cx('left-side')}>
-            <img
-              src={
-                dish.imageUrl && dish.imageUrl.trim() !== ''
-                  ? getWebImagePath(dish.imageUrl)
-                  : defaultImage
-              }
-              alt={dish.name}
-              className={cx('dish-image')}
-              onError={handleImageError}
-            />
+            <div className={cx('dish-image-container')} onClick={handleOpenReportModal}>
+              <img
+                src={dish.imageUrl && dish.imageUrl.trim() !== '' ? getWebImagePath(dish.imageUrl) : defaultImage}
+                alt={dish.name}
+                className={cx('dish-image')}
+                onError={handleImageError}
+              />
+              <div className={cx('image-overlay')}>
+                <Icon icon='weui:report-problem-filled' className={cx('overlay-icon')} />
+                <span className={cx('overlay-text')}>Report</span>
+              </div>
+            </div>
           </div>
 
           <div className={cx('right-side')}>
             <h1 className={cx('dish-name')}>{dish.name}</h1>
             <div className={cx('section')}>
-              <h2>Description</h2>
               <p>{dish.description || 'No description available'}</p>
             </div>
 
             <div className={cx('dish-stats')}>
               <div className={cx('stat-card')}>
-                <Icon icon="ph:clock" />
-                <span>{dish.cookingTime || 0} Min</span>
+                <div className={cx('icon-wrapper')}>
+                  <Icon icon='ph:clock' />
+                </div>
+                <div className={cx('stat-content')}>
+                  <span className={cx('stat-label')}>Cooking Time</span>
+                  <span className={cx('stat-value')}>{dish.cookingTime || 0} Min</span>
+                </div>
               </div>
               <div className={cx('stat-card')}>
-                <Icon icon="ph:fire" />
-                <span>{dish.calorie || dish.calories || 0} Kcal</span>
+                <div className={cx('icon-wrapper')}>
+                  <Icon icon='ph:fire' />
+                </div>
+                <div className={cx('stat-content')}>
+                  <span className={cx('stat-label')}>Calories</span>
+                  <span className={cx('stat-value')}>{dish.calorie || dish.calories || 0} Kcal</span>
+                </div>
               </div>
               <div className={cx('stat-card')}>
-                <Icon icon="ph:chef-hat" />
-                <span>
-                  {dish.difficulty
-                    ? dish.difficulty.charAt(0).toUpperCase() +
-                    dish.difficulty.slice(1).toLowerCase()
-                    : 'N/A'}
-                </span>
+                <div className={cx('icon-wrapper')}>
+                  <Icon icon='ph:chef-hat' />
+                </div>
+                <div className={cx('stat-content')}>
+                  <span className={cx('stat-label')}>Difficulty Level</span>
+                  <span className={cx('stat-value')}>
+                    {dish.difficulty
+                      ? dish.difficulty.charAt(0).toUpperCase() + dish.difficulty.slice(1).toLowerCase()
+                      : 'N/A'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -309,10 +410,7 @@ function DishDetailUser() {
             >
               Ingredients
             </button>
-            <button
-              className={cx('tab-btn', { active: activeTab === 'steps' })}
-              onClick={() => setActiveTab('steps')}
-            >
+            <button className={cx('tab-btn', { active: activeTab === 'steps' })} onClick={() => setActiveTab('steps')}>
               Steps
             </button>
           </div>
@@ -327,9 +425,7 @@ function DishDetailUser() {
                     ))}
                   </ol>
                 ) : (
-                  <p className={cx('empty-message')}>
-                    No ingredients found for this dish.
-                  </p>
+                  <p className={cx('empty-message')}>No ingredients found for this dish.</p>
                 )}
               </div>
             )}
@@ -342,9 +438,7 @@ function DishDetailUser() {
                     ))}
                   </ol>
                 ) : (
-                  <p className={cx('empty-message')}>
-                    No cooking steps found for this dish.
-                  </p>
+                  <p className={cx('empty-message')}>No cooking steps found for this dish.</p>
                 )}
               </div>
             )}
@@ -363,9 +457,7 @@ function DishDetailUser() {
             </div>
           </div>
 
-          <div className={cx('user-rating')}>
-            {renderStars(userRating, true)}
-          </div>
+          <div className={cx('user-rating')}>{renderStars(userRating, true)}</div>
         </div>
 
         <button className={cx('cook-btn')} onClick={handleCook}>
@@ -389,6 +481,46 @@ function DishDetailUser() {
         level={newLevel}
         points={newPoints}
       />
+      {success && <div className={cx('success-message')}>{success}</div>}
+      {error && <div className={cx('error-message')}>{error}</div>}
+      {errorSubmitReport && <div className={cx('error-message')}>{errorSubmitReport}</div>}
+      {/* Report Modal */}
+      {isReportModalVisible && (
+        <div className={cx('modal-overlay')} onClick={handleCloseReportModal}>
+          <div className={cx('modal-content')} onClick={(e) => e.stopPropagation()}>
+            <div className={cx('modal-header')}>
+              <h2 className={cx('modal-title')}>REPORT DISH</h2>
+              <button className={cx('modal-close-btn')} onClick={handleCloseReportModal}>
+                &times;
+              </button>
+            </div>
+            <form className={cx('modal-form')} onSubmit={handleSubmitReport}>
+              <div className={cx('form-group')}>
+                <label htmlFor='reportReason' className={cx('form-label')}>
+                  This report will be reviewed by our team. Please provide a reason for reporting
+                </label>
+                <textarea
+                  id='reportReason'
+                  className={cx('form-textarea')}
+                  rows='5'
+                  placeholder='Please describe the issue with this dish...'
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  required
+                />
+              </div>
+              <div className={cx('modal-actions')}>
+                <button type='button' className={cx('btn-cancel')} onClick={handleCloseReportModal}>
+                  Cancel
+                </button>
+                <button type='submit' className={cx('btn-submit')}>
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

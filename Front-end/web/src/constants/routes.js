@@ -30,7 +30,9 @@ export const ROUTES = {
   PROFILE_USER: '/user/profile',
   VERIFY_EMAIL: '/user/profile/verify-email',
   CHANGE_PASSWORD: '/user/change-password',
-LEADERBOARD: '/leaderboard',
+  LEADERBOARD: '/leaderboard',
+  HISTORY: '/user/history',
+
   // ERROR
   UNAUTHORIZED: '/unauthorized'
 };

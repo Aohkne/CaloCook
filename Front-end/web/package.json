@@ -12,6 +12,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@iconify/react": "^6.0.1",
+    "@react-oauth/google": "^0.12.2",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.11.0",
     "classnames": "^2.5.1",

@@ -29,8 +29,8 @@ export default function FilterScreen({ navigation }) {
     const [searchText, setSearchText] = useState('')
     const [selectedIngredients, setSelectedIngredients] = useState([])
     const [selectedDifficulty, setSelectedDifficulty] = useState([])
-    const [cookingTime, setCookingTime] = useState([5, 60]) // min - max in minutes
-    const [calories, setCalories] = useState([5, 2000]) // THAY ĐỔI TỪ [140, 450] THÀNH [5, 2000]
+    const [cookingTime, setCookingTime] = useState([5, 60])
+    const [calories, setCalories] = useState([5, 2000])
     const [timeSliderWidth, setTimeSliderWidth] = useState(0)
     const [calorieSliderWidth, setCalorieSliderWidth] = useState(0)
     const [randomIngredients, setRandomIngredients] = useState([])

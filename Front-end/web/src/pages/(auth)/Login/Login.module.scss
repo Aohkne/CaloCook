@@ -342,6 +342,7 @@
         border: 2px solid var(--input-border);
         border-radius: 18px;
         background-color: transparent;
+        cursor: pointer;
 
         display: flex;
         align-items: center;
@@ -357,6 +358,21 @@
 
         &:active {
           transform: scale(0.98);
+        }
+      }
+
+      .google-login-wrapper {
+        width: 100%;
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        // Override Google button inline styles
+        :global {
+          div[data-plugin-name='Sign In With Google'] {
+            width: 100% !important;
+          }
         }
       }
 

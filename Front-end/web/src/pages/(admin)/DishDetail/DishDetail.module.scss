@@ -1,8 +1,9 @@
 @use '@styles/mixin' as *;
+
 .wrapper {
-  max-width: 100rem;
   margin: auto;
   padding: 6rem 2rem;
+
   @include respond-above(lg) {
     padding: 6rem 2rem;
   }
@@ -22,6 +23,7 @@
     text-align: center;
     z-index: 10;
   }
+
   .error-message {
     position: fixed;
     top: 5px;
@@ -50,6 +52,7 @@
     margin-bottom: 0.5rem;
     color: var(--title);
   }
+
   // Back Button
   .back-button {
     position: absolute;
@@ -70,10 +73,11 @@
       color: var(--black);
     }
   }
+
   // Main Container
   .container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 2fr;
     gap: 3rem;
 
     @include respond-above(lg) {
@@ -81,6 +85,7 @@
       gap: 2rem;
     }
   }
+
   // Dish Image
   .dish-image-container {
     aspect-ratio: 1 / 1;
@@ -89,6 +94,11 @@
       aspect-ratio: 2/1;
       height: auto;
     }
+  }
+
+  .dish-infomation {
+    display: flex;
+    flex-direction: column;
   }
 
   .dish-image {
@@ -120,7 +130,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
-    margin-top: 2rem;
+    margin-top: auto;
 
     .span-2 {
       grid-column: span 2;
@@ -130,9 +140,9 @@
       display: flex;
       gap: 1rem;
       align-items: center;
-      background-color: var(--card-bg);
       border-radius: 8px;
-      box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+      border: 2px solid var(--secondary);
+      box-shadow: 3px 3px 0px var(--secondary);
       font-size: 16px;
       color: var(--title);
       padding: 1rem;
@@ -142,6 +152,7 @@
       display: flex;
       flex-direction: column;
     }
+
     .card-icon {
       background-color: var(--tertiary);
       color: var(--secondary);
@@ -150,6 +161,7 @@
       height: 35px;
       padding: 4px;
     }
+
     .card-title {
       font-size: 14px;
       color: var(--title);
@@ -163,6 +175,7 @@
       &.green {
         color: var(--green);
       }
+
       &.red {
         color: var(--red);
       }
@@ -177,10 +190,11 @@
       border: none;
       border-radius: 8px;
       color: var(--white);
-      font-size: 16px;
+      font-size: 24px;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
+      font-weight: 600;
+      gap: 1rem;
       border: 2px solid var(--secondary);
       box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
       transition: all 0.25s ease;
@@ -198,58 +212,63 @@
   .tabs-wrapper {
     margin-top: 5rem;
   }
+
   // Tabs
   .tabs {
-    display: grid;
     grid-template-columns: 1fr 1fr;
-    align-items: center;
-    justify-self: center;
-    background-color: var(--white);
-    border-radius: 10px;
-    padding: 3px;
     margin-bottom: 3rem;
-    box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid var(--description);
   }
 
   .tab-btn {
-    font-size: 16px;
+    font-size: 24px;
     padding: 0.75rem 5rem;
-    border-radius: 10px;
     border: none;
     cursor: pointer;
-    background-color: transparent;
-    color: var(--description);
+    background-color: var(--background);
+    color: var(--black);
+    font-weight: 600;
     transition: all 0.15s ease;
+    height: 100%;
 
     &.active {
-      background-color: var(--secondary);
-      color: var(--white);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      border-bottom: 3px solid var(--secondary);
+    }
+
+    @include respond-above(xs) {
+      font-size: 16px;
     }
   }
 
   // List
   .list {
-    background-color: var(--white);
     display: flex;
     flex-direction: column;
     position: relative;
     gap: 1.5rem;
     padding: 3rem;
     border-radius: 10px;
-    border: 1px solid var(--input-border);
-    box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+
+    @include respond-above(lg) {
+      padding: 0rem;
+    }
   }
+
   .list-title {
     font-size: 24px;
     font-weight: 500;
   }
+
   .ingredient-list {
     list-style-type: none;
     line-height: 3rem;
     max-height: 40rem;
     overflow-y: scroll;
     overflow-x: hidden;
+
+    @include respond-above(lg) {
+      margin-top: 3rem;
+    }
   }
 
   .ingredient-item {
@@ -312,14 +331,17 @@
   .add-ingredient-button {
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 11.6rem;
     font-size: 16px;
     border-radius: 10px;
     border: none;
     background-color: var(--secondary);
     color: var(--white);
     padding: 1rem 1rem;
+    top: -2rem;
     position: absolute;
-    right: 3rem;
+    right: 0rem;
     cursor: pointer;
     transition: all 0.25s ease;
 
@@ -427,15 +449,19 @@
         &:first-child {
           grid-column: 1 / -1; // Span full width for Name field
         }
+
         &:nth-child(2) {
           grid-column: 1 / -1; // Span full width for Cooking Time field
         }
+
         &:nth-child(3) {
           grid-column: 1 / -1; // Span full width for Calories field
         }
+
         &:nth-child(4) {
           grid-column: 1 / -1; // Span full width for Difficulty field
         }
+
         &:nth-child(5) {
           grid-column: 1 / -1; // Span full width for Description field
         }
@@ -457,6 +483,7 @@
         padding: 0 1rem;
         color: var(--input-text);
       }
+
       // Difficulty
       .difficulty-blocks {
         display: flex;
@@ -475,7 +502,7 @@
         width: 0;
         height: 0;
 
-        &:checked + .difficulty-block-text {
+        &:checked+.difficulty-block-text {
           background-color: var(--secondary);
           color: var(--background);
           border-color: var(--secondary);
@@ -499,6 +526,7 @@
           border-color: var(--secondary);
         }
       }
+
       // Description
       .modal-textarea {
         resize: vertical;
@@ -507,6 +535,7 @@
         min-height: 10rem;
         font-family: inherit;
       }
+
       // Image
       .image-group {
         grid-column: 1 / -1;
@@ -553,6 +582,7 @@
         object-fit: contain;
         border-radius: 8px;
       }
+
       .image-upload-text {
         font-size: 16px;
         font-weight: 500;
@@ -610,11 +640,11 @@
         width: 0;
         height: 0;
 
-        &:checked + .switch-slider {
+        &:checked+.switch-slider {
           background-color: var(--secondary);
         }
 
-        &:checked + .switch-slider:before {
+        &:checked+.switch-slider:before {
           transform: translateX(2.4rem);
         }
       }
@@ -689,15 +719,21 @@
       }
     }
   }
+
   .step-actions-container {
     position: absolute;
-    right: 3rem;
-    display: flex;
-    gap: 0.5rem;
+    right: 0;
+    top: -2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
   }
+
   .add-step-button {
     display: flex;
     align-items: center;
+    text-align: center;
+    justify-content: center;
     font-size: 16px;
     border-radius: 10px;
     border: none;
@@ -730,15 +766,25 @@
     max-height: 40rem;
     overflow-y: scroll;
     overflow-x: hidden;
+
+    @include respond-above(lg) {
+      margin-top: 3rem;
+    }
   }
 
   .sort-button {
+    color: var(--input-placeholder);
     font-size: 16px;
     border-radius: 10px;
+    border: 1px solid var(--description);
+    outline: none;
   }
 
   .order-button {
+    color: var(--input-placeholder);
     font-size: 16px;
     border-radius: 10px;
+    border: 1px solid var(--description);
+    outline: none;
   }
 }

@@ -110,10 +110,10 @@ function Navbar() {
                     <span>Security</span>
                   </Link>
 
-                  <div className={cx('dropdown-item')}>
+                  <Link to={ROUTES.HISTORY} className={cx('dropdown-item')} onClick={closeDropdown}>
                     <Icon icon='mingcute:history-fill' width='20' height='20' />
                     <span>History</span>
-                  </div>
+                  </Link>
 
                   <div className={cx('dropdown-divider')}></div>
 

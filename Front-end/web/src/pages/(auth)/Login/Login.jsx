@@ -10,10 +10,11 @@ import { ROUTES } from '@/constants/routes';
 
 import { randomMessages } from '@/data/randomMessages';
 
-import { login } from '@/api/auth';
+import { login, googleLogin } from '@/api/auth';
 
 import styles from './Login.module.scss';
 import classNames from 'classnames/bind';
+import { GoogleLogin } from '@react-oauth/google';
 
 const cx = classNames.bind(styles);
 
@@ -120,6 +121,36 @@ function Login() {
     }
   };
 
+  const handleGoogleLogin = async (credentialResponse) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await googleLogin(credentialResponse.credential);
+      console.log('Google login response:', response);
+
+      authLogin(response.user.accessToken, response.user.refreshToken, response.user.role);
+
+      setSuccess('Google login successful!');
+
+      setTimeout(() => {
+        if (response.user.role === ROLE.ADMIN) {
+          navigate(ROUTES.DASHBOARD);
+        } else {
+          navigate(ROUTES.DISH);
+        }
+      }, 1500);
+    } catch (error) {
+      console.error('Google login error:', error);
+      setError(error.response?.data?.message || 'Google login failed. Please try again.');
+      setTimeout(() => {
+        setError('');
+      }, 10000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={cx('wrapper')}>
       {/* Header */}
@@ -209,10 +240,20 @@ function Login() {
               <span className={cx('divider-line')}></span>
             </div>
 
-            <button className={cx('btn-google')}>
-              GOOGLE
-              <Icon icon='flat-color-icons:google' width='20' height='20' />
-            </button>
+            <div className={cx('google-login-wrapper')}>
+              <GoogleLogin
+                onSuccess={handleGoogleLogin}
+                onError={() => {
+                  setError('Google login failed. Please try again.');
+                }}
+                useOneTap
+                theme='filled_blue'
+                size='large'
+                text='continue_with'
+                shape='rectangular'
+                width='100%'
+              />
+            </div>
 
             <div className={cx('navigate')}>
               Not a member? <Link to={ROUTES.REGISTER}>Sign up now</Link>
