@@ -8,7 +8,8 @@ import { getDishById, getIngredientsByDishId, getStepsByDishId } from '@/api/dis
 import { addToHistory, getTotalCalories } from '@/api/history';
 import { getWebImagePath } from '@/utils/imageHelper';
 import CookingStepsModal from '@/components/ui/CookingStepsModal/CookingStepsModal';
-
+import { addAchievementPoints } from '@/api/achievement';
+import MedalAchievementModal from '@/components/ui/MedalAchievementModal/MedalAchievementModal';
 const cx = classNames.bind(styles);
 const defaultImage = '/images/default-img.png';
 
@@ -25,6 +26,9 @@ function DishDetailUser() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('ingredients');
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showMedalModal, setShowMedalModal] = useState(false);
+  const [newLevel, setNewLevel] = useState(null);
+  const [newPoints, setNewPoints] = useState(0);
 
   const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -133,17 +137,65 @@ function DishDetailUser() {
       await addToHistory(userId, id);
       const today = new Date().toISOString().split('T')[0];
       await getTotalCalories(userId, today);
-
+      
       setIsModalVisible(false);
 
+      let achievementResult = null;
+      let pointsEarned = 0;
+
+      try {
+        achievementResult = await addAchievementPoints(userId, dish.difficulty);
+        
+        const achievementData = achievementResult?.data?.data;
+        
+        if (achievementData) {
+          pointsEarned = achievementData.points || 0;
+          
+          // ✅ Check level up
+          const isLevelUp = achievementData.levelUp === true;
+          const hasValidNewLevel = achievementData.newLevel && achievementData.newLevel !== 'none';
+          
+          if (isLevelUp && hasValidNewLevel) {
+            // ✅ Show medal modal
+            setNewLevel(achievementData.newLevel);
+            setNewPoints(achievementData.totalPoints || 0);
+            
+            setTimeout(() => {
+              setShowMedalModal(true);
+            }, 300);
+            
+            return; // Không show alert thông thường
+          }
+        }
+      } catch (achievementError) {
+        console.error('Achievement error:', achievementError);
+      }
+
+      // ✅ Alert thông thường (khi không level up)
       setTimeout(() => {
-        const message = `Added "${dish.name}" (${dish.calorie || dish.calories || 0} Kcal) to your eating history!\n\nView your profile?`;
+        let message = `Added "${dish.name}" (${dish.calorie || dish.calories || 0} Kcal) to your eating history!`;
+        
+        if (pointsEarned > 0) {
+          const difficultyLevel = dish.difficulty
+            ? dish.difficulty.charAt(0).toUpperCase() + dish.difficulty.slice(1).toLowerCase()
+            : '';
+          const emoji = dish.difficulty?.toLowerCase() === 'easy' ? '😊' :
+            dish.difficulty?.toLowerCase() === 'medium' ? '🔥' : '⚡';
+          message += `\n\n${emoji} +${pointsEarned} Points Earned!\n(${difficultyLevel} Difficulty)`;
+        }
+        
+        message += '\n\nView your profile?';
+        
         const goToProfile = window.confirm(message);
-        if (goToProfile) navigate(ROUTES.PROFILE_USER);
+        if (goToProfile) {
+          window.location.href = ROUTES.PROFILE_USER;
+        }
       }, 300);
+
     } catch (err) {
       console.error('Failed to add to history:', err);
-      alert('Failed to add to history.');
+      setIsModalVisible(false);
+      alert('Failed to add to history. Please try again.');
     }
   };
 
@@ -328,6 +380,14 @@ function DishDetailUser() {
         steps={steps}
         dishData={dish}
         onComplete={handleCookingComplete}
+      />
+       <MedalAchievementModal
+        visible={showMedalModal}
+        onClose={() => {
+          setShowMedalModal(false);
+        }}
+        level={newLevel}
+        points={newPoints}
       />
     </div>
   );

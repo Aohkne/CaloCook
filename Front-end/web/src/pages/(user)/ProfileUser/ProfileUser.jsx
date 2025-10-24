@@ -6,11 +6,14 @@ import styles from './ProfileUser.module.scss';
 import classNames from 'classnames/bind';
 import { ROUTES } from '@/constants/routes';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { getUserAchievement } from '@/api/achievement';
+import { useLocation } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function ProfileUser() {
   const { user, updateUser } = useAuth();
+  const location = useLocation();
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -33,7 +36,7 @@ function ProfileUser() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-
+  const [achievement, setAchievement] = useState(null);
   // Mock data cho calories consumed - thay thế bằng data thực
   const [caloriesConsumed] = React.useState(2000);
   const hasVerified = useRef(false);
@@ -62,6 +65,33 @@ function ProfileUser() {
 
         setUserData(formattedData);
         setEditFormData(formattedData);
+
+        if (profileData._id) {
+          try {
+            const achievementData = await getUserAchievement(profileData._id);
+            console.log('Full achievement response:', achievementData);
+            console.log('achievementData.data:', achievementData.data);
+
+            // Set achievement với default values
+            setAchievement({
+              totalPoints: 0,
+              currentLevel: 'none',
+              easyDishCount: 0,
+              mediumDishCount: 0,
+              hardDishCount: 0,
+              ...(achievementData?.data?.data || achievementData?.data || {})
+            });
+          } catch (err) {
+            console.error('Failed to fetch achievement:', err);
+            setAchievement({
+              totalPoints: 0,
+              currentLevel: 'none',
+              easyDishCount: 0,
+              mediumDishCount: 0,
+              hardDishCount: 0
+            });
+          }
+        }
       } catch {
         // Fallback to mock data or user context
         const fallbackData = {
@@ -80,13 +110,22 @@ function ProfileUser() {
         };
         setUserData(fallbackData);
         setEditFormData(fallbackData);
+
+        // Set default achievement trong fallback
+        setAchievement({
+          totalPoints: 0,
+          currentLevel: 'none',
+          easyDishCount: 0,
+          mediumDishCount: 0,
+          hardDishCount: 0
+        });
       } finally {
         setLoading(false);
       }
     };
 
     loadUserProfile();
-  }, [user]);
+  }, [user, location.key]);
 
   // Check for email verification token in URL
   useEffect(() => {
@@ -97,6 +136,15 @@ function ProfileUser() {
       handleVerifyFromURL(token);
     }
   }, []);
+  const getMedalImage = (level) => {
+    const medals = {
+      bronze: '/images/level/bronze.png',
+      silver: '/images/level/silver.png',
+      gold: '/images/level/golden.png',
+      none: null
+    };
+    return medals[level] || null;
+  };
 
   // Add a helper function to format the API dates
   const formatApiDate = (dateString) => {
@@ -522,6 +570,121 @@ function ProfileUser() {
                 </div>
               </div>
             </div>
+            {achievement && (
+              <div className={cx('info-section', 'achievement-section')}>
+                <h4 className={cx('info-section-title')}>
+                  <Icon icon='heroicons:trophy' width='24' height='24' />
+                  Achievements
+                </h4>
+                <div className={cx('achievement-content')}>
+                  {/* Medal Display */}
+                  
+
+                  {/* Stats Grid */}
+                  <div className={cx('achievement-stats')}>
+                    <div className={cx('stat-card', 'total-points')}>
+                      <Icon icon='heroicons:star' width='24' height='24' />
+                      <div className={cx('stat-content')}>
+                        <span className={cx('stat-label')}>Total Points</span>
+                        <span className={cx('stat-value')}>{achievement.totalPoints || 0}</span>
+                      </div>
+                    </div>
+                    <div className={cx('stat-card', 'easy')}>
+                      <Icon icon='heroicons:face-smile' width='24' height='24' />
+                      <div className={cx('stat-content')}>
+                        <span className={cx('stat-label')}>Easy Dishes</span>
+                        <span className={cx('stat-value')}>{achievement.easyDishCount || 0}</span>
+                      </div>
+                    </div>
+                    <div className={cx('stat-card', 'medium')}>
+                      <Icon icon='heroicons:fire' width='24' height='24' />
+                      <div className={cx('stat-content')}>
+                        <span className={cx('stat-label')}>Medium Dishes</span>
+                        <span className={cx('stat-value')}>{achievement.mediumDishCount || 0}</span>
+                      </div>
+                    </div>
+                    <div className={cx('stat-card', 'hard')}>
+                      <Icon icon='heroicons:bolt' width='24' height='24' />
+                      <div className={cx('stat-content')}>
+                        <span className={cx('stat-label')}>Hard Dishes</span>
+                        <span className={cx('stat-value')}>{achievement.hardDishCount || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar - Dynamic scaling */}
+                  <div className={cx('progress-container')}>
+                    <div className={cx('progress-header')}>
+                      <span className={cx('progress-label')}>
+                        {achievement.currentLevel === 'gold' ? 'Infinite Progress' : 'Next Level Progress'}
+                      </span>
+                      <span className={cx('progress-value')}>
+                        {(() => {
+                          const points = achievement.totalPoints || 0;
+                          if (achievement.currentLevel === 'gold') {
+                            // Tính next milestone (mỗi 500 points)
+                            const nextMilestone = Math.ceil(points / 500) * 500;
+                            return `${points} / ${nextMilestone} points`;
+                          } else {
+                            const target = !achievement.currentLevel || achievement.currentLevel === 'none' ? 100 :
+                              achievement.currentLevel === 'bronze' ? 500 : 1000;
+                            return `${points} / ${target} points`;
+                          }
+                        })()}
+                      </span>
+                    </div>
+                    <div className={cx('progress-bar-wrapper')}>
+                      <div className={cx('progress-bar-background')}>
+                        <div
+                          className={cx('progress-bar-fill', { 'gold-level': achievement.currentLevel === 'gold' })}
+                          style={{
+                            width: `${Math.max(0, Math.min(100, (() => {
+                              const points = achievement.totalPoints || 0;
+                              if (achievement.currentLevel === 'gold') {
+                                // Progress trong 500 points tiếp theo
+                                const milestone = Math.floor(points / 500) * 500;
+                                return ((points - milestone) / 500) * 100;
+                              } else if (!achievement.currentLevel || achievement.currentLevel === 'none') {
+                                return (points / 100) * 100;
+                              } else if (achievement.currentLevel === 'bronze') {
+                                return ((points - 100) / 400) * 100;
+                              } else {
+                                return ((points - 500) / 500) * 100;
+                              }
+                            })()))}%`
+                          }}
+                        />
+                      </div>
+                    </div>
+                    {achievement.currentLevel === 'gold' && (
+                      <div className={cx('gold-level-text')}>
+                        <Icon icon='heroicons:fire' width='16' height='16' />
+                        <span>Gold Level! Next milestone: {Math.ceil((achievement.totalPoints || 0) / 500) * 500} points</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className={cx('medal-display')}>
+                    {achievement.currentLevel && achievement.currentLevel !== 'none' ? (
+                      <img
+                        src={getMedalImage(achievement.currentLevel)}
+                        alt={`${achievement.currentLevel} medal`}
+                        className={cx('medal-image')}
+                      />
+                    ) : (
+                      <div className={cx('no-medal')}>
+                        <Icon icon='heroicons:lock-closed' width='48' height='48' />
+                        <span>No Medal Yet</span>
+                      </div>
+                    )}
+                    {/* <p className={cx('medal-level')}>
+          {!achievement.currentLevel || achievement.currentLevel === 'none' 
+            ? 'Beginner' 
+            : achievement.currentLevel.toUpperCase()}
+        </p> */}
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Today's Progress Section */}
             <div className={cx('progress-section')}>
               <h4 className={cx('progress-title')}>Today's Progress</h4>

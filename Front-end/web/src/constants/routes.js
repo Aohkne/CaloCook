@@ -17,6 +17,7 @@ export const ROUTES = {
   DISH_MANAGEMENT: '/dish-management',
   DISH_MANAGEMENT_DETAIL: '/dish-management/:id',
   REPORT_MANAGEMENT: '/report-management',
+  LEVEL_MANAGEMENT: '/level-management',
   CHAT: '/chat',
   PROFILE_ADMIN: '/admin/profile',
   CHANGE_PASSWORD_ADMIN: '/admin/change-password',
@@ -29,7 +30,7 @@ export const ROUTES = {
   PROFILE_USER: '/user/profile',
   VERIFY_EMAIL: '/user/profile/verify-email',
   CHANGE_PASSWORD: '/user/change-password',
-
+LEADERBOARD: '/leaderboard',
   // ERROR
   UNAUTHORIZED: '/unauthorized'
 };

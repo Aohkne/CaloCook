@@ -148,6 +148,12 @@ function Sidebar() {
               <span>Report</span>
             </Link>
           </div>
+          <div className={cx('item')}>
+            <Link to={ROUTES.LEVEL_MANAGEMENT}>
+              <Icon icon='heroicons:trophy' width='20' height='20' />
+              <span>Levels</span>
+            </Link>
+          </div>
         </div>
 
         {/* Setting */}
