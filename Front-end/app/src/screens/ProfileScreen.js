@@ -36,7 +36,12 @@ import {
   Sun,
   Moon,
   History,
-  LogOut
+  LogOut,
+  Trophy,
+  Star,
+  Smile,
+  Zap,
+  Award
 } from 'lucide-react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { useDispatch, useSelector } from 'react-redux';
@@ -48,13 +53,40 @@ import {
   getTotalCalories
 } from '@/redux/slices/userSlice';
 import { logout, logoutLocal } from '@/redux/slices/authSlice';
+import { getUserAchievement, clearError as clearAchievementError } from '@/redux/slices/achievementSlice';
 export default function ProfileScreen({ navigation }) {
   const { colors, toggleTheme, isDark } = useTheme();
   const styles = createStyles(colors);
   const dispatch = useDispatch();
+  const medalScale = useRef(new Animated.Value(0)).current;
+  const medalRotate = useRef(new Animated.Value(0)).current;
+  const medalOpacity = useRef(new Animated.Value(0)).current;
+  const medalFloat = useRef(new Animated.Value(0)).current;
 
   // Redux state
+  const { userAchievement, isLoading: loadingAchievement, error: achievementError } = useSelector(
+    (state) => state.achievement
+  );
   const { userData, totalCalories, isLoading, isUpdating, error } = useSelector((state) => state.user);
+  const getMedalImage = (level) => {
+    const medals = {
+      bronze: require('@/assets/level/bronze.png'),
+      silver: require('@/assets/level/silver.png'),
+      gold: require('@/assets/level/golden.png'),
+      none: null
+    };
+    return medals[level] || null;
+  };
+
+  const getLevelColor = (level) => {
+    const levelColors = {
+      bronze: '#CD7F32',
+      silver: '#C0C0C0',
+      gold: '#FFD700',
+      none: '#6B7280'
+    };
+    return levelColors[level] || '#6B7280';
+  };
   useEffect(() => {
     const loadUserData = async () => {
       await dispatch(getUserProfile());
@@ -78,9 +110,19 @@ export default function ProfileScreen({ navigation }) {
 
   //useEffect focus listener
   useEffect(() => {
-    //unsubscribe đảm bảo listener được xóa khi component unmount để tránh memory leak.
+    if (userData?._id) {
+      dispatch(getUserAchievement(userData._id));
+    }
+  }, [dispatch, userData?._id]);
+
+  // ✅ SỬA: Focus listener - thêm reload achievement
+  useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       if (userData?._id) {
+        // Reload achievement
+        dispatch(getUserAchievement(userData._id));
+
+        // Reload calories
         const today = new Date();
         const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
         const todayString = localDate.toISOString().split('T')[0];
@@ -95,7 +137,75 @@ export default function ProfileScreen({ navigation }) {
 
     return unsubscribe;
   }, [navigation, userData?._id, dispatch]);
+  useEffect(() => {
+    if (achievementError) {
+      console.error('Achievement error:', achievementError);
+      dispatch(clearAchievementError());
+    }
+  }, [achievementError, dispatch]);
+  const achievement = userAchievement || {
+    totalPoints: 0,
+    currentLevel: 'none',
+    easyDishCount: 0,
+    mediumDishCount: 0,
+    hardDishCount: 0
+  };
+  useEffect(() => {
+    if (achievement.currentLevel && achievement.currentLevel !== 'none') {
+      // Reset animation
+      medalScale.setValue(0);
+      medalRotate.setValue(0);
+      medalOpacity.setValue(0);
+      medalFloat.setValue(0);
 
+      // Entrance animation sequence
+      Animated.sequence([
+        // Phase 1: Scale up with rotation
+        Animated.parallel([
+          Animated.spring(medalScale, {
+            toValue: 1,
+            tension: 50,
+            friction: 7,
+            useNativeDriver: true
+          }),
+          Animated.timing(medalOpacity, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true
+          }),
+          Animated.timing(medalRotate, {
+            toValue: 1,
+            duration: 1200,
+            useNativeDriver: true
+          })
+        ]),
+        // Phase 2: Start continuous floating
+        Animated.delay(200)
+      ]).start(() => {
+        // Continuous floating animation (lên xuống nhẹ)
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(medalFloat, {
+              toValue: -10,
+              duration: 2000,
+              useNativeDriver: true
+            }),
+            Animated.timing(medalFloat, {
+              toValue: 0,
+              duration: 2000,
+              useNativeDriver: true
+            })
+          ])
+        ).start();
+      });
+    } else {
+      // Reset animation khi không có medal
+      medalScale.setValue(0);
+      medalRotate.setValue(0);
+      medalOpacity.setValue(0);
+      medalFloat.setValue(0);
+    }
+  }, [achievement.currentLevel]);
   // Modal state
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
@@ -582,7 +692,120 @@ export default function ProfileScreen({ navigation }) {
             </View>
 
             {/* TT */}
+            {achievement && !loadingAchievement && (
+              <View style={styles.achievementSection}>
+                <View style={styles.sectionTitleContainer}>
+                  <Trophy size={20} color={colors.secondary} style={{ marginTop: -13 }} />
+                  <Text style={styles.sectionTitle}>Achievements</Text>
+                </View>
 
+                {/* Medal Display */}
+                <View style={styles.medalContainer}>
+                  {achievement.currentLevel && achievement.currentLevel !== 'none' ? (
+                    <Image
+                      source={getMedalImage(achievement.currentLevel)}
+                      style={styles.medalImage}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <View style={styles.noMedal}>
+                      <Award size={48} color="#CCCCCC" />
+                      <Text style={styles.noMedalText}>No Medal Yet</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Achievement Stats */}
+                <View style={styles.achievementStats}>
+                  <View style={[styles.achievementCard, { backgroundColor: '#FFF9E6' }]}>
+                    <Star size={20} color="#FFA500" />
+                    <View style={styles.achievementCardContent}>
+                      <Text style={styles.achievementCardLabel}>Total Points</Text>
+                      <Text style={styles.achievementCardValue}>{achievement.totalPoints || 0}</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.achievementCard, { backgroundColor: '#E6F7FF' }]}>
+                    <Smile size={20} color="#10B981" />
+                    <View style={styles.achievementCardContent}>
+                      <Text style={styles.achievementCardLabel}>Easy Dishes</Text>
+                      <Text style={styles.achievementCardValue}>{achievement.easyDishCount || 0}</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.achievementCard, { backgroundColor: '#FFF0E6' }]}>
+                    <Flame size={20} color="#F97316" />
+                    <View style={styles.achievementCardContent}>
+                      <Text style={styles.achievementCardLabel}>Medium Dishes</Text>
+                      <Text style={styles.achievementCardValue}>{`${achievement.mediumDishCount || 0}`}</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.achievementCard, { backgroundColor: '#FFE6E6' }]}>
+                    <Zap size={20} color="#EF4444" />
+                    <View style={styles.achievementCardContent}>
+                      <Text style={styles.achievementCardLabel}>Hard Dishes</Text>
+                      <Text style={styles.achievementCardValue}>{`${achievement.hardDishCount || 0}`}</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Progress Bar */}
+                <View style={styles.progressBarContainer}>
+                  <View style={styles.progressBarHeader}>
+                    <Text style={styles.progressBarLabel}>
+                      {achievement.currentLevel === 'gold' ? 'Infinite Progress' : 'Next Level Progress'}
+                    </Text>
+                    <Text style={styles.progressBarValue}>
+                      {(() => {
+                        const points = achievement.totalPoints || 0;
+                        if (achievement.currentLevel === 'gold') {
+                          const nextMilestone = Math.ceil(points / 500) * 500;
+                          return `${points} / ${nextMilestone} points`;
+                        } else {
+                          const target = !achievement.currentLevel || achievement.currentLevel === 'none' ? 100 :
+                            achievement.currentLevel === 'bronze' ? 500 : 1000;
+                          return `${points} / ${target} points`;
+                        }
+                      })()}
+                    </Text>
+                  </View>
+
+                  <View style={styles.progressBar}>
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${Math.max(0, Math.min(100, (() => {
+                            const points = achievement.totalPoints || 0;
+                            if (achievement.currentLevel === 'gold') {
+                              const milestone = Math.floor(points / 500) * 500;
+                              return ((points - milestone) / 500) * 100;
+                            } else if (!achievement.currentLevel || achievement.currentLevel === 'none') {
+                              return (points / 100) * 100;
+                            } else if (achievement.currentLevel === 'bronze') {
+                              return ((points - 100) / 400) * 100;
+                            } else {
+                              return ((points - 500) / 500) * 100;
+                            }
+                          })()))}%`,
+                          backgroundColor: getLevelColor(achievement.currentLevel)
+                        }
+                      ]}
+                    />
+                  </View>
+
+                  {achievement.currentLevel === 'gold' && (
+                    <View style={styles.goldLevelBadge}>
+                      <Flame size={16} color="#F59E0B" />
+                      <Text style={styles.goldLevelText}>
+                        Gold Level! Next milestone: {`${Math.ceil((achievement.totalPoints || 0) / 500) * 500}`} points
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
             {/* JSX RENDER HÌNH TRÒN */}
             <View style={styles.progressContainer}>
               <Text style={styles.progressTitle}>Today's Progress</Text>
@@ -638,9 +861,9 @@ export default function ProfileScreen({ navigation }) {
                             rotate:
                               progressPercentage > 100
                                 ? flameRotation.interpolate({
-                                    inputRange: [-1, 1],
-                                    outputRange: ['-10deg', '10deg']
-                                  })
+                                  inputRange: [-1, 1],
+                                  outputRange: ['-10deg', '10deg']
+                                })
                                 : '0deg'
                           }
                         ],
@@ -1074,6 +1297,7 @@ const createStyles = (colors) =>
       color: colors.title || '#1A1A1A',
       marginBottom: 16,
       paddingHorizontal: 4
+
     },
     infoGrid: {
       flexDirection: 'row',
@@ -1135,7 +1359,118 @@ const createStyles = (colors) =>
       color: '#9CA3AF',
       fontWeight: '500'
     },
+    achievementSection: {
+      width: '100%',
+      marginBottom: 20,
+      backgroundColor: '#FAFAFA',
+      borderRadius: 16,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: '#E5E7EB'
+    },
+    sectionTitleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 16,
+      paddingHorizontal: 4
+    },
+    medalContainer: {
+      alignItems: 'center',
+      marginVertical: 20
+    },
+    medalImage: {
+      width: 180,
+      height: 180
+    },
+    noMedal: {
+      alignItems: 'center',
+      padding: 20
+    },
+    noMedalText: {
+      marginTop: 8,
+      fontSize: 14,
+      color: '#999999',
+      fontWeight: '500'
+    },
+    achievementStats: {
+      gap: 12,
+      marginBottom: 16
+    },
+    achievementCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 12,
+      borderRadius: 12,
+      gap: 12
+    },
+    achievementCardContent: {
+      flex: 1
+    },
+    achievementCardLabel: {
+      fontSize: 12,
+      color: '#6B7280',
+      fontWeight: '600',
+      marginBottom: 4
+    },
+    achievementCardValue: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: '#000000'
+    },
+    progressBarContainer: {
+      marginTop: 8
+    },
+    progressBarHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8
+    },
+    progressBarLabel: {
+      fontSize: 12,
+      color: '#6B7280',
+      fontWeight: '600'
+    },
+    progressBarValue: {
+      fontSize: 12,
+      color: '#000000',
+      fontWeight: '700'
+    },
+    progressBar: {
+      height: 12,
+      backgroundColor: '#E5E7EB',
+      borderRadius: 6,
+      overflow: 'hidden'
+    },
+    progressBarFill: {
+      height: '100%',
+      borderRadius: 6
+    },
+    goldLevelBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      marginTop: 12,
+      padding: 12,
+      backgroundColor: '#FFFBEA',
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: '#FFD700'
+    },
+    goldLevelText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: '#92400E',
+      flex: 1
+    },
 
+    // Progress Section (giữ nguyên)
+    progressContainer: {
+      alignItems: 'center',
+      marginBottom: 20
+    },
     // Progress Section
     progressContainer: {
       alignItems: 'center',

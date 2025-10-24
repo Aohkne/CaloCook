@@ -6,7 +6,6 @@ import {
     ScrollView,
     Image,
     TouchableOpacity,
-    SafeAreaView,
     ActivityIndicator,
     Alert,
     Modal,
@@ -14,6 +13,7 @@ import {
     KeyboardAvoidingView,
     Platform
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@contexts/ThemeProvider'
 import { Heart, Clock, Flame, ChefHat, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux'
@@ -22,7 +22,8 @@ import { likeDish, dislikeDish, updateFavoriteItem } from '@redux/slices/favorit
 import { imageMap } from '@/constants/imageAssets';
 import { addEatingHistory, getTotalCalories, createReport } from '@redux/slices/userSlice'
 import CookingStepsModal from '@/components/CookingStepsModal'
-
+import { addAchievementPoints } from '@redux/slices/achievementSlice'
+import MedalAchievementModal from '@/components/MedalAchievementModal';
 export default function Detail({ route, navigation }) {
     const { dish } = route.params
     const { colors } = useTheme()
@@ -47,6 +48,9 @@ export default function Detail({ route, navigation }) {
     const isFavoriteDish = favorites.some(fav => fav.dishId === dishId)
     const [isLiked, setIsLiked] = useState(dish.isLiked || isFavoriteDish)
     const [isCookingModalVisible, setIsCookingModalVisible] = useState(false)
+    const [showMedalModal, setShowMedalModal] = useState(false);
+    const [newLevel, setNewLevel] = useState(null);
+    const [newPoints, setNewPoints] = useState(0);
     const [isReportModalVisible, setIsReportModalVisible] = useState(false)
     const [reportReason, setReportReason] = useState('')
     const [reportError, setReportError] = useState('')
@@ -200,14 +204,18 @@ export default function Detail({ route, navigation }) {
         setIsCookingModalVisible(true) // Hiện modal cooking steps thay vì add history ngay
     }
 
+    // Dòng 155-210: SỬA handleCookingComplete
+    // Tìm và THAY THẾ handleCookingComplete
     const handleCookingComplete = async () => {
         try {
+           
             const historyResult = await dispatch(addEatingHistory({
                 userId: user._id,
                 dishId: dishId
             })).unwrap()
 
-            // Tính ngày hiện tại với timezone đúng
+          
+
             const today = new Date();
             const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
             const todayString = localDate.toISOString().split('T')[0];
@@ -219,13 +227,67 @@ export default function Detail({ route, navigation }) {
                 }))
             }, 1000)
 
-
             setIsCookingModalVisible(false)
+            
 
-            // Thông báo thành công
+            let achievementResult = null;
+            let pointsEarned = 0;
+
+            try {
+                
+
+                achievementResult = await dispatch(addAchievementPoints({
+                    userId: user._id,
+                    difficulty: dishData.difficulty
+                })).unwrap();
+
+                
+                pointsEarned = achievementResult?.pointsEarned || 0;
+
+               
+                // ✅ SỬA: Check level up
+                if (achievementResult?.levelChanged && achievementResult?.newLevel !== 'none') {
+                   
+
+                    const levelToSet = achievementResult.newLevel;
+                    const pointsToSet = achievementResult.totalPoints || 0;
+
+                   
+
+                    // ✅ THÊM: Set states với delay nhỏ để đảm bảo sync
+                    setNewLevel(levelToSet);
+                    setNewPoints(pointsToSet);
+
+                    // ✅ QUAN TRỌNG: Dùng setTimeout để đảm bảo states được update trước khi show modal
+                    setTimeout(() => {
+
+                        setShowMedalModal(true);
+            
+                    }, 100); // Delay 100ms để đảm bảo states được update
+
+                    return; // Không show alert thông thường
+                } else {
+                }
+
+            } catch (achievementError) {
+                console.error('❌ Achievement error:', achievementError);
+            }
+
+            // Alert thông thường (khi không level up)
+            const calorieInfo = `${dishData.calorie || dishData.calories} Kcal`;
+            const difficultyLevel = capitalizeText(dishData.difficulty);
+
+            let pointsMessage = '';
+            if (pointsEarned > 0) {
+                const emoji = dishData.difficulty?.toLowerCase() === 'easy' ? '😊' :
+                    dishData.difficulty?.toLowerCase() === 'medium' ? '🔥' : '⚡';
+                pointsMessage = `\n\n${emoji} +${pointsEarned} Points Earned!\n(${difficultyLevel} Difficulty)`;
+            }
+
+           
             Alert.alert(
                 'Success!',
-                `Added "${dishData.name}" (${dishData.calorie || dishData.calories} Kcal) to your eating history!`,
+                `Added "${dishData.name}" (${calorieInfo}) to your eating history!${pointsMessage}`,
                 [
                     {
                         text: 'View Profile',
@@ -243,6 +305,7 @@ export default function Detail({ route, navigation }) {
             )
 
         } catch (error) {
+            console.error('❌ Cooking complete error:', error);
             Alert.alert('Error', error.message || 'Failed to add to eating history')
         }
     }
@@ -431,6 +494,17 @@ export default function Detail({ route, navigation }) {
                 dishData={dishData}
                 onComplete={handleCookingComplete}
             />
+            <MedalAchievementModal
+                visible={showMedalModal}
+                onClose={() => {
+
+                    setShowMedalModal(false);
+
+                }}
+                level={newLevel}
+                points={newPoints}
+            />
+
 
             {/* Report Modal */}
             <Modal
