@@ -1,0 +1,71 @@
+@startuml ERD
+@startchen
+
+entity user {
+}
+entity dish {
+}
+entity achievement {
+}
+entity emailService {
+}
+entity step {
+}
+entity ingredient {
+}
+
+relationship report {
+}
+relationship favorite {
+}
+relationship history {
+}
+
+' Mối quan hệ 1-1 (Một-Một)
+relationship has_achievement {
+}
+relationship has_emailService {
+}
+
+' Mối quan hệ 1-N (Một-Nhiều)
+relationship has_steps {
+}
+relationship has_ingredients {
+}
+
+
+' ---- NỐI CÁC MỐI QUAN HỆ ----
+
+' Nối Mối quan hệ N-N
+' 1 user có N report, 1 dish có N report
+user -N- report
+dish -N- report
+
+' 1 user có N favorite, 1 dish có N favorite
+user -N- favorite
+dish -N- favorite
+
+' 1 user có N history, 1 dish có N history
+user -N- history
+dish -N- history
+
+' Nối Mối quan hệ 1-1
+' 1 user có 1 achievement
+user -1- has_achievement
+has_achievement -1- achievement
+
+' 1 user có 1 emailService
+user -1- has_emailService
+has_emailService -1- emailService
+
+' Nối Mối quan hệ 1-N
+' 1 dish có N steps
+dish -1- has_steps
+has_steps -N- step
+
+' 1 dish có N ingredients
+dish -1- has_ingredients
+has_ingredients -N- ingredient
+
+@endchen
+

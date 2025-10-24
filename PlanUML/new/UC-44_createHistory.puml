@@ -1,0 +1,77 @@
+@startuml AddToHistory
+
+actor User as "Customer"
+boundary "Dish Detail Page" as View #lightblue
+participant ":historyRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "historyValidation" as Validation #orange
+control "historyController" as Controller #lightblue
+participant ":historyService" as Service #lightblue
+entity "historyModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Add Eat History
+User -> View: 1. Click "Let's Cook" button
+activate View
+activate User
+
+View -> Route: 2. POST /api/v1/history (dishId)
+activate Route
+
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 4. Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 4.1. Return 401/403 Error
+        Route --> View: 4.2. Show error
+        View --> User: 4.3. Display error message
+    end
+    Auth --> Route: 5. User authenticated & authorized
+    deactivate Auth
+
+Route -> Validation: 6. validateAddHistory(req)
+activate Validation
+
+alt Validation Failed
+    Validation --> Route: 6.1. Return 400
+    Route --> View: 6.1.2. Show error
+    View --> User: 6.1.3. Display error message
+
+else Validation Passed
+
+    Validation -> Controller: 6.2. addHistory(req, res)
+    deactivate Validation
+    activate Controller
+
+
+    Controller -> Service: 6.2.1. addHistory(data)
+    activate Service
+
+    Service -> Model: 6.2.2. insertHistory(data)
+    activate Model
+
+    Model -> MongoDB: 6.2.3. Insert document
+    activate MongoDB
+    MongoDB --> Model: 6.2.4. Return result
+    deactivate MongoDB
+
+    Model --> Service: 6.2.5. Return insert result
+    deactivate Model
+
+    Service --> Controller: 6.2.6. Return success
+    deactivate Service
+
+    Controller --> Route: 6.2.7. Send 201 Created
+    deactivate Controller
+
+    Route --> View: 6.2.8. Notify success
+    deactivate Route
+
+    View --> User: 6.2.9. Redirects the user to the cooking page
+    deactivate View
+    deactivate User
+end
+
+end
+@enduml

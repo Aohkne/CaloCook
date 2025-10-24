@@ -109,7 +109,7 @@ function DishDetailUser() {
           console.log('Ingredients response:', ingredientResponse);
 
           if (ingredientResponse.code === 200) {
-            const activeIngredients = (ingredientResponse.data || []).filter(ing => ing.isActive === true);
+            const activeIngredients = (ingredientResponse.data || []).filter((ing) => ing.isActive === true);
             setIngredients(activeIngredients);
           } else {
             setIngredients([]);
@@ -124,7 +124,7 @@ function DishDetailUser() {
           console.log('Steps response:', stepResponse);
 
           if (stepResponse.code === 200) {
-            const activeSteps = (stepResponse.data || []).filter(step => step.isActive === true);
+            const activeSteps = (stepResponse.data || []).filter((step) => step.isActive === true);
             setSteps(activeSteps);
           } else {
             setSteps([]);
@@ -192,8 +192,9 @@ function DishDetailUser() {
       setIsModalVisible(false);
 
       setTimeout(() => {
-        const message = `Added "${dish.name}" (${dish.calorie || dish.calories || 0
-          } Kcal) to your eating history!\n\nView your profile?`;
+        const message = `Added "${dish.name}" (${
+          dish.calorie || dish.calories || 0
+        } Kcal) to your eating history!\n\nView your profile?`;
         const goToProfile = window.confirm(message);
         if (goToProfile) navigate(ROUTES.PROFILE_USER);
       }, 300);
@@ -291,21 +292,20 @@ function DishDetailUser() {
       >
         <Icon icon={isFavorite ? 'ph:heart-fill' : 'ph:heart'} />
       </button>
+      <button className={cx('report-btn')} onClick={handleOpenReportModal}>
+        <Icon icon='weui:report-problem-filled' className={cx('overlay-icon')} />
+      </button>
 
       <div className={cx('container')}>
         <div className={cx('content-section')}>
           <div className={cx('left-side')}>
-            <div className={cx('dish-image-container')} onClick={handleOpenReportModal}>
+            <div className={cx('dish-image-container')}>
               <img
                 src={dish.imageUrl && dish.imageUrl.trim() !== '' ? getWebImagePath(dish.imageUrl) : defaultImage}
                 alt={dish.name}
                 className={cx('dish-image')}
                 onError={handleImageError}
               />
-              <div className={cx('image-overlay')}>
-                <Icon icon='weui:report-problem-filled' className={cx('overlay-icon')} />
-                <span className={cx('overlay-text')}>Report</span>
-              </div>
             </div>
           </div>
 
