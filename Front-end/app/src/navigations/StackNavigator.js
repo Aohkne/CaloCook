@@ -20,7 +20,7 @@ import Detail from '@screens/Detail';
 import ResetPasswordScreen from '@/screens/(auth)/ResetPasswordScreen';
 import ChatScreen from '@/screens/ChatScreen';
 import NutritionAnalyzeScreen from '@/screens/NutritionAnalyzeScreen';
-
+import LeaderboardScreen from '@/screens/LeaderBoardScreen';
 const Stack = createNativeStackNavigator();
 
 export default function StackNavigator() {
@@ -41,6 +41,7 @@ export default function StackNavigator() {
           <Stack.Screen name='History' component={HistoryScreen} />
           <Stack.Screen name='Chat' component={ChatScreen} />
           <Stack.Screen name='Nutrition' component={NutritionAnalyzeScreen} />
+          <Stack.Screen name='Leaderboard' component={LeaderboardScreen} />
         </>
       ) : hasSeenOnboarding ? (
         //  onboarding seen
