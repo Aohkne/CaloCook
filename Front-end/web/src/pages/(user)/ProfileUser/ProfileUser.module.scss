@@ -424,7 +424,9 @@
   margin: 0;
   padding-bottom: 1rem;
   border-bottom: 3px solid var(--input-border);
-  display: inline-block;
+  display: inline-flex; // THAY ĐỔI: từ inline-block sang inline-flex
+  align-items: center; // THÊM: căn giữa theo chiều dọc
+  gap: 0.5rem; // THÊM: khoảng cách giữa icon và text
 }
 
 .info-grid {
@@ -914,4 +916,284 @@
 .verification-status {
   font-size: 12px;
   line-height: 1;
+}
+// ...existing code...
+
+.achievement-section {
+  margin-top: 2rem;
+  
+  .achievement-content {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-top: 1.5rem;
+  }
+  
+  .medal-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    min-width: 150px;
+    
+    .medal-image {
+      width: 180px;
+      height: 180px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+      animation: medalFloat 3s ease-in-out infinite;
+    }
+    
+    .no-medal {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f3f4f6;
+      border-radius: 50%;
+      gap: 0.5rem;
+      
+      span {
+        font-size: 0.75rem;
+        color: #9ca3af;
+      }
+      
+      svg {
+        color: #d1d5db;
+      }
+    }
+    
+    .medal-level {
+      font-weight: 600;
+      font-size: 1.25rem;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.05em;
+    }
+  }
+  
+  .achievement-stats {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      
+      svg {
+        flex-shrink: 0;
+      }
+      
+      .stat-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        
+        .stat-label {
+          font-size: 0.875rem;
+          color: #6b7280;
+        }
+        
+        .stat-value {
+          font-size: 1.75rem;
+          font-weight: 700;
+        }
+      }
+      
+      &.total-points {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        
+        svg {
+          color: #2563eb;
+        }
+        
+        .stat-value {
+          color: #1e40af;
+        }
+      }
+      
+      &.easy {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        
+        svg {
+          color: #059669;
+        }
+        
+        .stat-value {
+          color: #047857;
+        }
+      }
+      
+      &.medium {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        
+        svg {
+          color: #f59e0b;
+        }
+        
+        .stat-value {
+          color: #d97706;
+        }
+      }
+      
+      &.hard {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        
+        svg {
+          color: #dc2626;
+        }
+        
+        .stat-value {
+          color: #b91c1c;
+        }
+      }
+    }
+  }
+  
+  .progress-container {
+    width: 100%;
+    margin-top: 2rem;
+    
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      
+      .progress-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+      
+      .progress-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #111827;
+      }
+    }
+    
+    .progress-bar-wrapper {
+      .progress-bar-background {
+        width: 100%;
+        height: 12px;
+        background: #e5e7eb;
+        border-radius: 9999px;
+        overflow: hidden;
+        
+        .progress-bar-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #fbbf24, #f59e0b);
+          border-radius: 9999px;
+          transition: width 0.5s ease;
+          position: relative;
+          &.gold-level {
+          background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
+          animation: goldShimmer 2s ease-in-out infinite;
+        }
+          &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+          }
+        }
+      }
+    }
+  .gold-level-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #FFFBEA 0%, #FFF4CC 100%);
+    border: 2px solid #FFD700;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.15);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 215, 0, 0.25);
+    }
+    
+    svg {
+      color: #F59E0B;
+      animation: fireFlicker 1.5s ease-in-out infinite;
+      filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.4));
+    }
+    
+    span {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #92400E;
+      letter-spacing: 0.025em;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+  }
+}
+
+@keyframes medalFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes fireFlicker {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.1) rotate(-5deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.15) rotate(5deg);
+    opacity: 0.95;
+  }
+  75% {
+    transform: scale(1.05) rotate(-3deg);
+    opacity: 0.85;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
 }

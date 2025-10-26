@@ -67,14 +67,54 @@ const getDetails = async (ratingId) => {
   }
 }
 
+
 const viewRatings = async (dishId, sortBy = 'createdAt', order = 'desc') => {
   try {
     const sortOrder = order === 'asc' ? 1 : -1
+    
     const ratings = await GET_DB()
       .collection(_COLLECTION_NAME)
-      .find({ dishId: new ObjectId(dishId) })
-      .sort({ [sortBy]: sortOrder })
+      .aggregate([
+        
+        { 
+          $match: { dishId: new ObjectId(dishId) } 
+        },
+        
+        {
+          $lookup: {
+            from: 'user',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'userInfo'
+          }
+        },
+        
+        {
+          $unwind: {
+            path: '$userInfo',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        
+        {
+          $project: {
+            _id: 1,
+            userId: 1,
+            fullName: '$userInfo.fullName',
+            dishId: 1,
+            star: 1,
+            description: 1,
+            createdAt: 1,
+            updatedAt: 1
+          }
+        },
+        
+        {
+          $sort: { [sortBy]: sortOrder }
+        }
+      ])
       .toArray()
+    
     return ratings
   } catch (error) {
     throw new Error(error)

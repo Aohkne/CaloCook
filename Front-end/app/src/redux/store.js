@@ -7,7 +7,7 @@ import favoriteSlice from './slices/favoriteSlice';
 import userSlice from './slices/userSlice';
 import chatSlice from './slices/chatSlice';
 import modelSlice from './slices/modelSlice';
-
+import achievementSlice from './slices/achievementSlice';
 export const store = configureStore({
   reducer: {
     auth: authSlice,
@@ -15,7 +15,8 @@ export const store = configureStore({
     favorite: favoriteSlice,
     user: userSlice,
     chat: chatSlice,
-    model: modelSlice
+    model: modelSlice,
+    achievement: achievementSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -72,6 +72,10 @@ function Navbar() {
             <Link to={ROUTES.CHAT_AI} className={cx('nav-item')}>
               CaloBot
             </Link>
+            <Link to={ROUTES.LEADERBOARD} className={cx('nav-item')}>
+              
+              Leaderboard
+            </Link>
           </div>
         </div>
 
