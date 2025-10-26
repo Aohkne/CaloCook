@@ -8,6 +8,7 @@ import userSlice from './slices/userSlice';
 import chatSlice from './slices/chatSlice';
 import modelSlice from './slices/modelSlice';
 import achievementSlice from './slices/achievementSlice';
+import ratingSlice from '@redux/slices/ratingSlice';
 export const store = configureStore({
   reducer: {
     auth: authSlice,
@@ -16,7 +17,8 @@ export const store = configureStore({
     user: userSlice,
     chat: chatSlice,
     model: modelSlice,
-    achievement: achievementSlice
+    achievement: achievementSlice,
+    rating: ratingSlice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

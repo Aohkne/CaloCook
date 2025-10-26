@@ -15,7 +15,7 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@contexts/ThemeProvider'
-import { Heart, Clock, Flame, ChefHat, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { Heart, Clock, Flame, ChefHat, ChevronLeft, Star } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux'
 import { getDishDetailData, clearDishDetail, updateDishLikeStatus } from '@redux/slices/dishSlice'
 import { likeDish, dislikeDish, updateFavoriteItem } from '@redux/slices/favoriteSlice'
@@ -24,6 +24,14 @@ import { addEatingHistory, getTotalCalories, createReport } from '@redux/slices/
 import CookingStepsModal from '@/components/CookingStepsModal'
 import { addAchievementPoints } from '@redux/slices/achievementSlice'
 import MedalAchievementModal from '@/components/MedalAchievementModal';
+import {
+    createRating,
+    getRatingsByDishId,
+    getAverageRating,
+    separateUserRating,
+    clearError as clearRatingError,
+    resetRatings
+} from '@redux/slices/ratingSlice'
 export default function Detail({ route, navigation }) {
     const { dish } = route.params
     const { colors } = useTheme()
@@ -54,6 +62,28 @@ export default function Detail({ route, navigation }) {
     const [isReportModalVisible, setIsReportModalVisible] = useState(false)
     const [reportReason, setReportReason] = useState('')
     const [reportError, setReportError] = useState('')
+    const {
+        ratings,
+        averageRating,
+        totalRatings,
+        userOwnRating,
+        isLoading: isLoadingRating,
+        error: ratingError,
+        successMessage: ratingSuccess
+    } = useSelector(state => state.rating)
+    //  Rating states
+    const [userRating, setUserRating] = useState(0);
+    const [hoveredStar, setHoveredStar] = useState(0);
+    const [selectedReview, setSelectedReview] = useState(null);
+    const [isReviewDetailModalVisible, setIsReviewDetailModalVisible] = useState(false);
+    const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
+    const [ratingDescription, setRatingDescription] = useState('');
+
+    //  Separate user's rating from others
+    const otherReviews = ratings.filter(r => {
+        const ratingUserId = typeof r.userId === 'object' ? r.userId._id : r.userId;
+        return ratingUserId !== user?._id;
+    });
 
     // Helper function để capitalize text
     const capitalizeText = (text) => {
@@ -71,14 +101,134 @@ export default function Detail({ route, navigation }) {
     useEffect(() => {
         if (dish._id || dish.id) {
             const dishId = dish._id || dish.id;
+
+            // Fetch dish detail
             dispatch(getDishDetailData(dishId));
+
+            // Fetch ratings
+            dispatch(getRatingsByDishId({
+                dishId,
+                sortBy: 'createdAt',
+                order: 'desc'
+            }));
+
+            // Fetch average rating
+            dispatch(getAverageRating(dishId));
         }
 
         // Cleanup khi component unmount
         return () => {
             dispatch(clearDishDetail());
+            dispatch(resetRatings());
         };
     }, [dispatch, dish._id, dish.id]);
+
+    // ✅ Separate user's own rating when ratings or user changes
+    useEffect(() => {
+        if (user?._id && ratings.length > 0) {
+            dispatch(separateUserRating({ userId: user._id }));
+        }
+    }, [dispatch, ratings, user?._id])
+
+    useEffect(() => {
+        if (ratingError) {
+            Alert.alert('Error', ratingError);
+            dispatch(clearRatingError());
+        }
+    }, [ratingError, dispatch]);
+
+    useEffect(() => {
+        if (ratingSuccess) {
+            Alert.alert('Success', ratingSuccess);
+            dispatch(clearRatingError());
+        }
+    }, [ratingSuccess, dispatch]);
+
+    // ✅ Rating handlers
+    const renderStars = (rating, isInteractive = false) => {
+        return Array.from({ length: 5 }, (_, index) => {
+            const starValue = index + 1;
+            const isFilled = isInteractive
+                ? hoveredStar
+                    ? starValue <= hoveredStar
+                    : starValue <= userRating
+                : starValue <= Math.floor(rating);
+
+            return (
+                <TouchableOpacity
+                    key={index}
+                    disabled={!isInteractive}
+                    onPress={isInteractive ? () => handleStarPress(starValue) : undefined}
+                >
+                    <Star
+                        size={isInteractive ? 32 : 16}
+                        color={colors.yellow}
+                        fill={isFilled ? colors.yellow : 'none'}
+                    />
+                </TouchableOpacity>
+            );
+        });
+    };
+
+    const handleStarPress = (rating) => {
+        if (!user?._id) {
+            Alert.alert('Error', 'Please login to rate this dish');
+            return;
+        }
+        setUserRating(rating);
+        setIsRatingModalVisible(true);
+    };
+
+    const handleReviewPress = (review) => {
+        setSelectedReview(review);
+        setIsReviewDetailModalVisible(true);
+    };
+
+    const handleCloseRatingModal = () => {
+        setIsRatingModalVisible(false);
+        setRatingDescription('');
+        setUserRating(0);
+    };
+
+    const handleSubmitRating = async () => {
+        const trimmedDescription = ratingDescription.trim();
+
+        if (!trimmedDescription) {
+            Alert.alert('Error', 'Please enter a description');
+            return;
+        }
+
+        if (trimmedDescription.length < 10) {
+            Alert.alert('Error', 'Description must be at least 10 characters');
+            return;
+        }
+
+        try {
+            await dispatch(createRating({
+                userId: user._id,
+                dishId: dishId,
+                star: userRating,
+                description: trimmedDescription
+            })).unwrap();
+
+            // ✅ Đợi cả 2 API hoàn thành trước khi đóng modal
+            await Promise.all([
+                dispatch(getRatingsByDishId({
+                    dishId,
+                    sortBy: 'createdAt',
+                    order: 'desc'
+                })).unwrap(),
+                dispatch(getAverageRating(dishId)).unwrap()
+            ]);
+
+            // Reset và đóng modal sau khi refresh xong
+            handleCloseRatingModal();
+            setUserRating(0);
+        } catch (error) {
+            Alert.alert('Error', error.message || 'Failed to submit rating');
+        }
+    };
+
 
     // Handle error
     useEffect(() => {
@@ -153,6 +303,18 @@ export default function Detail({ route, navigation }) {
         }
     }, [dispatch, user, isLiked, dish, dishDetail, dishId])
 
+    const formatDate = (dateString) => {
+        try {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'N/A';
+            return date.toISOString().split('T')[0];
+        } catch (error) {
+            return 'N/A';
+        }
+    };
+
+
     // Handle Report Modal
     const handleOpenReportModal = () => {
         if (!user?._id) {
@@ -172,7 +334,7 @@ export default function Detail({ route, navigation }) {
 
     const handleSubmitReport = async () => {
         const trimmedReason = reportReason.trim()
-        
+
         if (!trimmedReason) {
             setReportError('Please enter a reason for reporting')
             return
@@ -208,13 +370,13 @@ export default function Detail({ route, navigation }) {
     // Tìm và THAY THẾ handleCookingComplete
     const handleCookingComplete = async () => {
         try {
-           
+
             const historyResult = await dispatch(addEatingHistory({
                 userId: user._id,
                 dishId: dishId
             })).unwrap()
 
-          
+
 
             const today = new Date();
             const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
@@ -228,31 +390,31 @@ export default function Detail({ route, navigation }) {
             }, 1000)
 
             setIsCookingModalVisible(false)
-            
+
 
             let achievementResult = null;
             let pointsEarned = 0;
 
             try {
-                
+
 
                 achievementResult = await dispatch(addAchievementPoints({
                     userId: user._id,
                     difficulty: dishData.difficulty
                 })).unwrap();
 
-                
+
                 pointsEarned = achievementResult?.pointsEarned || 0;
 
-               
+
                 // ✅ SỬA: Check level up
                 if (achievementResult?.levelChanged && achievementResult?.newLevel !== 'none') {
-                   
+
 
                     const levelToSet = achievementResult.newLevel;
                     const pointsToSet = achievementResult.totalPoints || 0;
 
-                   
+
 
                     // ✅ THÊM: Set states với delay nhỏ để đảm bảo sync
                     setNewLevel(levelToSet);
@@ -262,7 +424,7 @@ export default function Detail({ route, navigation }) {
                     setTimeout(() => {
 
                         setShowMedalModal(true);
-            
+
                     }, 100); // Delay 100ms để đảm bảo states được update
 
                     return; // Không show alert thông thường
@@ -284,7 +446,7 @@ export default function Detail({ route, navigation }) {
                 pointsMessage = `\n\n${emoji} +${pointsEarned} Points Earned!\n(${difficultyLevel} Difficulty)`;
             }
 
-           
+
             Alert.alert(
                 'Success!',
                 `Added "${dishData.name}" (${calorieInfo}) to your eating history!${pointsMessage}`,
@@ -464,8 +626,117 @@ export default function Detail({ route, navigation }) {
                             <Text style={styles.noDataText}>No steps available</Text>
                         )}
                     </View>
+                    {/* ✅ Rating Section with real data */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Rating</Text>
+
+                        <View style={styles.ratingTop}>
+                            <View style={styles.averageRatingContainer}>
+                                <Text style={styles.ratingNumber}>
+                                    {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
+                                </Text>
+                            </View>
+
+                            <View style={styles.starsInfo}>
+                                <View style={styles.starsDisplay}>
+                                    {renderStars(averageRating)}
+                                </View>
+                                <Text style={styles.ratingCount}>
+                                    {totalRatings} {totalRatings === 1 ? 'Rating' : 'Ratings'}
+                                </Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.userRating}>
+                            {renderStars(userRating, true)}
+                        </View>
+                    </View>
                 </View>
-                
+
+                {/* ✅ Reviews List - Show user's own rating first, then others */}
+                <View style={styles.reviewsSection}>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.reviewsListContent}
+                    >
+                        {/* User's own rating first */}
+                        {userOwnRating && (
+                            <TouchableOpacity
+                                key={userOwnRating._id}
+                                style={[styles.reviewCard, styles.ownReviewCard]}
+                                onPress={() => handleReviewPress({
+                                    id: userOwnRating._id,
+                                    userName: userOwnRating.fullName || 'You',
+                                    rating: userOwnRating.star,
+                                    comment: userOwnRating.description,
+                                    date: formatDate(userOwnRating.createdAt)
+                                })}
+                            >
+                                <View style={styles.reviewHeader}>
+                                    <View style={styles.reviewInfo}>
+                                        <Text style={styles.reviewName}>
+                                            {userOwnRating.fullName || 'You'}
+                                        </Text>
+                                        <View style={styles.reviewStars}>
+                                            {renderStars(userOwnRating.star)}
+                                        </View>
+                                    </View>
+                                    <Text style={styles.reviewDate}>
+                                        {formatDate(userOwnRating.createdAt)}
+                                    </Text>
+                                </View>
+                                <Text style={styles.reviewComment} numberOfLines={1}>
+                                    {userOwnRating.description.split(' ').length > 30
+                                        ? userOwnRating.description.split(' ').slice(0, 30).join(' ') + '...'
+                                        : userOwnRating.description}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+
+                        {/* Other reviews - limit to 4 */}
+                        {otherReviews.slice(0, 4).map((review) => (
+                            <TouchableOpacity
+                                key={review._id}
+                                style={styles.reviewCard}
+                                onPress={() => handleReviewPress({
+                                    id: review._id,
+                                    userName: review.fullName,
+                                    rating: review.star,
+                                    comment: review.description,
+                                    date: formatDate(review.createdAt)
+                                })}
+                            >
+                                <View style={styles.reviewHeader}>
+                                    <View style={styles.reviewInfo}>
+                                        <Text style={styles.reviewName}>{review.fullName}</Text>
+                                        <View style={styles.reviewStars}>
+                                            {renderStars(review.star)}
+                                        </View>
+                                    </View>
+                                    <Text style={styles.reviewDate}>
+                                        {formatDate(review.createdAt)}
+                                    </Text>
+                                </View>
+                                <Text style={styles.reviewComment} numberOfLines={1}>
+                                    {review.description.split(' ').length > 30
+                                        ? review.description.split(' ').slice(0, 30).join(' ') + '...'
+                                        : review.description}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+
+                        {/* Empty state */}
+                        {!userOwnRating && otherReviews.length === 0 && (
+                            <View style={styles.emptyReviews}>
+                                <Text style={styles.emptyReviewsText}>
+                                    No reviews yet. Be the first to rate!
+                                </Text>
+                            </View>
+                        )}
+                    </ScrollView>
+                </View>
+
                 {/* Report Button */}
                 <View style={styles.reportButtonContainer}>
                     <TouchableOpacity
@@ -504,7 +775,95 @@ export default function Detail({ route, navigation }) {
                 level={newLevel}
                 points={newPoints}
             />
+            {/* Rating Modal */}
+            <Modal
+                visible={isRatingModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={handleCloseRatingModal}
+            >
+                <View style={styles.ratingModalOverlay}>
+                    <View style={styles.ratingModalContent}>
+                        <View style={styles.ratingModalHeader}>
+                            <Text style={styles.ratingModalTitle}>RATE THIS DISH</Text>
+                            <TouchableOpacity onPress={handleCloseRatingModal}>
+                                <Text style={styles.ratingModalCloseButton}>×</Text>
+                            </TouchableOpacity>
+                        </View>
 
+                        <View style={styles.ratingModalBody}>
+                            <Text style={styles.ratingModalLabel}>
+                                Tell us about your experience with this dish
+                            </Text>
+
+                            <TextInput
+                                style={styles.ratingTextarea}
+                                multiline
+                                numberOfLines={5}
+                                placeholder="Share your thoughts about the taste, preparation, or anything else..."
+                                placeholderTextColor={colors.description}
+                                value={ratingDescription}
+                                onChangeText={setRatingDescription}
+                                textAlignVertical="top"
+                            />
+
+                            <TouchableOpacity
+                                style={styles.submitRatingButton}
+                                onPress={handleSubmitRating}
+                                disabled={isLoadingRating}
+                            >
+                                {isLoadingRating ? (
+                                    <ActivityIndicator color="#fff" />
+                                ) : (
+                                    <Text style={styles.submitRatingButtonText}>Submit Rating</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Review Detail Modal */}
+            <Modal
+                visible={isReviewDetailModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsReviewDetailModalVisible(false)}
+            >
+                <View style={styles.ratingModalOverlay}>
+                    <View style={styles.ratingModalContent}>
+                        <View style={styles.ratingModalHeader}>
+                            <Text style={styles.ratingModalTitle}>REVIEW DETAILS</Text>
+                            <TouchableOpacity onPress={() => setIsReviewDetailModalVisible(false)}>
+                                <Text style={styles.ratingModalCloseButton}>×</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {selectedReview && (
+                            <View style={styles.ratingModalBody}>
+                                <View style={styles.reviewDetailHeader}>
+                                    <Text style={styles.reviewDetailName}>
+                                        {selectedReview.userName}
+                                    </Text>
+                                    <Text style={styles.reviewDetailDate}>
+                                        {selectedReview.date}
+                                    </Text>
+                                </View>
+
+                                <View style={styles.reviewDetailStars}>
+                                    {renderStars(selectedReview.rating)}
+                                </View>
+
+                                <View style={styles.reviewDetailCommentBox}>
+                                    <Text style={styles.reviewDetailComment}>
+                                        {selectedReview.comment}
+                                    </Text>
+                                </View>
+                            </View>
+                        )}
+                    </View>
+                </View>
+            </Modal>
 
             {/* Report Modal */}
             <Modal
@@ -537,7 +896,7 @@ export default function Detail({ route, navigation }) {
                                             Help us improve by reporting issues
                                         </Text>
                                     </View>
-                                    <TouchableOpacity 
+                                    <TouchableOpacity
                                         style={styles.closeButton}
                                         onPress={handleCloseReportModal}
                                     >
@@ -968,5 +1327,222 @@ const createStyles = (colors) =>
             color: '#fff',
             fontSize: 16,
             fontWeight: 'bold',
+        },
+
+        // Rating Section Styles
+        ratingTop: {
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            gap: 16,
+            marginBottom: 16,
+        },
+        averageRatingContainer: {
+            justifyContent: 'center',
+        },
+        ratingNumber: {
+            fontSize: 48,
+            fontWeight: '700',
+            color: colors.title,
+            lineHeight: 48,
+        },
+        starsInfo: {
+            flexDirection: 'column',
+            gap: 8,
+        },
+        starsDisplay: {
+            flexDirection: 'row',
+            gap: 4,
+        },
+        ratingCount: {
+            fontSize: 14,
+            color: colors.description,
+        },
+        userRating: {
+            flexDirection: 'row',
+            gap: 8,
+            marginTop: 8,
+        },
+
+        // Reviews Section Styles
+        reviewsSection: {
+            marginTop: 24,
+            marginBottom: 16,
+        },
+        reviewsListContent: {
+            paddingHorizontal: 16,
+            gap: 16,
+        },
+        reviewCard: {
+            width: 280,
+            backgroundColor: colors.background,
+            borderWidth: 2,
+            borderColor: colors.inputBorder,
+            borderRadius: 12,
+            padding: 16,
+            gap: 12,
+        },
+        reviewHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: 12,
+        },
+        reviewInfo: {
+            flex: 1,
+            gap: 6,
+        },
+        reviewName: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: colors.title,
+        },
+        reviewStars: {
+            flexDirection: 'row',
+            gap: 4,
+        },
+        reviewDate: {
+            fontSize: 12,
+            color: colors.description,
+        },
+        reviewComment: {
+            fontSize: 14,
+            color: colors.description,
+            lineHeight: 20,
+        },
+
+        // Review Detail Modal Styles
+        reviewDetailContent: {
+            padding: 24,
+            gap: 16,
+        },
+        reviewDetailHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingBottom: 16,
+            borderBottomColor: colors.inputBorder,
+        },
+        reviewDetailName: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: colors.title,
+        },
+        reviewDetailDate: {
+            fontSize: 14,
+            color: colors.description,
+        },
+        reviewDetailStars: {
+            flexDirection: 'row',
+            gap: 6,
+        },
+        reviewDetailComment: {
+            fontSize: 16,
+            color: colors.description,
+            lineHeight: 24,
+            backgroundColor: colors.backgroundSubside,
+            borderRadius: 8,
+            minHeight: 100,
+        },
+
+        // Rating Modal Specific Styles
+        ratingModalLabel: {
+            fontSize: 14,
+            color: colors.description,
+            marginBottom: 16,
+
+        },
+        ratingTextarea: {
+            borderWidth: 2,
+            borderColor: colors.inputBorder,
+            borderRadius: 8,
+            padding: 12,
+            fontSize: 14,
+            color: colors.title,
+            backgroundColor: colors.inputBg,
+            minHeight: 120,
+            marginBottom: 12,
+        },
+        ratingError: {
+            color: colors.red,
+            fontSize: 12,
+            marginBottom: 12,
+        },
+        submitRatingButton: {
+            backgroundColor: colors.primary,
+            padding: 14,
+            borderRadius: 8,
+            alignItems: 'center',
+            marginTop: 8,
+        },
+        submitRatingButtonText: {
+            color: 'white',
+            fontSize: 16,
+            fontWeight: '600',
+        },
+
+        //Modal
+        ratingModalOverlay: {
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
+            paddingBottom: 150
+        },
+        ratingModalContent: {
+            backgroundColor: colors.background,
+            borderRadius: 20,
+            width: '100%',
+            maxWidth: 400,
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 4,
+            },
+            shadowOpacity: 0.3,
+            shadowRadius: 12,
+            elevation: 20,
+        },
+        ratingModalHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: 20,
+            borderBottomWidth: 1,
+            borderBottomColor: '#E5E7EB',
+        },
+        ratingModalTitle: {
+            fontSize: 20,
+            fontWeight: 'bold',
+            color: colors.title,
+        },
+        ratingModalCloseButton: {
+            fontSize: 28,
+            color: '#6B7280',
+            fontWeight: '300',
+        },
+        ratingModalBody: {
+            padding: 20,
+        },
+        ratingModalLabel: {
+            fontSize: 14,
+            color: colors.description,
+            marginBottom: 16,
+        },
+        reviewDetailCommentBox: {
+            marginTop: 16,
+        },
+
+        emptyReviews: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 32,
+            minWidth: 280,
+        },
+        emptyReviewsText: {
+            fontSize: 14,
+            color: colors.description,
+            textAlign: 'center',
+            fontStyle: 'italic',
         },
     })

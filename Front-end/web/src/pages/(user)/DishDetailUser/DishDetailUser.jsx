@@ -6,6 +6,7 @@ import styles from './DishDetailUser.module.scss';
 import { ROUTES } from '@/constants/routes';
 import { getDishById, getIngredientsByDishId, getStepsByDishId } from '@/api/dish';
 import { addToHistory, getTotalCalories } from '@/api/history';
+import { createRating, getRatingsByDishId, getAverageRating } from '@/api/rating';
 import { createReport } from '@/api/report';
 import { getFavorites, addToFavorites, removeFromFavorites } from '@/api/favorite';
 import { getWebImagePath } from '@/utils/imageHelper';
@@ -35,6 +36,16 @@ function DishDetailUser() {
   const [newPoints, setNewPoints] = useState(0);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
+  const [ratingDescription, setRatingDescription] = useState('');
+  const [selectedReview, setSelectedReview] = useState(null);
+  const [isReviewDetailModalVisible, setIsReviewDetailModalVisible] = useState(false);
+
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
+  const [userOwnRating, setUserOwnRating] = useState(null);
+  const [otherReviews, setOtherReviews] = useState([]);
+
 
   const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -68,6 +79,119 @@ function DishDetailUser() {
   };
 
   const userId = getUserId();
+
+
+  // Fetch ratings
+  const fetchRatings = async () => {
+    if (!id) return;
+
+    try {
+      // Get ratings list
+      const ratingsResponse = await getRatingsByDishId(id, {
+        sortBy: 'createdAt',
+        order: 'desc'
+      });
+
+      if (ratingsResponse.code === 200) {
+        const ratingsData = ratingsResponse.data || [];
+
+        // Transform data to match UI format
+        const formattedReviews = ratingsData.map((rating) => ({
+          id: rating._id,
+          userName: rating.fullName,
+          rating: rating.star,
+          comment: rating.description,
+          date: new Date(rating.createdAt).toISOString().split('T')[0],
+          userId: typeof rating.userId === 'object' ? rating.userId._id : rating.userId,
+          rawUserId: rating.userId
+        }));
+        // Separate user's own rating and others
+        if (userId) {
+          const ownRating = formattedReviews.find(r => r.userId === userId);
+          const others = formattedReviews.filter(r => r.userId !== userId);
+
+          setUserOwnRating(ownRating || null);
+          setOtherReviews(others);
+        } else {
+          setUserOwnRating(null);
+          setOtherReviews(formattedReviews);
+        }
+      }
+
+      // Get average rating
+      const avgResponse = await getAverageRating(id);
+      if (avgResponse.code === 200) {
+        setAverageRating(avgResponse.data.averageRating || 0);
+        setTotalRatings(avgResponse.data.totalRatings || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching ratings:', error);
+    }
+  };
+  useEffect(() => {
+    const fetchDishDetail = async () => {
+      if (!id) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const dishResponse = await getDishById(id);
+        console.log('Dish response:', dishResponse);
+
+        if (dishResponse.code === 200) {
+          setDish(dishResponse.data);
+        } else {
+          setError('Dish not found');
+          setLoading(false);
+          return;
+        }
+
+        try {
+          const ingredientResponse = await getIngredientsByDishId(id);
+          console.log('Ingredients response:', ingredientResponse);
+
+          if (ingredientResponse.code === 200) {
+            const activeIngredients = (ingredientResponse.data || []).filter(ing => ing.isActive === true);
+            setIngredients(activeIngredients);
+          } else {
+            setIngredients([]);
+          }
+        } catch (ingredientErr) {
+          console.warn('Failed to load ingredients:', ingredientErr);
+          setIngredients([]);
+        }
+
+        try {
+          const stepResponse = await getStepsByDishId(id);
+          console.log('Steps response:', stepResponse);
+
+          if (stepResponse.code === 200) {
+            const activeSteps = (stepResponse.data || []).filter(step => step.isActive === true);
+            setSteps(activeSteps);
+          } else {
+            setSteps([]);
+          }
+        } catch (stepErr) {
+          console.warn('Failed to load steps:', stepErr);
+          setSteps([]);
+        }
+
+        // Check favorite status after loading dish
+        await checkFavoriteStatus();
+
+        // Fetch ratings
+        await fetchRatings();
+      } catch (err) {
+        console.error('Error fetching dish:', err);
+        setError('Failed to load dish details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDishDetail();
+  }, [id]);
 
   // Fetch favorite status
   const checkFavoriteStatus = async () => {
@@ -151,7 +275,65 @@ function DishDetailUser() {
     fetchDishDetail();
   }, [id]);
 
-  const handleStarClick = (rating) => setUserRating(rating);
+  const handleStarClick = (rating) => {
+    setUserRating(rating);
+    setIsRatingModalVisible(true);
+  };
+
+  const handleCloseRatingModal = () => {
+    setIsRatingModalVisible(false);
+    setRatingDescription('');
+  };
+
+  const handleSubmitRating = async (e) => {
+    e.preventDefault();
+    if (!ratingDescription.trim() || ratingDescription.trim().length < 10) {
+      setError('Please enter a description (at least 10 characters)');
+      setTimeout(() => setError(''), 5000);
+      return;
+    }
+
+    if (!userId) {
+      setError('Please login to submit rating');
+      setTimeout(() => setError(''), 5000);
+      return;
+    }
+
+    try {
+      const response = await createRating({
+        userId,
+        dishId: id,
+        star: userRating,
+        description: ratingDescription.trim()
+      });
+
+      if (response.code === 201) {
+        setSuccess('Rating submitted successfully!');
+        handleCloseRatingModal();
+        setUserRating(0); // Reset stars
+        setRatingDescription(''); // Reset description
+
+        // Refresh ratings
+        await fetchRatings();
+
+        setTimeout(() => setSuccess(''), 5000);
+      }
+    } catch (err) {
+      console.error('Failed to submit rating:', err);
+      setError('Failed to submit rating. Please try again.');
+      setTimeout(() => setError(''), 5000);
+    }
+  };
+
+  const handleReviewCardClick = (review) => {
+    setSelectedReview(review);
+    setIsReviewDetailModalVisible(true);
+  };
+
+  const handleCloseReviewDetailModal = () => {
+    setIsReviewDetailModalVisible(false);
+    setSelectedReview(null);
+  };
 
   const toggleFavorite = async () => {
     if (!userId) {
@@ -192,7 +374,7 @@ function DishDetailUser() {
       await addToHistory(userId, id);
       const today = new Date().toISOString().split('T')[0];
       await getTotalCalories(userId, today);
-      
+
       setIsModalVisible(false);
 
       let achievementResult = null;
@@ -200,25 +382,25 @@ function DishDetailUser() {
 
       try {
         achievementResult = await addAchievementPoints(userId, dish.difficulty);
-        
+
         const achievementData = achievementResult?.data?.data;
-        
+
         if (achievementData) {
           pointsEarned = achievementData.points || 0;
-          
+
           // ✅ Check level up
           const isLevelUp = achievementData.levelUp === true;
           const hasValidNewLevel = achievementData.newLevel && achievementData.newLevel !== 'none';
-          
+
           if (isLevelUp && hasValidNewLevel) {
             // ✅ Show medal modal
             setNewLevel(achievementData.newLevel);
             setNewPoints(achievementData.totalPoints || 0);
-            
+
             setTimeout(() => {
               setShowMedalModal(true);
             }, 300);
-            
+
             return; // Không show alert thông thường
           }
         }
@@ -229,7 +411,7 @@ function DishDetailUser() {
       // ✅ Alert thông thường (khi không level up)
       setTimeout(() => {
         let message = `Added "${dish.name}" (${dish.calorie || dish.calories || 0} Kcal) to your eating history!`;
-        
+
         if (pointsEarned > 0) {
           const difficultyLevel = dish.difficulty
             ? dish.difficulty.charAt(0).toUpperCase() + dish.difficulty.slice(1).toLowerCase()
@@ -238,9 +420,9 @@ function DishDetailUser() {
             dish.difficulty?.toLowerCase() === 'medium' ? '🔥' : '⚡';
           message += `\n\n${emoji} +${pointsEarned} Points Earned!\n(${difficultyLevel} Difficulty)`;
         }
-        
+
         message += '\n\nView your profile?';
-        
+
         const goToProfile = window.confirm(message);
         if (goToProfile) {
           window.location.href = ROUTES.PROFILE_USER;
@@ -449,21 +631,140 @@ function DishDetailUser() {
           <h2 className={cx('rating-title')}>Rating</h2>
           <div className={cx('rating-top')}>
             <div className={cx('average-rating')}>
-              <span className={cx('rating-number')}>4.5</span>
+              <span className={cx('rating-number')}>
+                {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
+              </span>
             </div>
             <div className={cx('stars-info')}>
-              <div className={cx('stars-display')}>{renderStars(4.5)}</div>
-              <div className={cx('rating-count')}>170 N Ratings</div>
+              <div className={cx('stars-display')}>
+                {renderStars(averageRating)}
+              </div>
+              <div className={cx('rating-count')}>
+                {totalRatings} {totalRatings === 1 ? 'Rating' : 'Ratings'}
+              </div>
             </div>
           </div>
 
           <div className={cx('user-rating')}>{renderStars(userRating, true)}</div>
+        </div>
+        {/* Review Cards */}
+        <div className={cx('reviews-list')}>
+          {/* User's own rating - always first if exists */}
+          {userOwnRating && (
+            <div
+              key={userOwnRating.id}
+              className={cx('review-card', 'own-review')}
+              onClick={() => handleReviewCardClick(userOwnRating)}
+            >
+              <div className={cx('review-header')}>
+                <div className={cx('review-info')}>
+                  <div className={cx('review-name')}>
+                    {userOwnRating.userName}
+                  </div>
+                  <div className={cx('review-stars')}>{renderStars(userOwnRating.rating)}</div>
+                </div>
+                <div className={cx('review-date')}>{userOwnRating.date}</div>
+              </div>
+              <div className={cx('review-comment')}>
+                {userOwnRating.comment.length > 30
+                  ? `${userOwnRating.comment.substring(0, 30)}...`
+                  : userOwnRating.comment}
+              </div>
+            </div>
+          )}
+
+          {/* Other reviews - show 4 most recent */}
+          {otherReviews.length > 0 ? (
+            otherReviews.slice(0, 4).map((review) => (
+              <div
+                key={review.id}
+                className={cx('review-card')}
+                onClick={() => handleReviewCardClick(review)}
+              >
+                <div className={cx('review-header')}>
+                  <div className={cx('review-info')}>
+                    <div className={cx('review-name')}>{review.userName}</div>
+                    <div className={cx('review-stars')}>{renderStars(review.rating)}</div>
+                  </div>
+                  <div className={cx('review-date')}>{review.date}</div>
+                </div>
+                <div className={cx('review-comment')}>
+                  {review.comment.length > 30
+                    ? `${review.comment.substring(0, 30)}...`
+                    : review.comment}
+                </div>
+              </div>
+            ))
+          ) : !userOwnRating ? (
+            <div className={cx('empty-reviews')}>No reviews yet. Be the first to rate this dish!</div>
+          ) : null}
         </div>
 
         <button className={cx('cook-btn')} onClick={handleCook}>
           Let's Cook
         </button>
       </div>
+
+      {/* Rating Modal */}
+      {isRatingModalVisible && (
+        <div className={cx('modal-overlay')} onClick={handleCloseRatingModal}>
+          <div className={cx('modal-content')} onClick={(e) => e.stopPropagation()}>
+            <div className={cx('modal-header')}>
+              <h2 className={cx('modal-title')}>RATE THIS DISH</h2>
+              <button className={cx('modal-close-btn')} onClick={handleCloseRatingModal}>
+                &times;
+              </button>
+            </div>
+            <form className={cx('modal-form')} onSubmit={handleSubmitRating}>
+              <div className={cx('form-group')}>
+                <label htmlFor='ratingDescription' className={cx('form-label')}>
+                  Tell us about your experience with this dish
+                </label>
+                <textarea
+                  id='ratingDescription'
+                  className={cx('form-textarea')}
+                  rows='5'
+                  placeholder='Share your thoughts about the taste, preparation, or anything else...'
+                  value={ratingDescription}
+                  onChange={(e) => setRatingDescription(e.target.value)}
+                  required
+                />
+              </div>
+              <div className={cx('rating-modal-actions')}>
+                <button type='submit' className={cx('btn-submit')}>
+                  Submit Rating
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Review Detail Modal */}
+      {isReviewDetailModalVisible && selectedReview && (
+        <div className={cx('modal-overlay')} onClick={handleCloseReviewDetailModal}>
+          <div className={cx('modal-content')} onClick={(e) => e.stopPropagation()}>
+            <div className={cx('modal-header')}>
+              <h2 className={cx('modal-title')}>REVIEW DETAILS</h2>
+              <button className={cx('modal-close-btn')} onClick={handleCloseReviewDetailModal}>
+                &times;
+              </button>
+            </div>
+            <div className={cx('review-detail-content')}>
+              <div className={cx('review-detail-header')}>
+                <div className={cx('review-detail-name')}>{selectedReview.userName}</div>
+                <div className={cx('review-detail-date')}>{selectedReview.date}</div>
+              </div>
+              <div className={cx('review-detail-stars')}>
+                {renderStars(selectedReview.rating)}
+              </div>
+              <div className={cx('review-detail-comment')}>
+                {selectedReview.comment}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cooking Steps Modal */}
       <CookingStepsModal
@@ -473,7 +774,7 @@ function DishDetailUser() {
         dishData={dish}
         onComplete={handleCookingComplete}
       />
-       <MedalAchievementModal
+      <MedalAchievementModal
         visible={showMedalModal}
         onClose={() => {
           setShowMedalModal(false);
