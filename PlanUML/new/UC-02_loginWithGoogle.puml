@@ -1,0 +1,91 @@
+@startuml UC02_LoginWithGoogle
+
+actor User as "User"
+boundary "Login Page" as View #lightblue
+participant ":authRoute" as Route #lightblue
+control "authMiddleware" as Auth #orange
+control "authController" as Controller #lightblue
+participant ":authService" as Service #lightblue
+entity "userModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+participant ":GoogleOAuth" as Google #pink
+
+group Login with Google
+    User -> View: 1. Click "Login with Google"
+    activate View
+    activate User
+
+    View -> Google: 2. Redirect to Google OAuth consent screen
+    activate Google
+
+    opt User cancel access
+        Google --> View: 2.1 Return error (access denied)
+        View --> User: 2.2 Display "Access Denied"
+    end
+
+    Google --> View: 3. Return id_token (if user grants access)
+    deactivate Google
+
+    View -> Route: 4. POST /api/v1/auth/googleLogin { id_token }
+    activate Route
+
+    Route -> Auth: 5. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 6 Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 6.1 Return 401/403 Error
+        Route --> View: 6.2 Show error message
+        View --> User: 6.3 Display "Unauthorized or Forbidden"
+    end
+    Auth --> Route: 7. User authenticated & authorized
+    deactivate Auth
+
+    Route -> Controller: 8. loginGoogle(req, res)
+    activate Controller
+
+    Controller -> Service: 9. verifyGoogleToken(id_token)
+    activate Service
+
+    Service -> Google: 10. Verify token with Google API
+    activate Google
+    Google --> Service: 11. Return user info (email, name, avatar)
+    deactivate Google
+
+    Service -> Model: 12. findUserByEmail(email)
+    activate Model
+    Model -> MongoDB: 13. Query user by email
+    activate MongoDB
+    MongoDB --> Model: 14. Return user or null
+    deactivate MongoDB
+   
+    alt User exists
+         Model --> Service: 14.1. Return user object
+        deactivate Model
+    else New user
+        Service -> Model: 14.2 createUser({ email, name, avatar, provider: 'google' })
+        activate Model
+        Model -> MongoDB: 14.2.1 Insert new user
+        activate MongoDB
+        MongoDB --> Model: 14.2.2 Return new user
+        deactivate MongoDB
+        Model --> Service: 14.2.3 Return new user
+        deactivate Model
+    end
+
+    Service --> Controller: 15. Return token
+    deactivate Service
+
+    Controller --> Route: 16. Return success { token }
+    deactivate Controller
+
+    Route --> View: 17. Save token & redirect
+    deactivate Route
+
+    View --> User: 18. Redirect to dashboard
+    deactivate View
+    deactivate User
+    
+end
+
+@enduml
