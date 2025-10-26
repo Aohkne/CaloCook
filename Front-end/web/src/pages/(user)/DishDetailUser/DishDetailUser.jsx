@@ -408,11 +408,8 @@ function DishDetailUser() {
         console.error('Achievement error:', achievementError);
       }
 
-      // ✅ Alert thông thường (khi không level up)
+      // Alert thông thường (khi không level up)
       setTimeout(() => {
-        const message = `Added "${dish.name}" (${
-          dish.calorie || dish.calories || 0
-        } Kcal) to your eating history!\n\nView your profile?`;
         let message = `Added "${dish.name}" (${dish.calorie || dish.calories || 0} Kcal) to your eating history!`;
 
         if (pointsEarned > 0) {
