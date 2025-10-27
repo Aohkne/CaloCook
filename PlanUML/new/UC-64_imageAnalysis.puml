@@ -28,30 +28,33 @@ Group AI Assistant Chat (Image Analysis)
     APIHandler -> SDK: 7. new GoogleGenerativeAI(API_KEY)
     activate SDK
 
-    APIHandler -> SDK: 8. getGenerativeModel({ model: VITE_MODEL }) 'vision model'
-
-    SDK --> APIHandler: 9. Return model instance
+    SDK --> APIHandler: 8. Return genAI instance
     deactivate SDK
 
-    APIHandler -> APIHandler: 10. Prepare multi-modal content (PROMPT + text + image data)
+    APIHandler -> SDK: 9. genAI.getGenerativeModel({ model: VITE_MODEL })
+    activate SDK
+    SDK --> APIHandler: 10. Return model instance
+    deactivate SDK
+
+    APIHandler -> APIHandler: 11. Prepare multi-modal content (PROMPT + text + image data)
     activate APIHandler
     deactivate APIHandler
 
-    APIHandler -> GeminiServer: 11. model.generateContent(content)
+    APIHandler -> GeminiServer: 13. model.generateContent(content)
     activate GeminiServer
 
-    GeminiServer --> APIHandler: 12. Return message
+    GeminiServer --> APIHandler: 14. Return message
     deactivate GeminiServer
     
     opt API Error
-        APIHandler --> View: 12.1. Return error string ("Sorry, I've been a bit busy...")
-        View --> User: 12.2. Display error message
+        APIHandler --> View: 14.1. Return error string ("Sorry, I've been a bit busy...")
+        View --> User: 14.2. Display error message
     end
     
-    APIHandler --> View: 13. Return response
+    APIHandler --> View: 15. Return response
     deactivate APIHandler
     
-    View --> User: 14. Display full response
+    View --> User: 16. Display full response
     deactivate User
     deactivate View
 
