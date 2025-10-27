@@ -1,0 +1,74 @@
+@startuml Get Top Favorite Dishes Statistics
+
+actor Admin as "Admin"
+boundary "AdminDashboard" as View #lightblue
+participant ":dashboardRoute" as Route #lightblue
+control "authMiddleware" as Auth #orange
+control "favoriteController" as Controller #lightblue
+participant ":favoriteService" as Service #lightblue
+entity "favoriteModel" as FavoriteModel #lightgreen
+database "MongoDB" as MongoDB #yellow
+
+Group Get Top 10 Favorite Dishes
+    Admin -> View: 1. Request top favorite dishes
+    activate Admin
+    activate View
+
+    View -> Route: 2. GET /api/v1/dashboard/top-favorites\n(query: limit)
+    activate Route
+
+    Route -> Auth: 3. authenticateUser(req) &\nauthorizeRole(['admin'])
+    activate Auth
+
+    ref over Auth : 4. 3.0 Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 4.1. Return 401/403 Error
+        Route --> View: 4.2. Show error
+        View --> Admin: 4.3. Display error message
+    end
+
+    Auth --> Route: 5. User authenticated & authorized
+    deactivate Auth
+
+    Route -> Controller: 6. getTopFavorites(req, res)
+    activate Controller
+
+    Controller -> Service: 7. getTopFavorites(limit)
+    activate Service
+
+    Service -> FavoriteModel: 8. getTopFavorites(limit)
+    activate FavoriteModel
+
+    FavoriteModel -> MongoDB: 9. Query top favorite dishes 
+    activate MongoDB
+
+    MongoDB --> FavoriteModel: 10. Return topFavorites array
+    deactivate MongoDB
+
+    FavoriteModel --> Service: 11. Return topFavorites array
+    deactivate FavoriteModel
+
+    opt No favorite dishes found (array is empty)
+        Service --> Controller: 11.1. Throw 404 Error
+        Controller --> Route: 11.2. Return 404 Error
+        Route --> View: 11.3. Show error message
+        View --> Admin: 11.4. Display "No favorite dishes found!"
+    end
+
+    Service --> Controller: 12. Return topFavorites array
+    deactivate Service
+
+    Controller --> Route: 13. Return 200 OK (data: topFavorites)
+    deactivate Controller
+
+    Route --> View: 14. Return top dishes data
+    deactivate Route
+
+    View --> Admin: 15. Display top favorite dishes
+    deactivate Admin
+    deactivate View
+
+end
+
+@enduml

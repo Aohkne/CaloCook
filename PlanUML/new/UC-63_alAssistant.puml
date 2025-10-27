@@ -1,0 +1,53 @@
+@startuml Get AI Assistant Response
+
+actor User as "User"
+boundary "GeminiChat" as View #lightblue
+participant ":callGeminiAPI" as APIHandler #lightblue
+participant ":GoogleGenerativeAI" as SDK #lightgreen
+database "Gemini AI Server" as GeminiServer #yellow
+
+Group AI Assistant Chat (Text Only)
+    User -> View: 1. Enters question (text)
+    activate User
+    activate View
+
+    User -> View: 2. Clicks Send
+
+    View -> APIHandler: 3. callGeminiAPI(input)
+    activate APIHandler
+
+    APIHandler -> SDK: 4. new GoogleGenerativeAI(API_KEY)
+    activate SDK
+
+    SDK --> APIHandler: 5. Return genAI instance
+    deactivate SDK
+
+    APIHandler -> SDK: 6. genAI.getGenerativeModel({ model: VITE_MODEL })
+    activate SDK
+    SDK --> APIHandler: 7. Return model instance
+    deactivate SDK
+
+    APIHandler -> APIHandler: 8. Prepare content (VITE_PROMPT + user_message)
+    activate APIHandler
+    deactivate APIHandler
+
+    APIHandler -> GeminiServer: 9. model.generateContent(content)
+    activate GeminiServer
+
+    GeminiServer --> APIHandler: 10. Return message
+    deactivate GeminiServer
+    
+    opt API Error
+        APIHandler --> View: 10.1. Return error string ("Sorry, I've been a bit busy...")
+        View --> User: 10.2. Display error message
+    end
+    
+    APIHandler --> View: 11. Return response
+    deactivate APIHandler
+    
+    View --> User: 12. Display full response
+    deactivate User
+    deactivate View
+
+end
+@enduml
