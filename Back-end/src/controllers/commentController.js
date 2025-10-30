@@ -28,7 +28,7 @@ const createComment = async (req, res, next) => {
     const payload = { ...req.body, userId: req.user._id }
     const newComment = await commentService.createComment(payload)
     res.json({
-      code: 201,
+      code: StatusCodes.CREATED,
       message: 'Comment created successfully',
       data: newComment
     })
@@ -77,7 +77,7 @@ const updateCommentById = async (req, res, next) => {
     const payload = req.body
     const updatedComment = await commentService.updateCommentById(commentId, payload)
     res.json({
-      code: 200,
+      code: StatusCodes.OK,
       message: 'Comment updated successfully',
       data: updatedComment
     })
@@ -92,7 +92,7 @@ const deleteCommentById = async (req, res, next) => {
     const commentId = req.params.id
     const deletedComment = await commentService.deleteCommentById(commentId)
     res.json({
-      code: 200,
+      code: StatusCodes.OK,
       message: 'Comment deleted successfully',
       data: deletedComment
     })
