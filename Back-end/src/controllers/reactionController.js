@@ -16,7 +16,7 @@ const addReaction = async (req, res, next) => {
         const payload = { ...req.body, userId: req.user._id }
         const newReaction = await reactionService.addReaction(payload)
         res.json({
-            code: 201,
+            code: StatusCodes.CREATED,
             message: 'Reaction added successfully',
             data: newReaction
         })
@@ -43,7 +43,7 @@ const updateReaction = async (req, res, next) => {
         const payload = req.body
         const updatedReaction = await reactionService.updateReaction(reactionId, payload)
         res.json({
-            code: 200,
+            code: StatusCodes.OK,
             message: 'Reaction updated successfully',
             data: updatedReaction
         })
@@ -58,7 +58,7 @@ const deleteReaction = async (req, res, next) => {
         const reactionId = req.params.id
         const deletedReaction = await reactionService.deleteReaction(reactionId)
         res.json({
-            code: 200,
+            code: StatusCodes.OK,
             message: 'Reaction deleted successfully',
             data: deletedReaction
         })
