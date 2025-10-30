@@ -1,0 +1,72 @@
+@startuml addFavorite
+
+actor User as "Customer"
+boundary "Dish List Page" as View #lightblue
+participant ":favoriteRoute" as Route #lightblue
+control "authMiddleware" as Auth #orange
+control "favoriteValidation" as Validation #orange
+control "favoriteController" as Controller #lightblue
+participant ":favoriteService" as Service #lightblue
+entity "favoriteModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Create Favorite Dish
+User -> View: 1. Click "Favorite" icon
+activate View
+activate User
+
+View -> Route: 2. POST /api/v1/favorite
+activate Route
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 4. Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 4.1. Return 401/403 Error
+        Route --> View: 4.2. Show error
+        View --> User: 4.3. Display error message
+    end
+    Auth --> Route: 5. User authenticated & authorized
+    deactivate Auth
+Route -> Validation: 6. validateGetFavorites(req)
+activate Validation
+
+opt Validation Failed
+    Validation --> Route: 7. Return 400 Bad Request
+    Route --> View: 7.1. Show validation error
+    View --> User: 7.1.1. Display error message
+end
+
+    Validation -> Controller: 8. addToFavorites(req, res)
+    deactivate Validation
+    activate Controller
+
+    Controller -> Service: 9. addToFavorites(userId, dishId)
+    activate Service
+
+    Service -> Model: 10. addToFavorites(userId, dishId)
+    activate Model
+
+    Model -> MongoDB: 11. Insert favorite dish
+    activate MongoDB
+    MongoDB --> Model: 12. Return query result
+    deactivate MongoDB
+
+    Model --> Service: 13. Favorite added
+    deactivate Model
+
+    Service --> Controller: 14. Favorite added
+    deactivate Service
+
+    Controller --> Route: 15. Send response
+    deactivate Controller
+
+    Route --> View: 16. Favorite added successfully
+    deactivate Route
+
+    View --> User: 17. Display success message
+
+deactivate View
+deactivate User
+end
+@enduml

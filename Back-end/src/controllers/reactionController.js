@@ -15,7 +15,11 @@ const addReaction = async (req, res, next) => {
     try {
         const payload = { ...req.body, userId: req.user._id }
         const newReaction = await reactionService.addReaction(payload)
-        res.status(StatusCodes.CREATED).json(newReaction)
+        res.json({
+            code: 201,
+            message: 'Reaction added successfully',
+            data: newReaction
+        })
     } catch (error) {
         next(error)
     }
@@ -38,7 +42,11 @@ const updateReaction = async (req, res, next) => {
         const reactionId = req.params.id
         const payload = req.body
         const updatedReaction = await reactionService.updateReaction(reactionId, payload)
-        res.status(StatusCodes.OK).json(updatedReaction)
+        res.json({
+            code: 200,
+            message: 'Reaction updated successfully',
+            data: updatedReaction
+        })
     } catch (error) {
         next(error)
     }
@@ -49,7 +57,11 @@ const deleteReaction = async (req, res, next) => {
     try {
         const reactionId = req.params.id
         const deletedReaction = await reactionService.deleteReaction(reactionId)
-        res.status(StatusCodes.OK).json(deletedReaction)
+        res.json({
+            code: 200,
+            message: 'Reaction deleted successfully',
+            data: deletedReaction
+        })
     } catch (error) {
         next(error)
     }

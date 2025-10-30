@@ -1,6 +1,7 @@
 @startuml ERD
-@startchen
+@startchen 
 
+' ====== ENTITY ======
 entity user {
 }
 entity dish {
@@ -13,59 +14,99 @@ entity step {
 }
 entity ingredient {
 }
+entity comment {
+}
+entity reactionComment {
+}
+entity conversation {
+}
+entity message {
+}
+entity rating {
+}
 
+' ====== RELATIONSHIP ======
 relationship report {
 }
 relationship favorite {
 }
 relationship history {
 }
-
-' Mối quan hệ 1-1 (Một-Một)
 relationship has_achievement {
 }
 relationship has_emailService {
 }
-
-' Mối quan hệ 1-N (Một-Nhiều)
 relationship has_steps {
 }
 relationship has_ingredients {
 }
+relationship has_comment {
+}
+relationship has_reactionComment {
+}
+relationship has_conversation {
+}
+relationship has_message {
+}
+relationship has_rating {
+}
 
+' ====== KẾT NỐI ======
 
-' ---- NỐI CÁC MỐI QUAN HỆ ----
-
-' Nối Mối quan hệ N-N
-' 1 user có N report, 1 dish có N report
+' --- N-N ---
 user -N- report
 dish -N- report
 
-' 1 user có N favorite, 1 dish có N favorite
 user -N- favorite
 dish -N- favorite
 
-' 1 user có N history, 1 dish có N history
 user -N- history
 dish -N- history
 
-' Nối Mối quan hệ 1-1
-' 1 user có 1 achievement
+' --- 1-1 ---
 user -1- has_achievement
 has_achievement -1- achievement
 
-' 1 user có 1 emailService
 user -1- has_emailService
 has_emailService -1- emailService
 
-' Nối Mối quan hệ 1-N
-' 1 dish có N steps
+' --- 1-N ---
 dish -1- has_steps
 has_steps -N- step
 
-' 1 dish có N ingredients
 dish -1- has_ingredients
 has_ingredients -N- ingredient
 
-@endchen
+' --- COMMENT ---
+user -1- has_comment
+has_comment -N- comment
 
+dish -1- has_comment
+has_comment -N- comment
+
+' --- REACTION COMMENT ---
+comment -1- has_reactionComment
+has_reactionComment -N- reactionComment
+
+user -1- has_reactionComment
+has_reactionComment -N- reactionComment
+
+' --- CONVERSATION & MESSAGE ---
+user -1- has_conversation
+has_conversation -N- conversation
+
+conversation -1- has_message
+has_message -N- message
+
+user -1- has_message
+has_message -N- message
+
+' --- RATING ---
+user -1- has_rating
+has_rating -N- rating
+
+dish -1- has_rating
+has_rating -N- rating
+
+@endchen
+@enduml
