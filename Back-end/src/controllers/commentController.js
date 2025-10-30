@@ -27,7 +27,11 @@ const createComment = async (req, res, next) => {
   try {
     const payload = { ...req.body, userId: req.user._id }
     const newComment = await commentService.createComment(payload)
-    res.status(StatusCodes.CREATED).json(newComment)
+    res.json({
+      code: 201,
+      message: 'Comment created successfully',
+      data: newComment
+    })
   } catch (error) {
     next(error)
   }
@@ -72,7 +76,11 @@ const updateCommentById = async (req, res, next) => {
     const commentId = req.params.id
     const payload = req.body
     const updatedComment = await commentService.updateCommentById(commentId, payload)
-    res.status(StatusCodes.OK).json(updatedComment)
+    res.json({
+      code: 200,
+      message: 'Comment updated successfully',
+      data: updatedComment
+    })
   } catch (error) {
     next(error)
   }
@@ -83,7 +91,11 @@ const deleteCommentById = async (req, res, next) => {
   try {
     const commentId = req.params.id
     const deletedComment = await commentService.deleteCommentById(commentId)
-    res.status(StatusCodes.OK).json(deletedComment)
+    res.json({
+      code: 200,
+      message: 'Comment deleted successfully',
+      data: deletedComment
+    })
   } catch (error) {
     next(error)
   }

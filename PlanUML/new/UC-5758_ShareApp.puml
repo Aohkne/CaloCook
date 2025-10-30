@@ -1,0 +1,50 @@
+@startuml ShareProfile
+
+actor User as "Customer" #lightblue
+boundary "Profile Page" as View #lightblue
+control "ShareController" as Controller #lightblue
+participant ":ShareService" as Service #lightblue
+entity "PlatformAPI" as Platform #pink
+
+User -> View: 1. Navigate to Profile Page
+activate View
+activate User
+
+User -> View: 2. Tap "Share" icon
+View -> Controller: 3. Select platform to share
+activate Controller
+
+Controller -> Service: 4. Share(profileData, selectedPlatform)
+activate Service
+
+alt User cancels before confirming
+    User -> View: 2.1 Cancel sharing
+    View --> User: System returns to profile page
+else AF2: Selected platform not installed
+    Service -> Platform: Check if platform available
+    activate Platform
+    Platform --> Service: Not installed
+    deactivate Platform
+    Service --> Controller: 3.1 Return "Platform unavailable"
+    Controller --> View: Display “Platform unavailable.”
+    View --> User: Show error message
+    deactivate Controller
+    deactivate Service
+else Normal Flow
+    Service -> Platform: Request share(profileData)
+    activate Platform
+    Platform --> Service: Confirm success
+    deactivate Platform
+
+    Service --> Controller: Return success
+    deactivate Service
+
+    Controller --> View: Show "Shared successfully"
+    deactivate Controller
+
+    View --> User: 4.1 Display success
+    deactivate View
+    deactivate User 
+end
+
+@enduml

@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
 import { commentModel } from '@/models/commentModel'
+import { userModel } from '@/models/userModel'
 import { reactionCommentModel } from '@/models/reactionCommentModel'
 import { ObjectId } from 'mongodb'
 import cloudinary from '@/config/cloudinary'
@@ -8,8 +9,46 @@ import cloudinary from '@/config/cloudinary'
 // Get all comments with pagination
 const getAllComments = async () => {
   try {
-    const comments = await commentModel.getAllComments()
-    return comments
+    const result = await commentModel.getAllComments()
+
+    // Check if result is an object with data property or direct array
+    const comments = Array.isArray(result) ? result : result?.data || []
+
+    if (!comments || comments.length === 0) {
+      return []
+    }
+
+    // Get unique user IDs
+    const userIds = [...new Set(comments.map((comment) => comment.userId).filter((id) => id))]
+
+    if (userIds.length === 0) {
+      return comments
+    }
+
+    // Fetch users one by one since getDetails only accepts single ID
+    const users = await Promise.all(
+      userIds.map(async (userId) => {
+        try {
+          const user = await userModel.getDetails(userId)
+          if (user) {
+            // Remove sensitive data
+            delete user.password_hash
+          }
+          return user
+        } catch (error) {
+          console.error(`Error fetching user ${userId}:`, error)
+          return null
+        }
+      })
+    )
+
+    // Filter out null users
+    const validUsers = users.filter((user) => user !== null)
+
+    return comments.map((comment) => ({
+      ...comment,
+      user: validUsers.find((user) => user._id.toString() === comment.userId.toString()) || null
+    }))
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching comments')
   }
@@ -52,7 +91,10 @@ const createComment = async (commentPayload) => {
 const getCommentById = async (commentId) => {
   try {
     const comment = await commentModel.getCommentById(new ObjectId(commentId))
-    return comment
+    // bao gom luôn thông tin user, xoa password_hash
+    const user = await userModel.getDetails(comment.userId)
+    delete user.password_hash
+    return { ...comment, user }
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching comment')
   }
@@ -62,7 +104,15 @@ const getCommentById = async (commentId) => {
 const getCommentsByParentId = async (parentId) => {
   try {
     const comments = await commentModel.getCommentsByParentId(new ObjectId(parentId))
-    return comments
+    // bao gom luôn thông tin user, xoa password_hash
+    const commentsWithUser = await Promise.all(
+      comments.map(async (comment) => {
+        const user = await userModel.getDetails(comment.userId)
+        delete user.password_hash
+        return { ...comment, user }
+      })
+    )
+    return commentsWithUser
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching comments by parentId')
   }
@@ -71,8 +121,48 @@ const getCommentsByParentId = async (parentId) => {
 // Get comments by dishId
 const getCommentsByDishId = async (dishId) => {
   try {
-    const comments = await commentModel.getCommentsByDishId(new ObjectId(dishId))
-    return comments
+    const result = await commentModel.getCommentsByDishId(new ObjectId(dishId))
+
+    // Check if result has comments property (structured response) or is direct array
+    const comments = result?.comments || (Array.isArray(result) ? result : result?.data || [])
+
+    if (!comments || comments.length === 0) {
+      return result || []
+    }
+
+    // Helper function to add user info recursively
+    const addUserToComment = async (comment) => {
+      try {
+        const user = await userModel.getDetails(comment.userId)
+        if (user) {
+          delete user.password_hash
+        }
+
+        // Process children recursively if they exist
+        let childrenWithUser = comment.children || []
+        if (childrenWithUser.length > 0) {
+          childrenWithUser = await Promise.all(childrenWithUser.map(async (child) => await addUserToComment(child)))
+        }
+
+        return { ...comment, user, children: childrenWithUser }
+      } catch (error) {
+        console.error(`Error fetching user for comment ${comment._id}:`, error)
+        return { ...comment, user: null }
+      }
+    }
+
+    // bao gom luôn thông tin user, xoa password_hash (including children)
+    const commentsWithUser = await Promise.all(comments.map(async (comment) => await addUserToComment(comment)))
+
+    // Return with same structure as original result
+    if (result?.comments) {
+      return {
+        ...result,
+        comments: commentsWithUser
+      }
+    }
+
+    return commentsWithUser
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching comments by dishId')
   }

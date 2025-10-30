@@ -4,7 +4,6 @@ actor User as "Customer"
 boundary "Dish Detail Page" as View #lightblue
 participant ":historyRoute" as Route #lightblue
 control "authMiddleware" as Auth #Orange
-control "historyValidation" as Validation #orange
 control "historyController" as Controller #lightblue
 participant ":historyService" as Service #lightblue
 entity "historyModel" as Model #lightblue
@@ -30,48 +29,35 @@ Route -> Auth: 3. authenticateUser(req) & authorizeRole()
     Auth --> Route: 5. User authenticated & authorized
     deactivate Auth
 
-Route -> Validation: 6. validateAddHistory(req)
-activate Validation
+Route -> Controller: 6. addHistory(req, res)
+activate Controller
 
-alt Validation Failed
-    Validation --> Route: 6.1. Return 400
-    Route --> View: 6.1.2. Show error
-    View --> User: 6.1.3. Display error message
+Controller -> Service: 7. addHistory(data)
+activate Service
 
-else Validation Passed
+Service -> Model: 8. insertHistory(data)
+activate Model
 
-    Validation -> Controller: 6.2. addHistory(req, res)
-    deactivate Validation
-    activate Controller
+Model -> MongoDB: 9. Insert document
+activate MongoDB
+MongoDB --> Model: 10. Return result
+deactivate MongoDB
 
+Model --> Service: 11. Return insert result
+deactivate Model
 
-    Controller -> Service: 6.2.1. addHistory(data)
-    activate Service
+Service --> Controller: 12. Return success
+deactivate Service
 
-    Service -> Model: 6.2.2. insertHistory(data)
-    activate Model
+Controller --> Route: 13. Send 201 Created
+deactivate Controller
 
-    Model -> MongoDB: 6.2.3. Insert document
-    activate MongoDB
-    MongoDB --> Model: 6.2.4. Return result
-    deactivate MongoDB
+Route --> View: 14. Notify success
+deactivate Route
 
-    Model --> Service: 6.2.5. Return insert result
-    deactivate Model
-
-    Service --> Controller: 6.2.6. Return success
-    deactivate Service
-
-    Controller --> Route: 6.2.7. Send 201 Created
-    deactivate Controller
-
-    Route --> View: 6.2.8. Notify success
-    deactivate Route
-
-    View --> User: 6.2.9. Redirects the user to the cooking page
-    deactivate View
-    deactivate User
-end
+View --> User: 15. Redirects the user to the cooking page
+deactivate View
+deactivate User
 
 end
 @enduml

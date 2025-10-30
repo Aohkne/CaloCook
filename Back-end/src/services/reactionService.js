@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
 import { reactionCommentModel } from '@/models/reactionCommentModel'
+import { userModel } from '@/models/userModel'
 import { ObjectId } from 'mongodb'
 import { GET_DB } from '@/config/mongodb'
 
@@ -43,8 +44,40 @@ const addReaction = async (payload) => {
 // Get reaction by commentId
 const getReactionsByCommentId = async (commentId) => {
   try {
-    const reactions = await reactionCommentModel.getReactionsByCommentId(commentId)
-    return reactions
+    const result = await reactionCommentModel.getReactionsByCommentId(commentId)
+
+    // Check if result has reactions property (structured response) or is direct array
+    const reactions = result?.reactions || (Array.isArray(result) ? result : result?.data || [])
+
+    if (!reactions || reactions.length === 0) {
+      return result || { reactions: [], totalReaction: 0, reactionCounts: {} }
+    }
+
+    // bao gom thong tin user, xoa password_hash
+    const reactionsWithUser = await Promise.all(
+      reactions.map(async (reaction) => {
+        try {
+          const user = await userModel.getDetails(reaction.userId)
+          if (user) {
+            delete user.password_hash
+          }
+          return { ...reaction, user }
+        } catch (error) {
+          console.error(`Error fetching user for reaction ${reaction._id}:`, error)
+          return { ...reaction, user: null }
+        }
+      })
+    )
+
+    // Return with same structure as original result
+    if (result?.reactions) {
+      return {
+        ...result,
+        reactions: reactionsWithUser
+      }
+    }
+
+    return reactionsWithUser
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error fetching reactions by commentId')
   }
