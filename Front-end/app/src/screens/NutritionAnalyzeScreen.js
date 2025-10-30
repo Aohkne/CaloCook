@@ -151,7 +151,7 @@ export default function NutritionAnalyzeScreen({ navigation }) {
 
       // Call API
       await getStatus();
-      // await dispatch(analyzeImage(formData)).unwrap();
+      await dispatch(analyzeImage(formData)).unwrap();
 
       // Clear selected image
       setSelectedImage(null);
