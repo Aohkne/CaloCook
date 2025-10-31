@@ -175,6 +175,33 @@ Sau khi build xong, bạn sẽ nhận được link tải file APK trong termina
 
 ---
 
+## 📦 Build AAB for Upload Google Play (Expo EAS)
+
+```bash
+# 👉 Bước 1: Đảm bảo backend đang ở môi trường production
+# Trong file .env của Back-end, thêm dòng sau:
+NODE_ENV=production
+
+# 👉 Bước 2: Cài đặt eas-cli vào dự án
+npm install eas-cli --save-dev
+
+# 👉 Bước 3: Đăng nhập vào tài khoản Expo (nếu chưa đăng nhập)
+npx eas login
+# Sẽ yêu cầu:
+# username/email:
+# password:
+
+# 👉 Bước 4: Cấu hình eas build
+npx eas build:configure
+
+# 👉 Bước 5: Tiến hành build file ABB
+npx eas build
+
+# 👉 Bước 6: Chọn Platform Android
+```
+
+---
+
 ## 🔗 Application URLs
 
 - **Backend API**: http://localhost:8080

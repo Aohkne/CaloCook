@@ -1,5 +1,4 @@
 import classNames from 'classnames/bind';
-
 import { Icon } from '@iconify/react';
 
 const cx = classNames.bind(styles);
@@ -9,6 +8,13 @@ import Footer from '@/components/sections/Footer/Footer';
 import Header from '@/components/sections/Header/Header';
 
 export default function Download() {
+  const handleDownloadAPK = () => {
+    window.open(
+      'https://expo.dev/accounts/aohk/projects/calocook/builds/291709fd-d6e7-416d-9e16-2d2133b737d5',
+      '_blank'
+    );
+  };
+
   return (
     <div className={cx('wrapper')}>
       <Header />
@@ -19,7 +25,7 @@ export default function Download() {
           <button className={cx('download-button-container')}>
             <img src='/images/chplay-download-button.png' className={cx('chplay-button')} />
           </button>
-          <button className={cx('download-button-container')}>
+          <button className={cx('download-button-container')} onClick={handleDownloadAPK}>
             <span className={cx('apk-button')}>
               <Icon icon='uiw:android' width='30' height='30' />
               Download APK.
@@ -35,7 +41,7 @@ export default function Download() {
             <div>
               <h3 className={cx('tertiary-text')}>Tinder Like Scrolling</h3>
               <p className={cx('short-description-text')}>
-                A swipe-based app for matching, inspired by Tinder’s simple left/right interaction model
+                A swipe-based app for matching, inspired by Tinder's simple left/right interaction model
               </p>
             </div>
             <div className={cx('icon')}>
