@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@contexts/ThemeProvider';
-import { Heart, Clock, Flame, ChefHat, ChevronLeft, Star, Share2 } from 'lucide-react-native';
+import { Heart, Clock, Flame, ChefHat, ChevronLeft, Star, Share2, MessageCircle } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { getDishDetailData, clearDishDetail, updateDishLikeStatus } from '@redux/slices/dishSlice';
 import { likeDish, dislikeDish, updateFavoriteItem } from '@redux/slices/favoriteSlice';
@@ -29,6 +29,7 @@ import {
   createRating,
   getRatingsByDishId,
   getAverageRating,
+  updateRating,
   separateUserRating,
   clearError as clearRatingError,
   resetRatings
@@ -73,6 +74,10 @@ export default function Detail({ route, navigation }) {
   const [isReviewDetailModalVisible, setIsReviewDetailModalVisible] = useState(false);
   const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
   const [ratingDescription, setRatingDescription] = useState('');
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingRatingId, setEditingRatingId] = useState(null);
+
+
 
   //  Separate user's rating from others
   const otherReviews = ratings.filter((r) => {
@@ -172,17 +177,28 @@ export default function Detail({ route, navigation }) {
     setIsRatingModalVisible(true);
   };
 
-  const handleReviewPress = (review) => {
+  const handleReviewPress = (review, isEdit = false) => {
     setSelectedReview(review);
-    setIsReviewDetailModalVisible(true);
+    if (isEdit) {
+      // Edit mode
+      setIsEditMode(true);
+      setEditingRatingId(review.id);
+      setUserRating(review.rating);
+      setRatingDescription(review.comment);
+      setIsRatingModalVisible(true);
+    } else {
+      // View mode
+      setIsReviewDetailModalVisible(true);
+    }
   };
 
   const handleCloseRatingModal = () => {
     setIsRatingModalVisible(false);
     setRatingDescription('');
     setUserRating(0);
+    setIsEditMode(false);
+    setEditingRatingId(null);
   };
-
   const handleSubmitRating = async () => {
     const trimmedDescription = ratingDescription.trim();
 
@@ -197,16 +213,28 @@ export default function Detail({ route, navigation }) {
     }
 
     try {
-      await dispatch(
-        createRating({
-          userId: user._id,
-          dishId: dishId,
-          star: userRating,
-          description: trimmedDescription
-        })
-      ).unwrap();
+      if (isEditMode && editingRatingId) {
+        // Update existing rating
+        await dispatch(
+          updateRating({
+            ratingId: editingRatingId,
+            star: userRating,
+            description: trimmedDescription
+          })
+        ).unwrap();
+      } else {
+        // Create new rating
+        await dispatch(
+          createRating({
+            userId: user._id,
+            dishId: dishId,
+            star: userRating,
+            description: trimmedDescription
+          })
+        ).unwrap();
+      }
 
-      // ✅ Đợi cả 2 API hoàn thành trước khi đóng modal
+      // Refresh ratings data
       await Promise.all([
         dispatch(
           getRatingsByDishId({
@@ -218,11 +246,10 @@ export default function Detail({ route, navigation }) {
         dispatch(getAverageRating(dishId)).unwrap()
       ]);
 
-      // Reset và đóng modal sau khi refresh xong
       handleCloseRatingModal();
       setUserRating(0);
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to submit rating');
+      Alert.alert('Error', error.message || `Failed to ${isEditMode ? 'update' : 'submit'} rating`);
     }
   };
 
@@ -386,26 +413,26 @@ export default function Detail({ route, navigation }) {
       const ingredientsText =
         ings.length > 0
           ? ings
-              .map((ing) => {
-                const qty = ing.quantity ? `${ing.quantity}` : '';
-                const unit = ing.unit ? ` ${ing.unit}` : '';
-                const name = ing.name || ing.ingredientName || ing.title || '';
-                return `- ${[qty, unit, name].join(' ').trim()}`;
-              })
-              .join('\n')
+            .map((ing) => {
+              const qty = ing.quantity ? `${ing.quantity}` : '';
+              const unit = ing.unit ? ` ${ing.unit}` : '';
+              const name = ing.name || ing.ingredientName || ing.title || '';
+              return `- ${[qty, unit, name].join(' ').trim()}`;
+            })
+            .join('\n')
           : 'No ingredients listed';
 
       const stepsText =
         stepsArr.length > 0
           ? stepsArr
-              .map((s, idx) => {
-                const num = s.stepNumber || idx + 1;
-                const title = s.title ? `${s.title} - ` : '';
-                const desc = s.description || s.text || '';
-                const dur = s.duration ? ` (${s.duration} min)` : '';
-                return `${num}. ${title}${desc}${dur}`.trim();
-              })
-              .join('\n')
+            .map((s, idx) => {
+              const num = s.stepNumber || idx + 1;
+              const title = s.title ? `${s.title} - ` : '';
+              const desc = s.description || s.text || '';
+              const dur = s.duration ? ` (${s.duration} min)` : '';
+              return `${num}. ${title}${desc}${dur}`.trim();
+            })
+            .join('\n')
           : 'No steps listed';
 
       const message = [
@@ -502,8 +529,8 @@ export default function Detail({ route, navigation }) {
           dishData.difficulty?.toLowerCase() === 'easy'
             ? '😊'
             : dishData.difficulty?.toLowerCase() === 'medium'
-            ? '🔥'
-            : '⚡';
+              ? '🔥'
+              : '⚡';
         pointsMessage = `\n\n${emoji} +${pointsEarned} Points Earned!\n(${difficultyLevel} Difficulty)`;
       }
 
@@ -701,16 +728,35 @@ export default function Detail({ route, navigation }) {
                     <Text style={styles.reviewName}>{userOwnRating.fullName || 'You'}</Text>
                     <View style={styles.reviewStars}>{renderStars(userOwnRating.star)}</View>
                   </View>
-                  <Text style={styles.reviewDate}>{formatDate(userOwnRating.createdAt)}</Text>
+                  <View style={styles.reviewDateContainer}>
+                    <Text style={styles.reviewDate}>{formatDate(userOwnRating.createdAt)}</Text>
+                    <TouchableOpacity
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleReviewPress(
+                          {
+                            id: userOwnRating._id,
+                            userName: userOwnRating.fullName || 'You',
+                            rating: userOwnRating.star,
+                            comment: userOwnRating.description,
+                            date: formatDate(userOwnRating.createdAt)
+                          },
+                          true
+                        );
+                      }}
+                      style={styles.editButton}
+                    >
+                      <Text style={styles.editButtonText}>Edit</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
                 <Text style={styles.reviewComment} numberOfLines={1}>
-                  {userOwnRating.description.split(' ').length > 30
+                  {userOwnRating.description && userOwnRating.description.split(' ').length > 30
                     ? userOwnRating.description.split(' ').slice(0, 30).join(' ') + '...'
-                    : userOwnRating.description}
+                    : userOwnRating.description || 'No comment'}
                 </Text>
               </TouchableOpacity>
             )}
-
             {/* Other reviews - limit to 4 */}
             {otherReviews.slice(0, 4).map((review) => (
               <TouchableOpacity
@@ -734,9 +780,9 @@ export default function Detail({ route, navigation }) {
                   <Text style={styles.reviewDate}>{formatDate(review.createdAt)}</Text>
                 </View>
                 <Text style={styles.reviewComment} numberOfLines={1}>
-                  {review.description.split(' ').length > 30
+                  {review.description && review.description.split(' ').length > 30
                     ? review.description.split(' ').slice(0, 30).join(' ') + '...'
-                    : review.description}
+                    : review.description || 'No comment'}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -759,6 +805,13 @@ export default function Detail({ route, navigation }) {
       </ScrollView>
       {/* Let's Cook Button */}
       <View style={styles.bottomContainer}>
+        <TouchableOpacity
+          style={styles.commentButton}
+          onPress={() => navigation.navigate('Comment', { dishId, dishName: dishData.name })}
+        >
+          <Text style={styles.commentButtonText}>Comment</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.cookButton} onPress={handleLetsCook}>
           <Text style={styles.cookButtonText}>Let's Cook</Text>
         </TouchableOpacity>
@@ -790,13 +843,18 @@ export default function Detail({ route, navigation }) {
         <View style={styles.ratingModalOverlay}>
           <View style={styles.ratingModalContent}>
             <View style={styles.ratingModalHeader}>
-              <Text style={styles.ratingModalTitle}>RATE THIS DISH</Text>
+              <Text style={styles.ratingModalTitle}>
+                {isEditMode ? 'EDIT YOUR RATING' : 'RATE THIS DISH'}
+              </Text>
               <TouchableOpacity onPress={handleCloseRatingModal}>
                 <Text style={styles.ratingModalCloseButton}>×</Text>
               </TouchableOpacity>
             </View>
 
             <View style={styles.ratingModalBody}>
+              <View style={styles.modalStarsContainer}>
+                {renderStars(userRating, true)}
+              </View>
               <Text style={styles.ratingModalLabel}>Tell us about your experience with this dish</Text>
 
               <TextInput
@@ -809,7 +867,6 @@ export default function Detail({ route, navigation }) {
                 onChangeText={setRatingDescription}
                 textAlignVertical='top'
               />
-
               <TouchableOpacity
                 style={styles.submitRatingButton}
                 onPress={handleSubmitRating}
@@ -818,7 +875,9 @@ export default function Detail({ route, navigation }) {
                 {isLoadingRating ? (
                   <ActivityIndicator color='#fff' />
                 ) : (
-                  <Text style={styles.submitRatingButtonText}>Submit Rating</Text>
+                  <Text style={styles.submitRatingButtonText}>
+                    {isEditMode ? 'Update Rating' : 'Submit Rating'}
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -1081,21 +1140,41 @@ const createStyles = (colors) =>
       backgroundColor: colors.background,
       paddingHorizontal: 20,
       paddingVertical: 20,
-      paddingBottom: 34
+      paddingBottom: 34,
+      flexDirection: 'row',  // ✅ Thêm dòng này
+      gap: 12,              // ✅ Thêm dòng này
+    },
+    commentButton: {
+      flex: 1,              // ✅ Thêm style mới
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.secondary + '20' || '#00B89420',
+      borderRadius: 12,
+      paddingVertical: 16,
+      gap: 8,
+      borderWidth: 1,
+      borderColor: colors.secondary || '#00B894',
+    },
+    commentButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.secondary || '#00B894',
     },
     cookButton: {
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.secondary || '#00B894',
       borderRadius: 12,
       paddingVertical: 16,
-      gap: 8
+      gap: 8,
     },
     cookButtonText: {
       fontSize: 16,
       fontWeight: '600',
-      color: '#fff'
+      color: '#fff',
     },
     reportButton: {
       flexDirection: 'row',
@@ -1446,7 +1525,7 @@ const createStyles = (colors) =>
       marginBottom: 12
     },
     submitRatingButton: {
-      backgroundColor: colors.primary,
+      backgroundColor: colors.secondary,
       padding: 14,
       borderRadius: 8,
       alignItems: 'center',
@@ -1522,5 +1601,35 @@ const createStyles = (colors) =>
       color: colors.description,
       textAlign: 'center',
       fontStyle: 'italic'
+    },
+    reviewDateContainer: {
+      alignItems: 'flex-end',
+      gap: 4
+    },
+    editButton: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      backgroundColor: colors.secondary + '20' || '#00B89420',
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.secondary || '#00B894'
+    },
+    editButtonText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.secondary || '#00B894'
+    },
+    ownReviewCard: {
+      borderColor: colors.secondary || '#00B894',
+      borderWidth: 2
+    },
+    modalStarsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 12,
+      paddingVertical: 16,
+      marginBottom: 16,
+      backgroundColor: colors.backgroundSubside || '#F5F5F5',
+      borderRadius: 12
     }
   });
