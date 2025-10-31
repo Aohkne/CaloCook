@@ -34,7 +34,7 @@ import ChatAI from '@/pages/(user)/ChatAI/ChatAI';
 import ProfileUser from '@/pages/(user)/ProfileUser/ProfileUser';
 import ChangePassword from '@/pages/(user)/ChangePassword/ChangePassword';
 import DishDetailUser from '@/pages/(user)/DishDetailUser/DishDetailUser';
-import Leaderboard from '@/pages/(user)/Leaderboard/Leaderboard';
+import Leaderboard from '@/pages/(user)/LeaderBoard/LeaderBoard';
 import LevelManagement from '@/pages/(admin)/LevelManagement.jsx/LevelManagement';
 import History from '@/pages/(user)/History/History';
 
@@ -264,13 +264,13 @@ function AppRoutes() {
           }
         />
         <Route
-  path={ROUTES.LEVEL_MANAGEMENT}
-  element={
-    <ProtectedRoute requiredRole={ROLE.ADMIN}>
-      <LevelManagement />
-    </ProtectedRoute>
-  }
-/>
+          path={ROUTES.LEVEL_MANAGEMENT}
+          element={
+            <ProtectedRoute requiredRole={ROLE.ADMIN}>
+              <LevelManagement />
+            </ProtectedRoute>
+          }
+        />
         {/* * */}
         <Route
           path='*'

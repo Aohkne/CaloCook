@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import classNames from 'classnames/bind';
-import styles from './Leaderboard.module.scss';
+import styles from './LeaderBoard.module.scss';
 import { getLeaderboard } from '@/api/achievement';
 import Navbar from '@/components/ui/Navbar/Navbar';
 import ChatBox from '@/components/ui/ChatBox/ChatBox';
@@ -25,8 +25,7 @@ const getLevelBadge = (level) => {
   return badges[level] || badges.none;
 };
 
-
-function Leaderboard() {
+function LeaderBoard() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -101,15 +100,15 @@ function Leaderboard() {
                   </div>
 
                   <div className={cx('stats')}>
-                    <div className={cx('stat')} title="Easy dishes">
+                    <div className={cx('stat')} title='Easy dishes'>
                       <Icon icon='heroicons:face-smile' width='20' height='20' />
                       <span className={cx('stat-number')}>{user.easyDishCount}</span>
                     </div>
-                    <div className={cx('stat')} title="Medium dishes">
+                    <div className={cx('stat')} title='Medium dishes'>
                       <Icon icon='heroicons:fire' width='20' height='20' />
                       <span className={cx('stat-number')}>{user.mediumDishCount}</span>
                     </div>
-                    <div className={cx('stat')} title="Hard dishes">
+                    <div className={cx('stat')} title='Hard dishes'>
                       <Icon icon='heroicons:bolt' width='20' height='20' />
                       <span className={cx('stat-number')}>{user.hardDishCount}</span>
                     </div>
@@ -125,7 +124,6 @@ function Leaderboard() {
                     ) : (
                       <Icon icon={levelBadge.icon} width='40' height='40' />
                     )}
-                    
                   </div>
                   <div className={cx('points')}>
                     <Icon icon='heroicons:star' width='24' height='24' />
@@ -140,11 +138,7 @@ function Leaderboard() {
 
         {!loading && pagination && (
           <div className={cx('pagination')}>
-            <button
-              className={cx('page-btn')}
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
+            <button className={cx('page-btn')} onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
               <Icon icon='ph:caret-left' width='20' height='20' />
               Previous
             </button>
@@ -155,7 +149,7 @@ function Leaderboard() {
 
             <button
               className={cx('page-btn')}
-              onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+              onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
               disabled={page === pagination.totalPages}
             >
               Next
@@ -173,4 +167,4 @@ function Leaderboard() {
   );
 }
 
-export default Leaderboard;
+export default LeaderBoard;
