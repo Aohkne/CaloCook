@@ -47,6 +47,45 @@ const getAll = async (paginationParams) => {
   }
 }
 
+const getAllWithFilters = async (filter = {}, paginationParams) => {
+  try {
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+
+    // Build query filter
+    const queryFilter = {}
+
+    if (filter.name) {
+      queryFilter.name = { $regex: filter.name, $options: 'i' }
+    }
+
+    if (filter.cookingTime) {
+      queryFilter.cookingTime = filter.cookingTime
+    }
+
+    if (filter.calorie) {
+      queryFilter.calorie = filter.calorie
+    }
+
+    if (filter.difficulty) {
+      queryFilter.difficulty = filter.difficulty
+    }
+
+    if (filter.isActive !== undefined) {
+      queryFilter.isActive = filter.isActive
+    }
+
+    const [data, totalCount] = await Promise.all([
+      GET_DB().collection(_COLLECTION_NAME).find(queryFilter).sort(sortObject).skip(skip).limit(limit).toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments(queryFilter)
+    ])
+
+    return { data, totalCount }
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 const getAllExistDish = async () => {
   try {
     return await GET_DB().collection(_COLLECTION_NAME).find({ isActive: true }).toArray()
@@ -188,10 +227,45 @@ const updateIsActive = async (dishId, isActive) => {
   }
 }
 
-// lay so luong dish
 const countDish = async () => {
   try {
     return await GET_DB().collection(_COLLECTION_NAME).countDocuments()
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const getAllForExport = async (filter = {}, maxLimit = 10000) => {
+  try {
+    const queryFilter = {}
+
+    if (filter.name) {
+      queryFilter.name = { $regex: filter.name, $options: 'i' }
+    }
+
+    if (filter.cookingTime) {
+      queryFilter.cookingTime = filter.cookingTime
+    }
+
+    if (filter.calorie) {
+      queryFilter.calorie = filter.calorie
+    }
+
+    if (filter.difficulty) {
+      queryFilter.difficulty = filter.difficulty
+    }
+
+    if (filter.isActive !== undefined) {
+      queryFilter.isActive = filter.isActive
+    }
+
+    const dishes = await GET_DB()
+      .collection(_COLLECTION_NAME)
+      .find(queryFilter, { projection: { imageUrl: 0 } })
+      .limit(maxLimit)
+      .toArray()
+
+    return dishes
   } catch (error) {
     throw new Error(error)
   }
@@ -201,6 +275,7 @@ export const dishModel = {
   _COLLECTION_NAME,
   _COLLECTION_SCHEMA,
   getAll,
+  getAllWithFilters,
   getAllExistDish,
   searchByName,
   searchByCookingTime,
@@ -211,5 +286,6 @@ export const dishModel = {
   createNew,
   updateDish,
   updateIsActive,
-  countDish
+  countDish,
+  getAllForExport
 }

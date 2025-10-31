@@ -1,0 +1,75 @@
+@startuml Dish Recommendation By Ingredient
+
+actor User as "User"
+boundary "FilterScreen" as View #lightblue
+participant ":ingredientRoute" as Route #lightblue
+control "authMiddleware" as Auth #orange
+control "ingredientController" as Controller #lightblue
+participant ":ingredientService" as Service #lightblue
+entity "ingredientModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+Group Dish Recommendation By Ingredient
+
+
+User -> View: 1. User Open Filter Modal
+activate User
+activate View
+
+View -> Route: 2. GET /api/v1/ingredient
+activate Route
+
+Route -> Auth: 3. authenticateUser(req) &\nauthorizeRole(['user', 'admin'])
+activate Auth
+
+ref over Auth : 4. Verify Token & Check Role
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 4.1. Return 401/403 Error
+    Route --> View: 4.2. Show error
+    View --> User: 4.3. Display error message
+end
+
+Auth --> Route: 5. User authenticated & authorized
+deactivate Auth
+
+Route -> Controller: 6. ingredientController.getAll()
+activate Controller
+
+Controller -> Service: 7. getAll(sortBy, order)
+activate Service
+
+Service -> Model: 8. getAll()
+activate Model
+
+Model -> MongoDB: 9. find() all ingredients
+activate MongoDB
+MongoDB --> Model: 10. Return ingredients array
+deactivate MongoDB
+
+Model --> Service: 11. Return ingredients
+deactivate Model
+
+Service --> Controller: 12. Return ingredients
+deactivate Service
+
+opt No ingredients found
+    Controller --> Route: 12.1. Show error message
+    Route --> View: 12.2. Show error message
+    View --> User: 12.3. Display "No ingredients available"
+end
+
+Controller --> Route: 13. Return 200 OK + data
+deactivate Controller
+
+Route --> View: 14. Ingredients data
+deactivate Route
+
+View --> User: 15. Display 5 random ingredient tags
+deactivate View
+
+
+
+end
+
+@enduml

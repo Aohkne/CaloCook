@@ -3,5 +3,19 @@ export const imageMap = {
   '@assets/img/beefsteak-with-egg.png': require('@assets/img/beefsteak-with-egg.png'),
   '@assets/img/banh-mi.png': require('@assets/img/banh-mi.png'),
   '@assets/img/lemon-butter-salmon.png': require('@assets/img/lemon-butter-salmon.png'),
-  '@assets/img/katsudon.png': require('@assets/img/katsudon.png')
+  '@assets/img/katsudon.png': require('@assets/img/katsudon.png'),
+  '@assets/img/grilled-pork-chop-with-rice.png': require('@assets/img/grilled-pork-chop-with-rice.png'),
+  '@assets/img/banh-xeo.png': require('@assets/img/banh-xeo.png'),
+  '@assets/img/thit-kho-tau.png': require('@assets/img/thit-kho-tau.png'),
+  '@assets/img/salmon-sushi-rolls.png': require('@assets/img/salmon-sushi-rolls.png'),
+  '@assets/img/bibimbap.png': require('@assets/img/bibimbap.png'),
+  '@assets/img/pad-thai.png': require('@assets/img/pad-thai.png'),
+  '@assets/img/spaghetti-carbonara.png': require('@assets/img/spaghetti-carbonara.png'),
+  '@assets/img/chicken-tikka-masala.png': require('@assets/img/chicken-tikka-masala.png'),
+  '@assets/img/cheeseburger.png': require('@assets/img/cheeseburger.png'),
+  '@assets/img/dimsum.png': require('@assets/img/dimsum.png'),
+  '@assets/img/salmon-poke-bowl.png': require('@assets/img/salmon-poke-bowl.png'),
+  '@assets/img/tofu-veggie-stir-fry.png': require('@assets/img/tofu-veggie-stir-fry.png'),
+  '@assets/img/falafel-pita.png': require('@assets/img/falafel-pita.png'),
+  '@assets/img/seafood-paella.png': require('@assets/img/seafood-paella.png')
 };

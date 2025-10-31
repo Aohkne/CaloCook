@@ -1,0 +1,50 @@
+@startuml Authentication_SubSequence_Clean
+
+participant ":authMiddleware" as Middleware #lightblue
+entity "authController" as Controller #lightblue
+entity "userModel" as Model #lightblue
+database "userDB" as DB #yellow
+
+activate Middleware
+Middleware -> Middleware: 1. Intercept Request (contains Token)
+activate Middleware
+deactivate Middleware
+
+alt Invalid Token
+    Middleware --> Middleware: 1.1.Return **401 Unauthorized**
+    activate Middleware
+    deactivate Middleware
+
+else Valid Token
+    Middleware -> Model: 1.2. getUserById(userId)
+    activate Model
+    Model -> DB: 1.2.1. Query user by ID
+    activate DB
+    DB --> Model: 1.2.2. Return User Document
+    deactivate DB
+    Model --> Middleware: 1.2.3. Return User Info (includes Role)
+    deactivate Model
+
+    alt Role = Admin
+        Middleware -> Controller: 1.2.3.1. Forward Request (Admin Access)
+        activate Controller
+        Controller --> Middleware: 1.2.3.2. Return Response
+        deactivate Controller
+
+    else Role = Customer
+        Middleware -> Controller: 1.2.3.a. Forward Request (Customer Access)
+        activate Controller
+        Controller --> Middleware: 1.2.3.b. Return Response
+        deactivate Controller
+
+    else Unauthorized Role
+        Middleware --> Middleware: 1.2.4.x Return **403 Forbidden**
+        activate Middleware
+        deactivate Middleware
+
+    end
+        deactivate Middleware
+end
+
+
+@enduml

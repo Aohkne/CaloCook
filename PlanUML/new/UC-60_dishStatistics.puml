@@ -1,0 +1,65 @@
+@startuml Get Dish Statistics (Dish Count)
+
+actor Admin as "Admin"
+boundary "AdminDashboard" as View #lightblue
+participant ":dashboardRoute" as Route #lightblue
+control "authMiddleware" as Auth #orange
+control "dishController" as Controller #lightblue
+participant ":dishService" as Service #lightblue
+entity "dishModel" as DishModel #lightblue
+database "MongoDB" as MongoDB #yellow
+
+Group Get Total Dish Count
+    Admin -> View: 1. Request dish count
+    activate Admin
+    activate View
+
+    View -> Route: 2. GET /api/v1/dashboard/dish-count
+    activate Route
+
+    Route -> Auth: 3. authenticateUser(req)
+    activate Auth
+    ref over Auth : 4. 3.0 Verify Token and Check Role
+    
+    opt Authentication Failed
+        Auth --> Route: 4.1. Return 401 Error
+        Route --> View: 4.2. Show error
+        View --> Admin: 4.3. Display error message
+    end
+    
+    Auth --> Route: 5. User authenticated & authorized
+    deactivate Auth
+
+    Route -> Controller: 6. getDishCount(req, res)
+    activate Controller
+
+    Controller -> Service: 7. getDishCount()
+    activate Service
+
+    Service -> DishModel: 8. countDish()
+    activate DishModel
+
+    DishModel -> MongoDB: 9. Query total dish
+    activate MongoDB
+    MongoDB --> DishModel: 10. Return totalCount
+    deactivate MongoDB
+
+    DishModel --> Service: 11. Return totalCount
+    deactivate DishModel
+
+    Service --> Controller: 12. Return totalCount
+    deactivate Service
+
+    Controller --> Route: 13. Return (data: totalCount)
+    deactivate Controller
+
+    Route --> View: 14. Return dish count data
+    deactivate Route
+
+    View --> Admin: 15. Display total dish count
+    deactivate Admin
+    deactivate View
+
+end
+
+@enduml

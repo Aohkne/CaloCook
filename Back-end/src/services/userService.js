@@ -1,11 +1,23 @@
 import { userModel } from '@/models/userModel'
+import { emailServiceModel } from '@/models/emailServiceModel'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '@/utils/ApiError'
 import { ObjectId } from 'mongodb'
 import cloudinary from '@/config/cloudinary.js'
+import sendEmail from '@/utils/sendEmail.js'
+import crypto from 'crypto'
+import { redis } from '@/config/redis.js'
+
 const getAll = async (paginationParams) => {
   try {
     return await userModel.getAll(paginationParams)
+  } catch (error) {
+    throw error
+  }
+}
+const getAllCustomer = async (paginationParams) => {
+  try {
+    return await userModel.getAllCustomer(paginationParams)
   } catch (error) {
     throw error
   }
@@ -85,7 +97,6 @@ const deactivateUser = async (userId) => {
   }
 }
 
-//lay so luong có role bang user
 const getUserCount = async () => {
   try {
     const count = await userModel.countUsers('user')
@@ -95,31 +106,35 @@ const getUserCount = async () => {
   }
 }
 
-const getUserProfile = async (userId) => {
-  const user = await userModel.findById(userId)
+const getUserProfile = async (user) => {
   if (!user) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'User not found')
   }
+  const emailService = await emailServiceModel.getByUserId(user._id)
 
   return {
     _id: user._id,
     username: user.username,
     email: user.email,
+    fullName: user.fullName,
     role: user.role,
     calorieLimit: user.calorieLimit,
-    avatarUrl: user.avatarUrl,
+    avatar_url: user.avatar_url,
     gender: user.gender,
     dob: user.dob,
     height: user.height,
     weight: user.weight,
-    createdAt: user.created_at,
-    isActive: user.is_active
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    isActive: user.isActive,
+    emailVerified: emailService ? emailService.emailVerified : false,
+    dateVerified: emailService ? emailService.updatedAt : null
   }
 }
 const editProfileService = async (userId, profileData) => {
   let cloudinaryResponse = null
-  if (profileData.avatarUrl) {
-    cloudinaryResponse = await cloudinary.uploader.upload(profileData.avatarUrl, {
+  if (profileData.avatar_url) {
+    cloudinaryResponse = await cloudinary.uploader.upload(profileData.avatar_url, {
       folder: 'avatars'
     })
   }
@@ -129,8 +144,9 @@ const editProfileService = async (userId, profileData) => {
       $set: {
         username: profileData.username,
         email: profileData.email,
+        fullName: profileData.fullName,
         calorieLimit: profileData.calorieLimit,
-        avatarUrl: cloudinaryResponse?.secure_url ? cloudinaryResponse.secure_url : '',
+        avatar_url: cloudinaryResponse?.secure_url ? cloudinaryResponse.secure_url : '',
         gender: profileData.gender,
         dob: profileData.dob,
         height: profileData.height,
@@ -143,15 +159,69 @@ const editProfileService = async (userId, profileData) => {
   if (result.modifiedCount === 0) throw new ApiError(StatusCodes.NOT_FOUND, 'User not found or no changes made')
   return true
 }
+const emailVerification = async (user) => {
+  try {
+    // tạo raw token
+    const rawToken = crypto.randomBytes(32).toString('hex')
+
+    // lưu raw token vào Redis dưới key mà verifyEmail hiện lookup (reset_token:<token>) — TTL 30 phút
+    await redis.set(`reset_token:${rawToken}`, user._id.toString(), 'EX', 30 * 60)
+
+    // build URL đúng format (token param, optional email)
+    const verifyURL = `http://localhost:5173/user/profile/verify-email?token=${rawToken}`
+
+    const message = `
+      <p>Click vào liên kết sau để xác thực email (hợp lệ 30 phút):</p>
+      <a href="${verifyURL}" target="_blank" style="color: blue;">${verifyURL}</a>
+    `
+    await sendEmail(user.email, 'Verify your CaloCook email', message)
+
+    return { message: 'Verification email sent' }
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error sending verification email')
+  }
+}
+const verifyEmail = async (token) => {
+  try {
+    if (!token) throw new ApiError(StatusCodes.BAD_REQUEST, 'Token is required')
+
+    // tìm userId từ token
+    const userId = await redis.get(`reset_token:${token}`)
+    if (!userId) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid or expired token' })
+    }
+    // Nếu như đã xác thực rồi thì thôi
+    const existingRecord = await emailServiceModel.getByUserId(userId)
+    if (existingRecord && existingRecord.emailVerified) {
+      await redis.del(`reset_token:${token}`)
+      return { message: 'Email already verified' }
+    }
+    await emailServiceModel.createEmailService({
+      userId: new ObjectId(userId),
+      emailVerified: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+    await redis.del(`reset_token:${token}`)
+
+    return { message: 'Email verified' }
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Error verifying email')
+  }
+}
+
 export const userService = {
   getAll,
+  getAllCustomer,
   searchByUsername,
   searchByEmail,
   searchByIsActive,
+  emailVerification,
   getDetails,
   activateUser,
   deactivateUser,
   getUserProfile,
   getUserCount,
-  editProfileService
+  editProfileService,
+  verifyEmail
 }

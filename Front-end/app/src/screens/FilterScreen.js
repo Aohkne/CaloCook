@@ -29,8 +29,8 @@ export default function FilterScreen({ navigation }) {
     const [searchText, setSearchText] = useState('')
     const [selectedIngredients, setSelectedIngredients] = useState([])
     const [selectedDifficulty, setSelectedDifficulty] = useState([])
-    const [cookingTime, setCookingTime] = useState([5, 60]) // min - max in minutes
-    const [calories, setCalories] = useState([140, 450])
+    const [cookingTime, setCookingTime] = useState([5, 60])
+    const [calories, setCalories] = useState([5, 2000])
     const [timeSliderWidth, setTimeSliderWidth] = useState(0)
     const [calorieSliderWidth, setCalorieSliderWidth] = useState(0)
     const [randomIngredients, setRandomIngredients] = useState([])
@@ -194,7 +194,8 @@ export default function FilterScreen({ navigation }) {
                 filters.minCookingTime = cookingTime[0];
                 filters.maxCookingTime = cookingTime[1];
             }
-            if (calories[0] !== 140 || calories[1] !== 450) {
+            // THAY ĐỔI ĐIỀU KIỆN KIỂM TRA CALORIES
+            if (calories[0] !== 5 || calories[1] !== 2000) {
                 filters.minCalorie = calories[0];
                 filters.maxCalorie = calories[1];
             }
@@ -297,7 +298,7 @@ export default function FilterScreen({ navigation }) {
         setSelectedIngredients([])
         setSelectedDifficulty([])
         setCookingTime([5, 60])
-        setCalories([140, 450])
+        setCalories([5, 2000]) // THAY ĐỔI RESET VALUE
         setIngredientSearchText('')
         setShowIngredientSuggestions(false)
         // Không refresh random ingredients khi clear all
@@ -341,7 +342,9 @@ export default function FilterScreen({ navigation }) {
         }, [min, max, sliderWidth])
 
         const getPositionFromValue = useCallback((value) => {
-            return ((value - min) / (max - min)) * sliderWidth
+            const thumbWidth = 20; // Thumb width from styles
+            const availableWidth = sliderWidth - thumbWidth;
+            return ((value - min) / (max - min)) * availableWidth
         }, [min, max, sliderWidth])
 
         const createPanResponder = (thumbIndex) => {
@@ -664,14 +667,14 @@ export default function FilterScreen({ navigation }) {
                     onLayout={(event) => setTimeSliderWidth(event.nativeEvent.layout.width)}
                 />
 
-                {/* Dish Calories */}
+                {/* Dish Calories - THAY ĐỔI MIN/MAX/STEP */}
                 <Text style={styles.sectionTitle}>Dish calories</Text>
                 <CustomRangeSlider
                     values={calories}
                     onValuesChange={setCalories}
-                    min={100}
-                    max={500}
-                    step={10}
+                    min={5}
+                    max={2000}
+                    step={5}
                     formatLabel={(min, max) => `${min} - ${max} kcal`}
                     sliderWidth={calorieSliderWidth}
                     onLayout={(event) => setCalorieSliderWidth(event.nativeEvent.layout.width)}

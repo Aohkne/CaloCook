@@ -1,0 +1,77 @@
+@startuml DeleteReport
+
+actor Admin
+boundary "Admin Dashboard" as View #lightblue
+participant ":reportRoute" as Route #lightblue
+control ":authMiddleware" as Auth #Orange
+control "reportController" as Controller #lightblue
+participant ":reportService" as Service #lightblue
+entity "reportModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Delete Report
+Admin -> View: 1. Select a report and click "Delete"
+activate Admin
+activate View
+
+View -> View: 2. Prompt "Are you sure?"
+activate View
+deactivate View
+
+opt Admin cancels
+    View --> Admin: 2.1. Abort deletion, return to list
+end
+    View -> Route: 3. DELETE /api/v1/reports/{reportId}
+    activate Route
+
+    Route -> Auth: 4. authenticateUser(req) & authorizeRole()
+activate Auth
+ref over Auth : 5. 3.0 Verify Token & Check Role
+
+opt Authentication/Authorization Failed
+    Auth --> Route: 5.1. Return 401/403 Error
+    Route --> View: 5.2. Show error
+    View --> Admin: 5.3. Display error message
+end
+Auth --> Route: 6. User authenticated & authorized
+deactivate Auth
+    Route -> Controller: 6. deleteReport(req, res)
+    activate Controller
+
+    Controller -> Service: 7. deleteReport(reportId)
+    activate Service
+
+    Service -> Model: 8. deleteReport(reportId)
+    activate Model
+    Model -> MongoDB: 9. ExecuteDelete()
+    activate MongoDB
+    MongoDB --> Model: 10. Return result
+    deactivate MongoDB
+    Model --> Service: 11. Return success
+    deactivate Model
+
+    alt Report exists
+
+        Service --> Controller: 11.1. Return success
+
+        Controller --> Route: 11.1.1. Return { "message": "Report deleted successfully" }
+
+        Route --> View: 11.1.2. Refresh report list
+
+        View --> Admin: 11.1.3. Show "Report deleted successfully"
+    else Report not found
+        Service --> Controller: 11.2. Return error "Report not found"
+        deactivate Service
+
+        Controller --> Route: 11.2.1. Return 404 Not Found
+        deactivate Controller
+
+        Route --> View: 11.2.2. Show error
+        deactivate Route
+
+        View --> Admin: 11.2.3. Display "Report not found or already deleted"
+        deactivate View
+        deactivate Admin
+    end
+end
+@enduml

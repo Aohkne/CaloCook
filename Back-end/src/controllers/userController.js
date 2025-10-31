@@ -18,7 +18,7 @@ const getAll = async (req, res, next) => {
     } else if (isActive !== undefined) {
       result = await userService.searchByIsActive(isActive, paginationParams)
     } else {
-      result = await userService.getAll(paginationParams)
+      result = await userService.getAllCustomer(paginationParams)
     }
 
     const response = paginationHelper.formatPaginatedResponse(
@@ -84,7 +84,6 @@ const deactivateUser = async (req, res, next) => {
   }
 }
 
-// lay so luong dish
 const getUserCount = async (req, res, next) => {
   try {
     const userCount = await userService.getUserCount()

@@ -22,7 +22,8 @@ Route -> Validation: 3. createNew validation
 activate Validation
 
 Validation -> Validation: 4. Validate dishId, stepNumber, description, isActive
-
+activate Validation
+deactivate Validation
 alt Validation Success
     Validation -> Controller: 5. createNew(req, res)
     activate Controller
@@ -37,6 +38,7 @@ alt Validation Success
     activate MongoDB
     
     MongoDB --> DishModel: 9. Return dish data
+    deactivate MongoDB
     
     DishModel --> Service: 10. Return dish or null
     deactivate DishModel
@@ -46,7 +48,7 @@ alt Validation Success
         activate Model
 
         Model -> MongoDB: 12. ExecuteQuery()
-
+        activate MongoDB
         MongoDB --> Model: 13. Return insertedId
 
         Model -> MongoDB: 14. ExecuteQuery()

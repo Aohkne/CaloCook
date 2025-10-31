@@ -3,12 +3,12 @@ import { authMiddleware } from '@/middlewares/authMiddleware'
 import { authController } from '@/controllers/authController'
 const Router = expesss.Router()
 
-// swagger: tags: ['Auth']
+// swagger: tags: ['auth']
 /**
  * @swagger
  * /api/v1/auth/login:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: User login
  *     requestBody:
  *       required: true
@@ -30,7 +30,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/signup:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: User signup
  *     requestBody:
  *       required: true
@@ -52,7 +52,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/refresh-token:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: Refresh access token
  *     requestBody:
  *       required: true
@@ -70,7 +70,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/logout:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     security:
  *       - bearerAuth: []
  *     summary: Logout user
@@ -90,7 +90,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/forgot-password:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: Request password reset
  *     requestBody:
  *       required: true
@@ -107,7 +107,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/forgot-password/{token}:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     summary: Reset password with token
  *     parameters:
  *       - in: path
@@ -132,7 +132,7 @@ const Router = expesss.Router()
 
  * /api/v1/auth/change-password:
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     security:
  *       - bearerAuth: []
  *     summary: Change password
@@ -154,7 +154,7 @@ const Router = expesss.Router()
  
  * /api/v1/auth/profile:
   *   get:
- *     tags: [Auth]
+ *     tags: [auth]
  *     security:
  *       - bearerAuth: []
  *     summary: Get user profile
@@ -181,7 +181,7 @@ const Router = expesss.Router()
  *                 calorieLimit:
  *                   type: number
  *                   example: 2000
- *                 avatarUrl:
+ *                 avatar_url:
  *                   type: string
  *                   example: none
  *                 gender:
@@ -202,11 +202,19 @@ const Router = expesss.Router()
  *                 createdAt:
  *                   type: string
  *                   example: "2024-06-11T08:00:00.000Z"
- *  
+ *                 updatedAt:
+ *                   type: string
+ *                   example: "2024-06-11T08:00:00.000Z"
+ *                 emailVerified:
+ *                   type: boolean
+ *                   example: true
+ *                 dateVerified:
+ *                   type: string
+ *                   example: "2024-06-11T08:00:00.000Z"
  *
  *
  *   post:
- *     tags: [Auth]
+ *     tags: [auth]
  *     security:
  *       - bearerAuth: []
  *     summary: Edit user profile
@@ -226,7 +234,7 @@ const Router = expesss.Router()
  *               calorieLimit:
  *                 type: number
  *                 example: 2000
- *               avatarUrl:
+ *               avatar_url:
  *                 type: string
  *                 example: https://example.com/avatar.jpg
  *               gender:
@@ -245,6 +253,48 @@ const Router = expesss.Router()
  *     responses:
  *       200:
  *         description: Profile updated successfully
+ *
+ * /api/v1/auth/forgot-password-otp:
+ *   post:
+ *     tags: [auth]
+ *     summary: Send OTP for forgot password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ * 
+ * /api/v1/auth/reset-password-otp:
+ *   post:
+ *     tags: [auth]
+ *     summary: Verify OTP and reset password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               otp:
+ *                 type: string
+ *                 example: 123456
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               newPassword:
+ *                 type: string
+ *                 example: newPassword123
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
  */
 Router.post('/login', authController.login)
 Router.post('/signup', authController.signup)
@@ -260,6 +310,9 @@ Router.post(
 )
 Router.post('/forgot-password', authController.forgotPassword)
 Router.post('/forgot-password/:token', authController.resetPassword)
+
+Router.post('/forgot-password-otp', authController.forgotPasswordOtp)
+Router.post('/reset-password-otp', authController.resetPasswordOtp)
 
 Router.post(
   '/change-password',

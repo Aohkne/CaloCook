@@ -1,23 +1,31 @@
 import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { Image, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import { Compass, User, Heart, Soup } from 'lucide-react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { useTheme } from '@contexts/ThemeProvider';
 
-// Import screens
+// Screens
 import ExploreScreen from '@screens/ExploreScreen';
 import FavoritesScreen from '@screens/FavoritesScreen';
 import DishScreen from '@screens/DishScreen';
 import ProfileScreen from '@screens/ProfileScreen';
 
 import ChatBotModal from '@components/ChatBot';
+import CenterNavigator from '@/navigations/CenterNavigator';
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
   const [openChat, setOpenChat] = useState(false);
+
+  const navigation = useNavigation();
   const { colors } = useTheme();
+
+  const handleCenterTabChange = (tabName) => {
+    navigation.navigate(tabName);
+  };
 
   return (
     <View style={styles.container}>
@@ -39,6 +47,8 @@ export default function TabNavigator() {
               case 'Profile':
                 IconComponent = User;
                 break;
+              case 'Center':
+                return null;
               default:
                 IconComponent = Compass;
             }
@@ -55,7 +65,7 @@ export default function TabNavigator() {
           tabBarActiveTintColor: colors.secondary,
           tabBarInactiveTintColor: colors.description + '80',
           tabBarLabelActiveTintColor: colors.secondary,
-          tabBarLabelActiveTintColor: colors.description + '80',
+          tabBarLabelInactiveTintColor: colors.description + '80',
           tabBarStyle: {
             height: 80,
             paddingBottom: 10,
@@ -84,10 +94,22 @@ export default function TabNavigator() {
       >
         <Tab.Screen name='Explore' component={ExploreScreen} options={{ tabBarLabel: 'Explore' }} />
         <Tab.Screen name='Favorites' component={FavoritesScreen} options={{ tabBarLabel: 'Favorites' }} />
+        <Tab.Screen
+          name='Center'
+          component={''}
+          options={{
+            tabBarLabel: '',
+            tabBarButton: () => null
+          }}
+        />
         <Tab.Screen name='Dish' component={DishScreen} options={{ tabBarLabel: 'Dish' }} />
         <Tab.Screen name='Profile' component={ProfileScreen} options={{ tabBarLabel: 'Profile' }} />
       </Tab.Navigator>
 
+      {/* CENTER NAVIGATION */}
+      <CenterNavigator onTabChange={handleCenterTabChange} />
+
+      {/* CHAT BOT */}
       <TouchableWithoutFeedback style={styles.botButton} onPress={() => setOpenChat(true)}>
         <Image source={require('@assets/chat/bot.png')} style={styles.botImage} />
       </TouchableWithoutFeedback>

@@ -1,0 +1,61 @@
+@startuml ViewAllHistory
+
+actor User as "Customer"
+boundary "History Page" as View #lightblue
+participant ":historyRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "historyController" as Controller #lightblue
+participant ":historyService" as Service #lightblue
+entity "historyModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View History List
+User -> View: 1. Click the History icon (clock icon) 
+activate View
+activate User
+
+View -> Route: 2. GET /api/v1/{userId}/total-calories
+activate Route
+
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 4. Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 4.1. Return 401/403 Error
+        Route --> View: 4.2. Show error
+        View --> User: 4.3. Display error message
+    end
+    Auth --> Route: 5. User authenticated & authorized
+    deactivate Auth
+
+Route -> Controller: 6. getTotalCalories(req, res)
+activate Controller
+
+Controller -> Service: 7. getTotalCaloriesByDate(userId, date)
+activate Service
+
+Service -> Model: 8. getTotalCaloriesByDate(userId, date)
+activate Model
+
+Model -> MongoDB: 9. Query total calories by date
+activate MongoDB
+MongoDB --> Model: 10. Return result
+deactivate MongoDB
+
+Model --> Service: 11. Return data
+deactivate Model
+
+Service --> Controller: 12. Return data
+deactivate Service
+
+Controller --> Route: 13. Send response
+deactivate Controller
+Route --> View: 14. Update UI
+deactivate Route
+View --> User: 15. Show total calories for the date
+deactivate View
+deactivate User
+
+end
+@enduml

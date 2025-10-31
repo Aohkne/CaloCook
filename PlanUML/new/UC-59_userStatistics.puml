@@ -1,0 +1,66 @@
+@startuml Get User Statistics (User Count)
+
+actor Admin as "Admin"
+boundary "AdminDashboard" as View #lightblue
+participant ":dashboardRoute" as Route #lightblue
+control "authMiddleware" as Auth #orange
+control "userController" as Controller #lightblue
+participant ":userService" as Service #lightblue
+entity "userModel" as UserModel #lightgreen
+database "MongoDB" as MongoDB #yellow
+
+Group Get Total User Count
+    Admin -> View: 1. Request user count
+    activate Admin
+    activate View
+
+    View -> Route: 2. GET /api/v1/dashboard/user-count
+    activate Route
+
+    Route -> Auth: 3. authenticateUser(req) &\nauthorizeRole(['admin'])
+    activate Auth
+
+    ref over Auth : 4. 3.0 Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 4.1. Return 401/403 Error
+        Route --> View: 4.2. Show error
+        View --> Admin: 4.3. Display error message
+    end
+
+    Auth --> Route: 5. User authenticated & authorized
+    deactivate Auth
+
+    Route -> Controller: 6. getUserCount(req, res)
+    activate Controller
+
+    Controller -> Service: 7. getUserCount()
+    activate Service
+
+    Service -> UserModel: 8. countUsers('user')
+    activate UserModel
+
+    UserModel -> MongoDB: 9. Query total user({ role: 'user' })
+    activate MongoDB
+    MongoDB --> UserModel: 10. Return totalUserCount
+    deactivate MongoDB
+
+    UserModel --> Service: 11. Return totalUserCount
+    deactivate UserModel
+
+    Service --> Controller: 12. Return totalUserCount
+    deactivate Service
+
+    Controller --> Route: 13. Return(data: totalUserCount)
+    deactivate Controller
+
+    Route --> View: 14. Return user count data
+    deactivate Route
+
+    View --> Admin: 15. Display total user count
+    deactivate Admin
+    deactivate View
+
+end
+
+@enduml

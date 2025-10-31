@@ -1,0 +1,63 @@
+@startuml AddToHistory
+
+actor User as "Customer"
+boundary "Dish Detail Page" as View #lightblue
+participant ":historyRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "historyController" as Controller #lightblue
+participant ":historyService" as Service #lightblue
+entity "historyModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Add Eat History
+User -> View: 1. Click "Let's Cook" button
+activate View
+activate User
+
+View -> Route: 2. POST /api/v1/history (dishId)
+activate Route
+
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 4. Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 4.1. Return 401/403 Error
+        Route --> View: 4.2. Show error
+        View --> User: 4.3. Display error message
+    end
+    Auth --> Route: 5. User authenticated & authorized
+    deactivate Auth
+
+Route -> Controller: 6. addHistory(req, res)
+activate Controller
+
+Controller -> Service: 7. addHistory(data)
+activate Service
+
+Service -> Model: 8. insertHistory(data)
+activate Model
+
+Model -> MongoDB: 9. Insert document
+activate MongoDB
+MongoDB --> Model: 10. Return result
+deactivate MongoDB
+
+Model --> Service: 11. Return insert result
+deactivate Model
+
+Service --> Controller: 12. Return success
+deactivate Service
+
+Controller --> Route: 13. Send 201 Created
+deactivate Controller
+
+Route --> View: 14. Notify success
+deactivate Route
+
+View --> User: 15. Redirects the user to the cooking page
+deactivate View
+deactivate User
+
+end
+@enduml

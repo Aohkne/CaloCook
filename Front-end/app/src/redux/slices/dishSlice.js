@@ -23,70 +23,56 @@ const initialState = {
   dishIngredients: [],
   dishSteps: [],
   isLoadingDetail: false,
-  detailError: null,
+  detailError: null
 };
 
-
 // Thêm async thunk mới cho dish detail
-export const getDishDetail = createAsyncThunk(
-  'dish/detail',
-  async (dishId, { rejectWithValue }) => {
-    try {
-      const response = await getDishDetailService(dishId);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error);
-    }
+export const getDishDetail = createAsyncThunk('dish/detail', async (dishId, { rejectWithValue }) => {
+  try {
+    const response = await getDishDetailService(dishId);
+    return response;
+  } catch (error) {
+    return rejectWithValue(error);
   }
-);
-export const getDishDetailData = createAsyncThunk(
-  'dish/getDetailData',
-  async (dishId, { rejectWithValue }) => {
-    try {
-      const [dishResponse, ingredientsResponse, stepsResponse] = await Promise.all([
-        getDishDetailService(dishId),
-        getIngredientsByDishService(dishId),
-        getStepsByDishService(dishId)
-      ]);
+});
+export const getDishDetailData = createAsyncThunk('dish/getDetailData', async (dishId, { rejectWithValue }) => {
+  try {
+    const [dishResponse, ingredientsResponse, stepsResponse] = await Promise.all([
+      getDishDetailService(dishId),
+      getIngredientsByDishService(dishId),
+      getStepsByDishService(dishId)
+    ]);
 
-      return {
-        dishDetail: dishResponse.data || dishResponse,
-        ingredients: ingredientsResponse.data || ingredientsResponse,
-        steps: stepsResponse.data || stepsResponse
-      };
-    } catch (error) {
-      console.error('Get dish detail data error:', error);
-      return rejectWithValue(error);
-    }
+    return {
+      dishDetail: dishResponse.data || dishResponse,
+      ingredients: ingredientsResponse.data || ingredientsResponse,
+      steps: stepsResponse.data || stepsResponse
+    };
+  } catch (error) {
+    console.error('Get dish detail data error:', error);
+    return rejectWithValue(error);
   }
-);
+});
 
 // Async thunk for getting ingredients
-export const getIngredients = createAsyncThunk(
-  'dish/ingredients',
-  async (name = '', { rejectWithValue }) => {
-    try {
-      const response = await getIngredientsService(name);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error);
-    }
+export const getIngredients = createAsyncThunk('dish/ingredients', async (name = '', { rejectWithValue }) => {
+  try {
+    const response = await getIngredientsService(name);
+    return response;
+  } catch (error) {
+    return rejectWithValue(error);
   }
-);
-
+});
 
 // Async thunk for filtered dishes
-export const getFilteredDishes = createAsyncThunk(
-  'dish/filtered',
-  async (filters, { rejectWithValue }) => {
-    try {
-      const response = await getFilteredDishesService(filters);
-      return response;
-    } catch (error) {
-      return rejectWithValue(error);
-    }
+export const getFilteredDishes = createAsyncThunk('dish/filtered', async (filters, { rejectWithValue }) => {
+  try {
+    const response = await getFilteredDishesService(filters);
+    return response;
+  } catch (error) {
+    return rejectWithValue(error);
   }
-);
+});
 
 // Async thunk for random dishes
 export const randomDishes = createAsyncThunk(
@@ -133,9 +119,9 @@ const syncDishLikeStatus = (dishes, favorites) => {
     return dishes;
   }
 
-  const favoritesDishIds = new Set(favorites.map(fav => fav.dishId));
+  const favoritesDishIds = new Set(favorites.map((fav) => fav.dishId));
 
-  return dishes.map(dish => ({
+  return dishes.map((dish) => ({
     ...dish,
     isLiked: favoritesDishIds.has(dish._id)
   }));
@@ -165,14 +151,14 @@ const dishSlice = createSlice({
     },
     toggleLocalLike: (state, action) => {
       const dishId = action.payload;
-      const dish = state.dishes.find(d => d.id === dishId);
+      const dish = state.dishes.find((d) => d.id === dishId);
       if (dish) {
         dish.isLiked = !dish.isLiked;
       }
     },
     updateDishLikeStatus: (state, action) => {
       const { dishId, isLiked } = action.payload;
-      const dish = state.dishes.find(d => d._id === dishId);
+      const dish = state.dishes.find((d) => d._id === dishId);
       if (dish) {
         dish.isLiked = isLiked;
       }
@@ -226,7 +212,11 @@ const dishSlice = createSlice({
       .addCase(loadMoreDishes.fulfilled, (state, action) => {
         state.isLoadingMore = false;
         const newDishes = action.payload.data;
-        state.dishes = [...state.dishes, ...newDishes];
+
+        const existingIds = new Set(state.dishes.map(dish => dish._id));
+        const uniqueNewDishes = newDishes.filter(dish => !existingIds.has(dish._id));
+
+        state.dishes = [...state.dishes, ...uniqueNewDishes];
         state.hasMore = action.payload.pagination.hasNextPage;
         state.currentPage = action.payload.pagination.currentPage;
       })
@@ -294,7 +284,7 @@ const dishSlice = createSlice({
       .addCase(getDishDetailData.rejected, (state, action) => {
         state.isLoadingDetail = false;
         state.detailError = action.payload?.message || 'Failed to fetch dish detail data';
-      })
+      });
   }
 });
 

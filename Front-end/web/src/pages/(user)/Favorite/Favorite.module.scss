@@ -1,0 +1,394 @@
+.wrapper {
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--background);
+
+    .content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px 40px;
+        padding-top: 100px;
+    }
+
+    .search-filter-section {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-bottom: 40px;
+
+        .search-bar {
+            position: relative;
+            width: 400px;
+
+            .search-icon {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--description);
+                font-size: 20px;
+                z-index: 1;
+            }
+
+            .search-input {
+                width: 100%;
+                padding: 12px 15px 12px 45px;
+                border: 2px solid var(--input-border);
+                border-radius: 25px;
+                font-size: 14px;
+                outline: none;
+                transition: border-color 0.3s ease;
+                background-color: var(--titleWithBg);
+                color: var(--title);
+
+                &:focus {
+                    border-color: var(--secondary);
+                }
+
+                &::placeholder {
+                    color: var(--description);
+                }
+            }
+        }
+
+        .filter-button {
+            width: 48px;
+            height: 48px;
+            border: 2px solid var(--input-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: var(--titleWithBg);
+            transition: all 0.3s ease;
+            color: var(--title);
+            font-size: 24px;
+
+            &:hover {
+                border-color: var(--secondary);
+                color: var(--secondary);
+            }
+        }
+    }
+
+    .dishes-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 50px;
+        margin-bottom: 50px;
+        padding-top: 90px;
+
+        .dish-card {
+            background: var(--titleWithBg);
+            border-radius: 16px;
+            border: 3px solid var(--shadow);
+            box-shadow: 4px 4px 0px var(--shadow);
+            overflow: hidden;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            position: relative;
+
+            &:hover {
+                box-shadow: 5px 5px 0px var(--shadow);
+            }
+
+            &:active {
+                transform: translate(2px, 2px);
+                box-shadow: 2px 2px 0px var(--shadow);
+            }
+
+            .card-image {
+                position: relative;
+                padding: 12px 20px;
+                height: 200px;
+                width: 100%;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: center;
+                    border-radius: 15px;
+                    border: 1px solid var(--input-border);
+                }
+
+                .favorite-btn {
+                    position: absolute;
+                    top: 9px;
+                    right: 19px;
+                    width: 42px;
+                    height: 42px;
+                    background: var(--titleWithBg);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    color: var(--red);
+                    font-size: 40px;
+                    z-index: 2;
+
+
+                    svg {
+                        stroke: transparent;
+                        stroke-width: 0;
+                    }
+
+                    &.active {
+                        color: var(--red);
+                        background: var(--titleWithBg);
+                    }
+                }
+            }
+
+            .card-content {
+                padding: 8px 16px 16px;
+                text-align: center;
+
+                .dish-name {
+                    font-size: 16px;
+                    font-weight: 700;
+                    margin-bottom: 12px;
+                    color: var(--title);
+                    letter-spacing: 0.5px;
+                    text-transform: uppercase;
+                }
+
+                .dish-stats {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                    margin-bottom: 12px;
+
+                    .stat-item {
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        font-size: 12px;
+                        color: var(--title);
+                        font-weight: 500;
+
+                        svg {
+                            font-size: 14px;
+                            color: var(--description);
+
+                        }
+                    }
+                }
+
+                .ingredients {
+                    font-size: 12px;
+                    color: var(--description);
+                    margin: 0;
+                    line-height: 1.4;
+                    text-align: center;
+                }
+            }
+        }
+    }
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 40px;
+        margin-bottom: 80px;
+
+        .pagination-btn {
+            min-width: 36px;
+            height: 36px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            background: var(--titleWithBg);
+            color: var(--border);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 12px;
+            box-shadow: 2px 2px 0px var(--shadow);
+
+            &:hover:not(:disabled) {
+                background: var(--primary);
+                color: var(--secondary);
+                box-shadow: 3px 3px 0px var(--shadow);
+
+            }
+
+            &:active:not(:disabled) {
+                transform: translate(2px, 2px);
+                box-shadow: none;
+                border: none;
+
+            }
+
+            &:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+
+                &:hover {
+                    background: var(--titleWithBg);
+                    color: var(--description);
+                    transform: none;
+                    box-shadow: 2px 2px 0px var(--description);
+                }
+            }
+
+            &.active {
+                background: var(--secondary);
+                color: var(--titleWithBg);
+                border-color: var(--border);
+                box-shadow: 2px 2px 0px var(--shadow);
+
+                &:active {
+                    transform: translate(2px, 2px);
+                    box-shadow: none;
+                    border: none;
+                }
+            }
+
+            &.prev,
+            &.next {
+                font-size: 14px;
+                width: 36px;
+            }
+        }
+    }
+
+    .chat-icon {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        height: 50px;
+        width: 50px;
+        font-size: 6rem;
+        border-radius: 50%;
+        color: var(--background);
+        border: 2px solid var(--shadow);
+        box-shadow: 2px 2px 1px var(--shadow);
+        background-color: var(--secondary);
+        z-index: 10;
+
+        cursor: pointer;
+        transition: 0.3s all ease;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            border: 2px solid transparent;
+            box-shadow: 0px 0px 0px var(--shadow);
+        }
+    }
+
+    // Responsive design
+    @media (max-width: 1200px) {
+        .content {
+            padding: 20px 30px;
+            padding-top: 100px;
+        }
+
+        .dishes-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+    }
+
+    @media (max-width: 900px) {
+        .content {
+            padding: 15px 20px;
+            padding-top: 80px;
+        }
+
+        .dishes-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .search-filter-section {
+            .search-bar {
+                width: 300px;
+            }
+        }
+    }
+
+    @media (max-width: 600px) {
+        .content {
+            padding: 15px;
+            padding-top: 80px;
+        }
+
+        .dishes-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .search-filter-section {
+            flex-direction: column;
+            gap: 10px;
+
+            .search-bar {
+                width: 100%;
+                max-width: 350px;
+            }
+        }
+
+        .pagination {
+            gap: 6px;
+
+            .pagination-btn {
+                min-width: 32px;
+                height: 32px;
+                font-size: 11px;
+                box-shadow: 2px 2px 0px var(--description);
+
+                &:hover:not(:disabled) {
+                    box-shadow: 3px 3px 0px var(--description);
+                }
+
+                &:active:not(:disabled) {
+                    transform: translate(1px, 1px);
+                    box-shadow: 1px 1px 0px var(--description);
+                }
+
+                &.prev,
+                &.next {
+                    font-size: 12px;
+                    width: 32px;
+                }
+            }
+        }
+    }
+}
+
+
+//Loading
+
+.loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 18px;
+    color: var(--description);
+    font-weight: 500;
+}
+
+.no-data {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    font-size: 18px;
+    color: var(--description);
+    font-weight: 500;
+    background: var(--titleWithBg);
+    border-radius: 16px;
+    border: 2px solid var(--description);
+    margin: 20px 0;
+}

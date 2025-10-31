@@ -1,0 +1,112 @@
+@startuml ERD
+@startchen 
+
+' ====== ENTITY ======
+entity user {
+}
+entity dish {
+}
+entity achievement {
+}
+entity emailService {
+}
+entity step {
+}
+entity ingredient {
+}
+entity comment {
+}
+entity reactionComment {
+}
+entity conversation {
+}
+entity message {
+}
+entity rating {
+}
+
+' ====== RELATIONSHIP ======
+relationship report {
+}
+relationship favorite {
+}
+relationship history {
+}
+relationship has_achievement {
+}
+relationship has_emailService {
+}
+relationship has_steps {
+}
+relationship has_ingredients {
+}
+relationship has_comment {
+}
+relationship has_reactionComment {
+}
+relationship has_conversation {
+}
+relationship has_message {
+}
+relationship has_rating {
+}
+
+' ====== KẾT NỐI ======
+
+' --- N-N ---
+user -N- report
+dish -N- report
+
+user -N- favorite
+dish -N- favorite
+
+user -N- history
+dish -N- history
+
+' --- 1-1 ---
+user -1- has_achievement
+has_achievement -1- achievement
+
+user -1- has_emailService
+has_emailService -1- emailService
+
+' --- 1-N ---
+dish -1- has_steps
+has_steps -N- step
+
+dish -1- has_ingredients
+has_ingredients -N- ingredient
+
+' --- COMMENT ---
+user -1- has_comment
+has_comment -N- comment
+
+dish -1- has_comment
+has_comment -N- comment
+
+' --- REACTION COMMENT ---
+comment -1- has_reactionComment
+has_reactionComment -N- reactionComment
+
+user -1- has_reactionComment
+has_reactionComment -N- reactionComment
+
+' --- CONVERSATION & MESSAGE ---
+user -1- has_conversation
+has_conversation -N- conversation
+
+conversation -1- has_message
+has_message -N- message
+
+user -1- has_message
+has_message -N- message
+
+' --- RATING ---
+user -1- has_rating
+has_rating -N- rating
+
+dish -1- has_rating
+has_rating -N- rating
+
+@endchen
+@enduml

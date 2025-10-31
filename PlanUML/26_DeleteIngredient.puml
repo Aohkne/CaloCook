@@ -14,7 +14,13 @@ Admin -> View: 1. Click "Delete Ingredient" button
 activate Admin
 activate View
 
-View -> Admin: 2. Show confirmation dialog
+View -> View: 2. Show confirmation dialog
+activate View
+deactivate View
+
+opt User cancels
+    View --> Admin: 2.1 Cancel deletion (dialog closed)
+end
 
 Admin -> View: 3. Confirm deletion
 View -> Route: 4. PATCH /api/v1/ingredient/:id/deactivate
@@ -34,8 +40,10 @@ activate IngredientModel
 IngredientModel -> MongoDB: 8. ExecuteQuery()
 activate MongoDB
 MongoDB --> IngredientModel: 9. Return update result
+deactivate MongoDB
 
 IngredientModel --> Service: 10. Return ingredient
+deactivate IngredientModel
 
 Service --> Controller: 11. Return deactivated ingredient
 
@@ -62,8 +70,9 @@ Route -> Controller: 18. activateIngredient(req, res, next)
 Controller -> Service: 19. activateIngredient(ingredientId)
 
 Service -> IngredientModel: 20. updateIsActive(ingredientId, true)
-
+activate IngredientModel
 IngredientModel -> MongoDB: 21. ExecuteQuery()
+activate MongoDB
 
 MongoDB --> IngredientModel: 22. Return update result
 deactivate MongoDB

@@ -1,74 +1,235 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { StyleSheet, Text, View, Image, TouchableOpacity, Animated, ScrollView, Modal, TextInput, Alert, KeyboardAvoidingView, Platform, Button } from 'react-native'
-import { useTheme } from '@contexts/ThemeProvider'
-import { Lock, User, Edit3, Calendar, Ruler, Weight, Target, Crown, X, Save, Users, Activity, Flame, ThumbsUp, ThumbsDown, Mars, Venus, Sun, Moon, History, LogOut } from 'lucide-react-native'
-import Svg, { Circle } from 'react-native-svg'
-import { useDispatch, useSelector } from 'react-redux'
-import { getUserProfile, updateUserProfile, clearError, updateLocalUserData, getTotalCalories } from '@/redux/slices/userSlice'
-import { logout, logoutLocal } from '@/redux/slices/authSlice'
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  Animated,
+  ScrollView,
+  Modal,
+  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Button,
+  Share
+} from 'react-native';
+import { useTheme } from '@contexts/ThemeProvider';
+import {
+  Lock,
+  User,
+  Edit3,
+  Calendar,
+  Ruler,
+  Weight,
+  Target,
+  Crown,
+  X,
+  Save,
+  Users,
+  Activity,
+  Flame,
+  ThumbsUp,
+  ThumbsDown,
+  Mars,
+  Venus,
+  Sun,
+  Moon,
+  History,
+  LogOut,
+  Trophy,
+  Star,
+  Smile,
+  Zap,
+  Award,
+  Share2
+} from 'lucide-react-native';
+import Svg, { Circle } from 'react-native-svg';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  getUserProfile,
+  updateUserProfile,
+  clearError,
+  updateLocalUserData,
+  getTotalCalories
+} from '@/redux/slices/userSlice';
+import { logout, logoutLocal } from '@/redux/slices/authSlice';
+import { getUserAchievement, clearError as clearAchievementError } from '@/redux/slices/achievementSlice';
 export default function ProfileScreen({ navigation }) {
-  const { colors, toggleTheme, isDark } = useTheme()
-  const styles = createStyles(colors)
-  const dispatch = useDispatch()
+  const { colors, toggleTheme, isDark } = useTheme();
+  const styles = createStyles(colors);
+  const dispatch = useDispatch();
+  const medalScale = useRef(new Animated.Value(0)).current;
+  const medalRotate = useRef(new Animated.Value(0)).current;
+  const medalOpacity = useRef(new Animated.Value(0)).current;
+  const medalFloat = useRef(new Animated.Value(0)).current;
 
   // Redux state
-  const { userData, totalCalories, isLoading, isUpdating, error } = useSelector(state => state.user)
+  const {
+    userAchievement,
+    isLoading: loadingAchievement,
+    error: achievementError
+  } = useSelector((state) => state.achievement);
+  const { userData, totalCalories, isLoading, isUpdating, error } = useSelector((state) => state.user);
+  const getMedalImage = (level) => {
+    const medals = {
+      bronze: require('@/assets/level/bronze.png'),
+      silver: require('@/assets/level/silver.png'),
+      gold: require('@/assets/level/golden.png'),
+      none: null
+    };
+    return medals[level] || null;
+  };
+
+  const getLevelColor = (level) => {
+    const levelColors = {
+      bronze: '#CD7F32',
+      silver: '#C0C0C0',
+      gold: '#FFD700',
+      none: '#6B7280'
+    };
+    return levelColors[level] || '#6B7280';
+  };
   useEffect(() => {
     const loadUserData = async () => {
-      await dispatch(getUserProfile())
+      await dispatch(getUserProfile());
 
       // Load total calories cho hôm nay với timezone đúng
       if (userData?._id) {
         const today = new Date();
         const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
         const todayString = localDate.toISOString().split('T')[0];
-        dispatch(getTotalCalories({
-          userId: userData._id,
-          date: todayString
-        }))
+        dispatch(
+          getTotalCalories({
+            userId: userData._id,
+            date: todayString
+          })
+        );
       }
-    }
+    };
 
-    loadUserData()
-  }, [dispatch, userData?._id])
+    loadUserData();
+  }, [dispatch, userData?._id]);
 
   //useEffect focus listener
   useEffect(() => {
-    //unsubscribe đảm bảo listener được xóa khi component unmount để tránh memory leak.
+    if (userData?._id) {
+      dispatch(getUserAchievement(userData._id));
+    }
+  }, [dispatch, userData?._id]);
+
+  // ✅ SỬA: Focus listener - thêm reload achievement
+  useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       if (userData?._id) {
+        // Reload achievement
+        dispatch(getUserAchievement(userData._id));
+
+        // Reload calories
         const today = new Date();
         const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
         const todayString = localDate.toISOString().split('T')[0];
-        dispatch(getTotalCalories({
-          userId: userData._id,
-          date: todayString
-        }))
+        dispatch(
+          getTotalCalories({
+            userId: userData._id,
+            date: todayString
+          })
+        );
       }
-    })
+    });
 
-    return unsubscribe
-  }, [navigation, userData?._id, dispatch])
+    return unsubscribe;
+  }, [navigation, userData?._id, dispatch]);
+  useEffect(() => {
+    if (achievementError) {
+      console.error('Achievement error:', achievementError);
+      dispatch(clearAchievementError());
+    }
+  }, [achievementError, dispatch]);
+  const achievement = userAchievement || {
+    totalPoints: 0,
+    currentLevel: 'none',
+    easyDishCount: 0,
+    mediumDishCount: 0,
+    hardDishCount: 0
+  };
+  useEffect(() => {
+    if (achievement.currentLevel && achievement.currentLevel !== 'none') {
+      // Reset animation
+      medalScale.setValue(0);
+      medalRotate.setValue(0);
+      medalOpacity.setValue(0);
+      medalFloat.setValue(0);
 
+      // Entrance animation sequence
+      Animated.sequence([
+        // Phase 1: Scale up with rotation
+        Animated.parallel([
+          Animated.spring(medalScale, {
+            toValue: 1,
+            tension: 50,
+            friction: 7,
+            useNativeDriver: true
+          }),
+          Animated.timing(medalOpacity, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true
+          }),
+          Animated.timing(medalRotate, {
+            toValue: 1,
+            duration: 1200,
+            useNativeDriver: true
+          })
+        ]),
+        // Phase 2: Start continuous floating
+        Animated.delay(200)
+      ]).start(() => {
+        // Continuous floating animation (lên xuống nhẹ)
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(medalFloat, {
+              toValue: -10,
+              duration: 2000,
+              useNativeDriver: true
+            }),
+            Animated.timing(medalFloat, {
+              toValue: 0,
+              duration: 2000,
+              useNativeDriver: true
+            })
+          ])
+        ).start();
+      });
+    } else {
+      // Reset animation khi không có medal
+      medalScale.setValue(0);
+      medalRotate.setValue(0);
+      medalOpacity.setValue(0);
+      medalFloat.setValue(0);
+    }
+  }, [achievement.currentLevel]);
   // Modal state
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false)
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
   // Edit form data
   const [editData, setEditData] = useState({
     username: '',
     email: '',
+    fullName: '',
     height: '',
     weight: '',
     calorieLimit: '',
     gender: 'male',
     dob: '',
-    avatarUrl: ''
-  })
+    avatar_url: ''
+  });
 
   // Load user profile on component mount
   useEffect(() => {
-    dispatch(getUserProfile())
-  }, [dispatch])
+    dispatch(getUserProfile());
+  }, [dispatch]);
 
   // Update editData when userData changes
   useEffect(() => {
@@ -76,169 +237,166 @@ export default function ProfileScreen({ navigation }) {
       setEditData({
         username: userData.username || '',
         email: userData.email || '',
+        fullName: userData.fullName || '',
         height: userData.height?.toString() || '',
         weight: userData.weight?.toString() || '',
         calorieLimit: userData.calorieLimit?.toString() || '',
         gender: userData.gender || 'male',
         dob: userData.dob || '',
-        avatarUrl: userData.avatarUrl || ''
-      })
+        avatar_url: userData.avatar_url || ''
+      });
     }
-  }, [userData])
+  }, [userData]);
 
   // Handle error display
   useEffect(() => {
     if (error) {
-      Alert.alert('Error', error)
-      dispatch(clearError())
+      Alert.alert('Error', error);
+      dispatch(clearError());
     }
-  }, [error, dispatch])
+  }, [error, dispatch]);
 
-  const userName = userData?.username || 'User'
+  const userName = userData?.username || 'User';
 
   // Function to get initials from name (first and last word)
   const getInitials = (name) => {
-    const words = name.trim().split(' ').filter(word => word.length > 0)
-    if (words.length === 0) return ''
-    if (words.length === 1) return words[0].charAt(0).toUpperCase()
+    const words = name
+      .trim()
+      .split(' ')
+      .filter((word) => word.length > 0);
+    if (words.length === 0) return '';
+    if (words.length === 1) return words[0].charAt(0).toUpperCase();
 
-    const firstInitial = words[0].charAt(0).toUpperCase()
-    const lastInitial = words[words.length - 1].charAt(0).toUpperCase()
-    return firstInitial + lastInitial
-  }
+    const firstInitial = words[0].charAt(0).toUpperCase();
+    const lastInitial = words[words.length - 1].charAt(0).toUpperCase();
+    return firstInitial + lastInitial;
+  };
 
   // Sửa format date function:
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A'
+    if (!dateString) return 'N/A';
     try {
-      const date = new Date(dateString)
-      if (isNaN(date.getTime())) return 'N/A'
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'N/A';
       return date.toLocaleDateString('en-US', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
-      })
+      });
     } catch (error) {
-      return 'N/A'
+      return 'N/A';
     }
-  }
+  };
 
   // Calculate age
   const calculateAge = (dateString) => {
-    if (!dateString) return 0
+    if (!dateString) return 0;
     try {
-      const today = new Date()
-      const birthDate = new Date(dateString)
-      let age = today.getFullYear() - birthDate.getFullYear()
-      const monthDiff = today.getMonth() - birthDate.getMonth()
+      const today = new Date();
+      const birthDate = new Date(dateString);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--
+        age--;
       }
-      return age
+      return age;
     } catch (error) {
-      return 0
+      return 0;
     }
-  }
+  };
 
   const calculateBMI = (weight, height) => {
-    if (!weight || !height || weight <= 0 || height <= 0) return '0.0'
+    if (!weight || !height || weight <= 0 || height <= 0) return '0.0';
     try {
-      const heightInM = height / 100
-      return (weight / (heightInM * heightInM)).toFixed(1)
+      const heightInM = height / 100;
+      return (weight / (heightInM * heightInM)).toFixed(1);
     } catch (error) {
-      return '0.0'
+      return '0.0';
     }
-  }
-
+  };
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: () => {
-            // Chỉ clear local state, không gọi API
-            dispatch(logoutLocal())
-          },
-        },
-      ]
-    )
-  }
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel'
+      },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: () => {
+          // Chỉ clear local state, không gọi API
+          dispatch(logoutLocal());
+        }
+      }
+    ]);
+  };
   // Hình tròn
   // Progress data (có thể lấy từ API riêng)
 
   // Animation values cho ngọn lửa
-  const flameScale = useRef(new Animated.Value(1)).current
-  const flameOpacity = useRef(new Animated.Value(1)).current
-  const flameRotation = useRef(new Animated.Value(0)).current
-  const currentCalories = totalCalories || 0
-  const targetCalories = userData?.calorieLimit || 2000
-  const progressPercentage = targetCalories > 0 ? (currentCalories / targetCalories) * 100 : 0
-
-
+  const flameScale = useRef(new Animated.Value(1)).current;
+  const flameOpacity = useRef(new Animated.Value(1)).current;
+  const flameRotation = useRef(new Animated.Value(0)).current;
+  const currentCalories = totalCalories || 0;
+  const targetCalories = userData?.calorieLimit || 2000;
+  const progressPercentage = targetCalories > 0 ? (currentCalories / targetCalories) * 100 : 0;
 
   // Circle progress calculations
-  const radius = 120
-  const strokeWidth = 18
-  const circumference = 2 * Math.PI * radius
-  const strokeDasharray = circumference
+  const radius = 120;
+  const strokeWidth = 18;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDasharray = circumference;
 
   //Giới hạn progress không vượt quá 100% cho hiển thị vòng tròn
-  const displayPercentage = Math.min(progressPercentage, 100)
-  const strokeDashoffset = circumference - (displayPercentage / 100) * circumference
+  const displayPercentage = Math.min(progressPercentage, 100);
+  const strokeDashoffset = circumference - (displayPercentage / 100) * circumference;
 
   // Tính toán màu sắc và icon dựa trên progress (vẫn dùng progressPercentage gốc để xác định trạng thái)
   const getProgressColor = () => {
     if (progressPercentage <= 15) {
-      return '#FF4444' // Màu đỏ khi ít
+      return '#FF4444'; // Màu đỏ khi ít
     } else if (progressPercentage > 100) {
-      return '#FF4444' // Màu đỏ khi vượt mức (lửa)
+      return '#FF4444'; // Màu đỏ khi vượt mức (lửa)
     } else if (progressPercentage === 100) {
-      return colors.primary // Màu xanh lime khi đúng mục tiêu
+      return colors.primary; // Màu xanh lime khi đúng mục tiêu
     } else {
       // Chuyển từ xanh nhạt → xanh lime (#9AF10C) cho 15-100%
-      const progress = (progressPercentage - 15) / 85 // 0-1 cho toàn bộ khoảng 15-100%
+      const progress = (progressPercentage - 15) / 85; // 0-1 cho toàn bộ khoảng 15-100%
 
       // Bắt đầu từ màu xanh nhạt và chuyển sang #9AF10C
-      const startColor = { r: 200, g: 250, b: 180 } // #C8FAAB - xanh nhạt hơn #9AF10C
-      const endColor = { r: 154, g: 241, b: 12 }    // #9AF10C
+      const startColor = { r: 200, g: 250, b: 180 }; // #C8FAAB - xanh nhạt hơn #9AF10C
+      const endColor = { r: 154, g: 241, b: 12 }; // #9AF10C
 
-      const red = Math.round(startColor.r - progress * (startColor.r - endColor.r))
-      const green = Math.round(startColor.g - progress * (startColor.g - endColor.g))
-      const blue = Math.round(startColor.b - progress * (startColor.b - endColor.b))
+      const red = Math.round(startColor.r - progress * (startColor.r - endColor.r));
+      const green = Math.round(startColor.g - progress * (startColor.g - endColor.g));
+      const blue = Math.round(startColor.b - progress * (startColor.b - endColor.b));
 
-      return `rgb(${red}, ${green}, ${blue})`
+      return `rgb(${red}, ${green}, ${blue})`;
     }
-  }
+  };
 
   const getProgressIcon = () => {
     if (progressPercentage > 100) {
-      return <Flame size={24} color="#FF4444" />
+      return <Flame size={24} color='#FF4444' />;
     } else if (progressPercentage === 100) {
-      return <ThumbsUp size={24} color={colors.primary} />
+      return <ThumbsUp size={24} color={colors.primary} />;
     } else {
-      return <ThumbsDown size={24} color="#FF4444" />
+      return <ThumbsDown size={24} color='#FF4444' />;
     }
-  }
+  };
 
   const getIconBackgroundColor = () => {
     if (progressPercentage <= 15) {
-      return '#FFE5E5' // Background đỏ nhạt khi ít
+      return '#FFE5E5'; // Background đỏ nhạt khi ít
     } else if (progressPercentage > 100) {
-      return '#FFE5E5' // Background đỏ nhạt cho lửa
+      return '#FFE5E5'; // Background đỏ nhạt cho lửa
     } else if (progressPercentage === 100) {
-      return '#F0FCE8' // Background xanh lime nhạt khi hoàn thành
+      return '#F0FCE8'; // Background xanh lime nhạt khi hoàn thành
     } else {
-      return '#F0F0FF' // Background xanh rất nhạt khi đang tiến bộ
+      return '#F0F0FF'; // Background xanh rất nhạt khi đang tiến bộ
     }
-  }
+  };
 
   // Animation cho icon
   useEffect(() => {
@@ -249,127 +407,131 @@ export default function ProfileScreen({ navigation }) {
           Animated.timing(flameScale, {
             toValue: 1.1,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: true
           }),
           Animated.timing(flameOpacity, {
             toValue: 0.8,
             duration: 800,
-            useNativeDriver: true,
-          }),
+            useNativeDriver: true
+          })
         ]),
         Animated.parallel([
           Animated.timing(flameScale, {
             toValue: 1,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: true
           }),
           Animated.timing(flameOpacity, {
             toValue: 1,
             duration: 800,
-            useNativeDriver: true,
-          }),
-        ]),
+            useNativeDriver: true
+          })
+        ])
       ])
-    )
+    );
 
     // Animation dao động nhẹ (chỉ cho icon lửa khi vượt mức)
-    let wiggleAnimation
+    let wiggleAnimation;
     if (progressPercentage > 100) {
       wiggleAnimation = Animated.loop(
         Animated.sequence([
           Animated.timing(flameRotation, {
             toValue: 0.05, // 5 độ
             duration: 1200,
-            useNativeDriver: true,
+            useNativeDriver: true
           }),
           Animated.timing(flameRotation, {
             toValue: -0.05, // -5 độ
             duration: 1200,
-            useNativeDriver: true,
+            useNativeDriver: true
           }),
           Animated.timing(flameRotation, {
             toValue: 0,
             duration: 1200,
-            useNativeDriver: true,
-          }),
+            useNativeDriver: true
+          })
         ])
-      )
-      wiggleAnimation.start()
+      );
+      wiggleAnimation.start();
     }
 
-    pulseAnimation.start()
+    pulseAnimation.start();
 
     return () => {
-      pulseAnimation.stop()
+      pulseAnimation.stop();
       if (wiggleAnimation) {
-        wiggleAnimation.stop()
+        wiggleAnimation.stop();
       }
-    }
-  }, [progressPercentage])
+    };
+  }, [progressPercentage]);
 
   // End hình tròn
 
   const handleLockPress = () => {
-    navigation.navigate('ChangePassword')
-  }
+    navigation.navigate('ChangePassword');
+  };
 
   const handleEditPress = () => {
-    setIsEditModalVisible(true)
-  }
+    setIsEditModalVisible(true);
+  };
 
   const handleSaveChanges = async () => {
     // Validate input
     if (!editData.username.trim()) {
-      Alert.alert('Error', 'Username cannot be empty')
-      return
+      Alert.alert('Error', 'Username cannot be empty');
+      return;
     }
     if (!editData.email.trim()) {
-      Alert.alert('Error', 'Email cannot be empty')
-      return
+      Alert.alert('Error', 'Email cannot be empty');
+      return;
+    }
+    if (editData.fullName.trim().length === 0) {
+      Alert.alert('Error', 'Full Name cannot be empty');
+      return;
     }
     if (editData.height && (isNaN(parseInt(editData.height)) || parseInt(editData.height) <= 0)) {
-      Alert.alert('Error', 'Please enter a valid height')
-      return
+      Alert.alert('Error', 'Please enter a valid height');
+      return;
     }
     if (editData.weight && (isNaN(parseInt(editData.weight)) || parseInt(editData.weight) <= 0)) {
-      Alert.alert('Error', 'Please enter a valid weight')
-      return
+      Alert.alert('Error', 'Please enter a valid weight');
+      return;
     }
     if (editData.calorieLimit && (isNaN(parseInt(editData.calorieLimit)) || parseInt(editData.calorieLimit) <= 0)) {
-      Alert.alert('Error', 'Please enter a valid calorie limit')
-      return
+      Alert.alert('Error', 'Please enter a valid calorie limit');
+      return;
     }
 
     // Prepare update data
     const updateData = {
       username: editData.username,
       email: editData.email,
+      fullName: editData.fullName,
       height: editData.height ? parseInt(editData.height) : null,
       weight: editData.weight ? parseInt(editData.weight) : null,
       calorieLimit: editData.calorieLimit ? parseInt(editData.calorieLimit) : null,
       gender: editData.gender,
       dob: editData.dob,
-      avatarUrl: editData.avatarUrl
-    }
+      avatar_url: editData.avatar_url
+    };
 
     try {
-
       // Dispatch update action
-      const result = await dispatch(updateUserProfile(updateData))
+      const result = await dispatch(updateUserProfile(updateData));
 
       if (updateUserProfile.fulfilled.match(result)) {
-        setIsEditModalVisible(false)
-        Alert.alert('Success', 'Profile updated successfully!')
+        setIsEditModalVisible(false);
+        Alert.alert('Success', 'Profile updated successfully!');
 
         // Delay một chút trước khi refresh data
         setTimeout(() => {
-          dispatch(getUserProfile())
-        }, 100)
+          dispatch(getUserProfile());
+        }, 100);
       }
     } catch (error) {
       // Error will be handled by useEffect
     }
-  }
+  };
 
   const handleCancelEdit = () => {
     // Reset edit data to original values
@@ -377,29 +539,46 @@ export default function ProfileScreen({ navigation }) {
       setEditData({
         username: userData.username || '',
         email: userData.email || '',
+        fullName: userData.fullName || '',
         height: userData.height?.toString() || '',
         weight: userData.weight?.toString() || '',
         calorieLimit: userData.calorieLimit?.toString() || '',
         gender: userData.gender || 'male',
         dob: userData.dob || '',
-        avatarUrl: userData.avatarUrl || ''
-      })
+        avatar_url: userData.avatar_url || ''
+      });
     }
-    setIsEditModalVisible(false)
-  }
+    setIsEditModalVisible(false);
+  };
+
+  // Handle Share App
+  const handleShareApp = async () => {
+    try {
+      await Share.share({
+        message: `🔥 Try Calocook — Eat what you love, track what you eat!
+
+• Swipe meals like Tinder
+• AI assistant to guide your diet
+• Track calories with zero effort
+
+Download now:
+https://play.google.com/store/apps/details?id=com.calocook`
+      });
+    } catch (error) {
+      console.log('Share error:', e);
+    }
+  };
 
   const InfoCard = ({ icon, title, value, subtitle, backgroundColor = '#F8F9FA' }) => (
     <View style={[styles.infoCard, { backgroundColor }]}>
-      <View style={styles.infoIcon}>
-        {icon}
-      </View>
+      <View style={styles.infoIcon}>{icon}</View>
       <View style={styles.infoContent}>
         <Text style={styles.infoTitle}>{title}</Text>
         <Text style={styles.infoValue}>{value}</Text>
         {subtitle && <Text style={styles.infoSubtitle}>{subtitle}</Text>}
       </View>
     </View>
-  )
+  );
 
   // Show loading state
   if (isLoading) {
@@ -407,7 +586,7 @@ export default function ProfileScreen({ navigation }) {
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text style={styles.title}>Loading...</Text>
       </View>
-    )
+    );
   }
 
   return (
@@ -415,22 +594,18 @@ export default function ProfileScreen({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
         <View style={styles.headerIcons}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleShareApp}>
+            <Share2 size={24} color={colors.title} />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={handleLockPress}>
             <Lock size={24} color={colors.title} />
           </TouchableOpacity>
           {/* History Icon - Add this */}
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => navigation.navigate('History')}
-          >
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('History')}>
             <History size={24} color={colors.title} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.themeToggleButton} onPress={toggleTheme}>
-            {isDark ? (
-              <Moon size={24} color="#4A90E2" />
-            ) : (
-              <Sun size={24} color="#FFA500" />
-            )}
+            {isDark ? <Moon size={24} color='#4A90E2' /> : <Sun size={24} color='#FFA500' />}
           </TouchableOpacity>
         </View>
       </View>
@@ -441,17 +616,14 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.cardContainer}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                {userData?.avatarUrl ? (
-                  <Image
-                    source={{ uri: userData?.avatarUrl }}
-                    style={styles.avatarImage}
-                  />
+                {userData?.avatar_url ? (
+                  <Image source={{ uri: userData?.avatar_url }} style={styles.avatarImage} />
                 ) : (
-                  <User size={50} color="#888888" />
+                  <User size={50} color='#888888' />
                 )}
               </View>
               <TouchableOpacity style={styles.editBadge} onPress={handleEditPress}>
-                <Edit3 size={16} color="#FFFFFF" />
+                <Edit3 size={16} color='#FFFFFF' />
               </TouchableOpacity>
             </View>
 
@@ -464,10 +636,8 @@ export default function ProfileScreen({ navigation }) {
                   <View style={styles.nameDetails}>
                     <Text style={styles.displayName}>{userName}</Text>
                     <View style={styles.roleTag}>
-                      {userData?.role === 'admin' && <Crown size={10} color="#0EA5E9" />}
-                      <Text style={styles.roleText}>
-                        {userData?.role === 'admin' ? 'Admin User' : 'User'}
-                      </Text>
+                      {userData?.role === 'admin' && <Crown size={10} color='#0EA5E9' />}
+                      <Text style={styles.roleText}>{userData?.role === 'admin' ? 'Admin User' : 'User'}</Text>
                     </View>
                   </View>
                 </View>
@@ -490,61 +660,187 @@ export default function ProfileScreen({ navigation }) {
 
               <View style={styles.infoGrid}>
                 <InfoCard
-                  icon={<Calendar size={20} color="#FF6B35" />}
-                  title="Age"
+                  icon={<Calendar size={20} color='#FF6B35' />}
+                  title='Age'
                   value={`${calculateAge(userData?.dob)} years`}
                   subtitle={formatDate(userData?.dob)}
-                  backgroundColor="#FFF5F0"
+                  backgroundColor='#FFF5F0'
                 />
 
                 <InfoCard
-                  icon={userData?.gender === 'male' ?
-                    <Mars size={20} color="#3B82F6" /> :
-                    <Venus size={20} color="#EC4899" />
+                  icon={
+                    userData?.gender === 'male' ? (
+                      <Mars size={20} color='#3B82F6' />
+                    ) : (
+                      <Venus size={20} color='#EC4899' />
+                    )
                   }
-                  title="Gender"
+                  title='Gender'
                   value={userData?.gender === 'male' ? 'Male' : 'Female'}
-                  backgroundColor="#F0F9FF"
+                  backgroundColor='#F0F9FF'
                 />
               </View>
 
               <View style={styles.infoGrid}>
                 <InfoCard
-                  icon={<Ruler size={20} color="#10B981" />}
-                  title="Height"
+                  icon={<Ruler size={20} color='#10B981' />}
+                  title='Height'
                   value={`${userData?.height || 0} cm`}
-                  backgroundColor="#F0FDF4"
+                  backgroundColor='#F0FDF4'
                 />
 
                 <InfoCard
-                  icon={<Weight size={20} color="#8B5CF6" />}
-                  title="Weight"
+                  icon={<Weight size={20} color='#8B5CF6' />}
+                  title='Weight'
                   value={`${userData?.weight || 0} kg`}
-                  backgroundColor="#FAF5FF"
+                  backgroundColor='#FAF5FF'
                 />
               </View>
 
               <View style={styles.infoGrid}>
                 <InfoCard
-                  icon={<Activity size={20} color="#EF4444" />}
-                  title="BMI"
+                  icon={<Activity size={20} color='#EF4444' />}
+                  title='BMI'
                   value={calculateBMI(userData?.weight, userData?.height)}
-                  subtitle="Normal"
-                  backgroundColor="#FEF2F2"
+                  subtitle='Normal'
+                  backgroundColor='#FEF2F2'
                 />
 
                 <InfoCard
-                  icon={<Target size={20} color="#F59E0B" />}
-                  title="Target"
+                  icon={<Target size={20} color='#F59E0B' />}
+                  title='Target'
                   value={`${userData?.calorieLimit || 0} kcal`}
-                  subtitle="Daily"
-                  backgroundColor="#FFFBEB"
+                  subtitle='Daily'
+                  backgroundColor='#FFFBEB'
                 />
               </View>
             </View>
 
             {/* TT */}
+            {achievement && !loadingAchievement && (
+              <View style={styles.achievementSection}>
+                <View style={styles.sectionTitleContainer}>
+                  <Trophy size={20} color={colors.secondary} style={{ marginTop: -13 }} />
+                  <Text style={styles.sectionTitle}>Achievements</Text>
+                </View>
 
+                {/* Medal Display */}
+                <View style={styles.medalContainer}>
+                  {achievement.currentLevel && achievement.currentLevel !== 'none' ? (
+                    <Image
+                      source={getMedalImage(achievement.currentLevel)}
+                      style={styles.medalImage}
+                      resizeMode='contain'
+                    />
+                  ) : (
+                    <View style={styles.noMedal}>
+                      <Award size={48} color='#CCCCCC' />
+                      <Text style={styles.noMedalText}>No Medal Yet</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Achievement Stats */}
+                <View style={styles.achievementStats}>
+                  <View style={[styles.achievementCard, { backgroundColor: '#FFF9E6' }]}>
+                    <Star size={20} color='#FFA500' />
+                    <View style={styles.achievementCardContent}>
+                      <Text style={styles.achievementCardLabel}>Total Points</Text>
+                      <Text style={styles.achievementCardValue}>{achievement.totalPoints || 0}</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.achievementCard, { backgroundColor: '#E6F7FF' }]}>
+                    <Smile size={20} color='#10B981' />
+                    <View style={styles.achievementCardContent}>
+                      <Text style={styles.achievementCardLabel}>Easy Dishes</Text>
+                      <Text style={styles.achievementCardValue}>{achievement.easyDishCount || 0}</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.achievementCard, { backgroundColor: '#FFF0E6' }]}>
+                    <Flame size={20} color='#F97316' />
+                    <View style={styles.achievementCardContent}>
+                      <Text style={styles.achievementCardLabel}>Medium Dishes</Text>
+                      <Text style={styles.achievementCardValue}>{`${achievement.mediumDishCount || 0}`}</Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.achievementCard, { backgroundColor: '#FFE6E6' }]}>
+                    <Zap size={20} color='#EF4444' />
+                    <View style={styles.achievementCardContent}>
+                      <Text style={styles.achievementCardLabel}>Hard Dishes</Text>
+                      <Text style={styles.achievementCardValue}>{`${achievement.hardDishCount || 0}`}</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Progress Bar */}
+                <View style={styles.progressBarContainer}>
+                  <View style={styles.progressBarHeader}>
+                    <Text style={styles.progressBarLabel}>
+                      {achievement.currentLevel === 'gold' ? 'Infinite Progress' : 'Next Level Progress'}
+                    </Text>
+                    <Text style={styles.progressBarValue}>
+                      {(() => {
+                        const points = achievement.totalPoints || 0;
+                        if (achievement.currentLevel === 'gold') {
+                          const nextMilestone = Math.ceil(points / 500) * 500;
+                          return `${points} / ${nextMilestone} points`;
+                        } else {
+                          const target =
+                            !achievement.currentLevel || achievement.currentLevel === 'none'
+                              ? 100
+                              : achievement.currentLevel === 'bronze'
+                              ? 500
+                              : 1000;
+                          return `${points} / ${target} points`;
+                        }
+                      })()}
+                    </Text>
+                  </View>
+
+                  <View style={styles.progressBar}>
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${Math.max(
+                            0,
+                            Math.min(
+                              100,
+                              (() => {
+                                const points = achievement.totalPoints || 0;
+                                if (achievement.currentLevel === 'gold') {
+                                  const milestone = Math.floor(points / 500) * 500;
+                                  return ((points - milestone) / 500) * 100;
+                                } else if (!achievement.currentLevel || achievement.currentLevel === 'none') {
+                                  return (points / 100) * 100;
+                                } else if (achievement.currentLevel === 'bronze') {
+                                  return ((points - 100) / 400) * 100;
+                                } else {
+                                  return ((points - 500) / 500) * 100;
+                                }
+                              })()
+                            )
+                          )}%`,
+                          backgroundColor: getLevelColor(achievement.currentLevel)
+                        }
+                      ]}
+                    />
+                  </View>
+
+                  {achievement.currentLevel === 'gold' && (
+                    <View style={styles.goldLevelBadge}>
+                      <Flame size={16} color='#F59E0B' />
+                      <Text style={styles.goldLevelText}>
+                        Gold Level! Next milestone: {`${Math.ceil((achievement.totalPoints || 0) / 500) * 500}`} points
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
             {/* JSX RENDER HÌNH TRÒN */}
             <View style={styles.progressContainer}>
               <Text style={styles.progressTitle}>Today's Progress</Text>
@@ -555,9 +851,9 @@ export default function ProfileScreen({ navigation }) {
                     cx={radius + strokeWidth}
                     cy={radius + strokeWidth}
                     r={radius}
-                    stroke="#F0F0F0"
+                    stroke='#F0F0F0'
                     strokeWidth={strokeWidth}
-                    fill="none"
+                    fill='none'
                   />
                   {/* Progress circle - sử dụng displayPercentage*/}
                   <Circle
@@ -566,21 +862,25 @@ export default function ProfileScreen({ navigation }) {
                     r={radius}
                     stroke={getProgressColor()}
                     strokeWidth={strokeWidth}
-                    fill="none"
+                    fill='none'
                     strokeDasharray={strokeDasharray}
                     strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
+                    strokeLinecap='round'
                     transform={`rotate(-90 ${radius + strokeWidth} ${radius + strokeWidth})`}
                   />
                   {/* Progress dot at the end of the progress - sử dụng displayPercentage */}
                   {displayPercentage > 0 && (
                     <Circle
-                      cx={radius + strokeWidth + radius * Math.cos((displayPercentage / 100) * 2 * Math.PI - Math.PI / 2)}
-                      cy={radius + strokeWidth + radius * Math.sin((displayPercentage / 100) * 2 * Math.PI - Math.PI / 2)}
+                      cx={
+                        radius + strokeWidth + radius * Math.cos((displayPercentage / 100) * 2 * Math.PI - Math.PI / 2)
+                      }
+                      cy={
+                        radius + strokeWidth + radius * Math.sin((displayPercentage / 100) * 2 * Math.PI - Math.PI / 2)
+                      }
                       r={6}
-                      fill="#FFFFFF"
+                      fill='#FFFFFF'
                       stroke={getProgressColor()}
-                      strokeWidth="2"
+                      strokeWidth='2'
                     />
                   )}
                 </Svg>
@@ -593,15 +893,17 @@ export default function ProfileScreen({ navigation }) {
                         transform: [
                           { scale: flameScale },
                           {
-                            rotate: (progressPercentage > 100) ?
-                              flameRotation.interpolate({
-                                inputRange: [-1, 1],
-                                outputRange: ['-10deg', '10deg'],
-                              }) : '0deg'
+                            rotate:
+                              progressPercentage > 100
+                                ? flameRotation.interpolate({
+                                    inputRange: [-1, 1],
+                                    outputRange: ['-10deg', '10deg']
+                                  })
+                                : '0deg'
                           }
                         ],
                         opacity: flameOpacity,
-                        shadowColor: getProgressColor(),
+                        shadowColor: getProgressColor()
                       }
                     ]}
                   >
@@ -623,7 +925,9 @@ export default function ProfileScreen({ navigation }) {
               <View style={styles.statusCard}>
                 <View style={styles.statusHeader}>
                   <Text style={styles.statusTitle}>Account Status</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: userData?.isActive ? colors.primary : '#EF4444' }]}>
+                  <View
+                    style={[styles.statusBadge, { backgroundColor: userData?.isActive ? colors.primary : '#EF4444' }]}
+                  >
                     <Text style={styles.statusText}>{userData?.isActive ? 'Active' : 'Suspended'}</Text>
                   </View>
                 </View>
@@ -636,10 +940,9 @@ export default function ProfileScreen({ navigation }) {
           </View>
         </View>
 
-
         <View style={styles.logoutSection}>
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <LogOut size={20} color="#FFFFFF" />
+            <LogOut size={20} color='#FFFFFF' />
             <Text style={styles.logoutButtonText}>Logout</Text>
           </TouchableOpacity>
         </View>
@@ -648,8 +951,8 @@ export default function ProfileScreen({ navigation }) {
       {/* Edit Modal */}
       <Modal
         visible={isEditModalVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
+        animationType='slide'
+        presentationStyle='pageSheet'
         onRequestClose={handleCancelEdit}
       >
         <KeyboardAvoidingView
@@ -667,7 +970,7 @@ export default function ProfileScreen({ navigation }) {
               style={[styles.modalSaveButton, { opacity: isUpdating ? 0.6 : 1 }]}
               disabled={isUpdating}
             >
-              <Save size={20} color="#FFFFFF" />
+              <Save size={20} color='#FFFFFF' />
               <Text style={styles.modalSaveText}>{isUpdating ? 'Saving...' : 'Save'}</Text>
             </TouchableOpacity>
           </View>
@@ -675,7 +978,7 @@ export default function ProfileScreen({ navigation }) {
           <ScrollView
             style={styles.modalContent}
             showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
+            keyboardShouldPersistTaps='handled'
             contentContainerStyle={styles.modalScrollContent}
           >
             {/* Username */}
@@ -684,9 +987,10 @@ export default function ProfileScreen({ navigation }) {
               <TextInput
                 style={styles.textInput}
                 value={editData.username}
-                onChangeText={(text) => setEditData(prev => ({ ...prev, username: text }))}
-                placeholder="Enter your username"
-                placeholderTextColor="#999"
+                onChangeText={(text) => setEditData((prev) => ({ ...prev, username: text }))}
+                placeholder='Enter your username'
+                placeholderTextColor='#999'
+                readOnly
               />
             </View>
 
@@ -696,43 +1000,43 @@ export default function ProfileScreen({ navigation }) {
               <TextInput
                 style={styles.textInput}
                 value={editData.email}
-                onChangeText={(text) => setEditData(prev => ({ ...prev, email: text }))}
-                placeholder="Enter your email"
-                placeholderTextColor="#999"
-                keyboardType="email-address"
-                autoCapitalize="none"
+                onChangeText={(text) => setEditData((prev) => ({ ...prev, email: text }))}
+                placeholder='Enter your email'
+                placeholderTextColor='#999'
+                keyboardType='email-address'
+                autoCapitalize='none'
+                readOnly
               />
             </View>
-
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <TextInput
+                style={styles.textInput}
+                value={editData.fullName}
+                onChangeText={(text) => setEditData((prev) => ({ ...prev, fullName: text }))}
+                placeholder='Enter your full name'
+                placeholderTextColor='#999'
+              />
+            </View>
             {/* Gender */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Gender</Text>
               <View style={styles.genderContainer}>
                 <TouchableOpacity
-                  style={[
-                    styles.genderButton,
-                    editData.gender === 'male' && styles.genderButtonActive
-                  ]}
-                  onPress={() => setEditData(prev => ({ ...prev, gender: 'male' }))}
+                  style={[styles.genderButton, editData.gender === 'male' && styles.genderButtonActive]}
+                  onPress={() => setEditData((prev) => ({ ...prev, gender: 'male' }))}
                 >
                   <Mars size={20} color={editData.gender === 'male' ? colors.secondary : '#6B7280'} />
-                  <Text style={[
-                    styles.genderText,
-                    editData.gender === 'male' && styles.genderTextActive
-                  ]}>Male</Text>
+                  <Text style={[styles.genderText, editData.gender === 'male' && styles.genderTextActive]}>Male</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[
-                    styles.genderButton,
-                    editData.gender === 'female' && styles.genderButtonActive
-                  ]}
-                  onPress={() => setEditData(prev => ({ ...prev, gender: 'female' }))}
+                  style={[styles.genderButton, editData.gender === 'female' && styles.genderButtonActive]}
+                  onPress={() => setEditData((prev) => ({ ...prev, gender: 'female' }))}
                 >
                   <Venus size={20} color={editData.gender === 'female' ? colors.secondary : '#6B7280'} />
-                  <Text style={[
-                    styles.genderText,
-                    editData.gender === 'female' && styles.genderTextActive
-                  ]}>Female</Text>
+                  <Text style={[styles.genderText, editData.gender === 'female' && styles.genderTextActive]}>
+                    Female
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -743,10 +1047,10 @@ export default function ProfileScreen({ navigation }) {
               <TextInput
                 style={styles.textInput}
                 value={editData.height}
-                onChangeText={(text) => setEditData(prev => ({ ...prev, height: text }))}
-                placeholder="Enter your height"
-                placeholderTextColor="#999"
-                keyboardType="numeric"
+                onChangeText={(text) => setEditData((prev) => ({ ...prev, height: text }))}
+                placeholder='Enter your height'
+                placeholderTextColor='#999'
+                keyboardType='numeric'
               />
             </View>
 
@@ -756,10 +1060,10 @@ export default function ProfileScreen({ navigation }) {
               <TextInput
                 style={styles.textInput}
                 value={editData.weight}
-                onChangeText={(text) => setEditData(prev => ({ ...prev, weight: text }))}
-                placeholder="Enter your weight"
-                placeholderTextColor="#999"
-                keyboardType="numeric"
+                onChangeText={(text) => setEditData((prev) => ({ ...prev, weight: text }))}
+                placeholder='Enter your weight'
+                placeholderTextColor='#999'
+                keyboardType='numeric'
               />
             </View>
 
@@ -769,10 +1073,10 @@ export default function ProfileScreen({ navigation }) {
               <TextInput
                 style={styles.textInput}
                 value={editData.calorieLimit}
-                onChangeText={(text) => setEditData(prev => ({ ...prev, calorieLimit: text }))}
-                placeholder="Enter your daily calorie target"
-                placeholderTextColor="#999"
-                keyboardType="numeric"
+                onChangeText={(text) => setEditData((prev) => ({ ...prev, calorieLimit: text }))}
+                placeholder='Enter your daily calorie target'
+                placeholderTextColor='#999'
+                keyboardType='numeric'
               />
             </View>
 
@@ -782,9 +1086,9 @@ export default function ProfileScreen({ navigation }) {
               <TextInput
                 style={styles.textInput}
                 value={editData.dob}
-                onChangeText={(text) => setEditData(prev => ({ ...prev, dob: text }))}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor="#999"
+                onChangeText={(text) => setEditData((prev) => ({ ...prev, dob: text }))}
+                placeholder='YYYY-MM-DD'
+                placeholderTextColor='#999'
               />
               <Text style={styles.inputHint}>Format: YYYY-MM-DD (e.g., 1995-05-15)</Text>
             </View>
@@ -794,11 +1098,11 @@ export default function ProfileScreen({ navigation }) {
               <Text style={styles.inputLabel}>Avatar URL (Optional)</Text>
               <TextInput
                 style={styles.textInput}
-                value={editData.avatarUrl}
-                onChangeText={(text) => setEditData(prev => ({ ...prev, avatarUrl: text }))}
-                placeholder="Enter avatar image URL"
-                placeholderTextColor="#999"
-                autoCapitalize="none"
+                value={editData.avatar_url}
+                onChangeText={(text) => setEditData((prev) => ({ ...prev, avatar_url: text }))}
+                placeholder='Enter avatar image URL'
+                placeholderTextColor='#999'
+                autoCapitalize='none'
               />
             </View>
 
@@ -808,7 +1112,7 @@ export default function ProfileScreen({ navigation }) {
         </KeyboardAvoidingView>
       </Modal>
     </View>
-  )
+  );
 }
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -817,7 +1121,7 @@ const createStyles = (colors) =>
       backgroundColor: colors.background
     },
     scrollContainer: {
-      flex: 1,
+      flex: 1
     },
     header: {
       flexDirection: 'row',
@@ -826,7 +1130,7 @@ const createStyles = (colors) =>
       paddingHorizontal: 20,
       paddingTop: 50,
       paddingBottom: 20,
-      backgroundColor: colors.background,
+      backgroundColor: colors.background
     },
     title: {
       color: colors.title,
@@ -843,7 +1147,7 @@ const createStyles = (colors) =>
     },
     profileSection: {
       flex: 1,
-      alignItems: 'center',
+      alignItems: 'center'
     },
     avatarContainer: {
       position: 'relative',
@@ -862,17 +1166,17 @@ const createStyles = (colors) =>
       shadowColor: '#000',
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 2
       },
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 3,
-      overflow: 'hidden',
+      overflow: 'hidden'
     },
     avatarImage: {
       width: '100%',
       height: '100%',
-      borderRadius: 60,
+      borderRadius: 60
     },
     editBadge: {
       position: 'absolute',
@@ -888,11 +1192,11 @@ const createStyles = (colors) =>
       shadowColor: '#000',
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 2
       },
       shadowOpacity: 0.15,
       shadowRadius: 4,
-      elevation: 4,
+      elevation: 4
     },
     cardContainer: {
       width: '100%',
@@ -904,18 +1208,18 @@ const createStyles = (colors) =>
       shadowColor: '#000',
       shadowOffset: {
         width: 0,
-        height: 4,
+        height: 4
       },
       shadowOpacity: 0.2,
       shadowRadius: 8,
       elevation: 5,
-      alignItems: 'center',
+      alignItems: 'center'
     },
     userInfo: {
       width: '100%',
       marginBottom: 20,
       alignItems: 'center',
-      paddingHorizontal: 20,
+      paddingHorizontal: 20
     },
     identityBlock: {
       width: '100%',
@@ -923,13 +1227,13 @@ const createStyles = (colors) =>
       borderRadius: 24,
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: '#E8E8E8',
+      borderColor: '#E8E8E8'
     },
     nameDisplay: {
       flexDirection: 'row',
       alignItems: 'center',
       padding: 16,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: '#FFFFFF'
     },
     initialCircle: {
       width: 44,
@@ -942,27 +1246,27 @@ const createStyles = (colors) =>
       shadowColor: '#FF6B35',
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 2
       },
       shadowOpacity: 0.3,
       shadowRadius: 4,
-      elevation: 3,
+      elevation: 3
     },
     initialText: {
       fontSize: 18,
       fontWeight: '900',
       color: '#FFFFFF',
-      letterSpacing: 0.5,
+      letterSpacing: 0.5
     },
     nameDetails: {
-      flex: 1,
+      flex: 1
     },
     displayName: {
       fontSize: 18,
       fontWeight: '800',
       color: '#000000',
       marginBottom: 4,
-      letterSpacing: -0.2,
+      letterSpacing: -0.2
     },
     roleTag: {
       flexDirection: 'row',
@@ -974,66 +1278,66 @@ const createStyles = (colors) =>
       borderRadius: 10,
       borderWidth: 1,
       borderColor: colors.secondary,
-      gap: 4,
+      gap: 4
     },
     roleText: {
       fontSize: 10,
       fontWeight: '700',
       color: colors.secondary,
       textTransform: 'uppercase',
-      letterSpacing: 0.6,
+      letterSpacing: 0.6
     },
     contactStrip: {
       backgroundColor: '#F8F9FA',
       paddingHorizontal: 20,
-      paddingVertical: 14,
+      paddingVertical: 14
     },
     emailField: {
-      width: '100%',
+      width: '100%'
     },
     fieldHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 6,
+      marginBottom: 6
     },
     fieldDot: {
       width: 5,
       height: 5,
       borderRadius: 2.5,
       backgroundColor: colors.secondary,
-      marginRight: 6,
+      marginRight: 6
     },
     fieldTitle: {
       fontSize: 9,
       fontWeight: '800',
       color: '#6B7280',
       letterSpacing: 1.2,
-      textTransform: 'uppercase',
+      textTransform: 'uppercase'
     },
     emailValue: {
       fontSize: 14,
       fontWeight: '600',
       color: '#000000',
       letterSpacing: 0.1,
-      paddingLeft: 11,
+      paddingLeft: 11
     },
     // Info Section Styles
     infoSection: {
       width: '100%',
-      marginBottom: 20,
+      marginBottom: 20
     },
     sectionTitle: {
       fontSize: 18,
       fontWeight: '700',
       color: colors.title || '#1A1A1A',
       marginBottom: 16,
-      paddingHorizontal: 4,
+      paddingHorizontal: 4
     },
     infoGrid: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginBottom: 12,
-      gap: 12,
+      gap: 12
     },
     infoCard: {
       flex: 1,
@@ -1042,7 +1346,7 @@ const createStyles = (colors) =>
       flexDirection: 'row',
       alignItems: 'center',
       borderWidth: 1,
-      borderColor: '#E5E7EB',
+      borderColor: '#E5E7EB'
     },
     infoIcon: {
       width: 40,
@@ -1055,20 +1359,20 @@ const createStyles = (colors) =>
       shadowColor: '#000',
       shadowOffset: {
         width: 0,
-        height: 1,
+        height: 1
       },
       shadowOpacity: 0.1,
       shadowRadius: 2,
-      elevation: 2,
+      elevation: 2
     },
     genderIcon: {
-      fontSize: 20,
+      fontSize: 20
     },
     targetIcon: {
-      fontSize: 20,
+      fontSize: 20
     },
     infoContent: {
-      flex: 1,
+      flex: 1
     },
     infoTitle: {
       fontSize: 11,
@@ -1076,31 +1380,141 @@ const createStyles = (colors) =>
       color: '#6B7280',
       textTransform: 'uppercase',
       letterSpacing: 0.5,
-      marginBottom: 2,
+      marginBottom: 2
     },
     infoValue: {
       fontSize: 16,
       fontWeight: '700',
       color: '#000000',
-      marginBottom: 2,
+      marginBottom: 2
     },
     infoSubtitle: {
       fontSize: 11,
       color: '#9CA3AF',
-      fontWeight: '500',
+      fontWeight: '500'
+    },
+    achievementSection: {
+      width: '100%',
+      marginBottom: 20,
+      backgroundColor: '#FAFAFA',
+      borderRadius: 16,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: '#E5E7EB'
+    },
+    sectionTitleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 16,
+      paddingHorizontal: 4
+    },
+    medalContainer: {
+      alignItems: 'center',
+      marginVertical: 20
+    },
+    medalImage: {
+      width: 180,
+      height: 180
+    },
+    noMedal: {
+      alignItems: 'center',
+      padding: 20
+    },
+    noMedalText: {
+      marginTop: 8,
+      fontSize: 14,
+      color: '#999999',
+      fontWeight: '500'
+    },
+    achievementStats: {
+      gap: 12,
+      marginBottom: 16
+    },
+    achievementCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 12,
+      borderRadius: 12,
+      gap: 12
+    },
+    achievementCardContent: {
+      flex: 1
+    },
+    achievementCardLabel: {
+      fontSize: 12,
+      color: '#6B7280',
+      fontWeight: '600',
+      marginBottom: 4
+    },
+    achievementCardValue: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: '#000000'
+    },
+    progressBarContainer: {
+      marginTop: 8
+    },
+    progressBarHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8
+    },
+    progressBarLabel: {
+      fontSize: 12,
+      color: '#6B7280',
+      fontWeight: '600'
+    },
+    progressBarValue: {
+      fontSize: 12,
+      color: '#000000',
+      fontWeight: '700'
+    },
+    progressBar: {
+      height: 12,
+      backgroundColor: '#E5E7EB',
+      borderRadius: 6,
+      overflow: 'hidden'
+    },
+    progressBarFill: {
+      height: '100%',
+      borderRadius: 6
+    },
+    goldLevelBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      marginTop: 12,
+      padding: 12,
+      backgroundColor: '#FFFBEA',
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: '#FFD700'
+    },
+    goldLevelText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: '#92400E',
+      flex: 1
     },
 
-
+    // Progress Section (giữ nguyên)
+    progressContainer: {
+      alignItems: 'center',
+      marginBottom: 20
+    },
     // Progress Section
     progressContainer: {
       alignItems: 'center',
-      marginBottom: 20,
+      marginBottom: 20
     },
     progressTitle: {
       fontSize: 18,
       fontWeight: '700',
       color: colors.title || '#1A1A1A',
-      marginBottom: 16,
+      marginBottom: 16
     },
     progressCircle: {
       position: 'relative',
@@ -1121,11 +1535,11 @@ const createStyles = (colors) =>
       marginBottom: 8,
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 2
       },
       shadowOpacity: 0.2,
       shadowRadius: 4,
-      elevation: 3,
+      elevation: 3
     },
     flameIcon: {
       fontSize: 24
@@ -1148,54 +1562,53 @@ const createStyles = (colors) =>
       fontWeight: '500'
     },
 
-
-    //End hình tròn 
+    //End hình tròn
     // Status Section
     statusSection: {
       width: '100%',
-      marginTop: 10,
+      marginTop: 10
     },
     statusCard: {
       backgroundColor: '#F9FAFB',
       borderRadius: 16,
       padding: 16,
       borderWidth: 1,
-      borderColor: '#E5E7EB',
+      borderColor: '#E5E7EB'
     },
     statusHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 12,
+      marginBottom: 12
     },
     statusTitle: {
       fontSize: 16,
       fontWeight: '700',
-      color: '#000000',
+      color: '#000000'
     },
     statusBadge: {
       paddingHorizontal: 12,
       paddingVertical: 4,
-      borderRadius: 12,
+      borderRadius: 12
     },
     statusText: {
       fontSize: 12,
       fontWeight: '600',
-      color: '#FFFFFF',
+      color: '#FFFFFF'
     },
     statusInfo: {
-      gap: 4,
+      gap: 4
     },
     statusLabel: {
       fontSize: 13,
       color: '#6B7280',
-      fontWeight: '500',
+      fontWeight: '500'
     },
 
     // Modal Styles
     modalContainer: {
       flex: 1,
-      backgroundColor: colors.background || '#FFFFFF',
+      backgroundColor: colors.background || '#FFFFFF'
     },
     modalHeader: {
       flexDirection: 'row',
@@ -1205,17 +1618,17 @@ const createStyles = (colors) =>
       paddingTop: 50,
       paddingBottom: 20,
       borderBottomWidth: 1,
-      borderBottomColor: '#E5E7EB',
+      borderBottomColor: '#E5E7EB'
     },
     modalCloseButton: {
       padding: 8,
       borderRadius: 20,
-      backgroundColor: '#F3F4F6',
+      backgroundColor: '#F3F4F6'
     },
     modalTitle: {
       fontSize: 20,
       fontWeight: '700',
-      color: colors.title || '#1A1A1A',
+      color: colors.title || '#1A1A1A'
     },
     modalSaveButton: {
       flexDirection: 'row',
@@ -1224,26 +1637,30 @@ const createStyles = (colors) =>
       paddingHorizontal: 16,
       paddingVertical: 8,
       borderRadius: 20,
-      gap: 6,
+      gap: 6
     },
     modalSaveText: {
       color: '#FFFFFF',
       fontSize: 14,
-      fontWeight: '600',
+      fontWeight: '600'
     },
     modalContent: {
       flex: 1,
       paddingHorizontal: 20,
-      paddingTop: 20,
+      paddingTop: 20
     },
     inputGroup: {
+      marginBottom: 24
+    },
+    inputGroupHidden: {
       marginBottom: 24,
+      display: 'none'
     },
     inputLabel: {
       fontSize: 16,
       fontWeight: '600',
       color: colors.title || '#1A1A1A',
-      marginBottom: 8,
+      marginBottom: 8
     },
     textInput: {
       borderWidth: 1,
@@ -1253,17 +1670,17 @@ const createStyles = (colors) =>
       paddingVertical: 12,
       fontSize: 16,
       color: colors.text || '#1A1A1A',
-      backgroundColor: '#FFFFFF',
+      backgroundColor: '#FFFFFF'
     },
     inputHint: {
       fontSize: 12,
       color: '#9CA3AF',
       marginTop: 4,
-      fontStyle: 'italic',
+      fontStyle: 'italic'
     },
     genderContainer: {
       flexDirection: 'row',
-      gap: 12,
+      gap: 12
     },
     genderButton: {
       flex: 1,
@@ -1276,35 +1693,35 @@ const createStyles = (colors) =>
       borderColor: '#E5E7EB',
       borderRadius: 12,
       backgroundColor: '#FFFFFF',
-      gap: 8,
+      gap: 8
     },
     genderButtonActive: {
       borderColor: colors.secondary,
-      backgroundColor: '#E6F4F1',
+      backgroundColor: '#E6F4F1'
     },
     genderText: {
       fontSize: 16,
       fontWeight: '500',
-      color: '#6B7280',
+      color: '#6B7280'
     },
     genderTextActive: {
       color: colors.secondary,
-      fontWeight: '600',
+      fontWeight: '600'
     },
     modalScrollContent: {
-      paddingBottom: 100,
+      paddingBottom: 100
     },
     bottomPadding: {
-      height: 50,
+      height: 50
     },
     themeToggleButton: {
-      padding: 8,
+      padding: 8
     },
 
     logoutSection: {
       marginTop: 20,
       marginBottom: 30,
-      paddingHorizontal: 20,
+      paddingHorizontal: 20
     },
     logoutButton: {
       backgroundColor: '#EF4444',
@@ -1318,15 +1735,15 @@ const createStyles = (colors) =>
       shadowColor: '#EF4444',
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 2
       },
       shadowOpacity: 0.25,
       shadowRadius: 4,
-      elevation: 5,
+      elevation: 5
     },
     logoutButtonText: {
       color: '#FFFFFF',
       fontSize: 16,
-      fontWeight: '600',
+      fontWeight: '600'
     }
-  })
+  });

@@ -3,13 +3,18 @@ import { StatusCodes } from 'http-status-codes'
 
 import { userRoute } from '@/routes/v1/userRoute'
 import { authRoute } from '@/routes/v1/authRoute'
+import { chatRoute } from '@/routes/v1/chatRoute'
 import { dishRoute } from '@/routes/v1/dishRoute'
 import { ingredientRoute } from '@/routes/v1/ingredientRoute'
 import { stepRoute } from '@/routes/v1/stepRoute'
 import { dashboardRoute } from '@/routes/v1/dashboardRoute'
 import { favoriteRoute } from '@/routes/v1/favoriteRoute'
 import { historyRoute } from '@/routes/v1/historyRoute'
-
+import { commentRoute } from '@/routes/v1/commentRoute'
+import { reactionRoute } from '@/routes/v1/reactionRoute'
+import { ratingRoute } from '@/routes/v1/ratingRoute'
+import { reportRoute } from '@/routes/v1/reportRoute'
+import { achievementRoute } from '@/routes/v1/achievementRoute'
 const Router = express.Router()
 
 /* Check API-v1 status */
@@ -20,11 +25,16 @@ Router.get('/status', (req, res) => {
 /* API - Đường dẫn */
 Router.use('/user', userRoute)
 Router.use('/auth', authRoute)
+Router.use('/chat', chatRoute)
 Router.use('/dish', dishRoute)
 Router.use('/ingredient', ingredientRoute)
 Router.use('/step', stepRoute)
 Router.use('/dashboard', dashboardRoute)
 Router.use('/favorite', favoriteRoute)
 Router.use('/history', historyRoute)
-
+Router.use('/rating', ratingRoute)
+Router.use('/comment', commentRoute)
+Router.use('/reaction', reactionRoute)
+Router.use('/report', reportRoute)
+Router.use('/achievements', achievementRoute)
 export const APIs_V1 = Router

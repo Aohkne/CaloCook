@@ -1,7 +1,7 @@
 @startuml ViewProfile
 
 actor User
-boundary "ProfilePage" as View #lightblue
+boundary "Profile Page" as View #lightblue
 participant ":authRoute" as Route #lightblue
 control "authController" as Controller #lightblue
 participant ":authService" as Service #lightblue
@@ -9,8 +9,9 @@ entity "userModel" as Model #lightblue
 database "MongoDB" as MongoDB #yellow
 
 group View Profile
-User -> View: 1.Click "View Profile"
+User -> View: 1.Click "Profile"
 activate View
+activate User
 
 View -> Route: 2.GET /api/v1/auth/profile
 activate Route
@@ -21,26 +22,40 @@ activate Controller
 Controller -> Service: 4.getProfile(userId)
 activate Service
 
-Service -> Model: 5.findUserById(userId)
-activate Model
 
-Model -> MongoDB: 6.ExecuteQuery()
-activate MongoDB
-MongoDB --> Model: 7.Return result
-deactivate MongoDB
+    Service -> Model: 5.findUserById(userId)
+    activate Model
 
-Model --> Service: 8.Return user data
-deactivate Model
+    Model -> MongoDB: 6.ExecuteQuery()
+    activate MongoDB
+    MongoDB --> Model: 7.Return result
+    deactivate MongoDB
 
-Service --> Controller: 9.Return profile info
-deactivate Service
+    Model --> Service: 8.Return user data
+    deactivate Model
+alt Service returns profile
+    Service --> Controller: 8.1. Return profile info
 
-Controller --> Route: 10.Return success
-deactivate Controller
+    Controller --> Route: 8.1.1. Return success
 
-Route --> View: 11.Render user profile
-deactivate Route
+    Route --> View: 8.1.2. Render user profile
 
-View --> User: 12.Show profile on screen
+    View --> User: 8.1.3. Show profile on screen
+else Service fails to load data
+    Service --> Controller: 8.2. Return Error("Failed to load profile")
+    deactivate Service
+
+    Controller --> Route: 8.2.1. Return error message
+    deactivate Controller
+
+    Route --> View: 8.2.2. Render error view
+    deactivate Route
+
+    View --> User: 8.2.3. Show error "Failed to load."
+    deactivate View
+    deactivate User
+end
+
 end
 @enduml
+// ...existing code...

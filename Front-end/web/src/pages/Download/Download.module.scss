@@ -1,0 +1,307 @@
+@use '@styles/mixin' as *;
+.wrapper {
+  padding: 5rem 0 0;
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+
+  .left-container {
+    padding-top: 20rem;
+    padding-left: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .right-container {
+    position: relative;
+  }
+  .main-text {
+    font-size: 4.8rem;
+    color: var(--secondary);
+  }
+  .secondary-text {
+    font-size: 2.4rem;
+    font-weight: 400;
+    color: var(--description);
+  }
+  .download-button-wrapper {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .download-button-container {
+    height: 4.75rem;
+    min-width: 16rem;
+    cursor: pointer;
+    background-color: var(--black);
+    border-radius: 0.75rem;
+    color: var(--white);
+    border: none;
+  }
+
+  .chplay-button {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .apk-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .phone {
+    width: 29rem;
+    height: 55rem;
+    position: absolute;
+    right: 15rem;
+    top: 5rem;
+  }
+  .ring {
+    position: absolute;
+    right: 7rem;
+    top: 10rem;
+    z-index: -1;
+    --size: 45rem;
+    --thickness: 3rem;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background: conic-gradient(from 360deg, var(--tertiary) 0%, var(--secondary) 180deg);
+    box-sizing: border-box;
+    /* Remove the border property and add padding to create hollow center */
+    padding: var(--thickness);
+
+    /* Create the hollow center using a pseudo-element */
+    &::after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--background);
+    }
+  }
+  .feature-container {
+    margin-top: 65rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5rem;
+  }
+  .feature {
+    position: absolute;
+    display: flex;
+    width: 30rem;
+    text-align: end;
+    gap: 1rem;
+  }
+  .feature-position-1 {
+    top: 10rem;
+    right: 46rem;
+  }
+  .feature-position-2 {
+    top: 30rem;
+    right: 54rem;
+  }
+  .feature-position-3 {
+    top: 50rem;
+    right: 46rem;
+  }
+  .icon {
+    width: 5rem;
+    height: 5rem;
+    font-size: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(230deg, var(--tertiary) 0%, var(--secondary) 100%);
+    border-radius: 100%;
+    border: 0.2rem solid var(--shadow);
+    box-shadow: 0.2rem 0.2rem 0.2rem var(--shadow);
+    flex-shrink: 0;
+    color: var(--white);
+  }
+  .tertiary-text {
+    font-size: 2.4rem;
+    font-weight: 500;
+    color: var(--secondary);
+  }
+  .short-description-text {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--description);
+  }
+  .description-text {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--title);
+  }
+  .bottom-container {
+    grid-column: 1 / span 2;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem 2rem 0 2rem;
+  }
+  .footer-container {
+    grid-column: 1 / span 2;
+    margin-top: 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  @keyframes floating {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  .floating-1 {
+    animation: floating 3s ease-in-out infinite;
+  }
+
+  .floating-2 {
+    animation: floating 3.5s ease-in-out infinite;
+    animation-delay: 0.5s;
+  }
+
+  .floating-3 {
+    animation: floating 4s ease-in-out infinite;
+    animation-delay: 1s;
+  }
+
+  .feature-1,
+  .feature-2,
+  .feature-3 {
+    will-change: transform;
+    transition: transform 0.3s ease;
+  }
+}
+// <= 1200px (xl)
+@media (max-width: 1200px) {
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+
+    .left-container {
+      align-items: center;
+      text-align: center;
+      padding: 2rem 5rem;
+    }
+    .right-container {
+      width: 100rem;
+      display: flex;
+      flex-direction: column;
+      align-self: center;
+    }
+    .bottom-container {
+      padding-left: 2rem;
+      margin-top: 5rem;
+    }
+    .phone {
+      width: 30rem;
+      height: 55rem;
+      transform: translateX(-50%);
+      left: 50%;
+      top: 1rem;
+    }
+    .feature {
+      width: 25rem;
+    }
+    .feature-position-1 {
+      top: 10rem;
+      left: 7rem;
+    }
+    .feature-position-2 {
+      display: flex;
+      flex-direction: row-reverse;
+      text-align: start;
+      top: 25rem;
+      right: 1rem;
+    }
+    .feature-position-3 {
+      top: 45rem;
+      left: 7rem;
+    }
+    .ring {
+      position: absolute;
+      top: 7.5rem;
+      left: 50%;
+      z-index: -1;
+      --size: 45rem;
+      --thickness: 3rem;
+      transform: translateX(-50%);
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      background: conic-gradient(from 360deg, var(--tertiary) 0%, var(--secondary) 180deg);
+      box-sizing: border-box;
+      /* Remove the border property and add padding to create hollow center */
+      padding: var(--thickness);
+
+      /* Create the hollow center using a pseudo-element */
+      &::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: (var(--background));
+      }
+    }
+  }
+}
+// <= 992px (lg)
+@media (max-width: 992px) {
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+
+    .left-container {
+      align-items: center;
+      text-align: center;
+      padding: 2rem 5rem;
+    }
+    .right-container {
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+    }
+    .bottom-container {
+      padding-left: 2rem;
+      margin-top: 5rem;
+    }
+    .phone {
+      width: 30rem;
+      height: 55rem;
+      transform: translateX(-50%);
+      left: 50%;
+      top: 1rem;
+    }
+    .feature {
+      position: static;
+      flex-direction: column-reverse;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+      width: 30rem;
+    }
+
+    .ring {
+      display: none;
+    }
+  }
+}

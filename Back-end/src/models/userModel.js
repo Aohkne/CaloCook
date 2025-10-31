@@ -16,6 +16,8 @@ const _COLLECTION_SCHEMA = Joi.object({
 
   password_hash: Joi.string().required().min(10).max(256).trim().strict(),
 
+  fullName: Joi.string().required().min(3).max(100).trim().strict(),
+
   role: Joi.string().valid('admin', 'user').required(),
 
   calorieLimit: Joi.number().integer().min(0).default(2000),
@@ -54,6 +56,26 @@ const getAll = async (paginationParams) => {
       GET_DB().collection(_COLLECTION_NAME).countDocuments()
     ])
 
+    return { data, totalCount }
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+// get All Customer
+const getAllCustomer = async (paginationParams) => {
+  try {
+    const { skip, limit, sortBy, order } = paginationParams
+    const sortObject = createSortObject(sortBy, order)
+    const [data, totalCount] = await Promise.all([
+      GET_DB()
+        .collection(_COLLECTION_NAME)
+        .find({ role: 'user' })
+        .sort(sortObject)
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      GET_DB().collection(_COLLECTION_NAME).countDocuments({ role: 'user' })
+    ])
     return { data, totalCount }
   } catch (error) {
     throw new Error(error)
@@ -170,5 +192,6 @@ export const userModel = {
   findById,
   create,
   updateOne,
-  countUsers
+  countUsers,
+  getAllCustomer
 }

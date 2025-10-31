@@ -4,6 +4,7 @@ import { authMiddleware } from '@/middlewares/authMiddleware'
 import { favoriteController } from '@/controllers/favoriteController'
 import { userController } from '@/controllers/userController'
 import { dishController } from '@/controllers/dishController'
+import { ratingController } from '@/controllers/ratingController'
 const Router = expesss.Router()
 
 /**
@@ -11,7 +12,7 @@ const Router = expesss.Router()
  * /api/v1/dashboard/user-count:
  *   get:
  *     summary: Get all users count
- *     tags: [Dashboard]
+ *     tags: [dashboard]
  *     security:
  *       - bearerAuth: []
  *     description: Get the total number of users in the system
@@ -37,7 +38,7 @@ const Router = expesss.Router()
  * /api/v1/dashboard/dish-count:
  *   get:
  *     summary: Get all dishes count
- *     tags: [Dashboard]
+ *     tags: [dashboard]
  *     security:
  *       - bearerAuth: []
  *     description: Get the total number of dishes in the system
@@ -58,10 +59,12 @@ const Router = expesss.Router()
  *                 data:
  *                   type: number
  *                   example: 10
+ * 
+ * 
  * /api/v1/dashboard/top-favorites:
  *   get:
  *     summary: Get top 10 most favorited dishes
- *     tags: [Dashboard]
+ *     tags: [dashboard]
  *     security:
  *       - bearerAuth: []
  *     description: Get the top 10 dishes with the highest number of favorites
@@ -116,6 +119,70 @@ const Router = expesss.Router()
  *                             type: string
  *                           updatedAt:
  *                             type: string 
+ * /api/v1/dashboard/top-ratings:
+ *   get:
+ *     summary: Get top 10 dishes with highest average rating
+ *     tags: [dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Get the top 10 dishes with the highest average rating
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of top dishes to return
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved top rated dishes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Get successful"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       dishId:
+ *                         type: string
+ *                       averageRating:
+ *                         type: number
+ *                       totalRatings:
+ *                         type: number
+ *                       dish:
+ *                         type: object
+ *                         properties:
+ *                           name:
+ *                             type: string
+ *                           cookingTime:
+ *                             type: number
+ *                           calorie:
+ *                             type: number
+ *                           difficulty:
+ *                             type: string
+ *                           description:
+ *                             type: string
+ *                           imageUrl:
+ *                             type: string
+ *                           isActive:
+ *                             type: boolean
+ *                           createdAt:
+ *                             type: string
+ *                           updatedAt:
+ *                             type: string
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - admin access required
  */
 Router.route('/user-count').get(
   authMiddleware.authenticateUser,
@@ -128,9 +195,15 @@ Router.route('/dish-count').get(
   authMiddleware.authorizeRole(['admin']),
   dishController.getDishCount
 )
+
 Router.route('/top-favorites').get(
   authMiddleware.authenticateUser,
   authMiddleware.authorizeRole(['admin']),
   favoriteController.getTopFavorites
+)
+Router.route('/top-ratings').get(
+  authMiddleware.authenticateUser,
+  authMiddleware.authorizeRole(['admin']),
+  ratingController.getTopRatings
 )
 export const dashboardRoute = Router

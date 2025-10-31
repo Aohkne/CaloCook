@@ -1,8 +1,9 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
-import { Animated, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Animated, StyleSheet, Text, TouchableWithoutFeedback, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Heart, RefreshCw, X } from 'lucide-react-native';
+import { Heart, RefreshCw, X, Trophy } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';  // ✅ THÊM
 
 import { useTheme } from '@contexts/ThemeProvider';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,6 +16,7 @@ export default function ExploreScreen() {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const dispatch = useDispatch();
+  const navigation = useNavigation();  // ✅ THÊM
 
   // Redux state
   const { user } = useSelector((state) => state.auth);
@@ -124,6 +126,12 @@ export default function ExploreScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Explore</Text>
+        <TouchableOpacity 
+          style={styles.trophyButton}
+          onPress={() => navigation.navigate('Leaderboard')}
+        >
+          <Trophy size={28} color={colors.yellow} strokeWidth={2.5} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.dishList}>
@@ -186,13 +194,29 @@ const createStyles = (colors) =>
       backgroundColor: colors.background
     },
     header: {
-      marginBottom: 15
+      marginBottom: 15,
+      flexDirection: 'row',  // ✅ THÊM
+      justifyContent: 'space-between',  // ✅ THÊM
+      alignItems: 'center'  // ✅ THÊM
     },
     title: {
       color: colors.title,
       fontSize: 32,
       letterSpacing: 3,
-      fontWeight: 700
+      fontWeight: '700'
+    },
+    trophyButton: {
+      height: 50,
+      width: 50,
+      borderRadius: 25,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.btnBg,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
+      elevation: 5
     },
 
     dishList: {
