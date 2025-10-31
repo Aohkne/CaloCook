@@ -9,12 +9,10 @@ import Header from '@/components/sections/Header/Header';
 
 export default function Download() {
   const handleDownloadAPK = () => {
-    const link = document.createElement('a');
-    link.href = '/files/calocook.apk';
-    link.download = 'Calocook.apk';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    window.open(
+      'https://expo.dev/accounts/aohk/projects/calocook/builds/291709fd-d6e7-416d-9e16-2d2133b737d5',
+      '_blank'
+    );
   };
 
   return (
