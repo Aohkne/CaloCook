@@ -21,6 +21,7 @@ import ResetPasswordScreen from '@/screens/(auth)/ResetPasswordScreen';
 import ChatScreen from '@/screens/ChatScreen';
 import NutritionAnalyzeScreen from '@/screens/NutritionAnalyzeScreen';
 import LeaderboardScreen from '@/screens/LeaderBoardScreen';
+import CommentScreen from '@/screens/Comment';
 const Stack = createNativeStackNavigator();
 
 export default function StackNavigator() {
@@ -36,6 +37,7 @@ export default function StackNavigator() {
         <>
           <Stack.Screen name='MainTabs' component={TabNavigator} options={{ animationEnabled: false }} />
           <Stack.Screen name='Detail' component={Detail} />
+          <Stack.Screen name='Comment' component={CommentScreen} />
           <Stack.Screen name='FilterScreen' component={FilterScreen} />
           <Stack.Screen name='ChangePassword' component={ChangePasswordScreen} />
           <Stack.Screen name='History' component={HistoryScreen} />

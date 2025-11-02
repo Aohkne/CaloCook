@@ -20,7 +20,7 @@ function TopTable({
   title = 'Top Table',
   pageSize = 10,
   showSearch = true,
-  showPagination = true,
+  // showPagination = false,
   type
 }) {
   const [sorting, setSorting] = useState([]);
@@ -124,7 +124,7 @@ function TopTable({
       </div>
 
       {/* Pagination */}
-      {showPagination && (
+      {/* {showPagination && (
         <div className={cx('pagination-container')}>
           <div className={cx('pagination-info')}>
             Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
@@ -188,7 +188,7 @@ function TopTable({
             </button>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
