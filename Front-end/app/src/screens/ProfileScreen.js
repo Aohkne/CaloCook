@@ -12,7 +12,8 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Button
+  Button,
+  Share
 } from 'react-native';
 import { useTheme } from '@contexts/ThemeProvider';
 import {
@@ -41,7 +42,8 @@ import {
   Star,
   Smile,
   Zap,
-  Award
+  Award,
+  Share2
 } from 'lucide-react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { useDispatch, useSelector } from 'react-redux';
@@ -64,9 +66,11 @@ export default function ProfileScreen({ navigation }) {
   const medalFloat = useRef(new Animated.Value(0)).current;
 
   // Redux state
-  const { userAchievement, isLoading: loadingAchievement, error: achievementError } = useSelector(
-    (state) => state.achievement
-  );
+  const {
+    userAchievement,
+    isLoading: loadingAchievement,
+    error: achievementError
+  } = useSelector((state) => state.achievement);
   const { userData, totalCalories, isLoading, isUpdating, error } = useSelector((state) => state.user);
   const getMedalImage = (level) => {
     const medals = {
@@ -547,6 +551,24 @@ export default function ProfileScreen({ navigation }) {
     setIsEditModalVisible(false);
   };
 
+  // Handle Share App
+  const handleShareApp = async () => {
+    try {
+      await Share.share({
+        message: `🔥 Try Calocook — Eat what you love, track what you eat!
+
+• Swipe meals like Tinder
+• AI assistant to guide your diet
+• Track calories with zero effort
+
+Download now:
+https://play.google.com/store/apps/details?id=com.calocook`
+      });
+    } catch (error) {
+      console.log('Share error:', e);
+    }
+  };
+
   const InfoCard = ({ icon, title, value, subtitle, backgroundColor = '#F8F9FA' }) => (
     <View style={[styles.infoCard, { backgroundColor }]}>
       <View style={styles.infoIcon}>{icon}</View>
@@ -572,6 +594,9 @@ export default function ProfileScreen({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
         <View style={styles.headerIcons}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleShareApp}>
+            <Share2 size={24} color={colors.title} />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={handleLockPress}>
             <Lock size={24} color={colors.title} />
           </TouchableOpacity>
@@ -705,11 +730,11 @@ export default function ProfileScreen({ navigation }) {
                     <Image
                       source={getMedalImage(achievement.currentLevel)}
                       style={styles.medalImage}
-                      resizeMode="contain"
+                      resizeMode='contain'
                     />
                   ) : (
                     <View style={styles.noMedal}>
-                      <Award size={48} color="#CCCCCC" />
+                      <Award size={48} color='#CCCCCC' />
                       <Text style={styles.noMedalText}>No Medal Yet</Text>
                     </View>
                   )}
@@ -718,7 +743,7 @@ export default function ProfileScreen({ navigation }) {
                 {/* Achievement Stats */}
                 <View style={styles.achievementStats}>
                   <View style={[styles.achievementCard, { backgroundColor: '#FFF9E6' }]}>
-                    <Star size={20} color="#FFA500" />
+                    <Star size={20} color='#FFA500' />
                     <View style={styles.achievementCardContent}>
                       <Text style={styles.achievementCardLabel}>Total Points</Text>
                       <Text style={styles.achievementCardValue}>{achievement.totalPoints || 0}</Text>
@@ -726,7 +751,7 @@ export default function ProfileScreen({ navigation }) {
                   </View>
 
                   <View style={[styles.achievementCard, { backgroundColor: '#E6F7FF' }]}>
-                    <Smile size={20} color="#10B981" />
+                    <Smile size={20} color='#10B981' />
                     <View style={styles.achievementCardContent}>
                       <Text style={styles.achievementCardLabel}>Easy Dishes</Text>
                       <Text style={styles.achievementCardValue}>{achievement.easyDishCount || 0}</Text>
@@ -734,7 +759,7 @@ export default function ProfileScreen({ navigation }) {
                   </View>
 
                   <View style={[styles.achievementCard, { backgroundColor: '#FFF0E6' }]}>
-                    <Flame size={20} color="#F97316" />
+                    <Flame size={20} color='#F97316' />
                     <View style={styles.achievementCardContent}>
                       <Text style={styles.achievementCardLabel}>Medium Dishes</Text>
                       <Text style={styles.achievementCardValue}>{`${achievement.mediumDishCount || 0}`}</Text>
@@ -742,7 +767,7 @@ export default function ProfileScreen({ navigation }) {
                   </View>
 
                   <View style={[styles.achievementCard, { backgroundColor: '#FFE6E6' }]}>
-                    <Zap size={20} color="#EF4444" />
+                    <Zap size={20} color='#EF4444' />
                     <View style={styles.achievementCardContent}>
                       <Text style={styles.achievementCardLabel}>Hard Dishes</Text>
                       <Text style={styles.achievementCardValue}>{`${achievement.hardDishCount || 0}`}</Text>
@@ -763,8 +788,12 @@ export default function ProfileScreen({ navigation }) {
                           const nextMilestone = Math.ceil(points / 500) * 500;
                           return `${points} / ${nextMilestone} points`;
                         } else {
-                          const target = !achievement.currentLevel || achievement.currentLevel === 'none' ? 100 :
-                            achievement.currentLevel === 'bronze' ? 500 : 1000;
+                          const target =
+                            !achievement.currentLevel || achievement.currentLevel === 'none'
+                              ? 100
+                              : achievement.currentLevel === 'bronze'
+                              ? 500
+                              : 1000;
                           return `${points} / ${target} points`;
                         }
                       })()}
@@ -776,19 +805,25 @@ export default function ProfileScreen({ navigation }) {
                       style={[
                         styles.progressBarFill,
                         {
-                          width: `${Math.max(0, Math.min(100, (() => {
-                            const points = achievement.totalPoints || 0;
-                            if (achievement.currentLevel === 'gold') {
-                              const milestone = Math.floor(points / 500) * 500;
-                              return ((points - milestone) / 500) * 100;
-                            } else if (!achievement.currentLevel || achievement.currentLevel === 'none') {
-                              return (points / 100) * 100;
-                            } else if (achievement.currentLevel === 'bronze') {
-                              return ((points - 100) / 400) * 100;
-                            } else {
-                              return ((points - 500) / 500) * 100;
-                            }
-                          })()))}%`,
+                          width: `${Math.max(
+                            0,
+                            Math.min(
+                              100,
+                              (() => {
+                                const points = achievement.totalPoints || 0;
+                                if (achievement.currentLevel === 'gold') {
+                                  const milestone = Math.floor(points / 500) * 500;
+                                  return ((points - milestone) / 500) * 100;
+                                } else if (!achievement.currentLevel || achievement.currentLevel === 'none') {
+                                  return (points / 100) * 100;
+                                } else if (achievement.currentLevel === 'bronze') {
+                                  return ((points - 100) / 400) * 100;
+                                } else {
+                                  return ((points - 500) / 500) * 100;
+                                }
+                              })()
+                            )
+                          )}%`,
                           backgroundColor: getLevelColor(achievement.currentLevel)
                         }
                       ]}
@@ -797,7 +832,7 @@ export default function ProfileScreen({ navigation }) {
 
                   {achievement.currentLevel === 'gold' && (
                     <View style={styles.goldLevelBadge}>
-                      <Flame size={16} color="#F59E0B" />
+                      <Flame size={16} color='#F59E0B' />
                       <Text style={styles.goldLevelText}>
                         Gold Level! Next milestone: {`${Math.ceil((achievement.totalPoints || 0) / 500) * 500}`} points
                       </Text>
@@ -861,9 +896,9 @@ export default function ProfileScreen({ navigation }) {
                             rotate:
                               progressPercentage > 100
                                 ? flameRotation.interpolate({
-                                  inputRange: [-1, 1],
-                                  outputRange: ['-10deg', '10deg']
-                                })
+                                    inputRange: [-1, 1],
+                                    outputRange: ['-10deg', '10deg']
+                                  })
                                 : '0deg'
                           }
                         ],
@@ -1297,7 +1332,6 @@ const createStyles = (colors) =>
       color: colors.title || '#1A1A1A',
       marginBottom: 16,
       paddingHorizontal: 4
-
     },
     infoGrid: {
       flexDirection: 'row',

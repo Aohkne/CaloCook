@@ -97,7 +97,6 @@ const deactivateUser = async (userId) => {
   }
 }
 
-//lay so luong có role bang user
 const getUserCount = async () => {
   try {
     const count = await userModel.countUsers('user')

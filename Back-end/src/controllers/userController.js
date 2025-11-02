@@ -84,7 +84,6 @@ const deactivateUser = async (req, res, next) => {
   }
 }
 
-// lay so luong dish
 const getUserCount = async (req, res, next) => {
   try {
     const userCount = await userService.getUserCount()
