@@ -150,7 +150,7 @@ function Sidebar() {
           </div>
           <div className={cx('item')}>
             <Link to={ROUTES.LEVEL_MANAGEMENT}>
-              <Icon icon='heroicons:trophy' width='20' height='20' />
+              <Icon icon='mdi:trophy' width='20' height='20' />
               <span>Levels</span>
             </Link>
           </div>

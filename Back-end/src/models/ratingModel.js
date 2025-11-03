@@ -42,11 +42,7 @@ const updateRating = async (ratingId, updateData) => {
     }
     const result = await GET_DB()
       .collection(_COLLECTION_NAME)
-      .findOneAndUpdate(
-        { _id: new ObjectId(ratingId) },
-        { $set: dataToUpdate },
-        { returnDocument: 'after' }
-      )
+      .findOneAndUpdate({ _id: new ObjectId(ratingId) }, { $set: dataToUpdate }, { returnDocument: 'after' })
     if (!result) {
       throw new Error('Rating not found')
     }
@@ -67,19 +63,17 @@ const getDetails = async (ratingId) => {
   }
 }
 
-
 const viewRatings = async (dishId, sortBy = 'createdAt', order = 'desc') => {
   try {
     const sortOrder = order === 'asc' ? 1 : -1
-    
+
     const ratings = await GET_DB()
       .collection(_COLLECTION_NAME)
       .aggregate([
-        
-        { 
-          $match: { dishId: new ObjectId(dishId) } 
+        {
+          $match: { dishId: new ObjectId(dishId) }
         },
-        
+
         {
           $lookup: {
             from: 'user',
@@ -88,14 +82,14 @@ const viewRatings = async (dishId, sortBy = 'createdAt', order = 'desc') => {
             as: 'userInfo'
           }
         },
-        
+
         {
           $unwind: {
             path: '$userInfo',
             preserveNullAndEmptyArrays: true
           }
         },
-        
+
         {
           $project: {
             _id: 1,
@@ -108,13 +102,13 @@ const viewRatings = async (dishId, sortBy = 'createdAt', order = 'desc') => {
             updatedAt: 1
           }
         },
-        
+
         {
           $sort: { [sortBy]: sortOrder }
         }
       ])
       .toArray()
-    
+
     return ratings
   } catch (error) {
     throw new Error(error)
@@ -182,7 +176,7 @@ const getTopRatings = async (limit = 10) => {
         {
           $project: {
             dishId: { $toString: '$_id' },
-            averageRating: { $round: ['$averageRating', 2] },
+            averageRating: { $round: ['$averageRating', 1] },
             totalRatings: 1,
             dish: {
               name: '$dish.name',
