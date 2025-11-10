@@ -1,0 +1,102 @@
+@startuml Nutrition Analysis with YOLOv8
+
+actor User as "User"
+boundary "Client App" as Client #lightblue
+participant ":FastAPI\nRouter" as Router #lightblue
+control ":AiController" as Controller #orange
+participant ":AiService" as Service #lightblue
+entity ":AiModel\n(AIModelsManager)" as Model #lightgreen
+participant "YOLOv8\nDetection" as YOLO #yellow
+participant "EfficientNet\nClassifier" as Classifier #yellow
+database "Food Database\n(JSON)" as DB #lightgray
+
+Group Nutrition Analysis Flow
+
+User -> Client: 1. Upload food image
+activate User
+activate Client
+
+Client -> Router: 2. POST /calobot\n(UploadFile: image)
+activate Router
+
+Router -> Controller: 3. analyze_food(file)
+activate Controller
+
+Controller -> Controller: 4. Validate file type
+activate Controller
+deactivate Controller
+
+opt Invalid File Type
+    Controller --> Router: 4.1. Return 400\n"File must be an image"
+    Router --> Client: 4.2. Return error
+    Client --> User: 4.3. Display error message
+end
+
+Controller -> Controller: 5. Check models ready
+activate Controller
+deactivate Controller
+
+opt Models Not Ready
+    Controller --> Router: 5.1. Return 503\n"Models not ready"
+    Router --> Client: 5.2. Return error
+    Client --> User: 5.3. Display error message
+end
+
+Controller -> Service: 6. analyze_food_image(contents, filename)
+activate Service
+
+Group Object Detection with YOLOv8
+Service -> YOLO: 7. model(image, conf=0.3)
+activate YOLO
+YOLO --> Service: 8. Return detection_results\n(bbox, confidence)
+deactivate YOLO
+
+opt No Objects Detected
+    Service --> Controller: 8.1. Return error response
+    Controller --> Router: 8.2. JSONResponse
+    Router --> Client: 8.3. Return response
+    Client --> User: 8.4. Show "No food detected"
+end
+end
+
+Group Image Cropping
+Service -> Service: 9. crop_image(image, bbox)
+activate Service
+deactivate Service
+
+opt Crop Failed
+    Service --> Controller: 9.1. ValueError
+    Controller --> Router: 9.2. HTTPException 400
+    Router --> Client: 9.3. Return error
+    Client --> User: 9.4. Display error
+end
+end
+
+Service -> Classifier: 10. model(transformed_image)
+
+activate Classifier
+Classifier --> Service: 11. Return prediction\n(food_name, confidence)
+deactivate Classifier
+
+Service -> DB: 12. Get nutrition info by food_name
+activate DB
+
+DB --> Service: 13. Return nutrition data
+deactivate DB
+
+Service --> Controller: 14. Return analysis result
+deactivate Service
+
+Controller --> Router: 15. Return Response(result)
+deactivate Controller
+
+Router --> Client: 16. Return response
+deactivate Router
+
+Client --> User: 17. Display nutrition analysis
+deactivate Client
+deactivate User
+
+end
+
+@enduml
