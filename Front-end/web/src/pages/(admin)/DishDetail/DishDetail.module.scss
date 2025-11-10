@@ -502,7 +502,7 @@
         width: 0;
         height: 0;
 
-        &:checked+.difficulty-block-text {
+        &:checked + .difficulty-block-text {
           background-color: var(--secondary);
           color: var(--background);
           border-color: var(--secondary);
@@ -640,11 +640,11 @@
         width: 0;
         height: 0;
 
-        &:checked+.switch-slider {
+        &:checked + .switch-slider {
           background-color: var(--secondary);
         }
 
-        &:checked+.switch-slider:before {
+        &:checked + .switch-slider:before {
           transform: translateX(2.4rem);
         }
       }
@@ -786,5 +786,106 @@
     border-radius: 10px;
     border: 1px solid var(--description);
     outline: none;
+  }
+
+  // Rating
+  .rating-wrapper {
+  }
+  .rating-title {
+    font-size: 32px;
+    font-weight: 500;
+  }
+  .total-rating {
+    display: flex;
+    gap: 4rem;
+    align-items: center;
+    margin-left: 3rem;
+  }
+  .total-rating-average {
+    font-size: 50px;
+    font-weight: 500;
+    color: var(--description);
+  }
+  .total-rating-value {
+    font-size: 16px;
+    color: var(--description);
+  }
+
+  // Review Card
+  .reviews-container {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .review-card {
+    position: relative;
+    min-width: 30rem;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    box-shadow: 5px 5px var(--description);
+    padding: 3rem 1rem 3rem 1rem;
+    margin-bottom: 16px;
+    background: var(--input-bg);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translate(5px, 5px);
+      box-shadow: 0 0 var(--description);
+      cursor: pointer;
+    }
+  }
+
+  .review-fullName-star-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .user-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .review-date {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .review-stars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .star-value {
+    font-size: 14px;
+    color: #6b7280;
+    margin-left: 4px;
+  }
+
+  .review-description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #374151;
+    margin: 0;
+    /* Single line ellipsis */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

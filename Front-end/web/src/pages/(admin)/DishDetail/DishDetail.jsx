@@ -13,6 +13,7 @@ import {
 import { getStepsByDish, createStep, updateStep, deactivateStep, activateStep } from '@/api/step';
 import { Icon } from '@iconify/react';
 import { getWebImagePath } from '@/utils/imageHelper';
+import { getAverageRating, getRatingsByDishId } from '@/api/rating';
 
 const cx = classNames.bind(styles);
 
@@ -36,6 +37,8 @@ function DishDetail() {
   const [editingStep, setEditingStep] = useState(null);
   const [stepSort, setStepSort] = useState('stepNumber');
   const [stepOrder, setStepOrder] = useState('asc');
+  const [rating, setRating] = useState([]);
+  const [averageRatings, setAverageRatings] = useState({});
 
   // Add Ingredient form state
   const [ingredientFormData, setIngredientFormData] = useState({
@@ -64,6 +67,7 @@ function DishDetail() {
     isActive: true
   });
 
+  // Fetch Dish
   useEffect(() => {
     let mounted = true;
     const fetchDish = async () => {
@@ -88,6 +92,7 @@ function DishDetail() {
     };
   }, [id]);
 
+  // Fetch Ingredients
   useEffect(() => {
     const fetchIngredients = async () => {
       try {
@@ -105,6 +110,7 @@ function DishDetail() {
     if (dish) fetchIngredients();
   }, [dish, id, stepSort, stepOrder]);
 
+  // Fetch Steps
   useEffect(() => {
     const fetchSteps = async () => {
       try {
@@ -122,6 +128,36 @@ function DishDetail() {
 
     if (dish) fetchSteps();
   }, [dish, id, stepOrder, stepSort]);
+
+  // Fetch Rating
+  useEffect(() => {
+    const fetchRating = async () => {
+      try {
+        const response = await getRatingsByDishId(id);
+        console.log('Rating:', response.data);
+        setRating(response.data);
+      } catch (error) {
+        setError(error.response?.data?.message || 'Failed to load rating');
+      }
+    };
+
+    if (dish) fetchRating();
+  }, [dish, id]);
+
+  // Fetch Average Rating
+  useEffect(() => {
+    const fetchAverageRating = async () => {
+      try {
+        const response = await getAverageRating(id);
+        console.log('Average rating:', response.data);
+        setAverageRatings(response.data);
+      } catch (error) {
+        setError(error.response?.data?.message || 'Failed to load average rating');
+      }
+    };
+
+    if (dish) fetchAverageRating();
+  }, [dish, id]);
 
   if (loading) return <div className={cx('wrapper')}>Loading...</div>;
   if (!dish) return <div className={cx('wrapper')}>No dish found</div>;
@@ -641,6 +677,68 @@ function DishDetail() {
         </div>
 
         <div className={cx('tab-content')}>{activeTab === 'ingredients' ? renderIngredients() : renderSteps()}</div>
+      </div>
+
+      {/* Rating */}
+      <div className={cx('rating-wrapper')}>
+        <h1 className={cx('rating-title')}>Rating</h1>
+        {/* Total rating */}
+        <div className={cx('total-rating')}>
+          <p className={cx('total-rating-average')}>{averageRatings.averageRating}</p>
+          <div className='total-rating-stars'>
+            {[...Array(5)].map((_, index) => {
+              const starValue = index + 1;
+              const filled = averageRatings.averageRating >= starValue;
+              const halfFilled = !filled && averageRatings.averageRating >= starValue - 0.5;
+
+              return (
+                <Icon
+                  key={index}
+                  icon={
+                    filled
+                      ? 'material-symbols:star-rounded'
+                      : halfFilled
+                      ? 'material-symbols:star-half-rounded'
+                      : 'material-symbols:star-outline-rounded'
+                  }
+                  width='24'
+                  height='24'
+                  style={{ color: filled || halfFilled ? '#EEC756' : '#D1D5DB' }}
+                />
+              );
+            })}
+            <p className={cx('total-rating-value')}>{averageRatings.totalRatings} Rating</p>
+          </div>
+        </div>
+        {/* Reviews/Ratings List */}
+        <div className={cx('reviews-container')}>
+          {rating.map((review) => (
+            <div key={review._id} className={cx('review-card')}>
+              {/* User Info */}
+              <div className={cx('review-header')}>
+                <h3 className={cx('user-name')}>{review.fullName}</h3>
+                {/* Star Rating */}
+                <div className={cx('review-stars')}>
+                  {[...Array(5)].map((_, index) => (
+                    <Icon
+                      key={index}
+                      icon='material-symbols:star-rounded'
+                      width='20'
+                      height='20'
+                      style={{
+                        color: index < review.star ? '#EEC756' : '#D1D5DB'
+                      }}
+                    />
+                  ))}
+                </div>
+                <p className={cx('review-date')}>{new Date(review.createdAt).toISOString().split('T')[0]}</p>
+              </div>
+
+              {/* Review Description */}
+              <p className={cx('review-description')}>{review.description}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Create Ingredient Modal */}
