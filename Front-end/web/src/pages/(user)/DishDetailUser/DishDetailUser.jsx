@@ -40,7 +40,7 @@ function DishDetailUser() {
   const [ratingDescription, setRatingDescription] = useState('');
   const [selectedReview, setSelectedReview] = useState(null);
   const [isReviewDetailModalVisible, setIsReviewDetailModalVisible] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);  // ← MỚI
+  const [isEditMode, setIsEditMode] = useState(false);
   const [editingRatingId, setEditingRatingId] = useState(null);
 
   const [averageRating, setAverageRating] = useState(0);
