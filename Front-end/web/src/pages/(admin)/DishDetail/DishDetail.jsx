@@ -39,6 +39,7 @@ function DishDetail() {
   const [stepOrder, setStepOrder] = useState('asc');
   const [rating, setRating] = useState([]);
   const [averageRatings, setAverageRatings] = useState({});
+  const [selectedReview, setSelectedReview] = useState(null);
 
   // Add Ingredient form state
   const [ingredientFormData, setIngredientFormData] = useState({
@@ -447,6 +448,10 @@ function DishDetail() {
     return copy;
   };
 
+  const handleCloseReviewDetailModal = () => {
+    setSelectedReview(false);
+  };
+
   // Render Ingredients List
   const renderIngredients = () => {
     return (
@@ -713,7 +718,7 @@ function DishDetail() {
         {/* Reviews/Ratings List */}
         <div className={cx('reviews-container')}>
           {rating.map((review) => (
-            <div key={review._id} className={cx('review-card')}>
+            <div key={review._id} className={cx('review-card')} onClick={() => setSelectedReview(review)}>
               {/* User Info */}
               <div className={cx('review-header')}>
                 <h3 className={cx('user-name')}>{review.fullName}</h3>
@@ -740,6 +745,47 @@ function DishDetail() {
           ))}
         </div>
       </div>
+
+      {/* Review Detail Modal */}
+      {selectedReview && (
+        <div className={cx('modal')}>
+          <div className={cx('modal-content')}>
+            <div className={cx('modal-content-top')}>
+              <h3 className={cx('modal-title')}>Review Detail</h3>
+              <button
+                type='button'
+                className={cx('modal-close-button')}
+                aria-label='Close modal'
+                onClick={handleCloseReviewDetailModal}
+              >
+                &times;
+              </button>
+            </div>
+            <div className={cx('modal-form-review')}>
+              <p className={cx('modal-form-review-fullName')}>{selectedReview.fullName}</p>
+              <p className={cx('modal-form-review-date')}>
+                {new Date(selectedReview.createdAt).toISOString().split('T')[0]}
+              </p>
+            </div>
+            <div className={cx('review-stars', 'modal-form-review-star')}>
+              {[...Array(5)].map((_, index) => (
+                <Icon
+                  key={index}
+                  icon='material-symbols:star-rounded'
+                  width='24'
+                  height='24'
+                  style={{
+                    color: index < selectedReview.star ? '#EEC756' : '#999999'
+                  }}
+                />
+              ))}
+            </div>
+            <div className={cx('modal-form-review-description')}>
+              <p>{selectedReview.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create Ingredient Modal */}
       {openCreateIngredientModal && (

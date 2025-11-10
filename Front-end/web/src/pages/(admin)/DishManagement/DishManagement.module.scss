@@ -120,6 +120,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -130,12 +131,14 @@
       width: 70rem;
       max-height: 90vh;
       overflow-y: auto;
-      backdrop-filter: blur(2px);
       background-color: var(--background-side);
-      border: 3px solid var(--shadow);
-      box-shadow: 1px 1px 1px var(--shadow);
+      border: 1px solid var(--border);
 
-      @include respond-above(md) {
+      ::placeholder {
+        color: var(--input-placeholder);
+      }
+
+      @include respond-above(lg) {
         width: 90%;
       }
 
@@ -162,12 +165,17 @@
           height: 36px;
           border: none;
           border-radius: 50%;
-          background: var(--description);
+          background: rgba(255, 255, 255, 0.2);
+          color: var(--white);
           cursor: pointer;
 
           display: flex;
           align-items: center;
           justify-content: center;
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+          }
         }
       }
 
@@ -186,15 +194,19 @@
         &:first-child {
           grid-column: 1 / -1; // Span full width for Name field
         }
+
         &:nth-child(2) {
           grid-column: 1 / -1; // Span full width for Cooking Time field
         }
+
         &:nth-child(3) {
           grid-column: 1 / -1; // Span full width for Calories field
         }
+
         &:nth-child(4) {
           grid-column: 1 / -1; // Span full width for Difficulty field
         }
+
         &:nth-child(5) {
           grid-column: 1 / -1; // Span full width for Description field
         }
@@ -202,8 +214,8 @@
 
       .modal-input-label {
         font-size: 16px;
-        color: var(--description);
         font-weight: 500;
+        color: var(--description);
       }
 
       .modal-input {
@@ -214,8 +226,8 @@
         background-color: var(--input-bg);
         border: 2px solid var(--input-border);
         padding: 0 1rem;
-        color: var(--input-text);
       }
+
       // Difficulty
       .difficulty-blocks {
         display: flex;
@@ -258,6 +270,7 @@
           border-color: var(--secondary);
         }
       }
+
       // Description
       .modal-textarea {
         resize: vertical;
@@ -266,6 +279,7 @@
         min-height: 10rem;
         font-family: inherit;
       }
+
       // Image
       .image-group {
         grid-column: 1 / -1;
@@ -312,6 +326,7 @@
         object-fit: contain;
         border-radius: 8px;
       }
+
       .image-upload-text {
         font-size: 16px;
         font-weight: 500;

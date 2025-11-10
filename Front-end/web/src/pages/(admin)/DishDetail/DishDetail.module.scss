@@ -383,6 +383,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -393,10 +394,12 @@
       width: 70rem;
       max-height: 90vh;
       overflow-y: auto;
-      backdrop-filter: blur(2px);
       background-color: var(--background-side);
-      border: 3px solid var(--shadow);
-      box-shadow: 1px 1px 1px var(--shadow);
+      border: 1px solid var(--border);
+
+      ::placeholder {
+        color: var(--input-placeholder);
+      }
 
       @include respond-above(lg) {
         width: 90%;
@@ -425,12 +428,17 @@
           height: 36px;
           border: none;
           border-radius: 50%;
-          background: var(--description);
+          background: rgba(255, 255, 255, 0.2);
+          color: var(--white);
           cursor: pointer;
 
           display: flex;
           align-items: center;
           justify-content: center;
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+          }
         }
       }
 
@@ -469,8 +477,8 @@
 
       .modal-input-label {
         font-size: 16px;
-        color: var(--description);
         font-weight: 500;
+        color: var(--description);
       }
 
       .modal-input {
@@ -481,7 +489,6 @@
         background-color: var(--input-bg);
         border: 2px solid var(--input-border);
         padding: 0 1rem;
-        color: var(--input-text);
       }
 
       // Difficulty
@@ -716,6 +723,46 @@
             transform: translateY(3px);
           }
         }
+      }
+
+      // Review Modal
+
+      .modal-form-review {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 4rem;
+      }
+
+      .modal-form-review-fullName {
+        font-size: 24px;
+        color: var(--black);
+      }
+
+      .modal-form-review-date {
+        font-size: 24px;
+        color: var(--black);
+      }
+
+      .modal-form-review-star {
+        margin-left: 4rem;
+        margin-top: 1rem;
+      }
+
+      .modal-form-review-description {
+        margin-left: 4rem;
+        margin-top: 2rem;
+        margin-right: 4rem;
+        margin-bottom: 2rem;
+        padding: 2rem;
+        border-radius: 5px;
+        background-color: var(--input-bg);
+        border: 2px solid var(--input-border);
+      }
+
+      .modal-form-review-description p {
+        font-size: 16px;
+        color: var(--black);
+        word-break: break-all;
       }
     }
   }
