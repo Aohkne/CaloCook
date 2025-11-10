@@ -720,6 +720,7 @@
 
 .review-card {
   flex: 0 0 280px;
+  min-width: 0;
   background-color: var(--background);
   border-radius: 12px;
   padding: 1.5rem;
@@ -761,6 +762,8 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--title);
+  word-break: break-word;
+  overflow-wrap: break-word;
 
   @media (max-width: 768px) {
     font-size: 1.2rem;
@@ -794,12 +797,14 @@
   font-size: 1.4rem;
   color: var(--description);
   line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   @media (max-width: 768px) {
     font-size: 1.2rem;
   }
 }
-
 
 //Modal rating
 .modal-stars {
@@ -875,6 +880,9 @@
   background-color: var(--background-subside);
   border-radius: 8px;
   min-height: 150px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 
   @media (max-width: 768px) {
     font-size: 1.4rem;
