@@ -383,6 +383,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -393,10 +394,12 @@
       width: 70rem;
       max-height: 90vh;
       overflow-y: auto;
-      backdrop-filter: blur(2px);
       background-color: var(--background-side);
-      border: 3px solid var(--shadow);
-      box-shadow: 1px 1px 1px var(--shadow);
+      border: 1px solid var(--border);
+
+      ::placeholder {
+        color: var(--input-placeholder);
+      }
 
       @include respond-above(lg) {
         width: 90%;
@@ -425,12 +428,17 @@
           height: 36px;
           border: none;
           border-radius: 50%;
-          background: var(--description);
+          background: rgba(255, 255, 255, 0.2);
+          color: var(--white);
           cursor: pointer;
 
           display: flex;
           align-items: center;
           justify-content: center;
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+          }
         }
       }
 
@@ -469,8 +477,8 @@
 
       .modal-input-label {
         font-size: 16px;
-        color: var(--description);
         font-weight: 500;
+        color: var(--description);
       }
 
       .modal-input {
@@ -481,7 +489,6 @@
         background-color: var(--input-bg);
         border: 2px solid var(--input-border);
         padding: 0 1rem;
-        color: var(--input-text);
       }
 
       // Difficulty
@@ -502,7 +509,7 @@
         width: 0;
         height: 0;
 
-        &:checked+.difficulty-block-text {
+        &:checked + .difficulty-block-text {
           background-color: var(--secondary);
           color: var(--background);
           border-color: var(--secondary);
@@ -640,11 +647,11 @@
         width: 0;
         height: 0;
 
-        &:checked+.switch-slider {
+        &:checked + .switch-slider {
           background-color: var(--secondary);
         }
 
-        &:checked+.switch-slider:before {
+        &:checked + .switch-slider:before {
           transform: translateX(2.4rem);
         }
       }
@@ -717,6 +724,46 @@
           }
         }
       }
+
+      // Review Modal
+
+      .modal-form-review {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 4rem;
+      }
+
+      .modal-form-review-fullName {
+        font-size: 24px;
+        color: var(--black);
+      }
+
+      .modal-form-review-date {
+        font-size: 24px;
+        color: var(--black);
+      }
+
+      .modal-form-review-star {
+        margin-left: 4rem;
+        margin-top: 1rem;
+      }
+
+      .modal-form-review-description {
+        margin-left: 4rem;
+        margin-top: 2rem;
+        margin-right: 4rem;
+        margin-bottom: 2rem;
+        padding: 2rem;
+        border-radius: 5px;
+        background-color: var(--input-bg);
+        border: 2px solid var(--input-border);
+      }
+
+      .modal-form-review-description p {
+        font-size: 16px;
+        color: var(--black);
+        word-break: break-all;
+      }
     }
   }
 
@@ -786,5 +833,106 @@
     border-radius: 10px;
     border: 1px solid var(--description);
     outline: none;
+  }
+
+  // Rating
+  .rating-wrapper {
+  }
+  .rating-title {
+    font-size: 32px;
+    font-weight: 500;
+  }
+  .total-rating {
+    display: flex;
+    gap: 4rem;
+    align-items: center;
+    margin-left: 3rem;
+  }
+  .total-rating-average {
+    font-size: 50px;
+    font-weight: 500;
+    color: var(--description);
+  }
+  .total-rating-value {
+    font-size: 16px;
+    color: var(--description);
+  }
+
+  // Review Card
+  .reviews-container {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .review-card {
+    position: relative;
+    min-width: 30rem;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    box-shadow: 5px 5px var(--description);
+    padding: 3rem 1rem 3rem 1rem;
+    margin-bottom: 16px;
+    background: var(--input-bg);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translate(5px, 5px);
+      box-shadow: 0 0 var(--description);
+      cursor: pointer;
+    }
+  }
+
+  .review-fullName-star-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .user-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .review-date {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .review-stars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .star-value {
+    font-size: 14px;
+    color: #6b7280;
+    margin-left: 4px;
+  }
+
+  .review-description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #374151;
+    margin: 0;
+    /* Single line ellipsis */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

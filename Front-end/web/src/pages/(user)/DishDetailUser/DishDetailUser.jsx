@@ -6,7 +6,7 @@ import styles from './DishDetailUser.module.scss';
 import { ROUTES } from '@/constants/routes';
 import { getDishById, getIngredientsByDishId, getStepsByDishId } from '@/api/dish';
 import { addToHistory, getTotalCalories } from '@/api/history';
-import { createRating, getRatingsByDishId, getAverageRating } from '@/api/rating';
+import { createRating, getRatingsByDishId, getAverageRating, updateRating } from '@/api/rating';
 import { createReport } from '@/api/report';
 import { getFavorites, addToFavorites, removeFromFavorites } from '@/api/favorite';
 import { getWebImagePath } from '@/utils/imageHelper';
@@ -40,6 +40,8 @@ function DishDetailUser() {
   const [ratingDescription, setRatingDescription] = useState('');
   const [selectedReview, setSelectedReview] = useState(null);
   const [isReviewDetailModalVisible, setIsReviewDetailModalVisible] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingRatingId, setEditingRatingId] = useState(null);
 
   const [averageRating, setAverageRating] = useState(0);
   const [totalRatings, setTotalRatings] = useState(0);
@@ -283,53 +285,82 @@ function DishDetailUser() {
   const handleCloseRatingModal = () => {
     setIsRatingModalVisible(false);
     setRatingDescription('');
+    setUserRating(0);
+    setIsEditMode(false);
+    setEditingRatingId(null);
   };
-
   const handleSubmitRating = async (e) => {
     e.preventDefault();
     if (!ratingDescription.trim() || ratingDescription.trim().length < 10) {
       setError('Please enter a description (at least 10 characters)');
+      handleCloseRatingModal();
       setTimeout(() => setError(''), 5000);
       return;
     }
 
     if (!userId) {
       setError('Please login to submit rating');
+      handleCloseRatingModal();
       setTimeout(() => setError(''), 5000);
       return;
     }
 
     try {
-      const response = await createRating({
-        userId,
-        dishId: id,
-        star: userRating,
-        description: ratingDescription.trim()
-      });
 
-      if (response.code === 201) {
-        setSuccess('Rating submitted successfully!');
-        handleCloseRatingModal();
-        setUserRating(0); // Reset stars
-        setRatingDescription(''); // Reset description
+      if (isEditMode && editingRatingId) {
+        // Update existing rating
+        const response = await updateRating(editingRatingId, {
+          star: userRating,
+          description: ratingDescription.trim()
+        });
 
-        // Refresh ratings
-        await fetchRatings();
+        if (response.code === 200) {
+          setSuccess('Rating updated successfully!');
+          handleCloseRatingModal();
+          await fetchRatings();
+          setTimeout(() => setSuccess(''), 5000);
+        }
+      } else {
+        // Create new rating (code cũ)
+        const response = await createRating({
+          userId,
+          dishId: id,
+          star: userRating,
+          description: ratingDescription.trim()
+        });
 
-        setTimeout(() => setSuccess(''), 5000);
+        if (response.code === 201) {
+          setSuccess('Rating submitted successfully!');
+          handleCloseRatingModal();
+          await fetchRatings();
+          setTimeout(() => setSuccess(''), 5000);
+        }
       }
     } catch (err) {
       console.error('Failed to submit rating:', err);
-      setError('Failed to submit rating. Please try again.');
+      setError(
+        isEditMode
+          ? 'Failed to update rating. Please try again.'
+          : 'User has already rated this dish!. Please try again.'
+      );
+      handleCloseRatingModal();
       setTimeout(() => setError(''), 5000);
     }
   };
-
-  const handleReviewCardClick = (review) => {
+  const handleReviewCardClick = (review, isEdit = false) => {
     setSelectedReview(review);
-    setIsReviewDetailModalVisible(true);
+    if (isEdit) {
+      // Edit mode
+      setIsEditMode(true);
+      setEditingRatingId(review.id);
+      setUserRating(review.rating);
+      setRatingDescription(review.comment);
+      setIsRatingModalVisible(true);
+    } else {
+      // View mode
+      setIsReviewDetailModalVisible(true);
+    }
   };
-
   const handleCloseReviewDetailModal = () => {
     setIsReviewDetailModalVisible(false);
     setSelectedReview(null);
@@ -653,7 +684,7 @@ function DishDetailUser() {
             <div
               key={userOwnRating.id}
               className={cx('review-card', 'own-review')}
-              onClick={() => handleReviewCardClick(userOwnRating)}
+              onClick={() => handleReviewCardClick(userOwnRating, false)}
             >
               <div className={cx('review-header')}>
                 <div className={cx('review-info')}>
@@ -662,7 +693,19 @@ function DishDetailUser() {
                   </div>
                   <div className={cx('review-stars')}>{renderStars(userOwnRating.rating)}</div>
                 </div>
-                <div className={cx('review-date')}>{userOwnRating.date}</div>
+
+                <div className={cx('review-date-actions')}>
+                  <div className={cx('review-date')}>{userOwnRating.date}</div>
+                  <button
+                    className={cx('edit-review-btn')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleReviewCardClick(userOwnRating, true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                </div>
               </div>
               <div className={cx('review-comment')}>
                 {userOwnRating.comment.length > 30
@@ -709,12 +752,19 @@ function DishDetailUser() {
         <div className={cx('modal-overlay')} onClick={handleCloseRatingModal}>
           <div className={cx('modal-content')} onClick={(e) => e.stopPropagation()}>
             <div className={cx('modal-header')}>
-              <h2 className={cx('modal-title')}>RATE THIS DISH</h2>
+              <h2 className={cx('modal-title')}>
+                {isEditMode ? 'EDIT YOUR RATING' : 'RATE THIS DISH'}
+              </h2>
               <button className={cx('modal-close-btn')} onClick={handleCloseRatingModal}>
                 &times;
               </button>
             </div>
             <form className={cx('modal-form')} onSubmit={handleSubmitRating}>
+              {/* ← MỚI: Hiển thị stars để chọn lại khi edit */}
+              <div className={cx('modal-stars-container')}>
+                <div className={cx('user-rating')}>{renderStars(userRating, true)}</div>
+              </div>
+
               <div className={cx('form-group')}>
                 <label htmlFor='ratingDescription' className={cx('form-label')}>
                   Tell us about your experience with this dish
@@ -731,7 +781,7 @@ function DishDetailUser() {
               </div>
               <div className={cx('rating-modal-actions')}>
                 <button type='submit' className={cx('btn-submit')}>
-                  Submit Rating
+                  {isEditMode ? 'Update Rating' : 'Submit Rating'}
                 </button>
               </div>
             </form>
