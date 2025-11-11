@@ -14,6 +14,8 @@ import { getStepsByDish, createStep, updateStep, deactivateStep, activateStep } 
 import { Icon } from '@iconify/react';
 import { getWebImagePath } from '@/utils/imageHelper';
 import { getAverageRating, getRatingsByDishId } from '@/api/rating';
+import { getAllCommentsForASpecificDish, deleteCommentById, createComment } from '@/api/comment';
+import CommentsList from '@/components/common/Comment/Comments';
 
 const cx = classNames.bind(styles);
 
@@ -40,6 +42,8 @@ function DishDetail() {
   const [rating, setRating] = useState([]);
   const [averageRatings, setAverageRatings] = useState({});
   const [selectedReview, setSelectedReview] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [totalComment, setTotalComment] = useState(null);
 
   // Add Ingredient form state
   const [ingredientFormData, setIngredientFormData] = useState({
@@ -66,6 +70,13 @@ function DishDetail() {
     calorie: '',
     difficulty: '',
     isActive: true
+  });
+
+  // Comment form state
+  const [commentFormData, setCommentFormData] = useState({
+    dishId: id,
+    content: '',
+    parentId: ''
   });
 
   // Fetch Dish
@@ -99,7 +110,6 @@ function DishDetail() {
       try {
         setSubLoading(true);
         const response = await getIngredientsByDish(id);
-        console.log(response.data);
         setIngredients(response.data);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load ingredient');
@@ -117,7 +127,6 @@ function DishDetail() {
       try {
         setSubLoading(true);
         const response = await getStepsByDish(id);
-        console.log(response.data);
         // Apply client-side sort so changing sort/order doesn't refetch or reload page
         setSteps(sortSteps(response.data || [], stepSort, stepOrder));
       } catch (err) {
@@ -135,7 +144,6 @@ function DishDetail() {
     const fetchRating = async () => {
       try {
         const response = await getRatingsByDishId(id);
-        console.log('Rating:', response.data);
         setRating(response.data);
       } catch (error) {
         setError(error.response?.data?.message || 'Failed to load rating');
@@ -150,7 +158,6 @@ function DishDetail() {
     const fetchAverageRating = async () => {
       try {
         const response = await getAverageRating(id);
-        console.log('Average rating:', response.data);
         setAverageRatings(response.data);
       } catch (error) {
         setError(error.response?.data?.message || 'Failed to load average rating');
@@ -160,11 +167,33 @@ function DishDetail() {
     if (dish) fetchAverageRating();
   }, [dish, id]);
 
+  // Fetch Comments for a specific dish
+  useEffect(() => {
+    const fetchCommentsForASpecificDish = async () => {
+      try {
+        const response = await getAllCommentsForASpecificDish(id);
+        console.log('Comments', response.comments);
+        setComments(response.comments);
+        setTotalComment(response.totalComment);
+      } catch (error) {
+        setError(error.response?.data?.message || 'Failed to load comments');
+      }
+    };
+
+    if (dish) fetchCommentsForASpecificDish();
+  }, [dish, id]);
+
   if (loading) return <div className={cx('wrapper')}>Loading...</div>;
   if (!dish) return <div className={cx('wrapper')}>No dish found</div>;
 
   // Handle Open Create Ingredient Modal
   const handleOpenCreateIngredientModal = () => {
+    setIngredientFormData({
+      dishId: id,
+      name: '',
+      quantity: '',
+      isActive: true
+    });
     setOpenCreateIngredientModal(true);
   };
 
@@ -260,6 +289,12 @@ function DishDetail() {
 
   // --- Step handlers (create / edit / toggle active) ---
   const handleOpenCreateStepModal = () => {
+    setStepFormData({
+      dishId: id,
+      stepNumber: '',
+      description: '',
+      isActive: true
+    });
     setOpenCreateStepModal(true);
   };
 
@@ -358,6 +393,14 @@ function DishDetail() {
     }));
   };
 
+  const handleCommentInputChange = (e) => {
+    const { id, value } = e.target;
+    setCommentFormData((prev) => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -450,6 +493,49 @@ function DishDetail() {
 
   const handleCloseReviewDetailModal = () => {
     setSelectedReview(false);
+  };
+
+  // Delete comment handler (passes down to CommentsList)
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await deleteCommentById(commentId);
+      setSuccess('Comment deleted successfully');
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete comment');
+    }
+  };
+
+  // Handle Create Comment (form submit)
+  const handleCreateComment = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    try {
+      const payload = {
+        dishId: commentFormData.dishId || id,
+        content: commentFormData.content,
+        parentId: commentFormData.parentId || ''
+      };
+
+      const response = await createComment(payload);
+      setSuccess(response?.message || 'Comment created successfully');
+      setError('');
+
+      // Refresh comments for the dish
+      try {
+        const resp = await getAllCommentsForASpecificDish(id);
+        // API in other places used resp.comments and resp.totalComment
+        setComments(resp.comments || resp.commentsList || []);
+        setTotalComment(resp.totalComment ?? resp.total ?? null);
+      } catch (refreshErr) {
+        // If refresh fails, still clear the form and show success
+        console.error('Failed to refresh comments after create', refreshErr);
+      }
+
+      // Clear the comment input
+      setCommentFormData({ dishId: id, content: '', parentId: '' });
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to create comment');
+    }
   };
 
   // Render Ingredients List
@@ -743,6 +829,31 @@ function DishDetail() {
               <p className={cx('review-description')}>{review.description}</p>
             </div>
           ))}
+        </div>
+
+        {/* Comment Input */}
+        <div className={cx('comment-input-container')}>
+          <form className={cx('comment-form')} onSubmit={handleCreateComment}>
+            <textarea
+              id='content'
+              value={commentFormData.content}
+              onChange={handleCommentInputChange}
+              rows={5}
+              placeholder='Text...'
+              className={cx('comment-form-textarea')}
+            />
+            <button type='submit' className={cx('comment-form-send-button')}>
+              SEND
+            </button>
+          </form>
+        </div>
+
+        {/* Comment Section */}
+        <div className={cx('comment-container')}>
+          <p className={cx('comment-title')}>
+            Comments <span className={cx('comment-total-value')}>{totalComment}</span>
+          </p>
+          <CommentsList comments={comments} onDelete={handleDeleteComment} />
         </div>
       </div>
 
@@ -1114,7 +1225,7 @@ function DishDetail() {
         <div className={cx('modal')}>
           <div className={cx('modal-content')}>
             <div className={cx('modal-content-top')}>
-              <h3 className={cx('modal-title')}>Create Dish</h3>
+              <h3 className={cx('modal-title')}>Edit Dish</h3>
               <button
                 type='button'
                 className={cx('modal-close-button')}
