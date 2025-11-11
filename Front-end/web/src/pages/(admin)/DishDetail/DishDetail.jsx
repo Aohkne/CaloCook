@@ -14,7 +14,7 @@ import { getStepsByDish, createStep, updateStep, deactivateStep, activateStep } 
 import { Icon } from '@iconify/react';
 import { getWebImagePath } from '@/utils/imageHelper';
 import { getAverageRating, getRatingsByDishId } from '@/api/rating';
-import { getAllCommentsForASpecificDish, deleteCommentById, createComment } from '@/api/comment';
+import { getAllCommentsForASpecificDish, deleteCommentById, createComment, updateCommentById } from '@/api/comment';
 import {
   addReaction,
   updateReactionById,
@@ -90,6 +90,10 @@ function DishDetail() {
 
   // Reply state to show who we're replying to and to set parentId
   const [replyTo, setReplyTo] = useState(null); // { id, name }
+
+  // Edit comment state
+  const [editingComment, setEditingComment] = useState(null); // { id, content }
+
   const commentTextareaRef = useRef(null);
 
   // Fetch Current User
@@ -609,6 +613,65 @@ function DishDetail() {
     setCommentFormData((prev) => ({ ...prev, parentId: '' }));
   };
 
+  // Handle request to edit a comment
+  const handleRequestEdit = (comment) => {
+    // Check if user can edit this comment (own comment only - even admins can only edit their own)
+    if (!currentUser || currentUser._id !== comment.user._id) {
+      setError('You can only edit your own comments');
+      return;
+    }
+
+    setEditingComment({ id: comment._id, originalContent: comment.content });
+    setCommentFormData((prev) => ({ ...prev, content: comment.content, parentId: '' }));
+    // Clear reply state when editing
+    setReplyTo(null);
+    // Focus textarea
+    setTimeout(() => commentTextareaRef.current?.focus(), 0);
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setEditingComment(null);
+    setCommentFormData((prev) => ({ ...prev, content: '', parentId: '' }));
+  };
+
+  // Handle update comment
+  const handleUpdateComment = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
+    if (!editingComment) return;
+
+    try {
+      const payload = {
+        content: commentFormData.content
+      };
+
+      await updateCommentById(editingComment.id, payload);
+      setSuccess('Comment updated successfully');
+      setError('');
+
+      // Refresh comments for the dish
+      try {
+        const resp = await getAllCommentsForASpecificDish(id);
+        setComments(resp.comments || resp.commentsList || []);
+        setTotalComment(resp.totalComment ?? resp.total ?? null);
+
+        // Reload reactions for the updated comments
+        if (resp.comments && resp.comments.length > 0) {
+          await loadReactions(resp.comments);
+        }
+      } catch (refreshErr) {
+        console.error('Failed to refresh comments after update', refreshErr);
+      }
+
+      // Clear edit state
+      setEditingComment(null);
+      setCommentFormData({ dishId: id, content: '', parentId: '' });
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to update comment');
+    }
+  };
+
   // Load reactions for comments
   const loadReactions = async (commentsList) => {
     if (!commentsList || commentsList.length === 0) {
@@ -996,7 +1059,16 @@ function DishDetail() {
             </div>
           )}
 
-          <form className={cx('comment-form')} onSubmit={handleCreateComment}>
+          {editingComment && (
+            <div className={cx('editing-comment')}>
+              Editing comment
+              <button type='button' className={cx('cancel-edit')} onClick={handleCancelEdit}>
+                Cancel
+              </button>
+            </div>
+          )}
+
+          <form className={cx('comment-form')} onSubmit={editingComment ? handleUpdateComment : handleCreateComment}>
             <textarea
               ref={commentTextareaRef}
               id='content'
@@ -1006,9 +1078,20 @@ function DishDetail() {
               placeholder='Text...'
               className={cx('comment-form-textarea')}
             />
-            <button type='submit' className={cx('comment-form-send-button')}>
-              SEND
-            </button>
+            {editingComment ? (
+              <div className={cx('comment-form-edit-buttons')}>
+                <button type='button' className={cx('comment-form-cancel-button')} onClick={handleCancelEdit}>
+                  CANCEL
+                </button>
+                <button type='submit' className={cx('comment-form-save-button')}>
+                  SAVE
+                </button>
+              </div>
+            ) : (
+              <button type='submit' className={cx('comment-form-send-button')}>
+                SEND
+              </button>
+            )}
           </form>
         </div>
 
@@ -1021,9 +1104,11 @@ function DishDetail() {
             comments={comments}
             onDelete={handleDeleteComment}
             onReply={handleRequestReply}
+            onEdit={handleRequestEdit}
             reactions={reactions}
             onReaction={handleReaction}
             currentUserId={currentUser?._id}
+            currentUser={currentUser}
           />
         </div>
       </div>

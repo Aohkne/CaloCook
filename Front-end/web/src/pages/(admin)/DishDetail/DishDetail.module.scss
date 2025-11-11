@@ -959,6 +959,64 @@
     resize: none;
   }
 
+  .comment-form-edit-buttons {
+    position: relative;
+  }
+
+  .comment-form-cancel-button {
+    position: absolute;
+    right: 12rem;
+    bottom: 1rem;
+    width: 10rem;
+    height: 4rem;
+    font-size: 16px;
+    border-radius: 5px;
+    color: var(--black);
+    background-color: var(--input-bg);
+    border: 2px solid var(--input-bg);
+    transition: all 0.25s ease;
+
+    ::placeholder {
+      text-align: start;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      cursor: pointer;
+    }
+
+    &:active {
+      transform: translateY(0px);
+    }
+  }
+
+  .comment-form-save-button {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    width: 10rem;
+    height: 4rem;
+    font-size: 16px;
+    border-radius: 5px;
+    color: var(--tertiary);
+    background-color: var(--secondary);
+    border: none;
+    transition: all 0.25s ease;
+
+    ::placeholder {
+      text-align: start;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      cursor: pointer;
+    }
+
+    &:active {
+      transform: translateY(0px);
+    }
+  }
+
   .comment-form-send-button {
     position: absolute;
     right: 1rem;

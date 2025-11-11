@@ -88,9 +88,11 @@ const Comment = ({
   onDelete,
   onRequestDelete,
   onReply,
+  onEdit,
   reactions,
   onReaction,
   currentUserId,
+  currentUser,
   isChild = false
 }) => {
   const [showReactionOptions, setShowReactionOptions] = useState(false);
@@ -222,6 +224,13 @@ const Comment = ({
             {/* ✅ Show "Answer" only for top-level comments */}
             {!isChild && <button onClick={() => onReply && onReply(comment._id, comment.user.fullName)}>Answer</button>}
 
+            {/* Show "Edit" only for comment owner (own comments only) */}
+            {currentUser && currentUser._id === comment.user._id && (
+              <button className={cx('comment-action-edit')} onClick={() => onEdit && onEdit(comment)}>
+                Edit
+              </button>
+            )}
+
             <button
               className={cx('comment-action-delete')}
               onClick={() => {
@@ -245,9 +254,11 @@ const Comment = ({
                 onDelete={onDelete}
                 onRequestDelete={onRequestDelete}
                 onReply={onReply}
+                onEdit={onEdit}
                 reactions={reactions}
                 onReaction={onReaction}
                 currentUserId={currentUserId}
+                currentUser={currentUser}
                 isChild={true} // ✅ mark as child
               />
             ))}
@@ -258,7 +269,7 @@ const Comment = ({
   );
 };
 
-const CommentsList = ({ comments, onDelete, onReply, reactions, onReaction, currentUserId }) => {
+const CommentsList = ({ comments, onDelete, onReply, onEdit, reactions, onReaction, currentUserId, currentUser }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingId, setPendingId] = useState(null);
 
@@ -290,9 +301,11 @@ const CommentsList = ({ comments, onDelete, onReply, reactions, onReaction, curr
           onDelete={onDelete}
           onRequestDelete={handleRequestDelete}
           onReply={onReply}
+          onEdit={onEdit}
           reactions={reactions}
           onReaction={onReaction}
           currentUserId={currentUserId}
+          currentUser={currentUser}
         />
       ))}
 
