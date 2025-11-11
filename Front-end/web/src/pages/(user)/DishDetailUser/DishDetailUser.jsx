@@ -206,62 +206,49 @@ function DishDetailUser() {
       return;
     }
 
-    const reactionsData = {};
+    const reactionPromises = [];
 
-    // Get all comments (including nested ones)
-    const getAllComments = (comments) => {
-      let allComments = [];
+    const traverseComments = (comments) => {
       comments.forEach((comment) => {
-        allComments.push(comment);
+        reactionPromises.push(
+          getAllReactionsForASpecificComment(comment._id)
+            .then((response) => ({
+              commentId: comment._id,
+              data: response?.data || response || { reactions: [], totalReaction: 0, reactionCounts: {} }
+            }))
+            .catch((error) => {
+              console.error(`Failed to load reactions for comment ${comment._id}:`, error);
+              return {
+                commentId: comment._id,
+                data: { reactions: [], totalReaction: 0, reactionCounts: {} }
+              };
+            })
+        );
+
         if (comment.children && comment.children.length > 0) {
-          allComments = allComments.concat(getAllComments(comment.children));
+          traverseComments(comment.children);
         }
       });
-      return allComments;
     };
 
-    const allComments = getAllComments(commentsList);
+    traverseComments(commentsList);
 
     try {
-      for (const comment of allComments) {
-        try {
-          console.log('Loading reactions for comment:', comment._id);
-          const response = await getAllReactionsForASpecificComment(comment._id);
-          console.log('Reaction response:', response);
-
-          if (response && (response.reactions || response.data)) {
-            const reactionData = response.reactions || response.data || response;
-            reactionsData[comment._id] = {
-              reactions: reactionData.reactions || [],
-              totalReaction: reactionData.totalReaction || 0,
-              reactionCounts: reactionData.reactionCounts || {}
-            };
-          } else {
-            reactionsData[comment._id] = {
-              reactions: [],
-              totalReaction: 0,
-              reactionCounts: {}
-            };
-          }
-        } catch (error) {
-          console.error(`Failed to load reactions for comment ${comment._id}:`, error);
-          reactionsData[comment._id] = {
-            reactions: [],
-            totalReaction: 0,
-            reactionCounts: {}
-          };
-        }
-      }
-      console.log('All reactions loaded:', reactionsData);
-      setReactions(reactionsData);
+      const reactionResults = await Promise.all(reactionPromises);
+      const reactionMap = {};
+      reactionResults.forEach(({ commentId, data }) => {
+        reactionMap[commentId] = data;
+      });
+      console.log('Loaded reactions:', reactionMap);
+      setReactions(reactionMap);
     } catch (error) {
-      console.error('Error loading reactions:', error);
+      console.error('Failed to load reactions:', error);
     }
   };
 
   // Handle reaction press
   const handleReaction = async (commentId, reactionType) => {
-    if (!currentUser) {
+    if (!currentUser?._id) {
       setError('Please log in to react to comments');
       return;
     }
@@ -272,40 +259,27 @@ function DishDetailUser() {
 
       if (userReaction) {
         if (userReaction.reactionType === reactionType) {
-          // Remove reaction if it's the same type
+          // Remove reaction if clicking same type
           await deleteReactionById(userReaction._id);
         } else {
-          // Update reaction if it's a different type
+          // Update reaction if changing to different type
           await updateReactionById(userReaction._id, { reactionType });
         }
       } else {
         // Add new reaction
-        await addReaction({
-          commentId,
-          userId: currentUser._id,
-          reactionType
-        });
+        await addReaction({ commentId, reactionType });
       }
 
-      // Reload reactions for this specific comment
-      try {
-        const response = await getAllReactionsForASpecificComment(commentId);
-        const reactionData = response.reactions || response.data || response;
-
-        setReactions((prev) => ({
-          ...prev,
-          [commentId]: {
-            reactions: reactionData.reactions || [],
-            totalReaction: reactionData.totalReaction || 0,
-            reactionCounts: reactionData.reactionCounts || {}
-          }
-        }));
-      } catch (refreshErr) {
-        console.error('Failed to refresh reactions after update:', refreshErr);
-      }
+      // Refresh reactions for this comment
+      const updatedReactions = await getAllReactionsForASpecificComment(commentId);
+      setReactions((prev) => ({
+        ...prev,
+        [commentId]: updatedReactions?.data ||
+          updatedReactions || { reactions: [], totalReaction: 0, reactionCounts: {} }
+      }));
     } catch (error) {
       console.error('Failed to handle reaction:', error);
-      setError('Failed to update reaction');
+      setError('Failed to update reaction. Please try again.');
     }
   };
 
