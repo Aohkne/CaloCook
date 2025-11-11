@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import classNames from 'classnames/bind';
 import styles from './DishDetail.module.scss';
 import { getDishById, updateDish } from '@/api/dish';
@@ -78,6 +78,10 @@ function DishDetail() {
     content: '',
     parentId: ''
   });
+
+  // Reply state to show who we're replying to and to set parentId
+  const [replyTo, setReplyTo] = useState(null); // { id, name }
+  const commentTextareaRef = useRef(null);
 
   // Fetch Dish
   useEffect(() => {
@@ -543,9 +547,24 @@ function DishDetail() {
 
       // Clear the comment input
       setCommentFormData({ dishId: id, content: '', parentId: '' });
+      // Clear reply state (stop replying to someone)
+      setReplyTo(null);
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to create comment');
     }
+  };
+
+  // Handle request to reply to a specific comment (from CommentsList)
+  const handleRequestReply = (commentId, fullName) => {
+    setReplyTo({ id: commentId, name: fullName });
+    setCommentFormData((prev) => ({ ...prev, parentId: commentId }));
+    // focus textarea
+    setTimeout(() => commentTextareaRef.current?.focus(), 0);
+  };
+
+  const handleCancelReply = () => {
+    setReplyTo(null);
+    setCommentFormData((prev) => ({ ...prev, parentId: '' }));
   };
 
   // Render Ingredients List
@@ -843,8 +862,18 @@ function DishDetail() {
 
         {/* Comment Input */}
         <div className={cx('comment-input-container')}>
+          {replyTo && (
+            <div className={cx('replying-to')}>
+              Replying to <strong style={{ fontSize: 16 }}>{replyTo.name}</strong>
+              <button type='button' className={cx('cancel-reply')} onClick={handleCancelReply}>
+                Cancel
+              </button>
+            </div>
+          )}
+
           <form className={cx('comment-form')} onSubmit={handleCreateComment}>
             <textarea
+              ref={commentTextareaRef}
               id='content'
               value={commentFormData.content}
               onChange={handleCommentInputChange}
@@ -863,7 +892,7 @@ function DishDetail() {
           <p className={cx('comment-title')}>
             Comments <span className={cx('comment-total-value')}>{totalComment}</span>
           </p>
-          <CommentsList comments={comments} onDelete={handleDeleteComment} />
+          <CommentsList comments={comments} onDelete={handleDeleteComment} onReply={handleRequestReply} />
         </div>
       </div>
 

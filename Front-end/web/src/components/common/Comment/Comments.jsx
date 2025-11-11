@@ -26,7 +26,7 @@ const timeAgo = (date) => {
   return 'just now';
 };
 
-const Comment = ({ comment, onDelete, onRequestDelete, isChild = false }) => {
+const Comment = ({ comment, onDelete, onRequestDelete, onReply, isChild = false }) => {
   return (
     <div className={cx('comment')}>
       <div className={cx('comment-header')}>
@@ -35,7 +35,7 @@ const Comment = ({ comment, onDelete, onRequestDelete, isChild = false }) => {
           src={comment.user.avatar_url || '/default-avatar.png'}
           alt={comment.user.fullName}
         />
-        <p className={cx('comment-author')}>{comment.user.fullName.toUpperCase()}</p>
+        <p className={cx('comment-author')}>{comment.user.fullName}</p>
       </div>
 
       <div className={cx('comment-body')}>
@@ -46,7 +46,7 @@ const Comment = ({ comment, onDelete, onRequestDelete, isChild = false }) => {
             <button>Like</button>
 
             {/* ✅ Show "Answer" only for top-level comments */}
-            {!isChild && <button>Answer</button>}
+            {!isChild && <button onClick={() => onReply && onReply(comment._id, comment.user.fullName)}>Answer</button>}
 
             <button
               className={cx('comment-action-delete')}
@@ -69,6 +69,8 @@ const Comment = ({ comment, onDelete, onRequestDelete, isChild = false }) => {
                 key={child._id}
                 comment={child}
                 onDelete={onDelete}
+                onRequestDelete={onRequestDelete}
+                onReply={onReply}
                 isChild={true} // ✅ mark as child
               />
             ))}
@@ -79,7 +81,7 @@ const Comment = ({ comment, onDelete, onRequestDelete, isChild = false }) => {
   );
 };
 
-const CommentsList = ({ comments, onDelete }) => {
+const CommentsList = ({ comments, onDelete, onReply }) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingId, setPendingId] = useState(null);
 
@@ -105,7 +107,13 @@ const CommentsList = ({ comments, onDelete }) => {
   return (
     <div className={cx('comments-list')}>
       {comments.map((comment) => (
-        <Comment key={comment._id} comment={comment} onDelete={onDelete} onRequestDelete={handleRequestDelete} />
+        <Comment
+          key={comment._id}
+          comment={comment}
+          onDelete={onDelete}
+          onRequestDelete={handleRequestDelete}
+          onReply={onReply}
+        />
       ))}
 
       {confirmOpen && (
