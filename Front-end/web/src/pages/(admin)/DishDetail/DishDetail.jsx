@@ -74,9 +74,9 @@ function DishDetail() {
   const [dishFormData, setDishFormData] = useState({
     name: '',
     description: '',
-    cookingTime: '',
+    cookingTime: 0,
     imageUrl: '',
-    calorie: '',
+    calorie: 0,
     difficulty: '',
     isActive: true
   });
@@ -416,8 +416,8 @@ function DishDetail() {
     setDishFormData({
       name: dish.name,
       description: dish.description,
-      cookingTime: dish.cookingTime,
-      calorie: dish.calorie,
+      cookingTime: Number(dish.cookingTime) || 0,
+      calorie: Number(dish.calorie) || 0,
       imageUrl: dish.imageUrl,
       difficulty: dish.difficulty,
       isActive: dish.isActive
@@ -427,9 +427,16 @@ function DishDetail() {
 
   const handleDishInputChange = (e) => {
     const { id, value } = e.target;
+    let processedValue = value;
+
+    // Convert to number for numeric fields
+    if (id === 'cookingTime' || id === 'calorie') {
+      processedValue = value === '' ? 0 : Number(value);
+    }
+
     setDishFormData((prev) => ({
       ...prev,
-      [id]: value
+      [id]: processedValue
     }));
   };
 
@@ -1059,15 +1066,6 @@ function DishDetail() {
             </div>
           )}
 
-          {editingComment && (
-            <div className={cx('editing-comment')}>
-              Editing comment
-              <button type='button' className={cx('cancel-edit')} onClick={handleCancelEdit}>
-                Cancel
-              </button>
-            </div>
-          )}
-
           <form className={cx('comment-form')} onSubmit={editingComment ? handleUpdateComment : handleCreateComment}>
             <textarea
               ref={commentTextareaRef}
@@ -1514,6 +1512,7 @@ function DishDetail() {
                 <input
                   id='cookingTime'
                   type='number'
+                  onWheel={(e) => e.target.blur()} // 👈 prevents scroll changing value
                   value={dishFormData.cookingTime}
                   onChange={handleDishInputChange}
                   placeholder='Enter cooking time'
@@ -1529,6 +1528,7 @@ function DishDetail() {
                 <input
                   id='calorie'
                   type='number'
+                  onWheel={(e) => e.target.blur()} // 👈 prevents scroll changing value
                   value={dishFormData.calorie}
                   onChange={handleDishInputChange}
                   placeholder='Enter calories'

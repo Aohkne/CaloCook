@@ -1,5 +1,5 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import classNames from 'classnames/bind';
 import styles from './DishDetailUser.module.scss';
@@ -9,16 +9,24 @@ import { addToHistory, getTotalCalories } from '@/api/history';
 import { createRating, getRatingsByDishId, getAverageRating, updateRating } from '@/api/rating';
 import { createReport } from '@/api/report';
 import { getFavorites, addToFavorites, removeFromFavorites } from '@/api/favorite';
+import { getAllCommentsForASpecificDish, deleteCommentById, createComment, updateCommentById } from '@/api/comment';
+import {
+  addReaction,
+  updateReactionById,
+  deleteReactionById,
+  getAllReactionsForASpecificComment
+} from '@/api/reaction';
+import { getUserProfile } from '@/api/user';
 import { getWebImagePath } from '@/utils/imageHelper';
 import CookingStepsModal from '@/components/ui/CookingStepsModal/CookingStepsModal';
 import { addAchievementPoints } from '@/api/achievement';
 import MedalAchievementModal from '@/components/ui/MedalAchievementModal/MedalAchievementModal';
+import CommentsList from '@/components/common/Comment/Comments';
 const cx = classNames.bind(styles);
 const defaultImage = '/images/default-img.png';
 
 function DishDetailUser() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [userRating, setUserRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -48,6 +56,26 @@ function DishDetailUser() {
   const [userOwnRating, setUserOwnRating] = useState(null);
   const [otherReviews, setOtherReviews] = useState([]);
 
+  // Comment and reaction states
+  const [comments, setComments] = useState([]);
+  const [totalComment, setTotalComment] = useState(null);
+  const [reactions, setReactions] = useState({}); // Store reactions by comment ID
+  const [currentUser, setCurrentUser] = useState(null); // Current user data
+
+  // Comment form state
+  const [commentFormData, setCommentFormData] = useState({
+    dishId: id,
+    content: '',
+    parentId: ''
+  });
+
+  // Reply state to show who we're replying to and to set parentId
+  const [replyTo, setReplyTo] = useState(null); // { id, name }
+
+  // Edit comment state
+  const [editingComment, setEditingComment] = useState(null); // { id, content }
+
+  const commentTextareaRef = useRef(null);
 
   const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -82,6 +110,47 @@ function DishDetailUser() {
 
   const userId = getUserId();
 
+  // Fetch Current User
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await getUserProfile();
+        const user = response.data || response.user || response;
+        console.log('Current user loaded:', user);
+        setCurrentUser(user);
+      } catch (error) {
+        console.error('Failed to fetch current user:', error);
+        setCurrentUser(null);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  // Fetch Comments for a specific dish
+  useEffect(() => {
+    const fetchComments = async () => {
+      if (!dish || !id) return;
+
+      try {
+        const response = await getAllCommentsForASpecificDish(id);
+        console.log('Comments loaded:', response);
+        setComments(response.comments || response.commentsList || []);
+        setTotalComment(response.totalComment ?? response.total ?? null);
+
+        // Load reactions after comments are loaded
+        if (response.comments && response.comments.length > 0) {
+          await loadReactions(response.comments);
+        }
+      } catch (error) {
+        console.error('Failed to fetch comments:', error);
+        setComments([]);
+        setTotalComment(0);
+      }
+    };
+
+    fetchComments();
+  }, [dish, id]);
 
   // Fetch ratings
   const fetchRatings = async () => {
@@ -109,8 +178,8 @@ function DishDetailUser() {
         }));
         // Separate user's own rating and others
         if (userId) {
-          const ownRating = formattedReviews.find(r => r.userId === userId);
-          const others = formattedReviews.filter(r => r.userId !== userId);
+          const ownRating = formattedReviews.find((r) => r.userId === userId);
+          const others = formattedReviews.filter((r) => r.userId !== userId);
 
           setUserOwnRating(ownRating || null);
           setOtherReviews(others);
@@ -130,6 +199,262 @@ function DishDetailUser() {
       console.error('Error fetching ratings:', error);
     }
   };
+
+  // Load reactions for comments
+  const loadReactions = async (commentsList) => {
+    if (!commentsList || commentsList.length === 0) {
+      return;
+    }
+
+    const reactionsData = {};
+
+    // Get all comments (including nested ones)
+    const getAllComments = (comments) => {
+      let allComments = [];
+      comments.forEach((comment) => {
+        allComments.push(comment);
+        if (comment.children && comment.children.length > 0) {
+          allComments = allComments.concat(getAllComments(comment.children));
+        }
+      });
+      return allComments;
+    };
+
+    const allComments = getAllComments(commentsList);
+
+    try {
+      for (const comment of allComments) {
+        try {
+          console.log('Loading reactions for comment:', comment._id);
+          const response = await getAllReactionsForASpecificComment(comment._id);
+          console.log('Reaction response:', response);
+
+          if (response && (response.reactions || response.data)) {
+            const reactionData = response.reactions || response.data || response;
+            reactionsData[comment._id] = {
+              reactions: reactionData.reactions || [],
+              totalReaction: reactionData.totalReaction || 0,
+              reactionCounts: reactionData.reactionCounts || {}
+            };
+          } else {
+            reactionsData[comment._id] = {
+              reactions: [],
+              totalReaction: 0,
+              reactionCounts: {}
+            };
+          }
+        } catch (error) {
+          console.error(`Failed to load reactions for comment ${comment._id}:`, error);
+          reactionsData[comment._id] = {
+            reactions: [],
+            totalReaction: 0,
+            reactionCounts: {}
+          };
+        }
+      }
+      console.log('All reactions loaded:', reactionsData);
+      setReactions(reactionsData);
+    } catch (error) {
+      console.error('Error loading reactions:', error);
+    }
+  };
+
+  // Handle reaction press
+  const handleReaction = async (commentId, reactionType) => {
+    if (!currentUser) {
+      setError('Please log in to react to comments');
+      return;
+    }
+
+    try {
+      const commentReactions = reactions[commentId];
+      const userReaction = commentReactions?.reactions?.find((r) => r.userId === currentUser._id);
+
+      if (userReaction) {
+        if (userReaction.reactionType === reactionType) {
+          // Remove reaction if it's the same type
+          await deleteReactionById(userReaction._id);
+        } else {
+          // Update reaction if it's a different type
+          await updateReactionById(userReaction._id, { reactionType });
+        }
+      } else {
+        // Add new reaction
+        await addReaction({
+          commentId,
+          userId: currentUser._id,
+          reactionType
+        });
+      }
+
+      // Reload reactions for this specific comment
+      try {
+        const response = await getAllReactionsForASpecificComment(commentId);
+        const reactionData = response.reactions || response.data || response;
+
+        setReactions((prev) => ({
+          ...prev,
+          [commentId]: {
+            reactions: reactionData.reactions || [],
+            totalReaction: reactionData.totalReaction || 0,
+            reactionCounts: reactionData.reactionCounts || {}
+          }
+        }));
+      } catch (refreshErr) {
+        console.error('Failed to refresh reactions after update:', refreshErr);
+      }
+    } catch (error) {
+      console.error('Failed to handle reaction:', error);
+      setError('Failed to update reaction');
+    }
+  };
+
+  // Delete comment handler (passes down to CommentsList)
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await deleteCommentById(commentId);
+      setSuccess('Comment deleted successfully');
+      setError('');
+
+      // Refresh comments so UI updates immediately without a full page refresh
+      try {
+        const resp = await getAllCommentsForASpecificDish(id);
+        setComments(resp.comments || resp.commentsList || []);
+        setTotalComment(resp.totalComment ?? resp.total ?? null);
+
+        // Reload reactions for the updated comments
+        if (resp.comments && resp.comments.length > 0) {
+          await loadReactions(resp.comments);
+        }
+      } catch (refreshErr) {
+        // If refresh fails, log but keep success message
+        console.error('Failed to refresh comments after delete', refreshErr);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete comment');
+    }
+  };
+
+  // Handle Create Comment (form submit)
+  const handleCreateComment = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    try {
+      const payload = {
+        dishId: commentFormData.dishId || id,
+        content: commentFormData.content,
+        parentId: commentFormData.parentId || ''
+      };
+
+      const response = await createComment(payload);
+      setSuccess(response?.message || 'Comment created successfully');
+      setError('');
+
+      // Refresh comments for the dish
+      try {
+        const resp = await getAllCommentsForASpecificDish(id);
+        // API in other places used resp.comments and resp.totalComment
+        setComments(resp.comments || resp.commentsList || []);
+        setTotalComment(resp.totalComment ?? resp.total ?? null);
+
+        // Reload reactions for the updated comments
+        if (resp.comments && resp.comments.length > 0) {
+          await loadReactions(resp.comments);
+        }
+      } catch (refreshErr) {
+        // If refresh fails, still clear the form and show success
+        console.error('Failed to refresh comments after create', refreshErr);
+      }
+
+      // Clear the comment input
+      setCommentFormData({ dishId: id, content: '', parentId: '' });
+      // Clear reply state (stop replying to someone)
+      setReplyTo(null);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to create comment');
+    }
+  };
+
+  // Handle request to reply to a specific comment (from CommentsList)
+  const handleRequestReply = (commentId, fullName) => {
+    setReplyTo({ id: commentId, name: fullName });
+    setCommentFormData((prev) => ({ ...prev, parentId: commentId }));
+    // focus textarea
+    setTimeout(() => commentTextareaRef.current?.focus(), 0);
+  };
+
+  const handleCancelReply = () => {
+    setReplyTo(null);
+    setCommentFormData((prev) => ({ ...prev, parentId: '' }));
+  };
+
+  // Handle request to edit a comment
+  const handleRequestEdit = (comment) => {
+    // Check if user can edit this comment (own comment only - even admins can only edit their own)
+    if (!currentUser || currentUser._id !== comment.user._id) {
+      setError('You can only edit your own comments');
+      return;
+    }
+
+    setEditingComment({ id: comment._id, originalContent: comment.content });
+    setCommentFormData((prev) => ({ ...prev, content: comment.content, parentId: '' }));
+    // Clear reply state when editing
+    setReplyTo(null);
+    // Focus textarea
+    setTimeout(() => commentTextareaRef.current?.focus(), 0);
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setEditingComment(null);
+    setCommentFormData((prev) => ({ ...prev, content: '', parentId: '' }));
+  };
+
+  // Handle update comment
+  const handleUpdateComment = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+
+    if (!editingComment) return;
+
+    try {
+      const payload = {
+        content: commentFormData.content
+      };
+
+      await updateCommentById(editingComment.id, payload);
+      setSuccess('Comment updated successfully');
+      setError('');
+
+      // Refresh comments for the dish
+      try {
+        const resp = await getAllCommentsForASpecificDish(id);
+        setComments(resp.comments || resp.commentsList || []);
+        setTotalComment(resp.totalComment ?? resp.total ?? null);
+
+        // Reload reactions for the updated comments
+        if (resp.comments && resp.comments.length > 0) {
+          await loadReactions(resp.comments);
+        }
+      } catch (refreshErr) {
+        console.error('Failed to refresh comments after update', refreshErr);
+      }
+
+      // Clear edit state
+      setEditingComment(null);
+      setCommentFormData({ dishId: id, content: '', parentId: '' });
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to update comment');
+    }
+  };
+
+  // Handle comment input change
+  const handleCommentInputChange = (e) => {
+    const { id, value } = e.target;
+    setCommentFormData((prev) => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
   useEffect(() => {
     const fetchDishDetail = async () => {
       if (!id) return;
@@ -154,7 +479,7 @@ function DishDetailUser() {
           console.log('Ingredients response:', ingredientResponse);
 
           if (ingredientResponse.code === 200) {
-            const activeIngredients = (ingredientResponse.data || []).filter(ing => ing.isActive === true);
+            const activeIngredients = (ingredientResponse.data || []).filter((ing) => ing.isActive === true);
             setIngredients(activeIngredients);
           } else {
             setIngredients([]);
@@ -169,7 +494,7 @@ function DishDetailUser() {
           console.log('Steps response:', stepResponse);
 
           if (stepResponse.code === 200) {
-            const activeSteps = (stepResponse.data || []).filter(step => step.isActive === true);
+            const activeSteps = (stepResponse.data || []).filter((step) => step.isActive === true);
             setSteps(activeSteps);
           } else {
             setSteps([]);
@@ -306,7 +631,6 @@ function DishDetailUser() {
     }
 
     try {
-
       if (isEditMode && editingRatingId) {
         // Update existing rating
         const response = await updateRating(editingRatingId, {
@@ -447,8 +771,12 @@ function DishDetailUser() {
           const difficultyLevel = dish.difficulty
             ? dish.difficulty.charAt(0).toUpperCase() + dish.difficulty.slice(1).toLowerCase()
             : '';
-          const emoji = dish.difficulty?.toLowerCase() === 'easy' ? '😊' :
-            dish.difficulty?.toLowerCase() === 'medium' ? '🔥' : '⚡';
+          const emoji =
+            dish.difficulty?.toLowerCase() === 'easy'
+              ? '😊'
+              : dish.difficulty?.toLowerCase() === 'medium'
+              ? '🔥'
+              : '⚡';
           message += `\n\n${emoji} +${pointsEarned} Points Earned!\n(${difficultyLevel} Difficulty)`;
         }
 
@@ -459,7 +787,6 @@ function DishDetailUser() {
           window.location.href = ROUTES.PROFILE_USER;
         }
       }, 300);
-
     } catch (err) {
       console.error('Failed to add to history:', err);
       setIsModalVisible(false);
@@ -661,14 +988,10 @@ function DishDetailUser() {
           <h2 className={cx('rating-title')}>Rating</h2>
           <div className={cx('rating-top')}>
             <div className={cx('average-rating')}>
-              <span className={cx('rating-number')}>
-                {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
-              </span>
+              <span className={cx('rating-number')}>{averageRating > 0 ? averageRating.toFixed(1) : '0.0'}</span>
             </div>
             <div className={cx('stars-info')}>
-              <div className={cx('stars-display')}>
-                {renderStars(averageRating)}
-              </div>
+              <div className={cx('stars-display')}>{renderStars(averageRating)}</div>
               <div className={cx('rating-count')}>
                 {totalRatings} {totalRatings === 1 ? 'Rating' : 'Ratings'}
               </div>
@@ -688,9 +1011,7 @@ function DishDetailUser() {
             >
               <div className={cx('review-header')}>
                 <div className={cx('review-info')}>
-                  <div className={cx('review-name')}>
-                    {userOwnRating.userName}
-                  </div>
+                  <div className={cx('review-name')}>{userOwnRating.userName}</div>
                   <div className={cx('review-stars')}>{renderStars(userOwnRating.rating)}</div>
                 </div>
 
@@ -718,11 +1039,7 @@ function DishDetailUser() {
           {/* Other reviews - show 4 most recent */}
           {otherReviews.length > 0 ? (
             otherReviews.slice(0, 4).map((review) => (
-              <div
-                key={review.id}
-                className={cx('review-card')}
-                onClick={() => handleReviewCardClick(review)}
-              >
+              <div key={review.id} className={cx('review-card')} onClick={() => handleReviewCardClick(review)}>
                 <div className={cx('review-header')}>
                   <div className={cx('review-info')}>
                     <div className={cx('review-name')}>{review.userName}</div>
@@ -731,15 +1048,68 @@ function DishDetailUser() {
                   <div className={cx('review-date')}>{review.date}</div>
                 </div>
                 <div className={cx('review-comment')}>
-                  {review.comment.length > 30
-                    ? `${review.comment.substring(0, 30)}...`
-                    : review.comment}
+                  {review.comment.length > 30 ? `${review.comment.substring(0, 30)}...` : review.comment}
                 </div>
               </div>
             ))
           ) : !userOwnRating ? (
             <div className={cx('empty-reviews')}>No reviews yet. Be the first to rate this dish!</div>
           ) : null}
+        </div>
+
+        {/* Comment Input */}
+        <div className={cx('comment-input-container')}>
+          {replyTo && (
+            <div className={cx('replying-to')}>
+              Replying to <strong style={{ fontSize: 16 }}>{replyTo.name}</strong>
+              <button type='button' className={cx('cancel-reply')} onClick={handleCancelReply}>
+                Cancel
+              </button>
+            </div>
+          )}
+
+          <form className={cx('comment-form')} onSubmit={editingComment ? handleUpdateComment : handleCreateComment}>
+            <textarea
+              ref={commentTextareaRef}
+              id='content'
+              value={commentFormData.content}
+              onChange={handleCommentInputChange}
+              rows={5}
+              placeholder='Text...'
+              className={cx('comment-form-textarea')}
+            />
+            {editingComment ? (
+              <div className={cx('comment-form-edit-buttons')}>
+                <button type='button' className={cx('comment-form-cancel-button')} onClick={handleCancelEdit}>
+                  CANCEL
+                </button>
+                <button type='submit' className={cx('comment-form-save-button')}>
+                  SAVE
+                </button>
+              </div>
+            ) : (
+              <button type='submit' className={cx('comment-form-send-button')}>
+                SEND
+              </button>
+            )}
+          </form>
+        </div>
+
+        {/* Comment Section */}
+        <div className={cx('comment-container')}>
+          <p className={cx('comment-title')}>
+            Comments <span className={cx('comment-total-value')}>{totalComment}</span>
+          </p>
+          <CommentsList
+            comments={comments}
+            onDelete={handleDeleteComment}
+            onReply={handleRequestReply}
+            onEdit={handleRequestEdit}
+            reactions={reactions}
+            onReaction={handleReaction}
+            currentUserId={currentUser?._id}
+            currentUser={currentUser}
+          />
         </div>
 
         <button className={cx('cook-btn')} onClick={handleCook}>
@@ -752,9 +1122,7 @@ function DishDetailUser() {
         <div className={cx('modal-overlay')} onClick={handleCloseRatingModal}>
           <div className={cx('modal-content')} onClick={(e) => e.stopPropagation()}>
             <div className={cx('modal-header')}>
-              <h2 className={cx('modal-title')}>
-                {isEditMode ? 'EDIT YOUR RATING' : 'RATE THIS DISH'}
-              </h2>
+              <h2 className={cx('modal-title')}>{isEditMode ? 'EDIT YOUR RATING' : 'RATE THIS DISH'}</h2>
               <button className={cx('modal-close-btn')} onClick={handleCloseRatingModal}>
                 &times;
               </button>
@@ -804,12 +1172,8 @@ function DishDetailUser() {
                 <div className={cx('review-detail-name')}>{selectedReview.userName}</div>
                 <div className={cx('review-detail-date')}>{selectedReview.date}</div>
               </div>
-              <div className={cx('review-detail-stars')}>
-                {renderStars(selectedReview.rating)}
-              </div>
-              <div className={cx('review-detail-comment')}>
-                {selectedReview.comment}
-              </div>
+              <div className={cx('review-detail-stars')}>{renderStars(selectedReview.rating)}</div>
+              <div className={cx('review-detail-comment')}>{selectedReview.comment}</div>
             </div>
           </div>
         </div>
