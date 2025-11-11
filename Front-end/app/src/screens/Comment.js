@@ -433,12 +433,14 @@ export default function Comment({ route, navigation }) {
 
                             {renderReactionSummary(comment._id)}
 
-                            <TouchableOpacity
-                                style={styles.actionButton}
-                                onPress={() => handleAnswer(comment)}
-                            >
-                                <Text style={styles.actionText}>Ans</Text>
-                            </TouchableOpacity>
+                            {!isReply && (
+                                <TouchableOpacity
+                                    style={styles.actionButton}
+                                    onPress={() => handleAnswer(comment)}
+                                >
+                                    <Text style={styles.actionText}>Answer</Text>
+                                </TouchableOpacity>
+                            )}
 
                             {isOwnComment && (
                                 <>
@@ -446,14 +448,14 @@ export default function Comment({ route, navigation }) {
                                         style={styles.actionButton}
                                         onPress={() => handleEdit(comment)}
                                     >
-                                        <Text style={styles.actionText}>Edt</Text>
+                                        <Text style={styles.actionText}>Edit</Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
                                         onPress={() => handleDeleteComment(comment._id)}
                                         style={styles.actionButton}
                                     >
-                                        <Text style={styles.deleteText}>Del</Text>
+                                        <Text style={styles.deleteText}>Delete</Text>
                                     </TouchableOpacity>
                                 </>
                             )}
