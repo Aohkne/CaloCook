@@ -124,3 +124,89 @@
   border: none;
   cursor: pointer;
 }
+
+// Reaction styles
+.reaction-container {
+  position: relative;
+  display: inline-block;
+}
+
+.reaction-button {
+  font-size: 15px;
+  background: none;
+  border: none;
+  color: var(--description);
+  cursor: pointer;
+  padding: 0;
+  
+  &:hover {
+    color: var(--black);
+  }
+  
+  &.reacted {
+    font-weight: 600;
+  }
+}
+
+.reaction-options {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid var(--input-border);
+  border-radius: 25px;
+  padding: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-bottom: 0.5rem;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 1rem;
+    border: 6px solid transparent;
+    border-top-color: white;
+  }
+}
+
+.reaction-option {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease;
+  
+  &:hover {
+    transform: scale(1.2);
+  }
+  
+  &.remove-reaction {
+    &:hover {
+      background-color: #fee;
+    }
+  }
+}
+
+.reaction-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 13px;
+  color: var(--description);
+}
+
+.reaction-icon-small {
+  display: flex;
+  align-items: center;
+}
+
+.reaction-count {
+  font-size: 13px;
+}

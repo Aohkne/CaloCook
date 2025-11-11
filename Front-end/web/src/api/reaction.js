@@ -26,6 +26,6 @@ export const deleteReactionById = async (id) => {
 
 // ✅ Get reactions by comment ID
 export const getAllReactionsForASpecificComment = async (commentId) => {
-  const response = await api.get(`/reaction/comment/${commentId}`);
+  const response = await api.get(`/reaction/${commentId}`);
   return response.data;
 };
