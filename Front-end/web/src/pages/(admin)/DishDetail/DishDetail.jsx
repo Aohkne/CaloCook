@@ -501,6 +501,16 @@ function DishDetail() {
       await deleteCommentById(commentId);
       setSuccess('Comment deleted successfully');
       setError('');
+
+      // Refresh comments so UI updates immediately without a full page refresh
+      try {
+        const resp = await getAllCommentsForASpecificDish(id);
+        setComments(resp.comments || resp.commentsList || []);
+        setTotalComment(resp.totalComment ?? resp.total ?? null);
+      } catch (refreshErr) {
+        // If refresh fails, log but keep success message
+        console.error('Failed to refresh comments after delete', refreshErr);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to delete comment');
     }
