@@ -7,20 +7,18 @@ const cx = classNames.bind(styles);
 // Helper function to get reaction icon
 const getReactionIcon = (type, size = 18) => {
   const iconProps = { width: size, height: size };
-  
+
   switch (type) {
     case 'like':
-      return <Icon icon="mdi:thumb-up" {...iconProps} style={{ color: '#4A90E2' }} />;
+      return <Icon icon='mdi:thumb-up' {...iconProps} style={{ color: '#4A90E2' }} />;
     case 'love':
-      return <Icon icon="mdi:heart" {...iconProps} style={{ color: '#E74C3C' }} />;
+      return <Icon icon='mdi:heart' {...iconProps} style={{ color: '#E74C3C' }} />;
     case 'haha':
-      return <Icon icon="mdi:emoticon-happy-outline" {...iconProps} style={{ color: '#FDB44B' }} />;
+      return <Icon icon='mdi:emoticon-happy-outline' {...iconProps} style={{ color: '#FDB44B' }} />;
     case 'angry':
-      return <Icon icon="mdi:emoticon-angry-outline" {...iconProps} style={{ color: '#D35400' }} />;
-    case 'sad':
-      return <Icon icon="mdi:emoticon-sad-outline" {...iconProps} style={{ color: '#95A5A6' }} />;
+      return <Icon icon='mdi:emoticon-angry-outline' {...iconProps} style={{ color: '#D35400' }} />;
     case 'wow':
-      return <Icon icon="mdi:emoticon-surprised-outline" {...iconProps} style={{ color: '#9B59B6' }} />;
+      return <Icon icon='mdi:emoticon-surprised-outline' {...iconProps} style={{ color: '#9B59B6' }} />;
     default:
       return null;
   }
@@ -29,26 +27,36 @@ const getReactionIcon = (type, size = 18) => {
 // Helper function to get reaction color
 const getReactionColor = (type) => {
   switch (type) {
-    case 'like': return '#4A90E2';
-    case 'love': return '#E74C3C';
-    case 'haha': return '#FDB44B';
-    case 'angry': return '#D35400';
-    case 'sad': return '#95A5A6';
-    case 'wow': return '#9B59B6';
-    default: return '#666';
+    case 'like':
+      return '#4A90E2';
+    case 'love':
+      return '#E74C3C';
+    case 'haha':
+      return '#FDB44B';
+    case 'angry':
+      return '#D35400';
+    case 'wow':
+      return '#9B59B6';
+    default:
+      return '#666';
   }
 };
 
 // Helper function to get reaction label
 const getReactionLabel = (type) => {
   switch (type) {
-    case 'like': return 'Like';
-    case 'love': return 'Love';
-    case 'haha': return 'Haha';
-    case 'angry': return 'Angry';
-    case 'sad': return 'Sad';
-    case 'wow': return 'Wow';
-    default: return '';
+    case 'like':
+      return 'Like';
+    case 'love':
+      return 'Love';
+    case 'haha':
+      return 'Haha';
+    case 'angry':
+      return 'Angry';
+    case 'wow':
+      return 'Wow';
+    default:
+      return '';
   }
 };
 
@@ -75,9 +83,18 @@ const timeAgo = (date) => {
   return 'just now';
 };
 
-const Comment = ({ comment, onDelete, onRequestDelete, onReply, reactions, onReaction, currentUserId, isChild = false }) => {
+const Comment = ({
+  comment,
+  onDelete,
+  onRequestDelete,
+  onReply,
+  reactions,
+  onReaction,
+  currentUserId,
+  isChild = false
+}) => {
   const [showReactionOptions, setShowReactionOptions] = useState(false);
-  
+
   // Close reaction options when clicking outside
   React.useEffect(() => {
     const handleClickOutside = () => {
@@ -89,11 +106,11 @@ const Comment = ({ comment, onDelete, onRequestDelete, onReply, reactions, onRea
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [showReactionOptions]);
-  
+
   // Get reactions for this comment
   const commentReactions = reactions?.[comment._id];
-  const userReaction = commentReactions?.reactions?.find(r => r.userId === currentUserId);
-  
+  const userReaction = commentReactions?.reactions?.find((r) => r.userId === currentUserId);
+
   // Handle reaction button click
   const handleReactionClick = (reactionType) => {
     if (onReaction) {
@@ -128,11 +145,11 @@ const Comment = ({ comment, onDelete, onRequestDelete, onReply, reactions, onRea
         <div className={cx('comment-footer')}>
           <span className={cx('comment-actions')}>
             <span className={cx('comment-time')}>{timeAgo(comment.createdAt)}</span>
-            
+
             {/* Reaction Button */}
             <div className={cx('reaction-container')} onClick={(e) => e.stopPropagation()}>
               {!userReaction ? (
-                <button 
+                <button
                   className={cx('reaction-button')}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -146,7 +163,7 @@ const Comment = ({ comment, onDelete, onRequestDelete, onReply, reactions, onRea
                   Like
                 </button>
               ) : (
-                <button 
+                <button
                   className={cx('reaction-button', 'reacted')}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -157,11 +174,11 @@ const Comment = ({ comment, onDelete, onRequestDelete, onReply, reactions, onRea
                   {getReactionLabel(userReaction.reactionType)}
                 </button>
               )}
-              
+
               {/* Reaction Options */}
               {showReactionOptions && (
                 <div className={cx('reaction-options')} onClick={(e) => e.stopPropagation()}>
-                  {['like', 'love', 'haha', 'angry', 'sad', 'wow'].map((reactionType) => (
+                  {['like', 'love', 'haha', 'angry', 'wow'].map((reactionType) => (
                     <button
                       key={reactionType}
                       className={cx('reaction-option')}
@@ -181,9 +198,9 @@ const Comment = ({ comment, onDelete, onRequestDelete, onReply, reactions, onRea
                         e.stopPropagation();
                         handleReactionClick(userReaction.reactionType);
                       }}
-                      title="Remove reaction"
+                      title='Remove reaction'
                     >
-                      <Icon icon="mdi:close" width={24} height={24} style={{ color: '#E74C3C' }} />
+                      <Icon icon='mdi:close' width={24} height={24} style={{ color: '#E74C3C' }} />
                     </button>
                   )}
                 </div>

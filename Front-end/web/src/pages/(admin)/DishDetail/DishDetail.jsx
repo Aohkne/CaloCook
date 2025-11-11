@@ -15,11 +15,11 @@ import { Icon } from '@iconify/react';
 import { getWebImagePath } from '@/utils/imageHelper';
 import { getAverageRating, getRatingsByDishId } from '@/api/rating';
 import { getAllCommentsForASpecificDish, deleteCommentById, createComment } from '@/api/comment';
-import { 
-  addReaction, 
-  updateReactionById, 
-  deleteReactionById, 
-  getAllReactionsForASpecificComment 
+import {
+  addReaction,
+  updateReactionById,
+  deleteReactionById,
+  getAllReactionsForASpecificComment
 } from '@/api/reaction';
 import { getUserProfile } from '@/api/user';
 import CommentsList from '@/components/common/Comment/Comments';
@@ -205,7 +205,7 @@ function DishDetail() {
         console.log('Comments', response.comments);
         setComments(response.comments);
         setTotalComment(response.totalComment);
-        
+
         // Load reactions for all comments
         if (response.comments && response.comments.length > 0) {
           console.log('Loading reactions for comments:', response.comments.length);
@@ -543,7 +543,7 @@ function DishDetail() {
         const resp = await getAllCommentsForASpecificDish(id);
         setComments(resp.comments || resp.commentsList || []);
         setTotalComment(resp.totalComment ?? resp.total ?? null);
-        
+
         // Reload reactions for the updated comments
         if (resp.comments && resp.comments.length > 0) {
           await loadReactions(resp.comments);
@@ -577,7 +577,7 @@ function DishDetail() {
         // API in other places used resp.comments and resp.totalComment
         setComments(resp.comments || resp.commentsList || []);
         setTotalComment(resp.totalComment ?? resp.total ?? null);
-        
+
         // Reload reactions for the updated comments
         if (resp.comments && resp.comments.length > 0) {
           await loadReactions(resp.comments);
@@ -616,24 +616,24 @@ function DishDetail() {
     }
 
     const reactionPromises = [];
-    
+
     const traverseComments = (comments) => {
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         reactionPromises.push(
           getAllReactionsForASpecificComment(comment._id)
-            .then(response => ({ 
-              commentId: comment._id, 
+            .then((response) => ({
+              commentId: comment._id,
               data: response?.data || response || { reactions: [], totalReaction: 0, reactionCounts: {} }
             }))
-            .catch(error => {
+            .catch((error) => {
               console.error(`Failed to load reactions for comment ${comment._id}:`, error);
-              return { 
-                commentId: comment._id, 
+              return {
+                commentId: comment._id,
                 data: { reactions: [], totalReaction: 0, reactionCounts: {} }
               };
             })
         );
-        
+
         if (comment.children && comment.children.length > 0) {
           traverseComments(comment.children);
         }
@@ -641,7 +641,7 @@ function DishDetail() {
     };
 
     traverseComments(commentsList);
-    
+
     try {
       const reactionResults = await Promise.all(reactionPromises);
       const reactionMap = {};
@@ -664,7 +664,7 @@ function DishDetail() {
 
     try {
       const commentReactions = reactions[commentId];
-      const userReaction = commentReactions?.reactions?.find(r => r.userId === currentUser._id);
+      const userReaction = commentReactions?.reactions?.find((r) => r.userId === currentUser._id);
 
       if (userReaction) {
         if (userReaction.reactionType === reactionType) {
@@ -681,11 +681,11 @@ function DishDetail() {
 
       // Refresh reactions for this comment
       const updatedReactions = await getAllReactionsForASpecificComment(commentId);
-      setReactions(prev => ({
+      setReactions((prev) => ({
         ...prev,
-        [commentId]: updatedReactions?.data || updatedReactions || { reactions: [], totalReaction: 0, reactionCounts: {} }
+        [commentId]: updatedReactions?.data ||
+          updatedReactions || { reactions: [], totalReaction: 0, reactionCounts: {} }
       }));
-      
     } catch (error) {
       console.error('Failed to handle reaction:', error);
       setError('Failed to update reaction. Please try again.');
@@ -1017,9 +1017,9 @@ function DishDetail() {
           <p className={cx('comment-title')}>
             Comments <span className={cx('comment-total-value')}>{totalComment}</span>
           </p>
-          <CommentsList 
-            comments={comments} 
-            onDelete={handleDeleteComment} 
+          <CommentsList
+            comments={comments}
+            onDelete={handleDeleteComment}
             onReply={handleRequestReply}
             reactions={reactions}
             onReaction={handleReaction}

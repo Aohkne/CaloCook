@@ -138,11 +138,11 @@
   color: var(--description);
   cursor: pointer;
   padding: 0;
-  
+
   &:hover {
     color: var(--black);
   }
-  
+
   &.reacted {
     font-weight: 600;
   }
@@ -161,7 +161,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   margin-bottom: 0.5rem;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -182,11 +182,11 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.1s ease;
-  
+
   &:hover {
     transform: scale(1.2);
   }
-  
+
   &.remove-reaction {
     &:hover {
       background-color: #fee;
