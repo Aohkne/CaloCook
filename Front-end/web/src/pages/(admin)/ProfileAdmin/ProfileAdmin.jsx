@@ -95,6 +95,7 @@ function ProfileAdmin() {
             // Prepare data for API
             const updateData = {
                 username: editFormData.name,
+                fullName: editFormData.name,
                 email: editFormData.email,
                 avatar_url: editFormData.avatar
             };
@@ -222,7 +223,7 @@ function ProfileAdmin() {
                             </div>
 
                             <form className={cx('edit-form')} onSubmit={handleSubmit}>
-                                 {/* Note cảnh báo */}
+                                {/* Note cảnh báo */}
                                 <div className={cx('warning-note')}>
                                     <Icon icon='heroicons:exclamation-triangle' width='20' height='20' />
                                     <span className={cx('warning-text')}>Username and Email cannot be changed for security reasons.</span>
