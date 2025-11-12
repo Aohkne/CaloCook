@@ -136,7 +136,7 @@ const Comment = ({
       <div className={cx('comment-header')}>
         <img
           className={cx('comment-avatar')}
-          src={comment.user.avatar_url || '/default-avatar.png'}
+          src={comment.user.avatar_url || '/images/default-img.png'}
           alt={comment.user.fullName}
         />
         <p className={cx('comment-author')}>{comment.user.fullName}</p>
@@ -231,16 +231,19 @@ const Comment = ({
               </button>
             )}
 
-            <button
-              className={cx('comment-action-delete')}
-              onClick={() => {
-                // prefer the request-delete callback (opens confirm modal) if provided
-                if (onRequestDelete) return onRequestDelete(comment._id);
-                if (onDelete) return onDelete(comment._id);
-              }}
-            >
-              Delete
-            </button>
+            {/* Show "Delete" only for: 1) Admin users (can delete any comment), 2) Comment owner (own comments only) */}
+            {currentUser && (currentUser.role === 'admin' || currentUser._id === comment.user._id) && (
+              <button
+                className={cx('comment-action-delete')}
+                onClick={() => {
+                  // prefer the request-delete callback (opens confirm modal) if provided
+                  if (onRequestDelete) return onRequestDelete(comment._id);
+                  if (onDelete) return onDelete(comment._id);
+                }}
+              >
+                Delete
+              </button>
+            )}
           </span>
         </div>
 
