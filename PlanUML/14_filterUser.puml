@@ -3,6 +3,7 @@
 actor Admin
 boundary "UserListPage" as View #lightblue
 participant ":userRoute" as Route #lightblue
+participant "authMiddleware" as Auth #Orange
 control "userController" as Controller #lightblue
 participant ":userService" as Service #lightblue
 entity "userModel" as Model #lightblue
@@ -15,44 +16,53 @@ activate View
 
 View -> Route: 2. GET /users/filter?isActive=true
 activate Route
+Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+activate Auth
+ref over Auth : 4. 3.0 Verify Token & Check Role
 
-Route -> Controller: 3. searchByIsActive(req, res)
+opt Authentication/Authorization Failed
+    Auth --> Route: 5.1. Return 401/403 Error
+    Route --> View: 5.2. Show error
+    View --> Admin: 5.3. Display error message
+end
+Auth --> Route: 6. User authenticated & authorized
+deactivate Auth
+Route -> Controller: 7. searchByIsActive(req, res)
 activate Controller
 
-Controller -> Service: 4. searchByIsActive(isActive)
+Controller -> Service: 8. searchByIsActive(isActive)
 activate Service
 
-Service -> Model: 5. searchByIsActive()
+Service -> Model: 9. searchByIsActive()
 activate Model
 
-Model -> MongoDB: 6. ExecuteQuery()
+Model -> MongoDB: 10. ExecuteQuery()
 activate MongoDB
-MongoDB --> Model: 7. Return filtered list
+MongoDB --> Model: 11. Return filtered list
 deactivate MongoDB
 
-Model --> Service: 8. Return result
+Model --> Service: 12. Return result
 deactivate Model
 
 alt Users found
-    Service --> Controller: 8.1 Return filtered users
+    Service --> Controller: 12.1 Return filtered users
+    Controller --> Route: 12.1.1 Return filtered users
 
-    Controller --> Route: 8.1.1 Return filtered users
+    Route --> View: 12.1.2 Render filtered list
 
-    Route --> View: 8.1.2 Render filtered list
-
-    View --> Admin: 8.1.3 Show filtered list of users
+    View --> Admin: 12.1.3 Show filtered list of users
 
 else No users found
-    Service --> Controller: 8.2 Return empty list
+    Service --> Controller: 12.2 Return empty list
     deactivate Service
 
-    Controller --> Route: 8.2.1 Return empty list
+    Controller --> Route: 12.2.1 Return empty list
     deactivate Controller
 
-    Route --> View: 8.2.2 Show "No users found for this filter"
+    Route --> View: 12.2.2 Show "No users found for this filter"
     deactivate Route
 
-    View --> Admin: 8.2.3 Display empty state message
+    View --> Admin: 12.2.3 Display empty state message
     deactivate View
     deactivate Admin
 end

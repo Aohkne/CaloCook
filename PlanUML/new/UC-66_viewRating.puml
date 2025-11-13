@@ -1,0 +1,63 @@
+@startuml ViewRating
+
+actor User as "User"
+boundary "Dish Detail Page" as View #lightblue
+participant ":ratingRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "ratingController" as Controller #lightblue
+participant ":ratingService" as Service #lightblue
+entity "ratingModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View Rating
+    User -> View: 1. Click a specific dish
+    activate User
+    activate View
+
+    View -> Route: 2. GET /api/v1/rating { dishId }
+    activate Route
+    Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 4. Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 4.1. Return 401/403 Error
+        Route --> View: 4.2. Show error
+        View --> User: 4.3. Display error message
+    end
+    Auth --> Route: 5. User authenticated & authorized
+    deactivate Auth
+    
+    Route -> Controller: 6. viewRatings(req, res)
+    activate Controller
+
+    Controller -> Service: 7. viewRatings(dishId, sortBy, order)
+    activate Service
+
+    Service -> Model: 8. viewRatings(dishId, sortBy, order)
+    activate Model
+
+    Model -> MongoDB: 9. Query ratings for the dish
+    activate MongoDB
+    MongoDB --> Model: 10. Return queried ratings
+    deactivate MongoDB
+
+    Model --> Service: 11. Return result
+    deactivate Model
+
+    Service --> Controller: 12. Return ratings data
+    deactivate Service
+
+    Controller --> Route: 13. Send 200 OK + ratings data
+    deactivate Controller
+
+    Route --> View: 14. Render ratings data
+    deactivate Route
+
+    View --> User: 15. Display ratings data
+    deactivate View
+    deactivate User
+end 
+
+
+@enduml

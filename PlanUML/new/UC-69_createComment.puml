@@ -1,0 +1,70 @@
+@startuml CreateComment
+
+actor User as "User"
+boundary "Dish Detail Page" as View #lightblue
+participant ":commentRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "commentController" as Controller #lightblue
+participant ":commentService" as Service #lightblue
+entity "commentModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Create Comment
+    User -> View: 1. Enter comment section
+    activate User
+    activate View
+
+    View -> View: 2. Validate input
+    activate View
+    deactivate View
+    opt Invalid Input
+        View --> User: 2.1. Display "Review is required shortest 10 characters."
+    end
+
+    View -> Route: 3. POST /api/v1/comment { dishId, userId, parentId, content }
+    activate Route
+    Route -> Auth: 4. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 5. Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 5.1. Return 401/403 Error
+        Route --> View: 5.2. Show error
+        View --> User: 5.3. Display error message
+    end
+    Auth --> Route: 6. User authenticated & authorized
+    deactivate Auth
+
+    Route -> Controller: 7. createComment(req, res)
+    activate Controller
+
+    Controller -> Service: 8. createComment(commentData)
+    activate Service
+
+    Service -> Model: 9. createComment(commentData)
+    activate Model
+
+    Model -> MongoDB: 10. Insert new comment
+    activate MongoDB
+    MongoDB --> Model: 11. Return created comment
+    deactivate MongoDB
+
+    Model --> Service: 12. Return result
+    deactivate Model
+
+    Service --> Controller: 13. Return created comment
+    deactivate Service
+
+    Controller --> Route: 14. 201 Created + comment
+    deactivate Controller
+
+    Route --> View: 15. Render created comment
+    deactivate Route
+
+    View --> User: 16. Display created comment
+    deactivate View
+    deactivate User
+end 
+
+
+@enduml

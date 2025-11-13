@@ -1,0 +1,70 @@
+@startuml View Reaction Comments for a Dish
+
+actor User as "User"
+boundary "Dish Detail Page" as View #lightblue
+participant ":reactionRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "reactionController" as Controller #lightblue
+participant ":reactionService" as Service #lightblue
+entity "reactionCommentModel" as Model #lightblue
+entity "userModel" as UserModel #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View Reaction 
+    User -> View: 1. Click a specific dish and icon reactions
+    activate User
+    activate View
+
+    View -> Route: 2. GET /api/v1/reaction { commentId }
+    activate Route
+    Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 4. Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 4.1. Return 401/403 Error
+        Route --> View: 4.2. Show error
+        View --> User: 4.3. Display error message
+    end
+    Auth --> Route: 5. User authenticated & authorized
+    deactivate Auth
+    
+    Route -> Controller: 6. getReactionsByCommentId(req, res)
+    activate Controller
+
+    Controller -> Service: 7. getReactionsByCommentId(commentId)
+    activate Service
+
+    Service -> Model: 8. getReactionsByCommentId(commentId)
+    activate Model
+
+    Model -> UserModel: 9. populate user details for each reaction
+    activate UserModel
+
+    UserModel -> MongoDB: 10. Query reactions for the comment
+    activate MongoDB
+    MongoDB --> UserModel: 11. Return queried reactions
+    deactivate MongoDB
+
+    UserModel --> Model: 12. Return populated reactions
+    deactivate UserModel
+
+    Model --> Service: 13. Return result
+    deactivate Model
+
+    Service --> Controller: 14. Return reactions data
+    deactivate Service
+
+    Controller --> Route: 15. Send 200 OK + reactions data
+    deactivate Controller
+
+    Route --> View: 16. Render reactions data
+    deactivate Route
+
+    View --> User: 17. Display reactions data
+    deactivate View
+    deactivate User
+end 
+
+
+@enduml

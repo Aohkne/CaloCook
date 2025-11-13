@@ -1,7 +1,7 @@
 @startuml ERD
-@startchen 
+@startchen
 
-' ====== ENTITY ======
+' ==================== ENTITY ====================
 entity user {
 }
 entity dish {
@@ -25,7 +25,7 @@ entity message {
 entity rating {
 }
 
-' ====== RELATIONSHIP ======
+' ==================== RELATIONSHIP ====================
 relationship report {
 }
 relationship favorite {
@@ -51,7 +51,7 @@ relationship has_message {
 relationship has_rating {
 }
 
-' ====== KẾT NỐI ======
+' ==================== KẾT NỐI ====================
 
 ' --- N-N ---
 user -N- report
@@ -77,21 +77,17 @@ has_steps -N- step
 dish -1- has_ingredients
 has_ingredients -N- ingredient
 
-' --- COMMENT ---
+' --- COMMENT (N-N giữa user & dish, thông qua comment) ---
 user -1- has_comment
-has_comment -N- comment
-
 dish -1- has_comment
 has_comment -N- comment
 
-' --- REACTION COMMENT ---
+' --- REACTION COMMENT (1-N giữa comment & reactionComment, và user) ---
 comment -1- has_reactionComment
 has_reactionComment -N- reactionComment
-
 user -1- has_reactionComment
-has_reactionComment -N- reactionComment
 
-' --- CONVERSATION & MESSAGE ---
+' --- CONVERSATION & MESSAGE (1-N) ---
 user -1- has_conversation
 has_conversation -N- conversation
 
@@ -99,12 +95,9 @@ conversation -1- has_message
 has_message -N- message
 
 user -1- has_message
-has_message -N- message
 
-' --- RATING ---
+' --- RATING (N-N giữa user & dish, thông qua rating) ---
 user -1- has_rating
-has_rating -N- rating
-
 dish -1- has_rating
 has_rating -N- rating
 

@@ -1,0 +1,76 @@
+@startuml UpdateComment
+
+actor User as "User"
+boundary "Dish Detail Page" as View #lightblue
+participant ":commentRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "commentController" as Controller #lightblue
+participant ":commentService" as Service #lightblue
+entity "commentModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Update Comment
+    User -> View: 1. Click "Edit" on a comment & Enter reply content
+    activate User
+    activate View
+
+    View -> View: 2. Open comment text input field (reply box)
+
+    opt Cancel Reply
+        View --> User: 2.1. Close reply box
+    end
+
+    View -> View: 3. Validate input
+    activate View
+    deactivate View
+    opt Invalid Input
+        View --> User: 3.1. Display "Comment is required shortest 10 characters."
+    end
+
+    View -> Route: 4. PATCH /api/v1/comment { commentId, content }
+    activate Route
+    Route -> Auth: 5. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 6. Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 6.1. Return 401/403 Error
+        Route --> View: 6.2. Show error
+        View --> User: 6.3. Display error message
+    end
+    Auth --> Route: 7. User authenticated & authorized
+    deactivate Auth
+
+    Route -> Controller: 8. updateCommentById(req, res)
+    activate Controller
+
+    Controller -> Service: 9. updateCommentById(commentId, commentData)
+    activate Service
+
+    Service -> Model: 10. updateCommentById(commentId, commentData)
+    activate Model
+
+    Model -> MongoDB: 11. Update existing comment
+    activate MongoDB
+    MongoDB --> Model: 12. Return updated comment
+    deactivate MongoDB
+
+    Model --> Service: 13. Return result
+    deactivate Model
+
+    Service --> Controller: 14. Return created comment
+    deactivate Service
+
+    Controller --> Route: 15. 201 Created + comment
+    deactivate Controller
+
+    Route --> View: 16. Render created comment
+    deactivate Route
+
+    View --> User: 17. Display created comment
+    deactivate View
+    deactivate User
+end 
+
+
+@enduml

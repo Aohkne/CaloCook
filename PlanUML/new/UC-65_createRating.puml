@@ -1,0 +1,90 @@
+@startuml CreateReport
+
+actor User as "Customer"
+boundary "Dish Detail Page" as View #lightblue
+participant ":ratingRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "ratingController" as Controller #lightblue
+participant ":ratingService" as Service #lightblue
+entity "ratingModel" as Model #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group Create Rating
+    User -> View: 1. Click and select number Start Icon
+    activate User
+    activate View
+
+    View --> View: 2. Show rating and review modal
+    activate View
+    deactivate View
+
+    opt User cancels
+        View --> User: 2.1. Cancel rating (modal closed)
+    end
+
+    User -> View: 3. Enter review (description)
+    View -> View: 4. Validate input
+    activate View
+    deactivate View
+    opt Invalid Input
+        View --> User: 4.1. Display "Review is required shortest 10 characters."
+    end
+
+    View -> Route: 4. POST /api/v1/rating { dishId, userId, star, description }
+    activate Route
+    Route -> Auth: 5. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 6. Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 6.1. Return 401/403 Error
+        Route --> View: 6.2. Show error
+        View --> User: 6.3. Display error message
+    end
+    Auth --> Route: 7. User authenticated & authorized
+    deactivate Auth
+
+    Route -> Controller: 8. addRating(req, res)
+    activate Controller
+
+    Controller -> Service: 9. addRating(ratingData)
+    activate Service
+
+    Service -> Model: 10. addRating(ratingData)
+    activate Model
+
+    Model -> MongoDB: 11. Insert new rating
+    activate MongoDB
+    MongoDB --> Model: 12. Return created rating
+    deactivate MongoDB
+
+    Model --> Service: 13. Return result
+    deactivate Model
+
+    alt AF1: User has already rated this dish
+        Service --> Controller: 13.1. Return existing rating
+
+        Controller --> Route: 13.1.1. 409 Conflict + existing rating
+
+        Route --> View: 13.1.2. Redirect edit Rating model
+
+        View --> User: 13.1.3. Display edit rating modal
+  
+    else User has not rated yet
+        Service --> Controller: 13.2. Return created rating
+        deactivate Service
+
+        Controller --> Route: 13.2.1. 201 Created + rating
+        deactivate Controller
+
+        Route --> View: 13.2.2. Render created rating
+        deactivate Route
+
+        View --> User: 13.2.3. Display created rating
+        deactivate View
+        deactivate User
+    end
+end 
+
+
+@enduml

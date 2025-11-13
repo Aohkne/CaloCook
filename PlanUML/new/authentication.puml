@@ -3,7 +3,7 @@
 participant ":authMiddleware" as Middleware #lightblue
 entity "authController" as Controller #lightblue
 entity "userModel" as Model #lightblue
-database "userDB" as DB #yellow
+database "MongoDB" as DB #yellow
 
 activate Middleware
 Middleware -> Middleware: 1. Intercept Request (contains Token)

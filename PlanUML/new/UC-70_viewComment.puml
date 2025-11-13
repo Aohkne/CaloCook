@@ -1,0 +1,70 @@
+@startuml ViewComment
+
+actor User as "User"
+boundary "Dish Detail Page" as View #lightblue
+participant ":commentRoute" as Route #lightblue
+control "authMiddleware" as Auth #Orange
+control "commentController" as Controller #lightblue
+participant ":commentService" as Service #lightblue
+entity "commentModel" as Model #lightblue
+entity "userModel" as UserModel #lightblue
+database "MongoDB" as MongoDB #yellow
+
+group View Comment
+    User -> View: 1. Click a specific dish
+    activate User
+    activate View
+
+    View -> Route: 2. GET /api/v1/comment { dishId }
+    activate Route
+    Route -> Auth: 3. authenticateUser(req) & authorizeRole()
+    activate Auth
+    ref over Auth : 4. Verify Token & Check Role
+
+    opt Authentication/Authorization Failed
+        Auth --> Route: 4.1. Return 401/403 Error
+        Route --> View: 4.2. Show error
+        View --> User: 4.3. Display error message
+    end
+    Auth --> Route: 5. User authenticated & authorized
+    deactivate Auth
+    
+    Route -> Controller: 6. getCommentsByDishId(req, res)
+    activate Controller
+
+    Controller -> Service: 7. getCommentsByDishId(dishId)
+    activate Service
+
+    Service -> Model: 8. getCommentsByDishId(dishId)
+    activate Model
+
+    Model -> UserModel: 9. populate user details for each comment
+    activate UserModel
+
+    UserModel -> MongoDB: 10. Query comments for the dish
+    activate MongoDB
+    MongoDB --> UserModel: 11. Return queried comments
+    deactivate MongoDB
+
+    UserModel --> Model: 12. Return populated comments
+    deactivate UserModel
+
+    Model --> Service: 13. Return result
+    deactivate Model
+
+    Service --> Controller: 14. Return comments data
+    deactivate Service
+
+    Controller --> Route: 15. Send 200 OK + comments data
+    deactivate Controller
+
+    Route --> View: 16. Render comments data
+    deactivate Route
+
+    View --> User: 17. Display comments data
+    deactivate View
+    deactivate User
+end 
+
+
+@enduml
