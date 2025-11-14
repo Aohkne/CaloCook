@@ -306,22 +306,6 @@ export default function Comment({ route, navigation }) {
         );
     };
 
-    const getInitials = (name) => {
-        if (!name) return '?';
-        const words = name.trim().split(' ');
-        if (words.length === 1) {
-            return words[0].charAt(0).toUpperCase();
-        }
-        const firstInitial = words[0].charAt(0).toUpperCase();
-        const lastInitial = words[words.length - 1].charAt(0).toUpperCase();
-        return firstInitial + lastInitial;
-    };
-
-    const getAvatarColor = (name) => {
-        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
-        const index = (name || '').length % colors.length;
-        return colors[index];
-    };
 
     const getTimeAgo = (dateString) => {
         const date = new Date(dateString);
@@ -356,16 +340,14 @@ export default function Comment({ route, navigation }) {
                     styles.commentContainer,
                     isReply && styles.replyContainer
                 ]}>
-                    {avatarUrl ? (
-                        <Image
-                            source={{ uri: avatarUrl }}
-                            style={styles.avatar}
-                        />
-                    ) : (
-                        <View style={[styles.avatarPlaceholder, { backgroundColor: getAvatarColor(userName) }]}>
-                            <Text style={styles.avatarText}>{getInitials(userName)}</Text>
-                        </View>
-                    )}
+                    <Image
+                        source={
+                            avatarUrl
+                                ? { uri: avatarUrl }
+                                : require('../assets/img/default-img.png')
+                        }
+                        style={styles.avatar}
+                    />
                     <View style={styles.commentContent}>
                         <Text style={styles.userName}>
                             {userName}
@@ -433,12 +415,14 @@ export default function Comment({ route, navigation }) {
 
                             {renderReactionSummary(comment._id)}
 
-                            <TouchableOpacity
-                                style={styles.actionButton}
-                                onPress={() => handleAnswer(comment)}
-                            >
-                                <Text style={styles.actionText}>Ans</Text>
-                            </TouchableOpacity>
+                            {!isReply && (
+                                <TouchableOpacity
+                                    style={styles.actionButton}
+                                    onPress={() => handleAnswer(comment)}
+                                >
+                                    <Text style={styles.actionText}>Answer</Text>
+                                </TouchableOpacity>
+                            )}
 
                             {isOwnComment && (
                                 <>
@@ -446,14 +430,14 @@ export default function Comment({ route, navigation }) {
                                         style={styles.actionButton}
                                         onPress={() => handleEdit(comment)}
                                     >
-                                        <Text style={styles.actionText}>Edt</Text>
+                                        <Text style={styles.actionText}>Edit</Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
                                         onPress={() => handleDeleteComment(comment._id)}
                                         style={styles.actionButton}
                                     >
-                                        <Text style={styles.deleteText}>Del</Text>
+                                        <Text style={styles.deleteText}>Delete</Text>
                                     </TouchableOpacity>
                                 </>
                             )}
@@ -588,19 +572,14 @@ export default function Comment({ route, navigation }) {
                                         <ScrollView>
                                             {reactions[showReactionModal].reactions.map((reaction) => (
                                                 <View key={reaction._id} style={styles.reactionUserItem}>
-                                                    {reaction.user?.avatar_url ? (
-                                                        <Image
-                                                            source={{ uri: reaction.user.avatar_url }}
-                                                            style={styles.reactionUserAvatar}
-                                                        />
-                                                    ) : (
-                                                        <View style={[styles.avatarPlaceholder, styles.reactionUserAvatar,
-                                                        { backgroundColor: getAvatarColor(reaction.user?.fullName || '') }]}>
-                                                            <Text style={styles.avatarText}>
-                                                                {getInitials(reaction.user?.fullName || reaction.user?.username)}
-                                                            </Text>
-                                                        </View>
-                                                    )}
+                                                    <Image
+                                                        source={
+                                                            reaction.user?.avatar_url
+                                                                ? { uri: reaction.user.avatar_url }
+                                                                : require('../assets/img/default-img.png')
+                                                        }
+                                                        style={styles.reactionUserAvatar}
+                                                    />
                                                     <Text style={styles.reactionUserName}>
                                                         {reaction.user?.fullName || reaction.user?.username}
                                                     </Text>
@@ -703,19 +682,6 @@ const createStyles = (colors) =>
             height: 45,
             borderRadius: 22.5,
             backgroundColor: '#E0E0E0',
-        },
-        avatarPlaceholder: {
-            width: 45,
-            height: 45,
-            borderRadius: 22.5,
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        avatarText: {
-            color: '#FFFFFF',
-            fontSize: 16,
-            fontWeight: '700',
-            letterSpacing: 0.5,
         },
         commentContent: {
             flex: 1,

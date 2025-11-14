@@ -1,0 +1,274 @@
+@use '@styles/mixin' as *;
+
+.comments-list {
+  margin-top: 3rem;
+}
+
+.comment {
+  margin-bottom: 1rem;
+  font-family: Arial, sans-serif;
+}
+
+.comment-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+}
+
+.comment-body {
+  flex: 1;
+  margin-left: 5.75rem;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.comment-author {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--title);
+}
+
+.comment-content {
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 1rem;
+  word-break: break-all;
+  color: var(--secondary); // dark green like your screenshot
+}
+
+.comment-time {
+  font-size: 15px;
+  color: var(--description);
+}
+
+.comment-footer {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.comment-actions button {
+  font-size: 15px;
+  background: none;
+  border: none;
+  color: var(--description);
+  cursor: pointer;
+  &:hover {
+    color: var(--title);
+  }
+}
+
+.comment-children {
+  margin-top: 2rem;
+}
+
+.comment-action-delete {
+  color: var(--red) !important; // ✅ force red color
+  &:hover {
+    color: red !important;
+  }
+}
+
+.confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.confirm-modal {
+  background: #fff;
+  padding: 1.25rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  font-size: 26px;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.cancel-btn {
+  font-size: 16px;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  border: 2px solid var(--input-border);
+  cursor: pointer;
+}
+
+.confirm-btn {
+  font-size: 16px;
+  padding: 0.5rem 1rem;
+  background-color: var(--red);
+  color: var(--white);
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+// Reaction styles
+.reaction-container {
+  position: relative;
+  display: inline-block;
+}
+
+.reaction-button {
+  font-size: 15px;
+  background: none;
+  border: none;
+  color: var(--description);
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    color: var(--black);
+  }
+
+  &.reacted {
+    font-weight: 600;
+  }
+}
+
+.reaction-options {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid var(--input-border);
+  border-radius: 25px;
+  padding: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-bottom: 0.5rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 1rem;
+    border: 6px solid transparent;
+    border-top-color: white;
+  }
+}
+
+.reaction-option {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+
+  &.remove-reaction {
+    &:hover {
+      background-color: #fee;
+    }
+  }
+}
+
+.reaction-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 13px;
+  color: var(--description);
+}
+
+.reaction-icon-small {
+  display: flex;
+  align-items: center;
+}
+
+.reaction-count {
+  font-size: 13px;
+}
+
+.editing-comment {
+  background-color: #f0f8ff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.cancel-edit {
+  background: none;
+  border: none;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 14px;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.comment-form-edit-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.comment-form-cancel-button {
+  font-size: 16px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  border: 2px solid var(--input-border);
+  background: white;
+  color: var(--description);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #f5f5f5;
+    border-color: var(--description);
+  }
+}
+
+.comment-form-save-button {
+  font-size: 16px;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary);
+  color: var(--white);
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--primary-hover);
+  }
+}

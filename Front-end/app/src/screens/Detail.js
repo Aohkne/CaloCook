@@ -1141,11 +1141,11 @@ const createStyles = (colors) =>
       paddingHorizontal: 20,
       paddingVertical: 20,
       paddingBottom: 34,
-      flexDirection: 'row',  // ✅ Thêm dòng này
-      gap: 12,              // ✅ Thêm dòng này
+      flexDirection: 'row',
+      gap: 12,
     },
     commentButton: {
-      flex: 1,              // ✅ Thêm style mới
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',

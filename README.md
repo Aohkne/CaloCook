@@ -10,13 +10,22 @@ Track your daily calories through every homemade dish
 
 **CaloCook** is an application that helps users track their daily calorie intake through home-cooked meals. Users can add dishes to their personal list based on pre-stored recipes. Each recipe includes an estimated calorie count. When users choose to prepare that dish, the application will automatically add the calories to the total calories consumed for the day. At the end of the day, the system will automatically reset to start a new cycle, making it easy for users to control and build a healthy diet.
 
+## 🎬 Demo Video
+
+Watch our introduction video to see Mer in action:
+
+[![CaloCook Introduction Video]()]()
+
+_Click the image above to watch the full demo on YouTube_
+
 ## 📚 Documentation
 
 - **API Documentation**: Truy cập Swagger UI tại `http://localhost:8080/api-docs` khi server đang chạy
-- **Project Backlog**: [Google Sheets](https://docs.google.com/spreadsheets/d/1qZQSl7nGFBgQ8uewTWSyrrD1jEJE7PI_dfjwzR5SLhw/edit?usp=sharing) - Chi tiết các tính năng và task
+- **Project Backlog**: [Google Sheets](https://docs.google.com/spreadsheets/d/1oTjKqkMeS-sp5jDHDS2CM_Mzts-6Y1MU/edit?usp=sharing&ouid=103845613501192788324&rtpof=true&sd=true) - Chi tiết các tính năng và task
 - **UI/UX Design**: [Figma](https://www.figma.com/design/jEj7bKpg4Smo76bZdOhn67/Diet?t=Ti6E9dWskcX1FDG0-0) - Mockup và design system
 - **Database Schema**: [DB Diagram](https://dbdiagram.io/d/CaloCook-Diagram-6846e9d49d13e984f7c73e68) - Thiết kế cơ sở dữ liệu
-- **Final Documentation**: [Google Docs](https://docs.google.com/document/d/1a32SBriBL02bUEA6Ysl-95G0fvPRHgltR84ZnlGxYxg/edit?usp=sharing) - Tài liệu tổng hợp dự án
+- **Support Documentation**: [Google Docs](https://docs.google.com/document/d/1a32SBriBL02bUEA6Ysl-95G0fvPRHgltR84ZnlGxYxg/edit?usp=sharing) - Tài liệu hỗ trợ dự án
+- **Final Documentation**: [Google Docs](https://docs.google.com/document/d/1WXCNHv66_Zyw1ooD9ZfQqYt4JVax7wq1/edit?usp=sharing&ouid=103845613501192788324&rtpof=true&sd=true) - Tài liệu tổng hợp dự án
 - **Setup & Support Guide**: [SUPPORT.md](./SUPPORT.md) - Hướng dẫn cài đặt và hỗ trợ chi tiết
 
 ## 📂 Project Structure

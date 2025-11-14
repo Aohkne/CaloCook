@@ -37,7 +37,7 @@ export default function Card({ dish, onHeartPress, onCardPress }) {
           source={
             transformedDish.image?.startsWith('http')
               ? { uri: transformedDish.image }
-              : imageMap[transformedDish.image] || require('../assets/img/testImage.png')
+              : imageMap[transformedDish.image] || require('../assets/img/default-img.png')
           }
           style={styles.dishImage}
           resizeMode='cover'
