@@ -12,7 +12,7 @@ Track your daily calories through every homemade dish
 
 ## 🎬 Demo Video
 
-Watch our introduction video to see Mer in action:
+Watch our introduction video to see CaloCook in action:
 
 [![CaloCook Introduction Video]()]()
 
