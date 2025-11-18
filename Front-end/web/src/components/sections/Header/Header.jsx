@@ -27,7 +27,7 @@ function Header() {
             Home
           </Link>
 
-          <Link to={ROUTES.SUPPORT} className={cx('nav-item')}>
+          <Link to={'https://github.com/Aohkne/CaloCook'} target='_blank' className={cx('nav-item')}>
             Support
           </Link>
 
