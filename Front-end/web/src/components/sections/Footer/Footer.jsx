@@ -51,7 +51,7 @@ function Footer() {
                   Home
                 </Link>
 
-                <Link to={ROUTES.SUPPORT} className={cx('navi-item')}>
+                <Link to={'https://github.com/Aohkne/CaloCook'} target='_blank' className={cx('navi-item')}>
                   Support
                 </Link>
 
