@@ -12,7 +12,7 @@ function Guide() {
         <iframe
           width='100%'
           height='100%'
-          src={'https://www.youtube.com/watch?v=dZn2OPClFJw'.replace('watch?v=', 'embed/')}
+          src={'https://www.youtube.com/watch?v=Fp01zmlQBGY'.replace('watch?v=', 'embed/')}
           title={'Calocook-howitworks'}
           allow='accelerometer; autoplay; encrypted-media; gyroscope;'
           allowFullScreen
