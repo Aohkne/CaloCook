@@ -14,7 +14,7 @@ Track your daily calories through every homemade dish
 
 Watch our introduction video to see CaloCook in action:
 
-[![CaloCook Introduction Video]()]()
+[![CaloCook Introduction Video](https://img.youtube.com/vi/Fp01zmlQBGY/maxresdefault.jpg)](https://www.youtube.com/watch?v=Fp01zmlQBGY)
 
 _Click the image above to watch the full demo on YouTube_
 
